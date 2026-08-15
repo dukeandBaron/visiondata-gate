@@ -159,10 +159,15 @@ def _license_value_expression(value: str | None) -> str | None:
     return _KNOWN_LICENSE_VALUES.get(normalized)
 
 
-def _license_evidence(metadata_records: list[dict[str, Any]]) -> dict[str, Any]:
+def _license_evidence(
+    metadata_records: list[dict[str, Any]],
+    *,
+    missing_detail: str | None = None,
+    missing_source: str | None = None,
+) -> dict[str, Any]:
     if len(metadata_records) != 1:
         detail = (
-            "installed METADATA missing"
+            missing_detail or "installed METADATA missing"
             if not metadata_records
             else "multiple METADATA records"
         )
@@ -170,7 +175,9 @@ def _license_evidence(metadata_records: list[dict[str, Any]]) -> dict[str, Any]:
             "classifiers": [],
             "evidence": detail,
             "expression": None,
-            "metadata_source": "not-found" if not metadata_records else "ambiguous",
+            "metadata_source": (
+                missing_source or "not-found" if not metadata_records else "ambiguous"
+            ),
             "review": REVIEW_REQUIRED,
         }
 
@@ -243,13 +250,22 @@ def _component(
     *,
     relationship: str,
     direct_groups: tuple[str, ...],
+    conditional_only: bool,
     metadata_records: list[dict[str, Any]],
     scope: str,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     name = package["name"]
     version = package["version"]
     purl = _purl(name, version)
-    license_info = _license_evidence(metadata_records)
+    license_info = _license_evidence(
+        [] if conditional_only else metadata_records,
+        missing_detail=(
+            "conditional dependency; installed METADATA intentionally not used"
+            if conditional_only
+            else None
+        ),
+        missing_source="uv.lock conditional edge" if conditional_only else None,
+    )
     property_values = {
         LICENSE_EVIDENCE_PROPERTY: license_info["evidence"],
         LICENSE_REVIEW_PROPERTY: license_info["review"],
@@ -302,6 +318,7 @@ def _inventory_bytes(rows: list[dict[str, Any]]) -> bytes:
         f"- 锁定组件总数（含内部根项目）：`{len(rows)}`",
         f"- `REVIEW_REQUIRED`：`{review_count}`",
         "- 数据范围：只枚举 `uv.lock` 中的项目及锁定依赖；`.venv` 中不在锁内的分发包不会进入本表。",
+        "- 条件依赖：仅通过 marker 入边引用的组件不读取当前平台安装 METADATA，避免跨平台借用许可证据。",
         "- 重建方式：`python tools/generate_supply_chain_artifacts.py`；不需要联网。",
         "",
         "| 关系 | 名称 | 版本 | PURL | 许可表达式 / classifiers | 元数据来源 | 复核状态 |",
@@ -386,6 +403,23 @@ def generate_supply_chain_artifacts(
         for dependency in dependencies:
             direct_groups[_normalize_name(dependency["name"])].add(f"optional:{group}")
 
+    conditional_dependencies: set[str] = set()
+    unconditional_dependencies: set[str] = set()
+    for normalized, package in by_name.items():
+        dependencies = list(package.get("dependencies", []))
+        if normalized == root_name:
+            for optional in package.get("optional-dependencies", {}).values():
+                dependencies.extend(optional)
+        for dependency in dependencies:
+            dependency_name = _normalize_name(dependency["name"])
+            if dependency.get("marker"):
+                conditional_dependencies.add(dependency_name)
+            else:
+                unconditional_dependencies.add(dependency_name)
+    conditional_only_dependencies = (
+        conditional_dependencies - unconditional_dependencies
+    )
+
     required_reachable: set[str] = set()
     queue: deque[str] = deque(
         sorted(_normalize_name(item["name"]) for item in root.get("dependencies", []))
@@ -418,6 +452,7 @@ def generate_supply_chain_artifacts(
             package,
             relationship=relationship,
             direct_groups=tuple(sorted(direct_groups.get(normalized, set()))),
+            conditional_only=normalized in conditional_only_dependencies,
             metadata_records=metadata.get(key, []),
             scope=scope,
         )

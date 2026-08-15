@@ -83,7 +83,15 @@ qa = [{ name = "ambiguous-lib" }]
 name = "direct-lib"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
-dependencies = [{ name = "transitive-lib" }]
+dependencies = [
+  { name = "conditional-lib", marker = "sys_platform == 'win32'" },
+  { name = "transitive-lib" },
+]
+
+[[package]]
+name = "conditional-lib"
+version = "5.0.0"
+source = { registry = "https://pypi.org/simple" }
 
 [[package]]
 name = "ambiguous-lib"
@@ -122,6 +130,12 @@ source = { registry = "https://pypi.org/simple" }
         name="transitive-lib",
         version="4.0.0",
         classifiers=("License :: OSI Approved :: Apache Software License",),
+    )
+    _write_metadata(
+        site_packages,
+        name="conditional-lib",
+        version="5.0.0",
+        license_expression="MIT",
     )
     _write_metadata(
         site_packages,
@@ -190,13 +204,14 @@ def test_generator_is_byte_deterministic_and_uses_only_locked_packages(
     names = {root["name"], *(component["name"] for component in sbom["components"])}
     assert names == {
         "ambiguous-lib",
+        "conditional-lib",
         "demo-root",
         "direct-lib",
         "transitive-lib",
     }
     assert "unrelated-global-package" not in names
-    assert generated_artifacts["first"]["component_count"] == 4
-    assert generated_artifacts["first"]["review_required_count"] == 2
+    assert generated_artifacts["first"]["component_count"] == 5
+    assert generated_artifacts["first"]["review_required_count"] == 3
 
 
 def test_sbom_has_minimum_cyclonedx_fields_and_relationships(
@@ -209,6 +224,7 @@ def test_sbom_has_minimum_cyclonedx_fields_and_relationships(
     assert sbom["version"] == 1
     assert [component["name"] for component in sbom["components"]] == [
         "ambiguous-lib",
+        "conditional-lib",
         "direct-lib",
         "transitive-lib",
     ]
@@ -235,6 +251,14 @@ def test_sbom_has_minimum_cyclonedx_fields_and_relationships(
     assert (
         _property(components["transitive-lib"], "visiondata-gate:relationship")
         == "transitive"
+    )
+    assert (
+        _property(components["conditional-lib"], "visiondata-gate:license-evidence")
+        == "conditional dependency; installed METADATA intentionally not used"
+    )
+    assert (
+        _property(components["conditional-lib"], "visiondata-gate:metadata-source")
+        == "uv.lock conditional edge"
     )
 
     refs = {component["bom-ref"] for component in all_components}

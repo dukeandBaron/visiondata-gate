@@ -3,8 +3,9 @@
 > 本文件由 `uv.lock` 与项目 `.venv` 中已安装的 `METADATA` 离线生成，仅是可审计的元数据清单；不构成法律审查，也不替代项目顶层 `LICENSE` / `NOTICE`。
 
 - 锁定组件总数（含内部根项目）：`55`
-- `REVIEW_REQUIRED`：`8`
+- `REVIEW_REQUIRED`：`9`
 - 数据范围：只枚举 `uv.lock` 中的项目及锁定依赖；`.venv` 中不在锁内的分发包不会进入本表。
+- 条件依赖：仅通过 marker 入边引用的组件不读取当前平台安装 METADATA，避免跨平台借用许可证据。
 - 重建方式：`python tools/generate_supply_chain_artifacts.py`；不需要联网。
 
 | 关系 | 名称 | 版本 | PURL | 许可表达式 / classifiers | 元数据来源 | 复核状态 |
@@ -19,7 +20,7 @@
 | transitive | certifi | 2026.7.22 | pkg:pypi/certifi@2026.7.22 | License: MPL-2.0; Classifier: License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0) | uv.lock; .venv/site-packages/certifi-2026.7.22.dist-info/METADATA | OK |
 | transitive | charset-normalizer | 3.4.9 | pkg:pypi/charset-normalizer@3.4.9 | License: MIT | uv.lock; .venv/site-packages/charset_normalizer-3.4.9.dist-info/METADATA | OK |
 | transitive | click | 8.4.2 | pkg:pypi/click@8.4.2 | License-Expression: BSD-3-Clause | uv.lock; .venv/site-packages/click-8.4.2.dist-info/METADATA | OK |
-| transitive | colorama | 0.4.6 | pkg:pypi/colorama@0.4.6 | Classifier: License :: OSI Approved :: BSD License | uv.lock; .venv/site-packages/colorama-0.4.6.dist-info/METADATA | REVIEW_REQUIRED |
+| transitive | colorama | 0.4.6 | pkg:pypi/colorama@0.4.6 | conditional dependency; installed METADATA intentionally not used | uv.lock; uv.lock conditional edge | REVIEW_REQUIRED |
 | direct | fastapi | 0.141.1 | pkg:pypi/fastapi@0.141.1 | License-Expression: MIT | uv.lock; .venv/site-packages/fastapi-0.141.1.dist-info/METADATA | OK |
 | transitive | h11 | 0.16.0 | pkg:pypi/h11@0.16.0 | License: MIT; Classifier: License :: OSI Approved :: MIT License | uv.lock; .venv/site-packages/h11-0.16.0.dist-info/METADATA | OK |
 | transitive | httpcore | 1.0.9 | pkg:pypi/httpcore@1.0.9 | License-Expression: BSD-3-Clause; Classifier: License :: OSI Approved :: BSD License | uv.lock; .venv/site-packages/httpcore-1.0.9.dist-info/METADATA | OK |
@@ -62,5 +63,5 @@
 | transitive | tzdata | 2026.3 | pkg:pypi/tzdata@2026.3 | License: Apache-2.0 | uv.lock; .venv/site-packages/tzdata-2026.3.dist-info/METADATA | OK |
 | transitive | urllib3 | 2.7.0 | pkg:pypi/urllib3@2.7.0 | License-Expression: MIT | uv.lock; .venv/site-packages/urllib3-2.7.0.dist-info/METADATA | OK |
 | direct | uvicorn | 0.52.1 | pkg:pypi/uvicorn@0.52.1 | License-Expression: BSD-3-Clause | uv.lock; .venv/site-packages/uvicorn-0.52.1.dist-info/METADATA | OK |
-| transitive | watchdog | 6.0.0 | pkg:pypi/watchdog@6.0.0 | License: Apache-2.0; Classifier: License :: OSI Approved :: Apache Software License | uv.lock; .venv/site-packages/watchdog-6.0.0.dist-info/METADATA | OK |
+| transitive | watchdog | 6.0.0 | pkg:pypi/watchdog@6.0.0 | conditional dependency; installed METADATA intentionally not used | uv.lock; uv.lock conditional edge | REVIEW_REQUIRED |
 | transitive | websockets | 16.1.1 | pkg:pypi/websockets@16.1.1 | License-Expression: BSD-3-Clause | uv.lock; .venv/site-packages/websockets-16.1.1.dist-info/METADATA | OK |

@@ -183,6 +183,6 @@ def test_frozen_supply_chain_outputs_match_offline_regeneration(
     assert result == {
         "component_count": 55,
         "inventory_sha256": _sha256(frozen_inventory),
-        "review_required_count": 8,
+        "review_required_count": 9,
         "sbom_sha256": _sha256(frozen_sbom),
     }
