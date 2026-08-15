@@ -1,0 +1,14 @@
+# Keep hashed evidence and generated text byte-identical on every runner.
+* text=auto eol=lf
+
+# Release and evidence binaries must never pass through line-ending filters.
+*.gif -text
+*.ico -text
+*.jpeg -text
+*.jpg -text
+*.mp4 -text
+*.pdf -text
+*.png -text
+*.pptx -text
+*.webp -text
+*.zip -text
