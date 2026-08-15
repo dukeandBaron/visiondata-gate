@@ -484,9 +484,10 @@ code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospac
   .brand small { display: none; }
   .section { padding-block: 70px; }
   .hero { padding-top: 45px; gap: 42px; }
-  .hero h1 { font-size: clamp(2.7rem, 14vw, 4rem); }
+  .hero h1 { font-size: clamp(2.55rem, 12.6vw, 3.5rem); }
   .hero-lead { font-size: 0.92rem; }
-  .hero-actions .button { flex: 1 1 140px; }
+  .hero-actions { display: grid; grid-template-columns: 1fr; }
+  .hero-actions .button { width: 100%; }
   .hero-proof { align-items: flex-start; flex-wrap: wrap; }
   .hero-console { min-height: 470px; border-radius: 24px; }
   .decision-orbit { width: 230px; height: 230px; right: -66px; }

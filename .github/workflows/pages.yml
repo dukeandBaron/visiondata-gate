@@ -36,6 +36,7 @@ jobs:
           cp evidence/submission/vdg-20260816-rc1/release_manifest.json _site/evidence/
           cp evidence/submission/vdg-20260816-rc1/dynamic_leader_plan.json _site/evidence/
           cp deliverables/GOAI_VisionDataGate_BoundlessAgents_20260816.pdf _site/downloads/roadshow.pdf
+          cp release/SHA256SUMS.txt _site/downloads/SHA256SUMS.txt
           touch _site/.nojekyll
 
       - name: Upload Pages artifact

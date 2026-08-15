@@ -22,6 +22,8 @@ VisionData Gate 面向工业视觉算法工程师和数据治理团队，把“�
 
 评委建议从[在线 Demo](https://dukeandbaron.github.io/visiondata-gate/)开始，再按 [`docs/00_OVERVIEW.md`](docs/00_OVERVIEW.md) 的五分钟路径抽查代码与证据。
 
+冻结发布入口为 [`v0.1.0-goai-rc1`](https://github.com/dukeandBaron/visiondata-gate/releases/tag/v0.1.0-goai-rc1)，五个作品附件的独立摘要见 [`release/SHA256SUMS.txt`](release/SHA256SUMS.txt)。已发布 tag 保持不移动；`main` 上的后续变更只用于验证、文档与评委入口加固，不静默覆盖 8,250,230 bytes 的冻结候选 ZIP。
+
 ## 业务闭环
 
 ```text
@@ -151,6 +153,14 @@ API 文档：`http://127.0.0.1:8787/docs`。请求示例见 `docs/API_QUICKSTART
 ```
 
 该命令交叉校验 ArchBench-v2 的 288 条记录、Omni-180-v1 的固定分母、dynamic plan、GateResult、场景交付凭证和 SHA-256。任一缺失、事实漂移或篡改都会失败。
+
+若本地保留了 Release 的全部五个附件，可进一步执行：
+
+```powershell
+uv run python tools/check_release_assets.py --require-all
+```
+
+该命令逐字节核验 PDF、PPTX、演示视频、detached receipt 与冻结 ZIP；干净 Git checkout 中缺少被忽略的 ZIP 时，CI 会改用 receipt 中冻结的文件名、大小和摘要交叉约束该条目。
 
 ## 工程验证
 
