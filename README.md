@@ -1,10 +1,26 @@
 # VisionData Gate｜工业视觉数据治理与发布 Agent
 
+[![CI](https://github.com/dukeandBaron/visiondata-gate/actions/workflows/ci.yml/badge.svg)](https://github.com/dukeandBaron/visiondata-gate/actions/workflows/ci.yml)
+[![Reviewer Site](https://github.com/dukeandBaron/visiondata-gate/actions/workflows/pages.yml/badge.svg)](https://dukeandbaron.github.io/visiondata-gate/)
+
 GOAI 世界人工智能开源大赛赛道二“无界应用 Boundless Agents”作品，行业方向为 AI+工业制造。
 
 VisionData Gate 面向工业视觉算法工程师和数据治理团队，把“数据批次能否进入实验训练池”组织成一条可运行的 Agent 业务闭环：理解审核目标、调用五类检查工具、依据中间证据动态补证、生成整改工单、在保留副本上修复、按同一合同复验，并交付可校验的 GateResult 与证据包。
 
 项目主叙事是行业应用。Agent Infra 是后台可信能力，用于 typed task、工具白名单、证据触发调度、失败关闭、reason trace 和 adapter 复用；不把框架本身当作用户价值。
+
+## 30 秒理解
+
+| 评委问题 | 回答 |
+|---|---|
+| 谁在使用？ | 工业视觉算法工程师与数据治理团队 |
+| 解决什么问题？ | 在图像、标注和元数据进入实验训练池前完成审核、补证、整改与复验 |
+| 为什么需要 Agent？ | 首轮工具证据可能暴露新缺口或冲突，后续任务不能总由固定 DAG 预先写死 |
+| 核心创新是什么？ | **证据驱动的动态 Agent 重规划**：先取证和初裁，再决定是否激活补证 Skill/Worker |
+| 最终交付什么？ | GateResult、findings、整改工单、规则检查、reason trace、证据矩阵与 SHA-256 |
+| 如何证明？ | 288 条同协议架构实验、Omni-180 固定公开 pilot、可重放证据与失败关闭反例 |
+
+评委建议从[在线 Demo](https://dukeandbaron.github.io/visiondata-gate/)开始，再按 [`docs/00_OVERVIEW.md`](docs/00_OVERVIEW.md) 的五分钟路径抽查代码与证据。
 
 ## 业务闭环
 
@@ -21,6 +37,17 @@ VisionData Gate 面向工业视觉算法工程师和数据治理团队，把“�
 ```
 
 最终结果不是聊天文本，而是结构化结论、findings、work orders、rule checks、工具 trace、证据矩阵和可验证交付凭证。
+
+## 与普通 Agent / 固定 Workflow 的区别
+
+| 维度 | 普通 Chat Agent | 固定 Workflow | VisionData Gate |
+|---|---|---|---|
+| 目标 | 回答问题 | 执行预设步骤 | 形成可执行的数据发布结论 |
+| 事实依据 | 语言上下文 | 节点输出 | 版本化工具证据与冻结规则 |
+| 任务结构 | 对话轮次 | 固定 DAG | 首轮取证后按证据重规划 |
+| 错误处理 | 重新生成 | 节点重试 | `DEFER` / `RECAPTURE` / rollback / 转调查 |
+| 最终输出 | 文本 | 流程结果 | GateResult、工单、trace 与 Evidence Package |
+| 可审计性 | 依赖回答引用 | 依赖运行日志 | 工具 → finding → 工单 → rule check → recheck 可追踪 |
 
 ## 已完成到哪一层
 
@@ -55,6 +82,20 @@ VisionData Gate 面向工业视觉算法工程师和数据治理团队，把“�
 ### 证据触发 Dynamic Leader
 
 固定 DAG 只适合已知 SOP。VisionData Gate 会先完成静态工具波次和首次裁决，再根据中间证据决定是否创建新任务。
+
+```mermaid
+flowchart LR
+    A["批次合同"] --> B["五类工具取证"]
+    B --> C["首次 Policy Judge"]
+    C --> D{"新证据改变后续任务？"}
+    D -- "否" --> E["按固定 SOP 交付"]
+    D -- "是" --> F["Leader 重规划"]
+    F --> G["激活补证 Skill / Worker"]
+    G --> H["再次 Policy Judge"]
+    H --> I["工单 + Evidence Package"]
+```
+
+这不是为了证明“多 Agent 天生更强”。ArchBench-v2 的 288 条同协议记录反而表明：固定 SOP 下，传统流水线、单 Agent 和多 Agent 的质量相同。动态 Worker 只在中间证据确实改变后续任务时才有必要。
 
 Omni-180-v1 公开图像 pilot 中检测到：
 

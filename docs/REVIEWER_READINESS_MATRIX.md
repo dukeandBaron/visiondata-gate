@@ -17,13 +17,13 @@
 |---|---|---|---|
 | 行业场景价值 | 工业视觉批次审核、整改和复验闭环；工作台与 API | `PARTIAL` | 真实用户访谈、授权 shadow test、现场 KPI |
 | Agent 能力与任务闭环 | 5 个静态工具任务；Omni 证据触发 1 replan / 3 Workers；Policy Judge 与工单 | `PASS`（本地/固定 pilot） | 更多行业批次与非确定性模型辅助对照 |
-| 产品体验与 Demo | 企业工作台、Reviewer Mode、Canvas、项目/任务/记录/API/权限 | `PASS`（本地） | 外部可访问部署与真实用户可用性测试 |
+| 产品体验与 Demo | 公网评委站点、企业工作台、Reviewer Mode、Canvas、项目/任务/记录/API/权限 | `PASS`（公网静态评委入口 / 本地完整 Runtime） | 完整 Runtime 外部托管与真实用户可用性测试 |
 | 技术深度与复现 | ArchBench-v2、typed task、tool contract、reason trace、同合同复验、确定性构包 | `PASS` | 独立环境/第三方复现回执 |
 | 安全、合规与开放复用 | fail closed、Claim Scope、redaction receipt、Skills、SBOM、AgentTeams adapter | `PARTIAL` | 顶层 LICENSE/NOTICE、数据主体书面授权、hosted transport |
 
 ## 评委建议读取顺序
 
-1. 打开 UI“评审模式”，先看目标用户、痛点、六步闭环和双向促进故事；
+1. 打开 <https://dukeandbaron.github.io/visiondata-gate/>，先看目标用户、痛点、六步闭环和动态重规划 Canvas；
 2. 看 Dynamic Leader Canvas，确认初始工具波次后才出现三条动态分支；
 3. 读取 `evidence/submission/vdg-20260816-rc1/dynamic_leader_plan.json`，核对每个 task 的 `dispatch_basis=intermediate_evidence` 和 `planned_before_initial_evidence=false`；
 4. 读取同目录 `omni_gate_receipt.json`，核对固定 180、1 replan、3 Workers、45 findings/work orders 和交叉 SHA-256；
