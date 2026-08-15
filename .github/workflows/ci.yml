@@ -1,5 +1,8 @@
 name: Continuous verification
 
+env:
+  PYTHONUTF8: "1"
+
 on:
   push:
     branches: [main]
@@ -46,8 +49,15 @@ jobs:
       - name: Compile Python sources
         run: uv run python -m compileall -q src app.py tools
 
-      - name: Validate release evidence
-        run: |
-          uv run python tools/check_release_consistency.py
-          uv run python tools/check_website_data.py
-          uv run python tools/check_release_assets.py
+      # Keep native commands in separate steps.  On PowerShell a failed native
+      # command in a multiline block does not necessarily terminate the step,
+      # so a later success could otherwise turn a release validation red into
+      # a misleading green check.
+      - name: Validate submission evidence
+        run: uv run python tools/check_release_consistency.py
+
+      - name: Validate reviewer website projection
+        run: uv run python tools/check_website_data.py
+
+      - name: Validate detached release assets
+        run: uv run python tools/check_release_assets.py

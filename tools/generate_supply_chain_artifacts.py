@@ -26,6 +26,60 @@ LICENSE_REVIEW_PROPERTY = "visiondata-gate:license-review"
 DIRECT_GROUPS_PROPERTY = "visiondata-gate:direct-groups"
 REVIEW_REQUIRED = "REVIEW_REQUIRED"
 
+# Exact-version resolutions for locked distributions whose Core Metadata is
+# ambiguous, contains an entire license body, or is intentionally unavailable
+# on one CI platform because the dependency is marker-gated.  Each resolution
+# was checked against the license file shipped in the named wheel.  Version
+# pinning is deliberate: a dependency upgrade returns to REVIEW_REQUIRED until
+# its new distribution is reviewed.
+_FROZEN_LICENSE_RESOLUTIONS = {
+    ("visiondata-gate", "0.1.0"): {
+        "expression": "Apache-2.0",
+        "evidence": "owner-confirmed top-level LICENSE",
+        "source": "LICENSE",
+    },
+    ("altair", "6.2.2"): {
+        "expression": "BSD-3-Clause",
+        "evidence": "wheel LICENSE SHA-256 648332da6631555f71f18305b96e9a2c409e73d73613b6c96587cdc0a449e054",
+        "source": "manual-audit:altair-6.2.2.dist-info/licenses/LICENSE",
+    },
+    ("colorama", "0.4.6"): {
+        "expression": "BSD-3-Clause",
+        "evidence": "wheel LICENSE SHA-256 cac35c02686e5d04a5a7140bfb3b36e73aed496656e891102e428886d7930318",
+        "source": "manual-audit:colorama-0.4.6.dist-info/licenses/LICENSE.txt",
+    },
+    ("itsdangerous", "2.2.0"): {
+        "expression": "BSD-3-Clause",
+        "evidence": "wheel LICENSE SHA-256 63af09891b6be8ad1a4252ed43af0f4efba7fc948e228367bed7f3c5ae0b09d7",
+        "source": "manual-audit:itsdangerous-2.2.0.dist-info/LICENSE.txt",
+    },
+    ("jinja2", "3.1.6"): {
+        "expression": "BSD-3-Clause",
+        "evidence": "wheel LICENSE SHA-256 3b49dcee4105eb37bac10faf1be260408fe85d252b8e9df2e0979fc1e094437b",
+        "source": "manual-audit:jinja2-3.1.6.dist-info/licenses/LICENSE.txt",
+    },
+    ("numpy", "2.2.6"): {
+        "expression": "BSD-3-Clause",
+        "evidence": "wheel LICENSE and bundled notices SHA-256 14256cc3a2c9d32ac284da96b937feb44f72dd90bee2317ac3020166846ad99d",
+        "source": "manual-audit:numpy-2.2.6.dist-info/LICENSE.txt",
+    },
+    ("pandas", "2.3.3"): {
+        "expression": "BSD-3-Clause",
+        "evidence": "wheel LICENSE SHA-256 533eb6d0b98e5be3ddd12dce97be35dd11282f5c47cdf8d08c81756fd5d70a26",
+        "source": "manual-audit:pandas-2.3.3.dist-info/LICENSE",
+    },
+    ("python-dateutil", "2.9.0.post0"): {
+        "expression": "Apache-2.0 OR BSD-3-Clause",
+        "evidence": "wheel dual-license file SHA-256 ba00f51a0d92823b5a1cde27d8b5b9d2321e67ed8da9bc163eff96d5e17e577e",
+        "source": "manual-audit:python_dateutil-2.9.0.post0.dist-info/LICENSE",
+    },
+    ("watchdog", "6.0.0"): {
+        "expression": "Apache-2.0",
+        "evidence": "wheel LICENSE SHA-256 cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "source": "manual-audit:watchdog-6.0.0.dist-info/LICENSE",
+    },
+}
+
 _KNOWN_LICENSE_VALUES = {
     "apache 2.0": "Apache-2.0",
     "apache license 2.0": "Apache-2.0",
@@ -264,6 +318,17 @@ def _component(
         ),
         missing_source="uv.lock conditional edge" if conditional_only else None,
     )
+    frozen_resolution = _FROZEN_LICENSE_RESOLUTIONS.get(
+        (_normalize_name(name), version)
+    )
+    if license_info["review"] == REVIEW_REQUIRED and frozen_resolution is not None:
+        license_info = {
+            "classifiers": license_info["classifiers"],
+            "evidence": frozen_resolution["evidence"],
+            "expression": frozen_resolution["expression"],
+            "metadata_source": frozen_resolution["source"],
+            "review": "OK",
+        }
     property_values = {
         LICENSE_EVIDENCE_PROPERTY: license_info["evidence"],
         LICENSE_REVIEW_PROPERTY: license_info["review"],
@@ -311,7 +376,7 @@ def _inventory_bytes(rows: list[dict[str, Any]]) -> bytes:
     lines = [
         "# 第三方许可证元数据清单（自动生成）",
         "",
-        "> 本文件由 `uv.lock` 与项目 `.venv` 中已安装的 `METADATA` 离线生成，仅是可审计的元数据清单；不构成法律审查，也不替代项目顶层 `LICENSE` / `NOTICE`。",
+        "> 本文件由 `uv.lock`、项目 `.venv` 中已安装的 `METADATA` 与精确版本许可证人工复核表离线生成；它是可审计的工程清单，不构成法律意见。项目授权见顶层 `LICENSE` / `NOTICE`，依赖说明见 `docs/THIRD_PARTY_NOTICES.md`。",
         "",
         f"- 锁定组件总数（含内部根项目）：`{len(rows)}`",
         f"- `REVIEW_REQUIRED`：`{review_count}`",
@@ -484,10 +549,10 @@ def generate_supply_chain_artifacts(
             "component": root_component,
             "properties": _properties(
                 {
-                    "visiondata-gate:generated-from": "uv.lock + .venv installed METADATA",
-                    "visiondata-gate:legal-review": "NOT_PERFORMED",
+                    "visiondata-gate:generated-from": "uv.lock + .venv installed METADATA + exact-version manual license resolutions",
+                    "visiondata-gate:legal-review": "OWNER_CONFIRMED_NOT_LEGAL_ADVICE",
                     "visiondata-gate:offline-rebuild": "true",
-                    "visiondata-gate:top-level-license-notice": "NOT_REPLACED",
+                    "visiondata-gate:top-level-license-notice": "APACHE-2.0_AND_NOTICE_PRESENT",
                 }
             ),
         },

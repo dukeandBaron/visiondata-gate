@@ -116,7 +116,7 @@ def validate_website_data() -> dict[str, Any]:
         "RECAPTURE",
         "45 findings → 45 工单",
         "评委网站展示固定公开运行，不冒充生产 SaaS",
-        "v0.1.0-goai-rc1",
+        "v0.1.0-goai-rc2",
         "downloads/SHA256SUMS.txt",
     )
     for phrase in required_copy:

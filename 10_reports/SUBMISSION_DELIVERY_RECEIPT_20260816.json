@@ -1,11 +1,11 @@
 {
-  "schema_version": "visiondata-gate.submission-delivery-receipt.v2",
+  "schema_version": "visiondata-gate.submission-delivery-receipt.v3",
   "status": "LOCAL_RC_READY_ACCOUNT_ACTIONS_PENDING",
   "release_id": "vdg-20260816-rc1",
   "track": "GOAI 赛道二 无界应用 Boundless Agents",
   "industry_direction": "AI+工业制造",
   "candidate_zip": {
-    "path": "deliverables/VisionData_Gate_GOAI_BoundlessAgents_RC1_20260816.zip",
+    "path": "deliverables/VisionData_Gate_GOAI_BoundlessAgents_RC2_20260816.zip",
     "built": true,
     "audited": true,
     "sha256": null,
@@ -13,12 +13,13 @@
     "self_reference_policy": "The ZIP SHA-256 is recorded outside the archive after the final immutable build."
   },
   "preflight_package_audit": {
-    "entry_count": 525,
-    "verified_file_count": 524,
+    "entry_count": 532,
+    "verified_file_count": 531,
     "clean_extract_verified": true,
     "issue_count": 0
   },
-  "local_engineering_gates": "PASS_164_PASSED_1_SKIPPED_1_WARNING_0_FAILED",
+  "local_engineering_gates": "PASS_166_PASSED_1_SKIPPED_1_WARNING_0_FAILED",
+  "open_source_release": "PASS_APACHE_2_0_NOTICE_SBOM_REVIEW_REQUIRED_0",
   "public_release_consistency": "PASS",
   "browser_qa": "PASS_STATIC_JUDGE_SITE_DESKTOP_MOBILE_CANVAS_INTERACTION",
   "presentation_qa": "PASS_12_PAGES_VISUALLY_REVIEWED",
@@ -31,7 +32,6 @@
     "platform_receipt": null
   },
   "owner_actions_remaining": [
-    "Confirm the top-level LICENSE and NOTICE as the rights holder.",
     "Upload through the competition account and retain the official platform receipt."
   ]
 }

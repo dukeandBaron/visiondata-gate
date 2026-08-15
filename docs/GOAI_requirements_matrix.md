@@ -63,7 +63,8 @@ Omni 源树 4,464 张图像与 1,439 个 masks 只完成结构/解码审计，�
 
 ## 上传前仍需闭合
 
-1. 最终全量测试、Ruff、compileall、PPT/PDF 视觉 QA 和候选 ZIP clean-extract 审计；
-2. 由权利主体确认顶层 LICENSE 与 NOTICE；
-3. 由账号持有人在赛道二页面上传材料并保存作品 ID 与平台回执；
-4. 如进入复赛，再补真实用户访谈、授权工业 shadow test 与 hosted AgentTeams transport 回执；这些不是初赛本地工程已完成项。
+1. RC2 全量测试、Ruff、compileall、PPT/PDF 视觉 QA 和候选 ZIP clean-extract 审计；
+2. 由账号持有人在赛道二页面上传材料并保存作品 ID 与平台回执；
+3. 如进入复赛，再补真实用户访谈、授权工业 shadow test 与 hosted AgentTeams transport 回执；这些不是初赛本地工程已完成项。
+
+Apache-2.0、NOTICE、第三方声明和 SBOM 已由权利主体确认并纳入 RC2 构包硬门禁。

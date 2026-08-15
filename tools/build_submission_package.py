@@ -45,7 +45,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=(
             PROJECT_ROOT
             / "deliverables"
-            / "VisionData_Gate_GOAI_BoundlessAgents_RC1_20260816.zip"
+            / "VisionData_Gate_GOAI_BoundlessAgents_RC2_20260816.zip"
         ),
         help="destination ZIP",
     )

@@ -19,7 +19,7 @@
 | Agent 能力与任务闭环 | 5 个静态工具任务；Omni 证据触发 1 replan / 3 Workers；Policy Judge 与工单 | `PASS`（本地/固定 pilot） | 更多行业批次与非确定性模型辅助对照 |
 | 产品体验与 Demo | 公网评委站点、企业工作台、Reviewer Mode、Canvas、项目/任务/记录/API/权限 | `PASS`（公网静态评委入口 / 本地完整 Runtime） | 完整 Runtime 外部托管与真实用户可用性测试 |
 | 技术深度与复现 | ArchBench-v2、typed task、tool contract、reason trace、同合同复验、确定性构包 | `PASS` | 独立环境/第三方复现回执 |
-| 安全、合规与开放复用 | fail closed、Claim Scope、redaction receipt、Skills、SBOM、AgentTeams adapter | `PARTIAL` | 顶层 LICENSE/NOTICE、数据主体书面授权、hosted transport |
+| 安全、合规与开放复用 | fail closed、Claim Scope、redaction receipt、Apache-2.0、NOTICE、Skills、SBOM、AgentTeams adapter | `PASS_WITH_EXTERNAL_BOUNDARY` | 真实数据书面授权与 hosted transport 仍属外部阶段 |
 
 ## 评委建议读取顺序
 

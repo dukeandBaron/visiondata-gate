@@ -276,8 +276,8 @@ def test_license_inventory_marks_ambiguity_and_removes_local_paths(
     combined = inventory + sbom_text
 
     assert "REVIEW_REQUIRED" in inventory
-    assert "不构成法律审查" in inventory
-    assert "不替代项目顶层 `LICENSE` / `NOTICE`" in inventory
+    assert "不构成法律意见" in inventory
+    assert "项目授权见顶层 `LICENSE` / `NOTICE`" in inventory
     assert "License-Expression: MIT" in inventory
     assert "License :: OSI Approved :: BSD License" in inventory
     assert "long text (" not in inventory

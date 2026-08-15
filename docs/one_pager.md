@@ -60,4 +60,4 @@ Streamlit / REST API
 
 本版本以 `local-deterministic` Runtime 完成上述应用闭环，actual model calls 与模型费用为 0。Omni 源树 4,464 张图像只完成结构/解码审计，Policy Gate 的已验证分母为 180。AgentTeams 静态契约为 `PASS`；将当前闭环扩展到客户、工厂、生产 IAM、全量 Omni、外部 LLM 或 hosted transport 时，需补相应外部验收回执，连接状态暂保持 `mapped_not_connected`。
 
-顶层 LICENSE/NOTICE 需由权利主体确认；官网上传和平台回执需由账号持有人完成。
+代码已按 Apache-2.0 开源，NOTICE、第三方声明和 SBOM 已纳入 RC2；官网上传和平台回执仍需由账号持有人完成。

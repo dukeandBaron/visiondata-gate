@@ -30,7 +30,7 @@ Omni 源树的 4,464 张图像与 1,439 个 masks 只完成结构/解码审计�
 - Omni 4,464 张图像全量 Policy Gate；
 - hosted AgentTeams/Matrix transport；当前静态契约为 `PASS`，transport 为 `OPEN`，连接状态为 `mapped_not_connected`；
 - 大赛官网作品 ID、上传回执、晋级或获奖；
-- 顶层 LICENSE 与 NOTICE 的权利主体确认。
+- 官网上传、作品 ID 与平台回执（Apache-2.0 LICENSE、NOTICE 和第三方声明已由权利主体确认并纳入 RC2）。
 
 第三层是扩大采用范围所需的下一批证据，不反向否定第一、二层已经完成的工程实现与固定公开数据实跑。
 

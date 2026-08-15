@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/dukeandBaron/visiondata-gate/actions/workflows/ci.yml/badge.svg)](https://github.com/dukeandBaron/visiondata-gate/actions/workflows/ci.yml)
 [![Reviewer Site](https://github.com/dukeandBaron/visiondata-gate/actions/workflows/pages.yml/badge.svg)](https://dukeandbaron.github.io/visiondata-gate/)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 GOAI 世界人工智能开源大赛赛道二“无界应用 Boundless Agents”作品，行业方向为 AI+工业制造。
 
@@ -22,7 +23,7 @@ VisionData Gate 面向工业视觉算法工程师和数据治理团队，把“�
 
 评委建议从[在线 Demo](https://dukeandbaron.github.io/visiondata-gate/)开始，再按 [`docs/00_OVERVIEW.md`](docs/00_OVERVIEW.md) 的五分钟路径抽查代码与证据。
 
-冻结发布入口为 [`v0.1.0-goai-rc1`](https://github.com/dukeandBaron/visiondata-gate/releases/tag/v0.1.0-goai-rc1)，五个作品附件的独立摘要见 [`release/SHA256SUMS.txt`](release/SHA256SUMS.txt)。已发布 tag 保持不移动；`main` 上的后续变更只用于验证、文档与评委入口加固，不静默覆盖 8,250,230 bytes 的冻结候选 ZIP。
+当前提交发布入口为 [`v0.1.0-goai-rc2`](https://github.com/dukeandBaron/visiondata-gate/releases/tag/v0.1.0-goai-rc2)，五个作品附件的独立摘要见 [`release/SHA256SUMS.txt`](release/SHA256SUMS.txt)。RC2 只关闭跨平台发布门禁与开源许可，不改变冻结的 `vdg-20260816-rc1` 实验数据、结论和证据哈希；历史 RC1 tag 与 ZIP 保持不移动、不覆盖。
 
 ## 业务闭环
 
@@ -172,6 +173,15 @@ uv run python tools/check_release_assets.py --require-all
 ```
 
 最终测试数量写入 `release_manifest.json`，不在 README 中硬编码，以避免新增测试后材料失真。
+
+## 开源许可
+
+项目代码采用 [Apache License 2.0](LICENSE)。版权与项目 NOTICE 见
+[`NOTICE`](NOTICE)；54 个锁定第三方依赖的 SPDX 表达式、精确版本与人工
+复核哈希见 [`docs/THIRD_PARTY_NOTICES.md`](docs/THIRD_PARTY_NOTICES.md)、
+[`docs/THIRD_PARTY_LICENSE_INVENTORY.generated.md`](docs/THIRD_PARTY_LICENSE_INVENTORY.generated.md)
+和 [`docs/SBOM.cdx.json`](docs/SBOM.cdx.json)。源码候选包不内嵌第三方
+Python distributions、模型权重或外部数据集。
 
 ## AgentTeams 状态
 

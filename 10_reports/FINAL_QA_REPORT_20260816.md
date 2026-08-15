@@ -1,6 +1,6 @@
 # VisionData Gate｜GOAI 初赛终版 QA 报告
 
-报告对象：`vdg-20260816-rc1`。本文件名对应初赛截止版本；所有时间均使用 Asia/Shanghai。
+报告对象：提交包 `v0.1.0-goai-rc2`，冻结证据 `vdg-20260816-rc1`。本文件名对应初赛截止版本；所有时间均使用 Asia/Shanghai。
 
 ## 当前结论
 
@@ -8,7 +8,7 @@
 
 VisionData Gate 的参赛主叙事为 GOAI 赛道二“无界应用 Boundless Agents”中的 AI+工业制造应用：工业视觉数据治理与发布 Agent。Agent Infra 仅作为动态补证、工具失败关闭、证据追踪、API 接入和组件复用的可信后台。
 
-核心应用、公开证据 release、在线评委网站、Reviewer Mode、PPT 与 PDF 已存在。2026-08-15 12:56（Asia/Shanghai）完成终版工程门禁：pytest 为 `164 passed / 1 skipped / 1 warning / 0 failed`；Ruff rules、Ruff format、compileall 与 `uv lock --check` 均通过。跳过项是当前 Windows 环境不可创建文件 symlink；警告来自 Starlette TestClient 的依赖弃用提示，不是业务测试失败。完整候选包已在新 cleanroom 中按 `uv.lock` 安装 55 个包并得到相同测试结果。
+核心应用、公开证据 release、在线评委网站、Reviewer Mode、PPT 与 PDF 已存在。2026-08-15 23:48（Asia/Shanghai）完成 RC2 本地工程门禁：pytest 为 `166 passed / 1 skipped / 1 warning / 0 failed`；Ruff rules、Ruff format、compileall 与 `uv lock --check` 均通过。新增回归测试覆盖 Windows `cp1252` 输出和 CI 原生命令失败传播。跳过项是当前 Windows 环境不可创建文件 symlink；警告来自 Starlette TestClient 的依赖弃用提示，不是业务测试失败。GitHub Windows/Linux CI 结果以 RC2 tag 对应工作流为最终跨平台凭证。
 
 在线评委网站已通过 Playwright Chromium 在 1440×1000 与 390×844 两个视口验收：横向溢出均为 0，page/console error 与失败资源请求均为 0；Canvas 具备有效像素尺寸，点击 metadata 动态 Worker 后证据面板正确更新，移动导航与 8 项规则列表可用。终版 PPT/PDF 已完成 12 页逐页目检：模板 fidelity `PASS / 0 issues`、PPT 无画布溢出、12/12 页均含 `[Sources]` notes、无空结构占位符；PDF 为 12 页、960×540 pt，全页渲染无裁切、重叠、乱码或黑块。
 
@@ -30,4 +30,4 @@ VisionData Gate 的参赛主叙事为 GOAI 赛道二“无界应用 Boundless Ag
 
 ## 不在本地工程可证明范围内
 
-当前不声称客户验收、真实工厂现场验证、生产部署或 IAM、外部 LLM 执行、完整 Omni 数据集 Gate、hosted AgentTeams/Matrix 连接、官网提交、作品 ID 或获奖。顶层 LICENSE 与 NOTICE 仍需权利主体确认。
+当前不声称客户验收、真实工厂现场验证、生产部署或 IAM、外部 LLM 执行、完整 Omni 数据集 Gate、hosted AgentTeams/Matrix 连接、官网提交、作品 ID 或获奖。代码已由权利主体确认按 Apache-2.0 开源；顶层 LICENSE、NOTICE、第三方声明与 `REVIEW_REQUIRED=0` 的 SBOM 清单进入 RC2 构包硬门禁。该代码许可不代表外部数据、模型或客户资产已授权。

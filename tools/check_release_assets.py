@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate hashes for the detached GOAI RC1 release assets."""
+"""Validate hashes for the detached GOAI RC2 release assets."""
 
 from __future__ import annotations
 
@@ -15,14 +15,14 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CHECKSUMS_PATH = PROJECT_ROOT / "release" / "SHA256SUMS.txt"
 DELIVERABLES_DIR = PROJECT_ROOT / "deliverables"
 RECEIPT_PATH = (
-    DELIVERABLES_DIR / "VisionData_Gate_GOAI_BoundlessAgents_RC1_20260816.receipt.json"
+    DELIVERABLES_DIR / "VisionData_Gate_GOAI_BoundlessAgents_RC2_20260816.receipt.json"
 )
 EXPECTED_ASSETS = {
     "GOAI_VisionDataGate_BoundlessAgents_20260816.pdf",
     "GOAI_VisionDataGate_BoundlessAgents_20260816.pptx",
     "VisionDataGate_GOAI_FinalDemo_20260813.mp4",
-    "VisionData_Gate_GOAI_BoundlessAgents_RC1_20260816.receipt.json",
-    "VisionData_Gate_GOAI_BoundlessAgents_RC1_20260816.zip",
+    "VisionData_Gate_GOAI_BoundlessAgents_RC2_20260816.receipt.json",
+    "VisionData_Gate_GOAI_BoundlessAgents_RC2_20260816.zip",
 }
 CHECKSUM_LINE = re.compile(r"^(?P<sha256>[0-9a-f]{64})  (?P<name>[^/\\]+)$")
 

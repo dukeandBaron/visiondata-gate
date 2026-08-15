@@ -7,7 +7,8 @@
 VisionData Gate 是 GOAI 赛道二“无界应用 Boundless Agents”中 AI+工业制造方向的应用作品。目标用户是工业视觉算法工程师和数据治理团队；核心任务是判断一个数据批次能否进入实验训练池，并把发现、整改、复验和交付串成闭环。
 
 - 在线评委入口：<https://dukeandbaron.github.io/visiondata-gate/>
-- 冻结 RC1：<https://github.com/dukeandBaron/visiondata-gate/releases/tag/v0.1.0-goai-rc1>
+- 当前提交 RC2：<https://github.com/dukeandBaron/visiondata-gate/releases/tag/v0.1.0-goai-rc2>
+- 冻结实验与证据命名空间：`vdg-20260816-rc1`（RC2 不改实验结论）
 - 附件摘要：[`../release/SHA256SUMS.txt`](../release/SHA256SUMS.txt)
 - 小白技术路线：[`BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md`](BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md)
 - 一页纸：[`one_pager.md`](one_pager.md)

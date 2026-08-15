@@ -48,6 +48,7 @@ DEFAULT_EXCLUDED_PARTS = frozenset(
         "node_modules",
         "output",
         "playwright-report",
+        "release",
         "temp",
         "test-results",
         "tmp",
@@ -93,6 +94,8 @@ SUBMISSION_DOC_EXCLUDELIST = frozenset(
 )
 
 DEFAULT_SUBMISSION_REQUIRED_PATHS = (
+    "LICENSE",
+    "NOTICE",
     "README.md",
     "app.py",
     "pyproject.toml",
@@ -134,6 +137,7 @@ DEFAULT_SUBMISSION_REQUIRED_PATHS = (
     "tools/agentteams_v122_bridge.py",
     "tools/api_smoke.py",
     "tools/check_website_data.py",
+    "tools/check_release_assets.py",
     "run_app.ps1",
     "run_api.ps1",
     "setup_env.ps1",
@@ -173,6 +177,7 @@ DEFAULT_SUBMISSION_REQUIRED_PATHS = (
     "docs/TOOL_REPLAY_AND_MIGRATION.md",
     "docs/SBOM.cdx.json",
     "docs/THIRD_PARTY_LICENSE_INVENTORY.generated.md",
+    "docs/THIRD_PARTY_NOTICES.md",
     "website/index.html",
     "website/styles.css",
     "website/app.js",
