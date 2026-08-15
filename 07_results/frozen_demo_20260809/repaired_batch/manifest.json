@@ -1,0 +1,257 @@
+{
+  "schema_version": "1.0",
+  "batch_id": "visiondata-demo-seed-20260809-dirty",
+  "seed": 20260809,
+  "samples": [
+    {
+      "sample_id": "base-bearing-front-bright",
+      "relative_path": "images/base-bearing-front-bright.png",
+      "split": "train",
+      "category": "bearing",
+      "view": "front",
+      "condition": "bright",
+      "annotation_path": "masks/base-bearing-front-bright.png",
+      "source_sample_id": null
+    },
+    {
+      "sample_id": "base-bearing-front-dim",
+      "relative_path": "images/base-bearing-front-dim.png",
+      "split": "train",
+      "category": "bearing",
+      "view": "front",
+      "condition": "dim",
+      "annotation_path": "masks/base-bearing-front-dim.png",
+      "source_sample_id": null
+    },
+    {
+      "sample_id": "base-bearing-side-bright",
+      "relative_path": "images/base-bearing-side-bright.png",
+      "split": "train",
+      "category": "bearing",
+      "view": "side",
+      "condition": "bright",
+      "annotation_path": "masks/base-bearing-side-bright.png",
+      "source_sample_id": null
+    },
+    {
+      "sample_id": "base-bearing-side-dim",
+      "relative_path": "images/base-bearing-side-dim.png",
+      "split": "train",
+      "category": "bearing",
+      "view": "side",
+      "condition": "dim",
+      "annotation_path": "masks/base-bearing-side-dim.png",
+      "source_sample_id": null
+    },
+    {
+      "sample_id": "base-gear-front-bright",
+      "relative_path": "images/base-gear-front-bright.png",
+      "split": "train",
+      "category": "gear",
+      "view": "front",
+      "condition": "bright",
+      "annotation_path": "masks/base-gear-front-bright.png",
+      "source_sample_id": null
+    },
+    {
+      "sample_id": "base-gear-front-dim",
+      "relative_path": "images/base-gear-front-dim.png",
+      "split": "train",
+      "category": "gear",
+      "view": "front",
+      "condition": "dim",
+      "annotation_path": "masks/base-gear-front-dim.png",
+      "source_sample_id": null
+    },
+    {
+      "sample_id": "base-gear-side-bright",
+      "relative_path": "images/base-gear-side-bright.png",
+      "split": "train",
+      "category": "gear",
+      "view": "side",
+      "condition": "bright",
+      "annotation_path": "masks/base-gear-side-bright.png",
+      "source_sample_id": null
+    },
+    {
+      "sample_id": "clean-val-bearing",
+      "relative_path": "images/clean-val-bearing.png",
+      "split": "val",
+      "category": "bearing",
+      "view": "front",
+      "condition": "bright",
+      "annotation_path": "masks/clean-val-bearing.png",
+      "source_sample_id": null
+    },
+    {
+      "sample_id": "clean-val-gear",
+      "relative_path": "images/clean-val-gear.png",
+      "split": "val",
+      "category": "gear",
+      "view": "side",
+      "condition": "dim",
+      "annotation_path": "masks/clean-val-gear.png",
+      "source_sample_id": null
+    },
+    {
+      "sample_id": "clean-test-bearing",
+      "relative_path": "images/clean-test-bearing.png",
+      "split": "test",
+      "category": "bearing",
+      "view": "side",
+      "condition": "bright",
+      "annotation_path": "masks/clean-test-bearing.png",
+      "source_sample_id": null
+    },
+    {
+      "sample_id": "clean-test-gear",
+      "relative_path": "images/clean-test-gear.png",
+      "split": "test",
+      "category": "gear",
+      "view": "front",
+      "condition": "dim",
+      "annotation_path": "masks/clean-test-gear.png",
+      "source_sample_id": null
+    },
+    {
+      "sample_id": "q-blur",
+      "relative_path": "images/q-blur.png",
+      "split": "train",
+      "category": "bearing",
+      "view": "front",
+      "condition": "bright",
+      "annotation_path": "masks/q-blur.png",
+      "source_sample_id": "reserve-q-blur"
+    },
+    {
+      "sample_id": "q-overexposed",
+      "relative_path": "images/q-overexposed.png",
+      "split": "train",
+      "category": "gear",
+      "view": "front",
+      "condition": "bright",
+      "annotation_path": "masks/q-overexposed.png",
+      "source_sample_id": "reserve-q-overexposed"
+    },
+    {
+      "sample_id": "q-underexposed",
+      "relative_path": "images/q-underexposed.png",
+      "split": "train",
+      "category": "bearing",
+      "view": "side",
+      "condition": "dim",
+      "annotation_path": "masks/q-underexposed.png",
+      "source_sample_id": "reserve-q-underexposed"
+    },
+    {
+      "sample_id": "q-bad-file",
+      "relative_path": "images/q-bad-file.png",
+      "split": "train",
+      "category": "gear",
+      "view": "side",
+      "condition": "bright",
+      "annotation_path": "masks/q-bad-file.png",
+      "source_sample_id": "reserve-q-bad-file"
+    },
+    {
+      "sample_id": "q-wrong-size",
+      "relative_path": "images/q-wrong-size.png",
+      "split": "train",
+      "category": "gear",
+      "view": "front",
+      "condition": "dim",
+      "annotation_path": "masks/q-wrong-size.png",
+      "source_sample_id": "reserve-q-wrong-size"
+    },
+    {
+      "sample_id": "dup-same-source",
+      "relative_path": "images/dup-same-source.png",
+      "split": "train",
+      "category": "bearing",
+      "view": "side",
+      "condition": "bright",
+      "annotation_path": "masks/dup-same-source.png",
+      "source_sample_id": null
+    },
+    {
+      "sample_id": "dup-same-copy",
+      "relative_path": "images/dup-same-copy.png",
+      "split": "train",
+      "category": "bearing",
+      "view": "side",
+      "condition": "bright",
+      "annotation_path": "masks/dup-same-copy.png",
+      "source_sample_id": "reserve-dup-same-copy"
+    },
+    {
+      "sample_id": "leak-exact-source",
+      "relative_path": "images/leak-exact-source.png",
+      "split": "train",
+      "category": "gear",
+      "view": "front",
+      "condition": "bright",
+      "annotation_path": "masks/leak-exact-source.png",
+      "source_sample_id": null
+    },
+    {
+      "sample_id": "leak-exact-copy",
+      "relative_path": "images/leak-exact-copy.png",
+      "split": "val",
+      "category": "gear",
+      "view": "front",
+      "condition": "bright",
+      "annotation_path": "masks/leak-exact-copy.png",
+      "source_sample_id": "reserve-leak-exact-copy"
+    },
+    {
+      "sample_id": "leak-near-source",
+      "relative_path": "images/leak-near-source.png",
+      "split": "train",
+      "category": "bearing",
+      "view": "front",
+      "condition": "dim",
+      "annotation_path": "masks/leak-near-source.png",
+      "source_sample_id": null
+    },
+    {
+      "sample_id": "leak-near-copy",
+      "relative_path": "images/leak-near-copy.png",
+      "split": "test",
+      "category": "bearing",
+      "view": "front",
+      "condition": "dim",
+      "annotation_path": "masks/leak-near-copy.png",
+      "source_sample_id": "reserve-leak-near-copy"
+    },
+    {
+      "sample_id": "ann-missing",
+      "relative_path": "images/ann-missing.png",
+      "split": "train",
+      "category": "bearing",
+      "view": "side",
+      "condition": "bright",
+      "annotation_path": "masks/ann-missing.png",
+      "source_sample_id": "reserve-ann-missing"
+    },
+    {
+      "sample_id": "ann-wrong-size",
+      "relative_path": "images/ann-wrong-size.png",
+      "split": "train",
+      "category": "gear",
+      "view": "side",
+      "condition": "bright",
+      "annotation_path": "masks/ann-wrong-size.png",
+      "source_sample_id": "reserve-ann-wrong-size"
+    },
+    {
+      "sample_id": "coverage-add-001",
+      "relative_path": "images/coverage-add-001.png",
+      "split": "train",
+      "category": "gear",
+      "view": "side",
+      "condition": "dim",
+      "annotation_path": "masks/coverage-add-001.png",
+      "source_sample_id": "reserve-coverage-gear-side-dim"
+    }
+  ]
+}

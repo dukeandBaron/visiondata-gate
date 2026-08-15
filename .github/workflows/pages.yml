@@ -1,0 +1,55 @@
+name: Deploy reviewer demo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate website evidence projection
+        run: python tools/check_website_data.py
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Assemble static artifact
+        shell: bash
+        run: |
+          mkdir -p _site/evidence _site/downloads
+          cp -R website/. _site/
+          cp evidence/submission/vdg-20260816-rc1/scenario_delivery_receipt.json _site/evidence/
+          cp evidence/submission/vdg-20260816-rc1/release_manifest.json _site/evidence/
+          cp evidence/submission/vdg-20260816-rc1/dynamic_leader_plan.json _site/evidence/
+          cp deliverables/GOAI_VisionDataGate_BoundlessAgents_20260816.pdf _site/downloads/roadshow.pdf
+          touch _site/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

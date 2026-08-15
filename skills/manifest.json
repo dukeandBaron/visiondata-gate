@@ -1,0 +1,11 @@
+{
+  "schema_version": "visiondata-gate.skill-manifest.v1",
+  "skills": [
+    {"name": "contract-intake", "version": "1.0.0", "path": "skills/contract-intake/SKILL.md", "owner": "manager.gate"},
+    {"name": "parallel-evidence-audit", "version": "1.0.0", "path": "skills/parallel-evidence-audit/SKILL.md", "owner": "leader.release-gate"},
+    {"name": "evidence-grounded-council", "version": "1.0.0", "path": "skills/evidence-grounded-council/SKILL.md", "owner": "reviewer.ai-council"},
+    {"name": "fail-closed-policy", "version": "1.0.0", "path": "skills/fail-closed-policy/SKILL.md", "owner": "judge.policy"},
+    {"name": "reserve-repair-recheck", "version": "1.0.0", "path": "skills/reserve-repair-recheck/SKILL.md", "owner": "operator.repair"}
+  ],
+  "boundary": "These are reusable local Skill contracts. They do not claim hosted AgentTeams installation."
+}

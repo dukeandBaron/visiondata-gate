@@ -1,0 +1,92 @@
+{
+  "schema_version": "visiondata-gate.final-qa.v2",
+  "status": "ENGINEERING_PASS_WITH_DISCLOSED_EXTERNAL_GAPS",
+  "verified_on": "2026-08-12",
+  "timezone": "Asia/Shanghai",
+  "track": {
+    "competition": "GOAI Agent Infra / 新质基座",
+    "industry_instance": "AI+工业制造",
+    "official_track_url": "https://www.goaihz.com/tracks?track=infra",
+    "agentteams_connection_status": "mapped_not_connected",
+    "matrix_connected": false
+  },
+  "engineering": {
+    "python": "3.12.5",
+    "pytest_passed": 98,
+    "pytest_skipped": 1,
+    "pytest_failed": 0,
+    "ruff_check": "PASS",
+    "ruff_format_check": "PASS",
+    "compileall": "PASS",
+    "seed_truth_match": "32/32",
+    "streamlit_apptest": "PASS",
+    "sensitive_scan_findings": 0,
+    "symlink_skip_reason": "file symlinks unavailable in current Windows environment"
+  },
+  "industrial_runtime": {
+    "seed": 20260812,
+    "scenario_profile": "industrial",
+    "runtime_status": "success",
+    "initial_decision": "RECAPTURE",
+    "repaired_decision": "PASS",
+    "initial_finding_count": 13,
+    "truth_issue_count": 12,
+    "true_positive_count": 12,
+    "false_positive_count": 1,
+    "precision": 0.9230769230769231,
+    "recall": 1.0,
+    "f1": 0.9600000000000001,
+    "governance_overlap_disclosure": "governance_audit emits one scope-gap finding overlapping the same missing coverage cell; this is reported as an extra finding rather than hidden",
+    "task_count": 24,
+    "event_count": 37,
+    "context_transfer_count": 31,
+    "runtime_contract_audit": "PASS",
+    "tool_ablation_receipt": "PASS",
+    "tool_ablation_outcome": "all 10 phase-tool ablations produce DEFER and none is more permissive",
+    "skill_qualification_receipt": "PASS",
+    "skill_execution_count": 24,
+    "execution_config_bound_to_run_id": true
+  },
+  "runtime_invariants": {
+    "context_capture_mode": "runtime_event",
+    "context_event_binding_verified": true,
+    "context_task_refs_verified": true,
+    "context_digests_verified": true,
+    "repair_to_recheck_dependency_declared": true,
+    "single_policy_authority_per_pass": true,
+    "same_contract_recheck": true,
+    "approval_handoff_status": "blocked",
+    "production_authorization_required": true
+  },
+  "reviewer_scenario_suite": {
+    "path": "07_results/reviewer_scenario_suite_20260812_v2/scenario_suite_receipt.json",
+    "status": "PASS",
+    "same_seed_input": true,
+    "same_contract": true,
+    "same_policy": true,
+    "run_identity_does_not_collide": true,
+    "happy_path": "RECAPTURE -> PASS",
+    "missing_worker": "DEFER -> DEFER",
+    "missing_worker_fake_repair_count": 0,
+    "missing_worker_deferred_context_count": 13,
+    "missing_worker_deferred_skill_count": 6
+  },
+  "artifacts": {
+    "runtime_qa_root": "output/qa_agentinfra_runtime_ledger_20260812_v1",
+    "independent_qa_root_pattern": "deliverables/_qa/run_20260812T*+0800",
+    "qa_report_markdown": "10_reports/FINAL_QA_REPORT_20260812.md",
+    "candidate_zip": "deliverables/VisionData_Gate_GOAI_AgentInfra_SubmissionCandidate_20260812.zip",
+    "detached_receipt": "deliverables/VisionData_Gate_GOAI_AgentInfra_SubmissionCandidate_20260812.receipt.json"
+  },
+  "boundaries": {
+    "official_platform_submission_completed": false,
+    "official_submission_receipt_received": false,
+    "real_customer_validation": false,
+    "real_industrial_data_validation": false,
+    "production_deployment_validated": false,
+    "hosted_agentteams_receipt": false,
+    "top_level_license_confirmed": false,
+    "formal_notice_confirmed": false,
+    "dingtalk_login_protected_replay_directly_verified": false
+  }
+}

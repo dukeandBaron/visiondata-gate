@@ -1,0 +1,23 @@
+schema_version: agentteams.run-entry.v1
+team_id: team.visiondata-gate
+task_template: task.release-gate.<run-id>
+stages:
+  - intake
+  - route
+  - memory
+  - plan
+  - tool
+  - council
+  - judge
+  - repair
+  - verify
+  - delivery
+context_contract:
+  required_fields: [goal, manifest, contract, input_sha256, scenario_profile]
+  evidence_fields: [tool_trace, finding_ids, rule_checks, work_order_ids]
+  deny_unknown_fields: true
+failure_routes:
+  missing_required_tool: DEFER
+  tool_error: DEFER
+  counterfactual_drift: DEFER
+  missing_production_authorization: BLOCKED

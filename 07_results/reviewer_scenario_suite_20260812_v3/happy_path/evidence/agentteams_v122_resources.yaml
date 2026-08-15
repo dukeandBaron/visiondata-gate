@@ -1,0 +1,153 @@
+apiVersion: agentteams.io/v1beta1
+kind: Worker
+metadata:
+  name: visiondata-release-lead
+spec:
+  model: "qwen3.5-plus"
+  runtime: qwenpaw
+  identity: "Release Gate Team Leader; decomposes the typed DAG and delegates all domain work."
+  agents: |
+    Execute only assigned VisionData Gate tasks.
+    Return typed artifact references; do not claim production authorization.
+  skills: [parallel-evidence-audit]
+  state: Running
+---
+apiVersion: agentteams.io/v1beta1
+kind: Worker
+metadata:
+  name: visiondata-image-quality
+spec:
+  model: "qwen3.5-plus"
+  runtime: qwenpaw
+  identity: "Image-quality evidence Worker; emits typed measurements and never writes release decisions."
+  agents: |
+    Execute only assigned VisionData Gate tasks.
+    Return typed artifact references; do not claim production authorization.
+  skills: [parallel-evidence-audit]
+  state: Running
+---
+apiVersion: agentteams.io/v1beta1
+kind: Worker
+metadata:
+  name: visiondata-duplicate-leakage
+spec:
+  model: "qwen3.5-plus"
+  runtime: qwenpaw
+  identity: "Duplicate and cross-split leakage Worker; emits ToolTrace and Finding references only."
+  agents: |
+    Execute only assigned VisionData Gate tasks.
+    Return typed artifact references; do not claim production authorization.
+  skills: [parallel-evidence-audit]
+  state: Running
+---
+apiVersion: agentteams.io/v1beta1
+kind: Worker
+metadata:
+  name: visiondata-annotation-integrity
+spec:
+  model: "qwen3.5-plus"
+  runtime: qwenpaw
+  identity: "Annotation-integrity Worker; checks mask presence and geometry under a read-only contract."
+  agents: |
+    Execute only assigned VisionData Gate tasks.
+    Return typed artifact references; do not claim production authorization.
+  skills: [parallel-evidence-audit]
+  state: Running
+---
+apiVersion: agentteams.io/v1beta1
+kind: Worker
+metadata:
+  name: visiondata-coverage-matrix
+spec:
+  model: "qwen3.5-plus"
+  runtime: qwenpaw
+  identity: "Coverage-matrix Worker; reports missing contract cells without inventing samples."
+  agents: |
+    Execute only assigned VisionData Gate tasks.
+    Return typed artifact references; do not claim production authorization.
+  skills: [parallel-evidence-audit]
+  state: Running
+---
+apiVersion: agentteams.io/v1beta1
+kind: Worker
+metadata:
+  name: visiondata-ai-council
+spec:
+  model: "qwen3.5-plus"
+  runtime: qwenpaw
+  identity: "Evidence Council Worker; advisory, citation-bound, and explicitly not an independent human expert."
+  agents: |
+    Execute only assigned VisionData Gate tasks.
+    Return typed artifact references; do not claim production authorization.
+  skills: [evidence-grounded-council]
+  state: Running
+---
+apiVersion: agentteams.io/v1beta1
+kind: Worker
+metadata:
+  name: visiondata-policy-judge
+spec:
+  model: "qwen3.5-plus"
+  runtime: qwenpaw
+  identity: "Fail-closed Policy Judge Worker; sole writer of GateDecision under frozen rules."
+  agents: |
+    Execute only assigned VisionData Gate tasks.
+    Return typed artifact references; do not claim production authorization.
+  skills: [fail-closed-policy]
+  state: Running
+---
+apiVersion: agentteams.io/v1beta1
+kind: Worker
+metadata:
+  name: visiondata-repair-operator
+spec:
+  model: "qwen3.5-plus"
+  runtime: qwenpaw
+  identity: "Reserve-only repair Worker; preserves the original batch and triggers same-contract recheck."
+  agents: |
+    Execute only assigned VisionData Gate tasks.
+    Return typed artifact references; do not claim production authorization.
+  skills: [reserve-repair-recheck]
+  state: Running
+---
+apiVersion: agentteams.io/v1beta1
+kind: Worker
+metadata:
+  name: visiondata-audit-clerk
+spec:
+  model: "qwen3.5-plus"
+  runtime: qwenpaw
+  identity: "Evidence delivery Worker; serializes canonical artifacts and cannot change the decision."
+  agents: |
+    Execute only assigned VisionData Gate tasks.
+    Return typed artifact references; do not claim production authorization.
+  skills: [reserve-repair-recheck]
+  state: Running
+---
+apiVersion: agentteams.io/v1beta1
+kind: Team
+metadata:
+  name: visiondata-gate
+spec:
+  description: Industrial-vision data release gate with evidence-bound Workers and a fail-closed Judge.
+  peerMentions: true
+  heartbeatEvery: 30m
+  workerMembers:
+    - name: visiondata-release-lead
+      role: team_leader
+    - name: visiondata-image-quality
+      role: worker
+    - name: visiondata-duplicate-leakage
+      role: worker
+    - name: visiondata-annotation-integrity
+      role: worker
+    - name: visiondata-coverage-matrix
+      role: worker
+    - name: visiondata-ai-council
+      role: worker
+    - name: visiondata-policy-judge
+      role: worker
+    - name: visiondata-repair-operator
+      role: worker
+    - name: visiondata-audit-clerk
+      role: worker

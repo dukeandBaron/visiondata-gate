@@ -1,0 +1,19 @@
+{
+  "agentteams_connection": "mapped_not_connected",
+  "artifact_response_hashes_verified": true,
+  "base_url": "http://127.0.0.1:8787",
+  "boundary": "Local synthetic HTTP integration smoke; not customer or production deployment evidence.",
+  "event_count": 37,
+  "event_sequence_contiguous": true,
+  "evidence_sha256": "7bd3165c2b8ddee687ae6a51ce528f0a077f639a36ba7220e794e0eac5a00ec7",
+  "execution_status": "COMPLETED",
+  "final_decision": "PASS",
+  "idempotency_verified": true,
+  "initial_decision": "RECAPTURE",
+  "production_ready": false,
+  "public_account_bootstrap_routes_absent": true,
+  "schema_version": "visiondata-gate.api-smoke.v1",
+  "status": "PASS",
+  "task_id": "tsk_402e835f972641ebbcca",
+  "trace_sha256": "7487e4c38bb9cf58bd0ac119fe25d84def0054b93830165b8a91d84273a2facc"
+}

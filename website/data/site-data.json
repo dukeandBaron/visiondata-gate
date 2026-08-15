@@ -1,0 +1,66 @@
+{
+  "schema_version": "visiondata-gate.judge-site.v1",
+  "release_id": "vdg-20260816-rc1",
+  "evidence_namespace": "Omni-180-v1",
+  "source_receipt": "evidence/submission/vdg-20260816-rc1/scenario_delivery_receipt.json",
+  "receipt_sha256": "bb2a23e4a154db4123ba4f9682ce22ba470af5e1a6b89d4c5c4977c359cda110",
+  "status": "LOCAL_SCENARIO_PILOT_VERIFIED",
+  "pilot": {
+    "decision": "RECAPTURE",
+    "fixed_image_denominator": 180,
+    "replan_count": 1,
+    "dynamic_worker_count": 3,
+    "finding_count": 45,
+    "work_order_count": 45,
+    "rule_check_count": 8,
+    "failed_rule_check_count": 0
+  },
+  "dynamic_triggers": [
+    {
+      "id": "conflict",
+      "signal": "CROSS_TOOL_ACTION_CONFLICT",
+      "observed_value": 2,
+      "unit": "samples",
+      "task_id": "followup.cross-tool-conflict-adjudication",
+      "action": "增派冲突复核 Worker，并转为 INVESTIGATE"
+    },
+    {
+      "id": "metadata",
+      "signal": "METADATA_COUNT_DRIFT",
+      "observed_value": 15,
+      "unit": "images",
+      "task_id": "followup.metadata-reconciliation",
+      "action": "增派元数据对账 Worker，保留调查工单并禁止自动修补"
+    },
+    {
+      "id": "resolution",
+      "signal": "NATIVE_RESOLUTION_GROUPS",
+      "observed_value": 28,
+      "unit": "groups",
+      "task_id": "followup.native-resolution-reconciliation",
+      "action": "增派分辨率补证 Worker，按原生尺寸分组测量后复判"
+    }
+  ],
+  "rule_checks": [
+    { "id": "RC-TOOL-COUNT", "label": "核心工具完整调用", "status": "PASS" },
+    { "id": "RC-SCENARIO-TOOLS", "label": "工业场景必需工具齐全", "status": "PASS" },
+    { "id": "RC-TRACE-OK", "label": "工具 Trace 全部成功", "status": "PASS" },
+    { "id": "RC-EVIDENCE-QUALITY", "label": "Finding 均有来源证据", "status": "PASS" },
+    { "id": "RC-GOVERNANCE-SCOPE", "label": "治理范围符合合同", "status": "PASS" },
+    { "id": "RC-COUNTERFACTUAL-REMOVE-1", "label": "单 Finding 删除扰动稳定", "status": "PASS" },
+    { "id": "RC-COUNTERFACTUAL-TOOL-REMOVE-1", "label": "工具级扰动稳定", "status": "PASS" },
+    { "id": "RC-COUNTERFACTUAL-RULE-STABILITY-1", "label": "规则反事实稳定", "status": "PASS" }
+  ],
+  "architecture_control": {
+    "record_count": 288,
+    "architectures": ["traditional_pipeline", "single_agent", "multi_agent"],
+    "f1": 0.96,
+    "unsafe_release_rate": 0.0,
+    "fixed_sop_multi_agent_necessity_supported": false
+  },
+  "claim_scope": {
+    "implemented": "PASS",
+    "public_pilot": "PASS",
+    "external_validation": "OPEN"
+  }
+}

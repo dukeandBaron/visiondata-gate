@@ -1,0 +1,111 @@
+{
+  "schema_version": "visiondata-gate.final-qa.v3",
+  "status": "ENGINEERING_GATES_PASS",
+  "verified_on": "2026-08-13",
+  "timezone": "Asia/Shanghai",
+  "positioning": {
+    "track": "GOAI Agent Infra / 新质基座",
+    "runtime": "trusted Agent Runtime and governance protocol for AI data production",
+    "first_adapter": "industrial visual data release gate"
+  },
+  "product": {
+    "workspace_ui": true,
+    "local_multi_workspace_objects": true,
+    "rest_api": true,
+    "enterprise_agent_entry": true,
+    "saas_pipeline_entry": true,
+    "shared_product_service": true,
+    "production_saas_claimed": false
+  },
+  "engineering": {
+    "python": "3.12.5",
+    "pytest_passed": 143,
+    "pytest_skipped": 1,
+    "pytest_failed": 0,
+    "pytest_warning_count": 1,
+    "pytest_skip_reason": "file symlinks are unavailable in this Windows environment",
+    "ruff_check": "PASS",
+    "ruff_format_check": "PASS",
+    "compileall": "PASS",
+    "uv_lock_check": "PASS",
+    "uv_sync_dry_run": "PASS_NO_CHANGES"
+  },
+  "browser_qa": {
+    "status": "PASS",
+    "viewports": [
+      [390, 844],
+      [768, 1024],
+      [1366, 768],
+      [1920, 1080]
+    ],
+    "mobile_create_task_y_px_observed_before_fresh_process": 738.984375,
+    "mobile_metric_layout": "2x2",
+    "horizontal_overflow_observed": 0,
+    "console_errors_observed": 0,
+    "console_warnings_observed": 0,
+    "evidence_chain_card_count": 13,
+    "security_page_review_state_default_collapsed": true,
+    "raw_browser_artifacts_packaged": false
+  },
+  "api_smoke": {
+    "path": "10_reports/API_SMOKE_20260813.json",
+    "status": "PASS",
+    "transport": "real local HTTP process",
+    "event_count": 37,
+    "event_sequence_contiguous": true,
+    "idempotency_verified": true,
+    "artifact_response_hashes_verified": true,
+    "production_ready": false
+  },
+  "synthetic_runtime": {
+    "seed": 20260812,
+    "initial_decision": "RECAPTURE",
+    "final_decision": "PASS",
+    "initial_findings": 13,
+    "work_orders": 13,
+    "repaired_findings": 0,
+    "truth_issues": 12,
+    "precision": 0.9230769230769231,
+    "recall": 1.0,
+    "f1": 0.9600000000000001,
+    "task_count": 24,
+    "event_count": 37,
+    "context_transfer_count": 31,
+    "tool_ablation_fail_closed": "10/10 DEFER"
+  },
+  "reviewer_scenario_suite": {
+    "path": "07_results/reviewer_scenario_suite_20260812_v3/scenario_suite_receipt.json",
+    "status": "PASS",
+    "happy_path": "RECAPTURE -> PASS",
+    "missing_worker": "DEFER -> DEFER",
+    "missing_worker_fake_repair_count": 0
+  },
+  "video": {
+    "path": "deliverables/VisionDataGate_GOAI_FinalDemo_20260813.mp4",
+    "technical_qa": "PASS",
+    "sha256": "399cc2f26e1eb07634ec7a9e41dd499a43452d50c2f08d36245f1e956d8b2ad2",
+    "file_size_bytes": 12826648,
+    "decoded_frame_count": 5100,
+    "ui_drift_disclosed": false,
+    "runtime_semantics_changed_since_video": false
+  },
+  "submission_package": {
+    "path": "deliverables/VisionData_Gate_GOAI_AgentInfra_SubmissionCandidate_20260813.zip",
+    "status": "EXACT_HASH_AND_CLEANROOM_RESULT_IN_DETACHED_RECEIPT",
+    "deterministic_builder": true,
+    "historical_media_excluded": true,
+    "detached_receipt": "deliverables/VisionData_Gate_GOAI_AgentInfra_SubmissionCandidate_20260813.receipt.json"
+  },
+  "boundaries": {
+    "agentteams_connection_status": "mapped_not_connected",
+    "matrix_connected": false,
+    "real_customer_validation": false,
+    "real_industrial_data_validation": false,
+    "production_deployment_validated": false,
+    "official_submission_receipt_received": false,
+    "omni_data_read_or_packaged": false,
+    "top_level_license_confirmed": false,
+    "formal_notice_confirmed": false,
+    "dingtalk_video_verified": false
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "schema_version": "visiondata-gate.agentteams-runtime-receipt.v1",
+  "agentteams_version": "v1.2.2",
+  "agentteams_commit": "aa650ccacc2ba6171d1b0b5efd2a49b1472abe5d",
+  "team": {
+    "name": "visiondata-gate",
+    "phase": "REPLACE_WITH_EXPORTED_PHASE",
+    "team_room_id": "REPLACE_WITH_EXPORTED_TEAM_ROOM_ID",
+    "leader_ready": false,
+    "ready_workers": 0,
+    "total_workers": 0
+  },
+  "assignment": {
+    "room_id": "REPLACE_WITH_EXPORTED_TEAM_ROOM_ID",
+    "event_id": "REPLACE_WITH_MATRIX_EVENT_ID",
+    "event_count": 0,
+    "retry_reused": false
+  },
+  "skill_assignments": [],
+  "raw_evidence": {
+    "team_status": {
+      "path": "agentteams_runtime_raw/team-status.json",
+      "sha256": "REPLACE_WITH_64_HEX_SHA256"
+    },
+    "matrix_assignment": {
+      "path": "agentteams_runtime_raw/matrix-assignment.json",
+      "sha256": "REPLACE_WITH_64_HEX_SHA256"
+    },
+    "skill_assignments": {
+      "path": "agentteams_runtime_raw/skill-assignments.json",
+      "sha256": "REPLACE_WITH_64_HEX_SHA256"
+    }
+  },
+  "boundary": "Populate only from a real AgentTeams export. Do not hand-edit values to claim connectivity."
+}

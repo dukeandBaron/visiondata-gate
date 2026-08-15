@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="VisionData Gate：面向工业视觉数据批次的检查、动态补证、门禁裁决、整改与复验 Agent。"
+    />
+    <meta name="theme-color" content="#f4f7fb" />
+    <meta property="og:title" content="VisionData Gate｜工业视觉数据治理 Agent" />
+    <meta
+      property="og:description"
+      content="固定 180 张公开图像实跑，证据触发 1 次重规划与 3 个动态 Worker。"
+    />
+    <meta property="og:type" content="website" />
+    <title>VisionData Gate｜工业视觉数据治理 Agent</title>
+    <link rel="icon" href="assets/mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到主要内容</a>
+    <header class="site-header" data-header>
+      <a class="brand" href="#top" aria-label="VisionData Gate 首页">
+        <img src="assets/mark.svg" width="34" height="34" alt="" />
+        <span><strong>VisionData Gate</strong><small>工业视觉数据治理 Agent</small></span>
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+        <span></span><span></span>
+        <span class="sr-only">打开导航</span>
+      </button>
+      <nav id="primary-nav" class="primary-nav" aria-label="主要导航">
+        <a href="#scenario">场景</a>
+        <a href="#demo">真实运行</a>
+        <a href="#evidence">证据</a>
+        <a href="#integration">接入</a>
+        <a href="#scope">边界</a>
+        <a
+          class="nav-cta"
+          href="https://github.com/dukeandBaron/visiondata-gate"
+          target="_blank"
+          rel="noreferrer"
+        >GitHub <span aria-hidden="true">↗</span></a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section id="top" class="hero section-shell">
+        <div class="hero-copy reveal">
+          <p class="eyebrow"><span></span>GOAI · Boundless Agents · AI+工业制造</p>
+          <h1>在数据进入训练池前，<br /><em>让证据先过门。</em></h1>
+          <p class="hero-lead">
+            VisionData Gate 把分散的质量、泄漏、标注、覆盖与治理检查，组织成一条可运行的
+            Agent 闭环：动态补证、门禁裁决、生成工单，并按同一合同复验。
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#demo">进入真实运行 <span>↓</span></a>
+            <a
+              class="button button-secondary"
+              href="https://github.com/dukeandBaron/visiondata-gate"
+              target="_blank"
+              rel="noreferrer"
+            >查看源码 <span>↗</span></a>
+          </div>
+          <div class="hero-proof" aria-label="项目验证状态">
+            <span class="status-dot"></span>
+            <strong>公开数据实跑 · 可复验</strong>
+            <span>Omni-180-v1</span>
+          </div>
+        </div>
+
+        <div class="hero-console reveal" aria-label="Omni-180-v1 运行摘要">
+          <div class="console-top">
+            <div class="console-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+            <span>GATE RUN / vdg-20260816-rc1</span>
+            <span class="live-chip"><i></i> VERIFIED</span>
+          </div>
+          <div class="decision-orbit" aria-hidden="true">
+            <span class="orbit orbit-one"></span>
+            <span class="orbit orbit-two"></span>
+            <span class="orbit-core">VG</span>
+          </div>
+          <div class="console-body">
+            <p class="console-label">POLICY DECISION</p>
+            <div class="console-decision">RECAPTURE</div>
+            <p>证据充分，批次未被错误放行。完成工单后按原合同复验。</p>
+          </div>
+          <div class="console-stats">
+            <div><span>固定分母</span><strong data-stat="images">180</strong><small>public images</small></div>
+            <div><span>动态任务</span><strong data-stat="workers">3</strong><small>evidence-triggered</small></div>
+            <div><span>整改工单</span><strong data-stat="orders">45</strong><small>traceable</small></div>
+          </div>
+          <div class="console-foot">
+            <span>receipt</span>
+            <code data-receipt-short>bb2a23e4…a110</code>
+          </div>
+        </div>
+      </section>
+
+      <section class="signal-strip" aria-label="核心运行指标">
+        <div class="section-shell signal-grid">
+          <div><strong>5</strong><span>类只读工具</span></div>
+          <div><strong>1×</strong><span>证据触发重规划</span></div>
+          <div><strong>45→45</strong><span>finding 到工单映射</span></div>
+          <div><strong>8/8</strong><span>交付完整性检查</span></div>
+          <div><strong>0%</strong><span>同协议错误放行率</span></div>
+        </div>
+      </section>
+
+      <section id="scenario" class="section section-shell">
+        <div class="section-heading reveal">
+          <p class="eyebrow"><span></span>01 / 真实任务</p>
+          <h2>不是聊天框，而是一张可以交付的工业工单。</h2>
+          <p>用户要解决的不是“数据怎么样”，而是“这一批数据现在能不能进入实验训练池，不能的话下一步做什么”。</p>
+        </div>
+        <div class="scenario-grid">
+          <article class="problem-card reveal">
+            <div class="card-index">01</div>
+            <div class="line-icon line-icon-fragment" aria-hidden="true"></div>
+            <h3>证据散落</h3>
+            <p>五类脚本各说一部分事实，缺少统一、可追踪的发布结论。</p>
+          </article>
+          <article class="problem-card reveal">
+            <div class="card-index">02</div>
+            <div class="line-icon line-icon-conflict" aria-hidden="true"></div>
+            <h3>处置冲突</h3>
+            <p>同一样本被不同工具给出冲突动作，需要补证和调查，而不是猜测。</p>
+          </article>
+          <article class="problem-card reveal">
+            <div class="card-index">03</div>
+            <div class="line-icon line-icon-trace" aria-hidden="true"></div>
+            <h3>整改失联</h3>
+            <p>finding、工单、规则和复验常常断链，难以证明问题真正被处理。</p>
+          </article>
+          <article class="solution-card reveal">
+            <p class="mini-label">VISIONDATA GATE</p>
+            <h3>提交一个批次，收到一条可复核闭环。</h3>
+            <ol>
+              <li><span>01</span>冻结目标、合同与权限</li>
+              <li><span>02</span>五类工具并行取证</li>
+              <li><span>03</span>Leader 根据证据补派 Worker</li>
+              <li><span>04</span>Judge 裁决并生成工单</li>
+              <li><span>05</span>保留副本整改，同合同复验</li>
+            </ol>
+          </article>
+        </div>
+      </section>
+
+      <section id="demo" class="section demo-section">
+        <div class="section-shell">
+          <div class="section-heading section-heading-light reveal">
+            <p class="eyebrow"><span></span>02 / Reviewer Demo</p>
+            <h2>点击节点，查看这次运行为什么改变了计划。</h2>
+            <p>以下不是概念动画。节点、数量、触发条件与 SHA-256 均来自固定公开数据运行回执。</p>
+          </div>
+
+          <div class="demo-frame reveal">
+            <div class="demo-toolbar">
+              <div class="demo-title">
+                <img src="assets/mark.svg" width="28" height="28" alt="" />
+                <div><strong>Omni-180-v1</strong><span>Fixed public image pilot</span></div>
+              </div>
+              <div class="run-progress" aria-label="运行已完成">
+                <span>RUN COMPLETE</span><i><b></b></i><strong>100%</strong>
+              </div>
+              <div class="decision-chip">RECAPTURE</div>
+            </div>
+
+            <div class="demo-layout">
+              <aside class="phase-rail" aria-label="运行阶段">
+                <button class="phase-button active" type="button" data-focus="intake"><span>01</span><b>任务合同</b><small>180 张固定分母</small></button>
+                <button class="phase-button" type="button" data-focus="tools"><span>02</span><b>工具取证</b><small>5 类只读工具</small></button>
+                <button class="phase-button" type="button" data-focus="leader"><span>03</span><b>动态补证</b><small>1 replan · 3 workers</small></button>
+                <button class="phase-button" type="button" data-focus="judge2"><span>04</span><b>门禁裁决</b><small>正确阻断</small></button>
+                <button class="phase-button" type="button" data-focus="delivery"><span>05</span><b>结果交付</b><small>45 条可执行工单</small></button>
+              </aside>
+
+              <div class="canvas-panel">
+                <div class="canvas-head">
+                  <div><span class="pulse-dot"></span> EVIDENCE FLOW</div>
+                  <p>选择任意节点查看输入、动作和证据</p>
+                </div>
+                <div class="canvas-wrap">
+                  <canvas id="evidence-canvas" role="img" aria-label="证据触发的动态 Agent 运行流程图"></canvas>
+                  <div class="canvas-legend" aria-hidden="true"><span><i class="legend-static"></i>静态任务</span><span><i class="legend-dynamic"></i>动态任务</span><span><i class="legend-decision"></i>裁决</span></div>
+                  <p class="sr-only">任务合同触发五类工具，初次裁决后，Leader 根据中间证据增派三个动态 Worker，再次裁决并交付工单。</p>
+                </div>
+              </div>
+
+              <aside class="inspector" aria-live="polite">
+                <div class="inspector-kicker" data-inspector-kicker>INTAKE / CONTRACT</div>
+                <h3 data-inspector-title>任务合同冻结</h3>
+                <p data-inspector-body>固定 180 张公开图像、审核阈值、工具范围与发布目标，避免运行后更换分母。</p>
+                <dl data-inspector-metrics>
+                  <div><dt>输入分母</dt><dd>180</dd></div>
+                  <div><dt>发布范围</dt><dd>沙箱训练池</dd></div>
+                </dl>
+                <div class="inspector-proof">
+                  <span>证据引用</span>
+                  <code data-inspector-proof>contract / Omni-180-v1</code>
+                </div>
+              </aside>
+            </div>
+
+            <div class="trigger-bar" aria-label="真实动态分支">
+              <span class="trigger-label">真实动态分支</span>
+              <button type="button" data-focus="conflict"><b>2</b><span>跨工具冲突</span></button>
+              <button type="button" data-focus="metadata"><b>15</b><span>metadata 数量漂移</span></button>
+              <button type="button" data-focus="resolution"><b>28</b><span>原生分辨率组</span></button>
+              <div class="trigger-note"><i></i>均为首轮证据后创建，非预设 DAG</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="evidence" class="section section-shell evidence-section">
+        <div class="section-heading reveal">
+          <p class="eyebrow"><span></span>03 / 可核验证据</p>
+          <h2>每个数字都有分母，每次裁决都有去向。</h2>
+          <p>系统将工具事实、finding、工单、规则检查和 SHA-256 收进同一条交付链。</p>
+        </div>
+
+        <div class="decision-explainer reveal">
+          <div class="decision-mark"><span>业务结论</span><strong>RECAPTURE</strong></div>
+          <div class="decision-copy">
+            <h3>8/8 检查通过，为什么仍然是 RECAPTURE？</h3>
+            <p>8 项检查证明工具执行、证据质量、追踪和反事实稳定性完整；RECAPTURE 表示这些完整证据确认批次需要整改。系统工作正常，所以没有放行。</p>
+          </div>
+          <div class="decision-arrow" aria-hidden="true">→</div>
+          <div class="decision-result"><span>系统行为</span><strong>正确阻断</strong><small>45 findings → 45 工单</small></div>
+        </div>
+
+        <div class="evidence-grid">
+          <article class="evidence-card evidence-card-wide reveal">
+            <div class="card-head">
+              <div><p class="mini-label">TRACEABILITY</p><h3>证据矩阵</h3></div>
+              <span class="verified-badge">交叉哈希已校验</span>
+            </div>
+            <div class="matrix" role="table" aria-label="证据追踪矩阵">
+              <div class="matrix-row matrix-header" role="row">
+                <span role="columnheader">工具事实</span><span role="columnheader">Finding</span><span role="columnheader">工单</span><span role="columnheader">规则复核</span>
+              </div>
+              <div class="matrix-row" role="row">
+                <span role="cell"><i class="tool-dot tool-blue"></i>重复 / 泄漏</span><span role="cell">CROSS_SPLIT_NEAR_DUPLICATE</span><span role="cell">REMOVE_OR_REPARTITION</span><span role="cell"><b class="pass-text">PASS</b></span>
+              </div>
+              <div class="matrix-row" role="row">
+                <span role="cell"><i class="tool-dot tool-violet"></i>治理审计</span><span role="cell">METADATA_COUNT_DRIFT</span><span role="cell">INVESTIGATE</span><span role="cell"><b class="pass-text">PASS</b></span>
+              </div>
+              <div class="matrix-row" role="row">
+                <span role="cell"><i class="tool-dot tool-cyan"></i>冲突复核</span><span role="cell">CROSS_TOOL_ACTION_CONFLICT</span><span role="cell">INVESTIGATE</span><span role="cell"><b class="pass-text">PASS</b></span>
+              </div>
+            </div>
+            <div class="matrix-foot"><span>evidence_span</span><span>reason_trace</span><span>sample_refs</span><span>SHA-256</span></div>
+          </article>
+
+          <article class="evidence-card reveal">
+            <div class="card-head"><div><p class="mini-label">RULE CHECKS</p><h3>8 项完整性检查</h3></div><strong class="score-ring">8/8</strong></div>
+            <ul class="rule-list" data-rule-list>
+              <li><span></span>加载运行证据…</li>
+            </ul>
+          </article>
+
+          <article class="evidence-card reveal">
+            <div class="card-head"><div><p class="mini-label">ARCHBENCH-V2</p><h3>先证明何时不需要多 Agent</h3></div><span class="record-count">288 records</span></div>
+            <p class="card-copy">同输入、同工具、同 Judge、同扰动协议。固定 SOP 下三种架构质量相同，因此只在证据改变任务时启用动态 Agent。</p>
+            <div class="bench-chart" aria-label="三种架构同协议指标">
+              <div><span>传统流水线</span><i><b style="--bar:96%"></b></i><strong>F1 0.96</strong></div>
+              <div><span>单 Agent</span><i><b style="--bar:96%"></b></i><strong>F1 0.96</strong></div>
+              <div><span>多 Agent</span><i><b style="--bar:96%"></b></i><strong>F1 0.96</strong></div>
+            </div>
+            <div class="bench-result"><span>错误放行率</span><strong>0%</strong><small>固定协议内</small></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="integration" class="section integration-section">
+        <div class="section-shell integration-grid">
+          <div class="integration-copy reveal">
+            <p class="eyebrow"><span></span>04 / 接入现有工作流</p>
+            <h2>工作台给人，API 给企业 Agent 与流水线。</h2>
+            <p>完整 Runtime 可在本地运行；REST API、CLI 与 canonical evidence package 共享同一个任务合同。评委网站展示固定公开运行，不冒充生产 SaaS。</p>
+            <div class="interface-list">
+              <div><span>01</span><p><strong>团队工作台</strong><small>创建任务、查看工单、复验与下载证据</small></p></div>
+              <div><span>02</span><p><strong>企业 Agent / SaaS</strong><small>通过 REST API 提交批次并轮询任务状态</small></p></div>
+              <div><span>03</span><p><strong>CI / 数据流水线</strong><small>以结构化结论阻断不合格批次进入实验池</small></p></div>
+            </div>
+            <div class="integration-actions">
+              <a class="button button-primary" href="https://github.com/dukeandBaron/visiondata-gate/blob/main/docs/API_QUICKSTART.md" target="_blank" rel="noreferrer">API Quickstart <span>↗</span></a>
+              <a class="text-link" href="https://github.com/dukeandBaron/visiondata-gate/blob/main/docs/BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md" target="_blank" rel="noreferrer">阅读技术路线 <span>→</span></a>
+            </div>
+          </div>
+          <div class="api-window reveal" aria-label="REST API 请求示例">
+            <div class="api-top"><span><i></i><i></i><i></i></span><b>POST /v1/tasks</b><em>201 CREATED</em></div>
+            <pre><code><span class="code-muted">// 提交冻结审核合同</span>
+<span class="code-blue">POST</span> /v1/tasks
+{
+  <span class="code-key">"scenario"</span>: <span class="code-value">"industrial"</span>,
+  <span class="code-key">"batch_ref"</span>: <span class="code-value">"omni-180-v1"</span>,
+  <span class="code-key">"release_scope"</span>: <span class="code-value">"sandbox_training_pool"</span>
+}
+
+<span class="code-muted">// 返回结构化门禁结果</span>
+{
+  <span class="code-key">"decision"</span>: <span class="code-warn">"RECAPTURE"</span>,
+  <span class="code-key">"findings"</span>: <span class="code-number">45</span>,
+  <span class="code-key">"work_orders"</span>: <span class="code-number">45</span>,
+  <span class="code-key">"evidence_url"</span>: <span class="code-value">"/v1/tasks/{id}/evidence"</span>
+}</code></pre>
+            <div class="api-foot"><span><i></i> typed contract</span><span><i></i> fail closed</span><span><i></i> auditable trace</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="scope" class="section section-shell scope-section">
+        <div class="section-heading reveal">
+          <p class="eyebrow"><span></span>05 / 证据阶梯</p>
+          <h2>已经完成的强陈述，与下一阶段验收分开。</h2>
+          <p>外部验收尚未发生，不会反向否定已经完成的工程实现和固定公开数据实跑。</p>
+        </div>
+        <div class="proof-ladder">
+          <article class="proof-step proof-pass reveal">
+            <div class="proof-number">01</div><span class="proof-status">PASS</span>
+            <h3>已工程实现</h3>
+            <p>工作台、REST API、五类工具、动态 Leader、冻结 Judge、工单、同合同复验与证据包。</p>
+          </article>
+          <article class="proof-step proof-pass reveal">
+            <div class="proof-number">02</div><span class="proof-status">PASS</span>
+            <h3>已公开数据实跑</h3>
+            <p>固定 180 张图像，1 次重规划、3 个动态 Worker、45 条工单，结果 RECAPTURE。</p>
+          </article>
+          <article class="proof-step proof-open reveal">
+            <div class="proof-number">03</div><span class="proof-status">NEXT</span>
+            <h3>下一阶段外部验收</h3>
+            <p>客户 shadow test、工厂现场 KPI、生产 IAM、外部模型与 hosted transport 回执。</p>
+          </article>
+        </div>
+        <details class="claim-details reveal">
+          <summary>查看完整验证边界</summary>
+          <div>
+            <p><strong>本网站证明：</strong>本地可运行应用闭环、固定公开数据 Policy Gate、证据触发重规划和可复验发布凭证。</p>
+            <p><strong>本网站不声称：</strong>客户验收、工厂上线、生产部署、全量 Omni Gate、外部 LLM 实跑或 hosted AgentTeams 已连接。</p>
+          </div>
+        </details>
+      </section>
+
+      <section class="final-cta section-shell reveal">
+        <div>
+          <p class="eyebrow"><span></span>REVIEW THE EVIDENCE</p>
+          <h2>让评委从结论进入证据，<br />再从证据回到可运行代码。</h2>
+        </div>
+        <div class="final-actions">
+          <a class="button button-light" href="https://github.com/dukeandBaron/visiondata-gate" target="_blank" rel="noreferrer">打开 GitHub <span>↗</span></a>
+          <a class="button button-ghost" href="https://github.com/dukeandBaron/visiondata-gate/raw/main/deliverables/GOAI_VisionDataGate_BoundlessAgents_20260816.pdf">下载路演 PDF <span>↓</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer section-shell">
+      <div class="footer-brand"><img src="assets/mark.svg" width="30" height="30" alt="" /><p><strong>VisionData Gate</strong><span>GOAI Boundless Agents · AI+工业制造</span></p></div>
+      <p class="footer-proof">Evidence namespace <strong>Omni-180-v1</strong> · Release <strong>vdg-20260816-rc1</strong></p>
+      <p>© 2026 VisionData Gate · <a href="https://github.com/dukeandBaron/visiondata-gate">Source & evidence</a></p>
+    </footer>
+    <noscript><div class="noscript">此交互 Demo 需要 JavaScript。完整证据仍可在 GitHub 仓库中查看。</div></noscript>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+schema_version: agentteams.team.v1
+team_id: team.visiondata-gate
+team_name: VisionData Release Gate Team
+protocol: agentteams-teamharness.v1
+room_id: room.visiondata-gate.runtime
+runtime_adapter: local-deterministic
+connection_status: mapped_not_connected
+matrix_connected: false
+run_entry: python -m visiondata_gate.cli agent-demo --seed 20260812 --output output/agent-demo
+authority:
+  release_decision_owner: judge.policy
+  production_authorization: external_human_required
+  worker_side_effects: read_only
+boundary: Contract mapping only; not a hosted AgentTeams or Matrix receipt.

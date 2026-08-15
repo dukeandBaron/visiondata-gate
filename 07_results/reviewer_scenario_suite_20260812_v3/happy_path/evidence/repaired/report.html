@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:">
+  <title>VisionData Gate 可审计报告</title>
+  <style>
+    :root { color-scheme: light; --blue:#0b6cff; --gold:#d9b431; --ink:#101114; --muted:#5c6573; --line:#d7dee8; --panel:#f5f7fa; }
+    * { box-sizing: border-box; }
+    body { margin:0; color:var(--ink); background:white; font:15px/1.55 Arial,"Microsoft YaHei",sans-serif; }
+    main { max-width:1180px; margin:0 auto; padding:32px 28px 64px; }
+    h1 { margin:0 0 8px; font-size:34px; } h2 { margin-top:34px; border-bottom:2px solid var(--ink); padding-bottom:8px; }
+    h3 { margin:0 0 8px; } p { margin:8px 0; } code { overflow-wrap:anywhere; }
+    .eyebrow { color:var(--blue); font-weight:700; letter-spacing:.12em; }
+    .decision { display:inline-block; margin:14px 0; padding:10px 18px; border-radius:999px; color:white; background:var(--ink); font-weight:800; }
+    .decision.pass { background:#087f5b; } .decision.quarantine,.decision.recapture { background:#9c5d00; } .decision.defer { background:#5d6470; }
+    .notice { border-left:6px solid var(--gold); padding:14px 18px; background:#fff9df; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+    .opinion { border:1px solid var(--line); border-radius:12px; padding:16px; background:var(--panel); }
+    .muted { color:var(--muted); }
+    .table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:10px; }
+    table { width:100%; border-collapse:collapse; } th,td { padding:9px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+    th { background:#eef2f7; } .kv th { width:34%; }
+    .severity { font-weight:700; } .severity.critical,.severity.high { color:#a40000; } .severity.medium { color:#8a5600; }
+    footer { margin-top:42px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); }
+    @media print { main { max-width:none; padding:10mm; } .table-wrap { overflow:visible; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">VISIONDATA GATE · AUDIT REPORT</div>
+    <h1>VisionData Gate 可审计报告</h1>
+    <p>run <code>agent-verification-10ae01f998f5-e4cec17712af</code> · batch <code>visiondata-demo-seed-20260812-dirty</code> · contract <code>visiondata-image-demo-v1</code></p>
+    <div class="decision pass">PASS</div>
+    <p><strong>确定性理由：</strong>PASS only for the frozen sandbox experiment training pool contract; production release still requires human authority.</p>
+    <div class="notice"><strong>边界：</strong>PASS only means this batch satisfies the frozen demo data contract for a sandbox experiment pool; it is not product acceptance, model validation, data authorization, or a legal/safety certification.</div>
+  </header>
+
+  <section id="scope"><h2>运行与责任范围</h2>
+    <table class="kv">
+      <tr><th>输入 SHA-256</th><td><code>10ae01f998f55a8adea146d6a936a4b0e0d055c8c003ac434ee4af6c21c225db</code></td></tr>
+      <tr><th>Policy</th><td>gate-policy-1.0</td></tr>
+      <tr><th>发布范围</th><td>sandbox_experiment_training_pool</td></tr>
+      <tr><th>生产前真实授权主体</th><td>必须</td></tr>
+      <tr><th>Council backend</th><td>shared-deterministic-ai-council-simulator-v1</td></tr>
+      <tr><th>同源披露</th><td>All named experts are explicitly simulated AI roles using one shared backend. Their agreement is not independent evidence, and a vote is never used to justify a gate decision.</td></tr>
+    </table>
+  </section>
+
+  <section id="metrics"><h2>门禁指标</h2><table class="kv"><tr><th>annotation_decoded_mask_count</th><td>25</td></tr><tr><th>annotation_dimension_mismatch_count</th><td>0</td></tr><tr><th>annotation_mask_fraction_max</th><td>0.186768</td></tr><tr><th>annotation_mask_fraction_min</th><td>0.13562</td></tr><tr><th>annotation_mask_fraction_out_of_range_count</th><td>0</td></tr><tr><th>annotation_missing_annotation_count</th><td>0</td></tr><tr><th>annotation_path_count</th><td>25</td></tr><tr><th>annotation_sample_count</th><td>25</td></tr><tr><th>coverage_expected_cell_count</th><td>8</td></tr><tr><th>coverage_minimum_observed_cell_count</th><td>1</td></tr><tr><th>coverage_missing_cell_count</th><td>0</td></tr><tr><th>coverage_observed_cell_count</th><td>8</td></tr><tr><th>coverage_required_min_per_cell</th><td>1</td></tr><tr><th>duplicates_cross_split_compared_pair_count</th><td>123</td></tr><tr><th>duplicates_cross_split_exact_pair_count</th><td>0</td></tr><tr><th>duplicates_cross_split_near_pair_count</th><td>0</td></tr><tr><th>duplicates_decode_skipped_count</th><td>0</td></tr><tr><th>duplicates_exact_duplicate_group_count</th><td>0</td></tr><tr><th>duplicates_exact_duplicate_pair_count</th><td>0</td></tr><tr><th>duplicates_hashed_file_count</th><td>25</td></tr><tr><th>duplicates_perceptual_eligible_count</th><td>25</td></tr><tr><th>duplicates_sample_count</th><td>25</td></tr><tr><th>finding_count</th><td>0</td></tr><tr><th>governance_annotation_path_missing_count</th><td>0</td></tr><tr><th>governance_coverage_cell_count</th><td>8</td></tr><tr><th>governance_missing_cell_count</th><td>0</td></tr><tr><th>governance_observed_cells</th><td>8</td></tr><tr><th>governance_observed_required_cells</th><td>8</td></tr><tr><th>governance_required_cells_total</th><td>8</td></tr><tr><th>governance_required_split_ok</th><td>1</td></tr><tr><th>governance_unknown_cell_count</th><td>0</td></tr><tr><th>quality_decode_failure_count</th><td>0</td></tr><tr><th>quality_decoded_image_count</th><td>25</td></tr><tr><th>quality_invalid_dimension_count</th><td>0</td></tr><tr><th>quality_low_sharpness_count</th><td>0</td></tr><tr><th>quality_mean_luma_max</th><td>116.510864</td></tr><tr><th>quality_mean_luma_min</th><td>75.157837</td></tr><tr><th>quality_overexposed_count</th><td>0</td></tr><tr><th>quality_sample_count</th><td>25</td></tr><tr><th>quality_sharpness_max</th><td>1255.098954</td></tr><tr><th>quality_sharpness_min</th><td>673.312917</td></tr><tr><th>quality_underexposed_count</th><td>0</td></tr><tr><th>sample_count</th><td>25</td></tr><tr><th>tool_count</th><td>5</td></tr><tr><th>tool_error_count</th><td>0</td></tr></table></section>
+
+  <section id="findings"><h2>Findings</h2><div class="table-wrap"><table>
+    <thead><tr><th>ID</th><th>Code</th><th>级别</th><th>工具</th><th>样本</th><th>摘要</th><th>动作</th><th>证据</th></tr></thead>
+    <tbody><tr><td colspan="8" class="muted">无 findings</td></tr></tbody>
+  </table></div></section>
+
+  <section id="tools"><h2>白名单工具轨迹</h2><div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>工具</th><th>状态</th><th>输入 SHA</th><th>结果 SHA</th><th>Finding</th><th>错误</th></tr></thead>
+    <tbody><tr><td>1</td><td>image_quality</td><td>ok</td><td><code>dc2375a0ea56a33606f2c08706084616b4002928872637370de854fccf0821bc</code></td><td><code>6045f2d1249ae8ac6b01e9ce81821facb49dde018cd52d2b3ef5330e02719911</code></td><td>—</td><td>—</td></tr><tr><td>2</td><td>duplicate_leakage</td><td>ok</td><td><code>2e9dad7fa8208a25c906139a60ad248f16af61a59e64ed1326da469298886cc1</code></td><td><code>8880e3ebe5501ca8f96c41c0eff64d426e1d0e51d645c41f291f5aa0b743d62d</code></td><td>—</td><td>—</td></tr><tr><td>3</td><td>annotation_integrity</td><td>ok</td><td><code>9d608f4c203a400492c8fd68e3748a8304f7ab78a9cbe2527ad7d89cfbe41aa4</code></td><td><code>2712b5252e698add8d71490aa90160ec0d3907b9b0217c7eb7c40e8a2b476eae</code></td><td>—</td><td>—</td></tr><tr><td>4</td><td>coverage_matrix</td><td>ok</td><td><code>6430c5691ff0e3a5a4b4ac32ec77ef1e05964a7f35b578b2c7a264024dc0d147</code></td><td><code>fd3bbf873f2849c3b3fb95ab6e4fadf3474c0380b3804e32bcf9f6d17dc0f8ff</code></td><td>—</td><td>—</td></tr><tr><td>5</td><td>governance_audit</td><td>ok</td><td><code>b09c03f630bcf97d30c5f48abdf0b8d83e6d3dca619a025cc1fb82fe48431ff4</code></td><td><code>de51618e70ff0d24ebaeed9c709a299de15461c37b371fccdfd829d62d82a154</code></td><td>—</td><td>—</td></tr></tbody>
+  </table></div></section>
+
+  <section id="council"><h2>AI Expert Council（非真人专家）</h2><div class="grid"><article class="opinion"><h3>AI Acquisition Quality Expert</h3><p class="muted"><code>ai_acquisition_quality</code> · Decodeability, dimensions, illumination, and sharpness</p><p><strong>建议：</strong>PASS</p><p><strong>置信轴：</strong>E=medium · T=high · A=medium · M=low</p><p><strong>质询：</strong>AI Annotation and Coverage Expert: could mask structure or missing coverage invalidate the apparent image-quality conclusion?</p><p><strong>主张</strong></p><ul><li>No role-specific finding was emitted by the executed tool traces; this is not proof that untested issues are absent.</li></ul><p><strong>局限</strong></p><ul><li>This is an AI role, not a human domain expert.</li><li>The role shares one backend with all other council roles.</li><li>Its recommendation is advisory and cannot override tool evidence.</li></ul></article><article class="opinion"><h3>AI Annotation and Coverage Expert</h3><p class="muted"><code>ai_annotation_coverage</code> · Annotation structure and contract coverage cells</p><p><strong>建议：</strong>PASS</p><p><strong>置信轴：</strong>E=medium · T=high · A=medium · M=low</p><p><strong>质询：</strong>AI Duplicate and Leakage Expert: would a proposed relabel preserve a duplicate or cross-split leak?</p><p><strong>主张</strong></p><ul><li>No role-specific finding was emitted by the executed tool traces; this is not proof that untested issues are absent.</li></ul><p><strong>局限</strong></p><ul><li>This is an AI role, not a human domain expert.</li><li>The role shares one backend with all other council roles.</li><li>Its recommendation is advisory and cannot override tool evidence.</li></ul></article><article class="opinion"><h3>AI Data Contract Expert</h3><p class="muted"><code>ai_data_contract</code> · Frozen contract scope, evidence status, and release boundary</p><p><strong>建议：</strong>PASS</p><p><strong>置信轴：</strong>E=medium · T=high · A=medium · M=low</p><p><strong>质询：</strong>AI Acquisition Quality Expert: are every threshold and claimed measurement tied to an executed tool trace?</p><p><strong>主张</strong></p><ul><li>No role-specific finding was emitted by the executed tool traces; this is not proof that untested issues are absent.</li></ul><p><strong>局限</strong></p><ul><li>This is an AI role, not a human domain expert.</li><li>The role shares one backend with all other council roles.</li><li>Its recommendation is advisory and cannot override tool evidence.</li></ul></article><article class="opinion"><h3>AI Duplicate and Leakage Expert</h3><p class="muted"><code>ai_duplicate_leakage</code> · Exact duplicates, near duplicates, and cross-split leakage</p><p><strong>建议：</strong>PASS</p><p><strong>置信轴：</strong>E=medium · T=high · A=medium · M=low</p><p><strong>质询：</strong>AI Annotation and Coverage Expert: after removal or repartition, does every required coverage cell remain populated?</p><p><strong>主张</strong></p><ul><li>No role-specific finding was emitted by the executed tool traces; this is not proof that untested issues are absent.</li></ul><p><strong>局限</strong></p><ul><li>This is an AI role, not a human domain expert.</li><li>The role shares one backend with all other council roles.</li><li>Its recommendation is advisory and cannot override tool evidence.</li></ul></article><article class="opinion"><h3>AI Red-Team Audit Expert</h3><p class="muted"><code>ai_red_team_auditor</code> · Missing evidence, tool failures, and unsafe release claims</p><p><strong>建议：</strong>PASS</p><p><strong>置信轴：</strong>E=medium · T=high · A=medium · M=low</p><p><strong>质询：</strong>All AI council roles: identify one conclusion that would change if a tool failed or its evidence were unsupported.</p><p><strong>主张</strong></p><ul><li>No role-specific finding was emitted by the executed tool traces; this is not proof that untested issues are absent.</li></ul><p><strong>局限</strong></p><ul><li>This is an AI role, not a human domain expert.</li><li>The role shares one backend with all other council roles.</li><li>Its recommendation is advisory and cannot override tool evidence.</li></ul></article><article class="opinion"><h3>AI Repair Safety Expert</h3><p class="muted"><code>ai_repair_safety</code> · Work-order remediation side-effects and residual risk</p><p><strong>建议：</strong>PASS</p><p><strong>置信轴：</strong>E=medium · T=high · A=medium · M=low</p><p><strong>质询：</strong>All AI council roles: can every remediation order be executed without introducing higher-priority unresolved findings?</p><p><strong>主张</strong></p><ul><li>No role-specific finding was emitted by the executed tool traces; this is not proof that untested issues are absent.</li></ul><p><strong>局限</strong></p><ul><li>This is an AI role, not a human domain expert.</li><li>The role shares one backend with all other council roles.</li><li>Its recommendation is advisory and cannot override tool evidence.</li></ul></article></div>
+    <h3>交叉质询</h3><ul><li>AI Acquisition Quality Expert: are every threshold and claimed measurement tied to an executed tool trace?</li><li>AI Annotation and Coverage Expert: could mask structure or missing coverage invalidate the apparent image-quality conclusion?</li><li>AI Annotation and Coverage Expert: after removal or repartition, does every required coverage cell remain populated?</li><li>AI Duplicate and Leakage Expert: would a proposed relabel preserve a duplicate or cross-split leak?</li><li>All AI council roles: can every remediation order be executed without introducing higher-priority unresolved findings?</li><li>All AI council roles: identify one conclusion that would change if a tool failed or its evidence were unsupported.</li></ul>
+    <h3>未解决异议</h3><ul><li>Absence of findings is conditional on the tools that actually ran.</li><li>No AI council opinion establishes production readiness; production authority remains human.</li></ul>
+  </section>
+
+  <section id="work-orders"><h2>工单</h2><div class="table-wrap"><table>
+    <thead><tr><th>ID</th><th>动作</th><th>优先级</th><th>原因</th><th>样本</th><th>状态</th></tr></thead>
+    <tbody><tr><td colspan="6" class="muted">无工单</td></tr></tbody>
+  </table></div></section>
+
+  
+  <footer>本文件为单文件离线报告；不加载外部字体、脚本、图片或分析服务。哈希证明完整性，不等于数据授权、真人签名或法律认证。</footer>
+</main>
+</body>
+</html>

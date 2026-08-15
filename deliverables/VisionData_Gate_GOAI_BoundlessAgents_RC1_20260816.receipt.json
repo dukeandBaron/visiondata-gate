@@ -1,0 +1,147 @@
+{
+  "schema_version": "visiondata-gate.detached-submission-receipt.v6",
+  "status": "LOCAL_SUBMISSION_CANDIDATE_PASS_PUBLICATION_PENDING",
+  "verified_at": "2026-08-15T13:07:51+08:00",
+  "timezone": "Asia/Shanghai",
+  "release_id": "vdg-20260816-rc1",
+  "positioning": {
+    "track": "GOAI 赛道二 无界应用 Boundless Agents",
+    "industry_direction": "AI+工业制造",
+    "application": "工业视觉数据治理与发布 Agent",
+    "infra_role": "动态补证、失败关闭、证据追踪、API 与复用后台"
+  },
+  "candidate": {
+    "path": "deliverables/VisionData_Gate_GOAI_BoundlessAgents_RC1_20260816.zip",
+    "bytes": 8250230,
+    "sha256": "6eb9614d38c9481fedea6923d6210a2615ede99b7ccf604955052ad028577148",
+    "entry_count": 525,
+    "payload_file_count": 524,
+    "audit_ok": true,
+    "clean_extract_verified": true,
+    "audit_issue_count": 0
+  },
+  "determinism": {
+    "independent_build_count": 2,
+    "all_sha256_equal": true,
+    "sha256": "6eb9614d38c9481fedea6923d6210a2615ede99b7ccf604955052ad028577148",
+    "comparison_build": "output/release_validation_20260815_1300/VisionData_Gate_GOAI_BoundlessAgents_RC1_20260816.rebuild.zip"
+  },
+  "exact_package_cleanroom": {
+    "source_was_exact_candidate_sha256": true,
+    "cleanroom_root": "output/cleanroom_exact_20260815_1310",
+    "python": "3.12.5",
+    "uv_sync_all_extras_locked": "PASS_55_PACKAGES",
+    "pytest_passed": 164,
+    "pytest_skipped": 1,
+    "pytest_failed": 0,
+    "pytest_warning_count": 1,
+    "pytest_skip_reason": "file symlinks are unavailable in this Windows environment",
+    "pytest_warning_boundary": "Starlette TestClient dependency deprecation; no business test failure",
+    "ruff_check": "PASS",
+    "ruff_format_check": "PASS_69_FILES",
+    "compileall": "PASS",
+    "uv_lock_check": "PASS",
+    "source_import_binding": "PASS_EXACT_CLEANROOM_SRC",
+    "release_consistency": {
+      "ok": true,
+      "quality_status": "PASS",
+      "scenario_status": "LOCAL_SCENARIO_PILOT_VERIFIED",
+      "proof_ladder": {
+        "implemented": "PASS",
+        "public_pilot": "PASS",
+        "external_validation": "OPEN"
+      },
+      "architecture_records": 288,
+      "omni_fixed_denominator": 180,
+      "dynamic_workers": 3,
+      "work_orders": 45,
+      "agentteams_connection_status": "mapped_not_connected"
+    },
+    "website_projection": {
+      "status": "PASS",
+      "receipt_sha256": "bb2a23e4a154db4123ba4f9682ce22ba470af5e1a6b89d4c5c4977c359cda110",
+      "rule_check_count": 8,
+      "dynamic_trigger_count": 3
+    }
+  },
+  "browser_qa": {
+    "transport": "real local Chromium 151 page via Playwright",
+    "desktop_viewport": [1440, 1000],
+    "mobile_viewport": [390, 844],
+    "desktop_horizontal_overflow_px": 0,
+    "mobile_horizontal_overflow_px": 0,
+    "page_error_count": 0,
+    "console_error_count": 0,
+    "failed_request_count": 0,
+    "canvas_bitmap_nonzero": true,
+    "dynamic_worker_click_result": "metadata 数量对账",
+    "mobile_navigation_verified": true,
+    "rendered_rule_count": 8
+  },
+  "review_artifacts": [
+    {
+      "path": "deliverables/GOAI_VisionDataGate_BoundlessAgents_20260816.pptx",
+      "bytes": 965583,
+      "sha256": "d900dd0cdf87fdf115d7ed65e03fe34a1dab380f6e6e18ec5bd6ca4a013f4d24",
+      "qa": "PASS_12_SLIDES_SOURCES_NOTES_12_OF_12_TEMPLATE_FIDELITY_0_ISSUES"
+    },
+    {
+      "path": "deliverables/GOAI_VisionDataGate_BoundlessAgents_20260816.pdf",
+      "bytes": 573601,
+      "sha256": "29135083cd5792b870342eebe7acdbf1aee1a864b7294dfe0ba489692aeeb282",
+      "qa": "PASS_12_PAGES_960X540_FULL_VISUAL_REVIEW"
+    },
+    {
+      "path": "output/playwright/judge-site-desktop-v2.png",
+      "bytes": 1660489,
+      "sha256": "625b27c1ea22df156888d0d5ee59ab45bbc9ff9f7e17fd2eed6963fce16b9b07",
+      "qa": "PASS_1440X1000_FULL_PAGE_NO_HORIZONTAL_OVERFLOW_NO_PAGE_ERROR"
+    },
+    {
+      "path": "output/playwright/judge-site-mobile-v2.png",
+      "bytes": 902030,
+      "sha256": "a4d58681da62d8967baadead1c151b2d39dd6c81901972019e4e242cd62fa9e7",
+      "qa": "PASS_390X844_FULL_PAGE_NO_HORIZONTAL_OVERFLOW_NO_PAGE_ERROR"
+    },
+    {
+      "path": "output/playwright/judge-site-demo-section.png",
+      "bytes": 219966,
+      "sha256": "d8412f2d5b057a88807a9649e5d7b760c527a8b720e1cf2dd89817df486da0ce",
+      "qa": "PASS_CANVAS_DYNAMIC_NODE_INTERACTION"
+    }
+  ],
+  "verified_scenario_claim": {
+    "fixed_public_images": 180,
+    "replan_count": 1,
+    "dynamic_worker_count": 3,
+    "finding_count": 45,
+    "work_order_count": 45,
+    "rule_check_count": 8,
+    "decision": "RECAPTURE",
+    "meaning": "已工程实现并在固定公开数据上实跑；不是客户或工厂验收。"
+  },
+  "publication": {
+    "github_repository_published": false,
+    "github_repository_url": null,
+    "judge_site_deployed": false,
+    "judge_site_url": null
+  },
+  "boundaries": {
+    "engineering_candidate_is_official_submission": false,
+    "actual_model_call_count": 0,
+    "agentteams_static_contract_status": "PASS",
+    "agentteams_runtime_transport_status": "OPEN",
+    "agentteams_connection_status": "mapped_not_connected",
+    "real_customer_validation": false,
+    "factory_site_validation": false,
+    "production_deployment_validated": false,
+    "full_omni_gate_certified": false,
+    "official_submission_receipt_received": false,
+    "top_level_license_confirmed": false,
+    "formal_notice_confirmed": false
+  },
+  "owner_actions_remaining": [
+    "Confirm the top-level LICENSE and NOTICE as the rights holder.",
+    "Upload through the competition account and retain the official work ID and platform receipt."
+  ]
+}

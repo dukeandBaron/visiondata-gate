@@ -1,0 +1,57 @@
+{
+  "artifacts": {
+    "evidence_zip_sha256": "1e1418c26f28ffb7c6ebefa7109cfdb8ff98468ce0dcac8c44833069cef022d0",
+    "inventory_sha256": "021a7d2b4c4e94961e371cde066a3d831c9bbe59391a281f69c0fa103610b692",
+    "pdf_sha256": "2c7a642e6070c805d11afbe34c22cc0d55f4e7853728fb26046b42c84f328852",
+    "pptx_sha256": "e38e6ca839744c9834af8181b064eaa0b2de43910c77689dbc184f96a3c647ea",
+    "sbom_sha256": "456ad56a25f3a342c3509192dd5a2670b0dead13c3f514afdc0bd01f3f857daa",
+    "uv_lock_sha256": "db2e01704eb790f390b661e5cf65055e08954f89148fc48b494e9d1bf484ed28",
+    "video_sha256": "8804f5fd8338b83627fe969603d1e095ae00bba25a6a532513478f9812f81594"
+  },
+  "boundaries": {
+    "official_submission_receipt": false,
+    "real_industrial_validation": false,
+    "top_level_license_confirmed": false
+  },
+  "demo": {
+    "critical_bad_release_rate": 0.0,
+    "f1": 1.0,
+    "initial_decision": "RECAPTURE",
+    "initial_findings": 12,
+    "precision": 1.0,
+    "recall": 1.0,
+    "repaired_decision": "PASS",
+    "repaired_findings": 0,
+    "seed": 20260809,
+    "work_order_recall": 1.0
+  },
+  "engineering": {
+    "python": "3.12.5",
+    "pytest_passed": 86,
+    "pytest_skipped": 1,
+    "ruff_check": "PASS",
+    "ruff_format_check": "PASS",
+    "seed_truth_match": "32/32",
+    "symlink_skip_reason": "file symlinks unavailable in current Windows environment"
+  },
+    "package_receipt": "deliverables/VisionData_Gate_GOAI_AgentInfra_SubmissionCandidate_20260812.receipt.json",
+    "review_audit": "docs/GOAI_REVIEWER_FEEDBACK_AUDIT_20260812.md",
+  "schema_version": "visiondata-gate.final-qa.v1",
+  "status": "ENGINEERING_PASS_WITH_DISCLOSED_BOUNDARIES",
+  "track": {
+    "competition": "GOAI Agent Infra / 新质基座",
+    "industry_instance": "AI+工业制造",
+    "official_track_url": "https://www.goaihz.com/tracks?track=infra",
+    "agentteams_connection_status": "mapped_not_connected",
+    "matrix_connected": false
+  },
+  "video": {
+    "duration_seconds": 170.02,
+    "full_decode_frames": 5100,
+    "qa_status": "PASS",
+    "resolution": [
+      1920,
+      1080
+    ]
+  }
+}

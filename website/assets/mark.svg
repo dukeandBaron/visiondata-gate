@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="VisionData Gate">
+  <defs>
+    <linearGradient id="g" x1="8" y1="5" x2="58" y2="61" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#63a5ff"/>
+      <stop offset=".48" stop-color="#1769ff"/>
+      <stop offset="1" stop-color="#0b45bb"/>
+    </linearGradient>
+  </defs>
+  <rect x="3" y="3" width="58" height="58" rx="18" fill="url(#g)"/>
+  <path d="M18 17.5 31.7 47 46 17.5h-8.1l-6.1 15.9-6-15.9H18Z" fill="#fff"/>
+  <path d="M39.5 27.5h8v17h-8z" fill="#fff" opacity=".96"/>
+  <path d="M39.5 27.5h8v5h-8z" fill="#8bc1ff"/>
+</svg>

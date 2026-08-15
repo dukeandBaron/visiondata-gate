@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "visiondata-gate"
+version = "0.1.0"
+description = "Auditable industrial-vision data release gate with an AI Expert Council"
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "numpy>=2.2,<2.3",
+  "pillow>=11,<13",
+  "pydantic>=2.12,<3",
+]
+
+[project.optional-dependencies]
+ui = ["streamlit>=1.59,<2", "pandas>=2.3,<2.4"]
+api = ["fastapi>=0.128,<1", "uvicorn>=0.40,<1"]
+qa = ["httpx>=0.28,<1", "pytest>=8,<9", "ruff>=0.15,<0.16"]
+
+[project.scripts]
+visiondata-gate = "visiondata_gate.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
