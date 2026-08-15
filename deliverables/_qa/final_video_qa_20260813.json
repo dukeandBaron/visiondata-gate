@@ -1,0 +1,52 @@
+{
+  "anonymity": {
+    "forbidden_hits": []
+  },
+  "audio": {
+    "max_volume_db": -4.6,
+    "mean_volume_db": -22.3
+  },
+  "boundary": "Synthetic local engineering demo; not customer, factory, production, hosted AgentTeams, or official submission evidence.",
+  "checks": {
+    "anonymous_payload_scan": true,
+    "audio_is_aac": true,
+    "audio_is_audible": true,
+    "codec_is_h264": true,
+    "contact_sheet_created": true,
+    "duration_is_170_seconds": true,
+    "fps_is_30": true,
+    "full_decode_passed": true,
+    "resolution_is_1920x1080": true,
+    "ten_scene_frames_extracted": true
+  },
+  "contact_sheet": "deliverables/_qa/final_video_contact_sheet_20260813.png",
+  "decode": {
+    "decoded_frame_count": 5100,
+    "errors": [],
+    "exit_code": 0,
+    "sample_timestamps_seconds": [
+      6,
+      21,
+      39,
+      57,
+      76,
+      95,
+      114,
+      133,
+      150,
+      164
+    ],
+    "sampled_frame_count": 10
+  },
+  "duration_seconds": 170.02,
+  "file_size_bytes": 12826648,
+  "fps": 30.0,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "schema_version": "visiondata-gate.video-qa.v2",
+  "sha256": "399cc2f26e1eb07634ec7a9e41dd499a43452d50c2f08d36245f1e956d8b2ad2",
+  "status": "PASS",
+  "video_file": "deliverables/VisionDataGate_GOAI_FinalDemo_20260813.mp4"
+}

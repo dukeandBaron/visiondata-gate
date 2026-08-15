@@ -77,9 +77,19 @@ def _sha256(data: bytes) -> str:
 
 def _relative_source(path: Path, project_root: Path) -> str:
     try:
-        return path.resolve().relative_to(project_root.resolve()).as_posix()
+        relative = path.resolve().relative_to(project_root.resolve())
     except ValueError:
         return "installed-metadata"
+
+    # Virtual-environment layouts differ by platform:
+    # Windows uses .venv/Lib/site-packages while POSIX uses
+    # .venv/lib/pythonX.Y/site-packages.  Persist a logical location so an
+    # offline rebuild has identical bytes on both platforms.
+    for index, part in enumerate(relative.parts):
+        if part.casefold() == "site-packages":
+            metadata_member = Path(*relative.parts[index + 1 :]).as_posix()
+            return f".venv/site-packages/{metadata_member}"
+    return relative.as_posix()
 
 
 def _lock_source(source: dict[str, Any]) -> str:

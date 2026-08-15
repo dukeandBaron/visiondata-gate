@@ -261,3 +261,6 @@ def test_license_inventory_marks_ambiguity_and_removes_local_paths(
     assert WINDOWS_USER_PREFIX not in combined
     assert WINDOWS_USER_BACKSLASH_PREFIX not in combined
     assert POSIX_USER_PREFIX not in combined
+    assert ".venv/Lib/" not in combined
+    assert ".venv/lib/python" not in combined
+    assert ".venv/site-packages/" in combined
