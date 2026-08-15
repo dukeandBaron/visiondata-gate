@@ -7,6 +7,8 @@
 VisionData Gate 是 GOAI 赛道二“无界应用 Boundless Agents”中 AI+工业制造方向的应用作品。目标用户是工业视觉算法工程师和数据治理团队；核心任务是判断一个数据批次能否进入实验训练池，并把发现、整改、复验和交付串成闭环。
 
 - 在线评委入口：<https://dukeandbaron.github.io/visiondata-gate/>
+- 冻结 RC1：<https://github.com/dukeandBaron/visiondata-gate/releases/tag/v0.1.0-goai-rc1>
+- 附件摘要：[`../release/SHA256SUMS.txt`](../release/SHA256SUMS.txt)
 - 小白技术路线：[`BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md`](BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md)
 - 一页纸：[`one_pager.md`](one_pager.md)
 
@@ -55,9 +57,10 @@ AgentTeams 当前状态：静态契约 `PASS`、runtime transport `OPEN`、conne
 ```powershell
 .\.venv\Scripts\python.exe tools\check_release_consistency.py
 .\.venv\Scripts\python.exe tools\check_website_data.py
+.\.venv\Scripts\python.exe tools\check_release_assets.py --require-all
 ```
 
-两项检查会核对固定分母、动态任务、GateResult、架构实验、网站投影和 SHA-256；事实缺失或漂移时退出失败。
+三项检查会核对固定分母、动态任务、GateResult、架构实验、网站投影和五个发布附件的 SHA-256；事实缺失或漂移时退出失败。
 
 ## 当前仍需权利主体完成
 

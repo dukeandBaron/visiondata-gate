@@ -1,4 +1,6 @@
-# GOAI 赛道现场对齐记录（Agent Infra / 新质基座）
+# 历史快照｜GOAI Agent Infra 赛道现场对齐记录（2026-08-10）
+
+> **历史决策快照，已被后续赛道决策取代。** 本文保留用于说明方案如何演化，不是当前提交指南。当前唯一主口径为赛道二“无界应用 Boundless Agents”与 AI+工业制造，见 [`00_OVERVIEW.md`](00_OVERVIEW.md) 和 [`BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md`](BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md)；Agent Infra 仅作为可信后台能力。
 
 核验时间：2026-08-10（北京时间）
 
