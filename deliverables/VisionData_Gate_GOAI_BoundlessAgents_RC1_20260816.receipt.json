@@ -1,6 +1,6 @@
 {
   "schema_version": "visiondata-gate.detached-submission-receipt.v6",
-  "status": "LOCAL_SUBMISSION_CANDIDATE_PASS_PUBLICATION_PENDING",
+  "status": "LOCAL_SUBMISSION_CANDIDATE_PASS_PUBLICATION_VERIFIED",
   "verified_at": "2026-08-15T13:07:51+08:00",
   "timezone": "Asia/Shanghai",
   "release_id": "vdg-20260816-rc1",
@@ -121,10 +121,11 @@
     "meaning": "已工程实现并在固定公开数据上实跑；不是客户或工厂验收。"
   },
   "publication": {
-    "github_repository_published": false,
-    "github_repository_url": null,
-    "judge_site_deployed": false,
-    "judge_site_url": null
+    "github_repository_published": true,
+    "github_repository_url": "https://github.com/dukeandBaron/visiondata-gate",
+    "judge_site_deployed": true,
+    "judge_site_url": "https://dukeandbaron.github.io/visiondata-gate/",
+    "publication_verified_at": "2026-08-15T15:18:53+08:00"
   },
   "boundaries": {
     "engineering_candidate_is_official_submission": false,
