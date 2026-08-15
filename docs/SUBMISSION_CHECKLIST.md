@@ -3,7 +3,9 @@
 作品：VisionData Gate｜工业视觉数据治理与发布 Agent  
 赛道：无界应用 Boundless Agents  
 方向：AI+工业制造  
-Release：`vdg-20260816-rc1`
+提交包：`v0.1.0-goai-rc2`
+
+冻结证据：`vdg-20260816-rc1`（RC2 未修改实验数据与结论）
 
 ## P0：任一失败即停止构包/上传
 
@@ -28,7 +30,7 @@ Release：`vdg-20260816-rc1`
 - [x] 方案 PPT：`deliverables/GOAI_VisionDataGate_BoundlessAgents_20260816.pptx`；
 - [x] 方案 PDF：`deliverables/GOAI_VisionDataGate_BoundlessAgents_20260816.pdf`；
 - [x] 可选演示视频策略：RC1 不带旧视频；如需上传，应基于新版 Reviewer Mode 重新录制并单独 QA；
-- [x] 源码候选包：`deliverables/VisionData_Gate_GOAI_BoundlessAgents_RC1_20260816.zip`；
+- [x] 源码候选包：`deliverables/VisionData_Gate_GOAI_BoundlessAgents_RC2_20260816.zip`；
 - [x] 一页纸：`docs/one_pager.md`；
 - [x] 最终 QA：`10_reports/FINAL_QA_REPORT_20260816.md`；
 - [x] 包外交付回执：`10_reports/SUBMISSION_DELIVERY_RECEIPT_20260816.json`。
@@ -36,7 +38,7 @@ Release：`vdg-20260816-rc1`
 ## 账号持有人必须完成
 
 - [ ] 确认报名主体、团队信息和作品名称；
-- [ ] 由权利主体选择并确认顶层 LICENSE 与 NOTICE；
+- [x] 权利主体确认 Apache-2.0，顶层 LICENSE、NOTICE、第三方声明和 SBOM 已纳入构包硬门禁；
 - [ ] 在官网上传简介、PPT/PDF、视频和源码链接/附件；
 - [ ] 提交前在预览页核对赛道为“赛道二 无界应用”；
 - [ ] 保存作品 ID、提交时间、页面截图或平台回执；

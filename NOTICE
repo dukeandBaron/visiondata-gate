@@ -1,0 +1,9 @@
+VisionData Gate
+Copyright 2026 VisionData Gate contributors
+
+This product is licensed under the Apache License, Version 2.0.
+
+Third-party Python packages are resolved by uv.lock and installed separately;
+they remain subject to their respective licenses. See
+docs/THIRD_PARTY_NOTICES.md and docs/SBOM.cdx.json for the locked dependency
+inventory and attribution details.

@@ -21,6 +21,12 @@ from visiondata_gate.release import (  # noqa: E402
 )
 
 
+def _write_json(payload: dict[str, object]) -> None:
+    """Write canonical UTF-8 bytes without inheriting a legacy console codec."""
+
+    sys.stdout.buffer.write(canonical_json_text(payload).encode("utf-8"))
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Validate a VisionData Gate public release."
@@ -35,34 +41,27 @@ def main(argv: list[str] | None = None) -> int:
     try:
         release = load_submission_release(release_dir)
     except (OSError, ReleaseValidationError, ValueError) as exc:
-        sys.stdout.write(
-            canonical_json_text(
-                {"ok": False, "error_type": type(exc).__name__, "error": str(exc)}
-            )
-        )
+        _write_json({"ok": False, "error_type": type(exc).__name__, "error": str(exc)})
         return 2
     omni = release.manifest["evidence_namespaces"]["Omni-180-v1"]
     arch = release.manifest["evidence_namespaces"]["ArchBench-v2"]
     scenario = release.scenario_delivery_receipt
-    sys.stdout.write(
-        canonical_json_text(
-            {
-                "ok": True,
-                "release_id": release.manifest["release_id"],
-                "track": "Boundless Agents / AI+工业制造",
-                "architecture_records": arch["record_count"],
-                "omni_fixed_denominator": omni["selected_image_count"],
-                "dynamic_workers": omni["worker_count"],
-                "work_orders": omni["work_order_count"],
-                "scenario_status": scenario["status"],
-                "proof_ladder": {
-                    key: value["status"]
-                    for key, value in scenario["proof_ladder"].items()
-                },
-                "agentteams": release.manifest["agentteams"]["connection_status"],
-                "quality_status": release.manifest["quality_gates"]["status"],
-            }
-        )
+    _write_json(
+        {
+            "ok": True,
+            "release_id": release.manifest["release_id"],
+            "track": "Boundless Agents / AI+工业制造",
+            "architecture_records": arch["record_count"],
+            "omni_fixed_denominator": omni["selected_image_count"],
+            "dynamic_workers": omni["worker_count"],
+            "work_orders": omni["work_order_count"],
+            "scenario_status": scenario["status"],
+            "proof_ladder": {
+                key: value["status"] for key, value in scenario["proof_ladder"].items()
+            },
+            "agentteams": release.manifest["agentteams"]["connection_status"],
+            "quality_status": release.manifest["quality_gates"]["status"],
+        }
     )
     return 0
 

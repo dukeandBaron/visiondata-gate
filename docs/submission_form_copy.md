@@ -82,7 +82,7 @@ Omni 源树 4,464 张图像和 1,439 个 masks 只完成结构/解码审计，�
 - 工具白名单、只读默认、失败关闭和证据哈希；
 - 公开 evidence 经过结构校验、交叉哈希和私有路径扫描；
 - Skills、Tool Contract、规则包和 AgentTeams adapter 可独立复用；
-- 顶层 LICENSE/NOTICE 仍需权利主体确认，不在材料中伪造许可证结论。
+- 代码按 Apache-2.0 开源，NOTICE、第三方声明和 SBOM 随 RC2 交付；该许可不覆盖外部数据、模型或客户资产。
 
 ## 三级证据状态
 

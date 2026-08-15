@@ -148,7 +148,7 @@ uv run python -m pytest -q tests\test_release_artifacts.py
 uv run python tools\generate_supply_chain_artifacts.py
 ```
 
-生成器只枚举 `uv.lock` 中的 55 个组件，并忽略环境中不在锁内的临时包。清单中的 `REVIEW_REQUIRED` 是待权利主体复核标志，不构成法律结论，也不替代顶层 `LICENSE` / 正式 `NOTICE`。
+生成器只枚举 `uv.lock` 中的 55 个组件，并忽略环境中不在锁内的临时包。RC2 对 Core Metadata 含糊的精确版本额外冻结 wheel 许可证文件哈希；当前 `REVIEW_REQUIRED` 为 0。结果仍是工程清单而非独立法律意见，顶层授权以 `LICENSE` / `NOTICE` 为准。
 
 ## 从 GateResult 生成证据文件
 
@@ -171,7 +171,7 @@ write_offline_html(output / "report.html", gate_result, evaluation_result)
 
 ```powershell
 uv run python tools\build_submission_package.py `
-  --output deliverables\VisionData_Gate_GOAI_BoundlessAgents_RC1_20260816.zip
+  --output deliverables\VisionData_Gate_GOAI_BoundlessAgents_RC2_20260816.zip
 ```
 
 若目标已存在，命令默认拒绝覆盖；只有确认目标后才使用 `--force`。默认构包会：
@@ -186,7 +186,7 @@ uv run python tools\build_submission_package.py `
 
 ```powershell
 uv run python tools\audit_submission_package.py `
-  deliverables\VisionData_Gate_GOAI_BoundlessAgents_RC1_20260816.zip
+  deliverables\VisionData_Gate_GOAI_BoundlessAgents_RC2_20260816.zip
 ```
 
 ## 字节复现检查
@@ -203,7 +203,6 @@ Get-FileHash -Algorithm SHA256 output\release\a.zip,output\release\b.zip
 
 ## 仍未闭合
 
-- 顶层 LICENSE 与正式 NOTICE 的权利主体确认
 - 真实客户/真实工业数据验证
 - 官网上传与提交回执
 

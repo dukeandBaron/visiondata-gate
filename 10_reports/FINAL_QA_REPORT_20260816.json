@@ -1,5 +1,5 @@
 {
-  "schema_version": "visiondata-gate.final-qa.v5",
+  "schema_version": "visiondata-gate.final-qa.v6",
   "status": "LOCAL_RC_READY_ACCOUNT_ACTIONS_PENDING",
   "release_id": "vdg-20260816-rc1",
   "report_filename_date": "2026-08-16",
@@ -13,9 +13,9 @@
     "infra_role": "动态补证、失败关闭、证据追踪、API 与复用后台"
   },
   "engineering": {
-    "verified_at": "2026-08-15T12:56:51+08:00",
+    "verified_at": "2026-08-15T23:48:00+08:00",
     "python": "3.12.5",
-    "pytest_passed": 164,
+    "pytest_passed": 166,
     "pytest_skipped": 1,
     "pytest_failed": 0,
     "pytest_warning_count": 1,
@@ -85,13 +85,13 @@
   },
   "submission_package": {
     "status": "PREFLIGHT_AUDIT_PASS_FINAL_EXACT_RESULT_DETACHED",
-    "path": "deliverables/VisionData_Gate_GOAI_BoundlessAgents_RC1_20260816.zip",
+    "path": "deliverables/VisionData_Gate_GOAI_BoundlessAgents_RC2_20260816.zip",
     "deterministic_builder": true,
     "zip_sha256_embedded": false,
-    "detached_receipt": "deliverables/VisionData_Gate_GOAI_BoundlessAgents_RC1_20260816.receipt.json",
+    "detached_receipt": "deliverables/VisionData_Gate_GOAI_BoundlessAgents_RC2_20260816.receipt.json",
     "preflight_audit": {
-      "entry_count": 525,
-      "verified_file_count": 524,
+      "entry_count": 532,
+      "verified_file_count": 531,
       "clean_extract_verified": true,
       "issue_count": 0
     }
@@ -109,7 +109,8 @@
     "production_deployment_validated": false,
     "full_omni_gate_certified": false,
     "official_submission_receipt_received": false,
-    "top_level_license_confirmed": false,
-    "formal_notice_confirmed": false
+    "top_level_license_confirmed": true,
+    "formal_notice_confirmed": true,
+    "third_party_review_required_count": 0
   }
 }

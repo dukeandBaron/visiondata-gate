@@ -7,6 +7,8 @@ name = "visiondata-gate"
 version = "0.1.0"
 description = "Auditable industrial-vision data release gate with an AI Expert Council"
 readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
 requires-python = ">=3.12,<3.14"
 dependencies = [
   "numpy>=2.2,<2.3",

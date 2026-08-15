@@ -702,6 +702,8 @@ def test_default_required_paths_cover_final_submission_anchors() -> None:
         "docs/GOAI_REVIEWER_FEEDBACK_AUDIT_20260812.md",
     }
     expected = {
+        "LICENSE",
+        "NOTICE",
         "README.md",
         "app.py",
         "src/visiondata_gate/product_models.py",
@@ -724,6 +726,7 @@ def test_default_required_paths_cover_final_submission_anchors() -> None:
         "docs/SUBMISSION_CHECKLIST.md",
         "docs/SBOM.cdx.json",
         "docs/THIRD_PARTY_LICENSE_INVENTORY.generated.md",
+        "docs/THIRD_PARTY_NOTICES.md",
         "10_reports/FINAL_QA_REPORT_20260816.md",
         "10_reports/FINAL_QA_REPORT_20260816.json",
         "10_reports/SUBMISSION_DELIVERY_RECEIPT_20260816.json",

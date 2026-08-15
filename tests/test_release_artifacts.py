@@ -2,12 +2,48 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path, PurePosixPath
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_release_checker_writes_utf8_under_legacy_stdout_codec() -> None:
+    """Reproduce the Windows cp1252 failure that previously produced false-green CI."""
+
+    environment = os.environ.copy()
+    environment["PYTHONIOENCODING"] = "cp1252"
+    process = subprocess.run(
+        [sys.executable, "tools/check_release_consistency.py"],
+        cwd=PROJECT_ROOT,
+        env=environment,
+        capture_output=True,
+        timeout=30,
+        check=False,
+    )
+
+    assert process.returncode == 0, process.stderr.decode("utf-8", errors="replace")
+    payload = json.loads(process.stdout.decode("utf-8", errors="strict"))
+    assert payload["ok"] is True
+    assert payload["track"] == "Boundless Agents / AI+工业制造"
+
+
+def test_ci_release_validators_are_independent_fail_fast_steps() -> None:
+    workflow = (PROJECT_ROOT / ".github" / "workflows" / "ci.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert 'PYTHONUTF8: "1"' in workflow
+    assert "- name: Validate submission evidence" in workflow
+    assert "- name: Validate reviewer website projection" in workflow
+    assert "- name: Validate detached release assets" in workflow
+    assert "run: uv run python tools/check_release_consistency.py" in workflow
+    assert "run: uv run python tools/check_website_data.py" in workflow
+    assert "run: uv run python tools/check_release_assets.py" in workflow
+    assert "- name: Validate release evidence" not in workflow
 
 
 def _sha256(path: Path) -> str:
@@ -183,6 +219,6 @@ def test_frozen_supply_chain_outputs_match_offline_regeneration(
     assert result == {
         "component_count": 55,
         "inventory_sha256": _sha256(frozen_inventory),
-        "review_required_count": 9,
+        "review_required_count": 0,
         "sbom_sha256": _sha256(frozen_sbom),
     }

@@ -1,0 +1,106 @@
+{
+  "schema_version": "visiondata-gate.detached-submission-receipt.v7",
+  "status": "LOCAL_RC2_PASS_OFFICIAL_SUBMISSION_PENDING",
+  "verified_at": "2026-08-15T23:51:41+08:00",
+  "timezone": "Asia/Shanghai",
+  "software_release": "v0.1.0-goai-rc2",
+  "evidence_release": "vdg-20260816-rc1",
+  "positioning": {
+    "track": "GOAI 赛道二 无界应用 Boundless Agents",
+    "industry_direction": "AI+工业制造",
+    "application": "工业视觉数据治理与发布 Agent",
+    "infra_role": "证据触发动态补证、失败关闭、可追踪 API 与复用后台"
+  },
+  "candidate": {
+    "path": "deliverables/VisionData_Gate_GOAI_BoundlessAgents_RC2_20260816.zip",
+    "bytes": 8290088,
+    "sha256": "560d4216be63ebc75210cf516431d23aec6e88d4c153eb16f755affd3b9382bf",
+    "entry_count": 532,
+    "payload_file_count": 531,
+    "audit_ok": true,
+    "clean_extract_verified": true,
+    "audit_issue_count": 0
+  },
+  "determinism": {
+    "independent_build_count": 3,
+    "all_sha256_equal": true,
+    "sha256": "560d4216be63ebc75210cf516431d23aec6e88d4c153eb16f755affd3b9382bf",
+    "comparison_builds": [
+      "output/rc2_repro_c_20260815.zip",
+      "output/rc2_repro_d_20260815.zip"
+    ]
+  },
+  "engineering": {
+    "python": "3.12",
+    "pytest_passed": 166,
+    "pytest_skipped": 1,
+    "pytest_failed": 0,
+    "pytest_warning_count": 1,
+    "pytest_skip_reason": "file symlinks are unavailable in this Windows environment",
+    "pytest_warning_boundary": "Starlette TestClient dependency deprecation; no business test failure",
+    "ruff_check": "PASS",
+    "ruff_format_check": "PASS_70_FILES",
+    "compileall": "PASS",
+    "uv_lock_check": "PASS",
+    "windows_legacy_codec_regression": "PASS",
+    "ci_native_failure_propagation_contract": "PASS"
+  },
+  "open_source": {
+    "project_license": "Apache-2.0",
+    "rights_holder_confirmation": true,
+    "top_level_license_present": true,
+    "notice_present": true,
+    "third_party_notices_present": true,
+    "cyclonedx_component_count_including_root": 55,
+    "locked_third_party_component_count": 54,
+    "review_required_count": 0,
+    "vendored_python_distributions": 0,
+    "bundled_model_weights": 0,
+    "bundled_external_datasets": 0,
+    "boundary": "The code license does not grant rights to external data, models, customer assets, names, or trademarks."
+  },
+  "frozen_evidence": {
+    "architecture_records": 288,
+    "omni_fixed_denominator": 180,
+    "replan_count": 1,
+    "dynamic_worker_count": 3,
+    "finding_count": 45,
+    "work_order_count": 45,
+    "rule_check_count": 8,
+    "decision": "RECAPTURE",
+    "meaning": "RC2 changes release verification and licensing only; it does not mutate the RC1 experiment evidence."
+  },
+  "review_artifacts": [
+    {
+      "path": "deliverables/GOAI_VisionDataGate_BoundlessAgents_20260816.pptx",
+      "bytes": 965583,
+      "sha256": "d900dd0cdf87fdf115d7ed65e03fe34a1dab380f6e6e18ec5bd6ca4a013f4d24",
+      "qa": "PASS_12_SLIDES"
+    },
+    {
+      "path": "deliverables/GOAI_VisionDataGate_BoundlessAgents_20260816.pdf",
+      "bytes": 573601,
+      "sha256": "29135083cd5792b870342eebe7acdbf1aee1a864b7294dfe0ba489692aeeb282",
+      "qa": "PASS_12_PAGES_FULL_VISUAL_REVIEW"
+    },
+    {
+      "path": "deliverables/VisionDataGate_GOAI_FinalDemo_20260813.mp4",
+      "bytes": 12826648,
+      "sha256": "399cc2f26e1eb07634ec7a9e41dd499a43452d50c2f08d36245f1e956d8b2ad2",
+      "qa": "HISTORICAL_PRE_RC_VIDEO_RETAINED_AS_SEPARATE_OPTIONAL_ASSET"
+    }
+  ],
+  "boundaries": {
+    "engineering_candidate_is_official_submission": false,
+    "official_submission_receipt_received": false,
+    "actual_model_call_count": 0,
+    "agentteams_connection_status": "mapped_not_connected",
+    "real_customer_validation": false,
+    "factory_site_validation": false,
+    "production_deployment_validated": false,
+    "full_omni_gate_certified": false
+  },
+  "owner_actions_remaining": [
+    "Upload through the competition account and retain the official work ID and platform receipt."
+  ]
+}
