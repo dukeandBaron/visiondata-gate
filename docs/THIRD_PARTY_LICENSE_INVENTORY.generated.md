@@ -11,7 +11,7 @@
 | 关系 | 名称 | 版本 | PURL | 许可表达式 / classifiers | 元数据来源 | 复核状态 |
 |---|---|---|---|---|---|---|
 | internal-root | visiondata-gate | 0.1.0 | pkg:pypi/visiondata-gate@0.1.0 | no license metadata | uv.lock; .venv/site-packages/visiondata_gate-0.1.0.dist-info/METADATA | REVIEW_REQUIRED |
-| transitive | altair | 6.2.2 | pkg:pypi/altair@6.2.2 | License: long text (1480 chars); Classifier: License :: OSI Approved :: BSD License | uv.lock; .venv/site-packages/altair-6.2.2.dist-info/METADATA | REVIEW_REQUIRED |
+| transitive | altair | 6.2.2 | pkg:pypi/altair@6.2.2 | License: long text; Classifier: License :: OSI Approved :: BSD License | uv.lock; .venv/site-packages/altair-6.2.2.dist-info/METADATA | REVIEW_REQUIRED |
 | transitive | annotated-doc | 0.0.5 | pkg:pypi/annotated-doc@0.0.5 | License-Expression: MIT | uv.lock; .venv/site-packages/annotated_doc-0.0.5.dist-info/METADATA | OK |
 | transitive | annotated-types | 0.8.0 | pkg:pypi/annotated-types@0.8.0 | License-Expression: MIT; Classifier: License :: OSI Approved :: MIT License | uv.lock; .venv/site-packages/annotated_types-0.8.0.dist-info/METADATA | OK |
 | transitive | anyio | 4.14.2 | pkg:pypi/anyio@4.14.2 | License-Expression: MIT | uv.lock; .venv/site-packages/anyio-4.14.2.dist-info/METADATA | OK |
@@ -34,9 +34,9 @@
 | transitive | jsonschema-specifications | 2025.9.1 | pkg:pypi/jsonschema-specifications@2025.9.1 | License-Expression: MIT | uv.lock; .venv/site-packages/jsonschema_specifications-2025.9.1.dist-info/METADATA | OK |
 | transitive | markupsafe | 3.0.3 | pkg:pypi/markupsafe@3.0.3 | License-Expression: BSD-3-Clause | uv.lock; .venv/site-packages/markupsafe-3.0.3.dist-info/METADATA | OK |
 | transitive | narwhals | 2.24.0 | pkg:pypi/narwhals@2.24.0 | License-Expression: MIT | uv.lock; .venv/site-packages/narwhals-2.24.0.dist-info/METADATA | OK |
-| direct | numpy | 2.2.6 | pkg:pypi/numpy@2.2.6 | License: long text (45442 chars); Classifier: License :: OSI Approved :: BSD License | uv.lock; .venv/site-packages/numpy-2.2.6.dist-info/METADATA | REVIEW_REQUIRED |
+| direct | numpy | 2.2.6 | pkg:pypi/numpy@2.2.6 | License: long text; Classifier: License :: OSI Approved :: BSD License | uv.lock; .venv/site-packages/numpy-2.2.6.dist-info/METADATA | REVIEW_REQUIRED |
 | transitive | packaging | 26.3 | pkg:pypi/packaging@26.3 | License-Expression: Apache-2.0 OR BSD-2-Clause | uv.lock; .venv/site-packages/packaging-26.3.dist-info/METADATA | OK |
-| direct | pandas | 2.3.3 | pkg:pypi/pandas@2.3.3 | License: long text (1616 chars); Classifier: License :: OSI Approved :: BSD License | uv.lock; .venv/site-packages/pandas-2.3.3.dist-info/METADATA | REVIEW_REQUIRED |
+| direct | pandas | 2.3.3 | pkg:pypi/pandas@2.3.3 | License: long text; Classifier: License :: OSI Approved :: BSD License | uv.lock; .venv/site-packages/pandas-2.3.3.dist-info/METADATA | REVIEW_REQUIRED |
 | direct | pillow | 12.3.0 | pkg:pypi/pillow@12.3.0 | License-Expression: MIT-CMU | uv.lock; .venv/site-packages/pillow-12.3.0.dist-info/METADATA | OK |
 | transitive | pluggy | 1.6.0 | pkg:pypi/pluggy@1.6.0 | License: MIT; Classifier: License :: OSI Approved :: MIT License | uv.lock; .venv/site-packages/pluggy-1.6.0.dist-info/METADATA | OK |
 | transitive | protobuf | 7.35.1 | pkg:pypi/protobuf@7.35.1 | License: 3-Clause BSD License | uv.lock; .venv/site-packages/protobuf-7.35.1.dist-info/METADATA | OK |

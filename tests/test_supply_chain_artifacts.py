@@ -280,6 +280,7 @@ def test_license_inventory_marks_ambiguity_and_removes_local_paths(
     assert "不替代项目顶层 `LICENSE` / `NOTICE`" in inventory
     assert "License-Expression: MIT" in inventory
     assert "License :: OSI Approved :: BSD License" in inventory
+    assert "long text (" not in inventory
     assert "unrelated-global-package" not in inventory
     assert FILE_URL_PREFIX not in combined
     assert WINDOWS_USER_PREFIX not in combined

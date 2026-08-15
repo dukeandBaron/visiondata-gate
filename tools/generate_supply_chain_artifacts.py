@@ -201,9 +201,7 @@ def _license_evidence(
     if license_value:
         stripped = re.sub(r"\s+", " ", license_value.strip())
         evidence_parts.append(
-            f"License: {stripped}"
-            if len(stripped) <= 120
-            else f"License: long text ({len(stripped)} chars)"
+            f"License: {stripped}" if len(stripped) <= 120 else "License: long text"
         )
     evidence_parts.extend(f"Classifier: {item}" for item in classifiers)
     if mapped_license is not None:
