@@ -1,0 +1,76 @@
+:root {
+  color-scheme: dark;
+  --bg-0: #080a0e;
+  --bg-1: #0b0d12;
+  --bg-2: #0f1218;
+  --bg-3: #141820;
+  --bg-4: #1a1f28;
+  --surface: #101319;
+  --surface-raised: #171b23;
+  --surface-subtle: #0c0f14;
+  --line: #262c36;
+  --line-strong: #363e4b;
+  --line-soft: rgba(186, 208, 235, 0.075);
+  --text: #e4e9ef;
+  --text-strong: #f7f9fb;
+  --muted: #929ca9;
+  --muted-2: #66717f;
+  --blue: #7f91ff;
+  --blue-strong: #6478ed;
+  --blue-soft: rgba(103, 126, 246, 0.13);
+  --cyan: #55c8d8;
+  --green: #45d794;
+  --green-soft: rgba(69, 215, 148, 0.12);
+  --amber: #f0ad4e;
+  --amber-soft: rgba(240, 173, 78, 0.13);
+  --red: #ff6464;
+  --red-strong: #e13c46;
+  --red-soft: rgba(255, 80, 91, 0.12);
+  --violet: #8d91e8;
+  --accent-primary: #7f91ff;
+  --accent-secondary: #55c8d8;
+  --accent-tertiary: #b8ff70;
+  --accent-warm: #ff765f;
+  --accent-primary-soft: rgba(103, 126, 246, 0.14);
+  --accent-secondary-soft: rgba(85, 200, 216, 0.12);
+  --sidebar-width: 244px;
+  --sidebar-collapsed: 54px;
+  --topbar-height: 48px;
+  --ribbon-height: 36px;
+  --radius-xs: 4px;
+  --radius-sm: 7px;
+  --radius-md: 11px;
+  --radius-lg: 15px;
+  --shadow-raised: 0 20px 52px rgba(0, 7, 18, 0.34);
+  --font-sans: "Segoe UI Variable Text", "Noto Sans SC", "Microsoft YaHei UI", "PingFang SC", system-ui, sans-serif;
+  --font-display: "Segoe UI Variable Display", "Noto Sans SC", "Microsoft YaHei UI", system-ui, sans-serif;
+  --font-mono: "Cascadia Mono", "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  --transition: 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+:root[data-accent="cyan-lime"] {
+  --accent-primary: #32d5de;
+  --accent-secondary: #9de86b;
+  --accent-tertiary: #ffd166;
+  --accent-warm: #ff7f66;
+  --accent-primary-soft: rgba(50, 213, 222, 0.14);
+  --accent-secondary-soft: rgba(157, 232, 107, 0.12);
+}
+
+:root[data-accent="coral-violet"] {
+  --accent-primary: #ff765f;
+  --accent-secondary: #a78bfa;
+  --accent-tertiary: #5eead4;
+  --accent-warm: #ffd166;
+  --accent-primary-soft: rgba(255, 118, 95, 0.14);
+  --accent-secondary-soft: rgba(167, 139, 250, 0.12);
+}
+
+:root[data-reduce-motion="true"] *,
+:root[data-reduce-motion="true"] *::before,
+:root[data-reduce-motion="true"] *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}

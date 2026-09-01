@@ -1,0 +1,13 @@
+schema_version: visiondata-gate.site-manifest.v1
+site_id: factory-b-cell-07
+pack_version: 1.0.0
+site_name: Factory B / Cell 07 Fixture
+timezone: Asia/Shanghai
+quality_owner_roles:
+  - QualityLead
+  - AutomationEngineer
+  - CellSupervisor
+supported_case_types:
+  - POST_CHANGE_NG_SPIKE
+  - NEW_DEFECT_CLUSTER
+production_site_claimed: false

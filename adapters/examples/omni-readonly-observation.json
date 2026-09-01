@@ -1,0 +1,42 @@
+{
+  "schema_version": "visiondata-gate.adapter-observation.v1",
+  "adapter_id": "visiondata-gate.omni-readonly",
+  "adapter_version": "1.0.0",
+  "invocation_id": "example-omni-readonly-001",
+  "input_snapshot_sha256": "17631d2f9fa51e58d8decdb13e4e9ef91f9d2119e2bba344e51db78f5f455098",
+  "status": "OK",
+  "findings": [
+    {
+      "finding_id": "example-metadata-count-drift-001",
+      "tool": "governance_audit",
+      "code": "METADATA_COUNT_DRIFT",
+      "severity": "high",
+      "summary": "The redacted metadata total and observed file-tree count differ.",
+      "redacted_sample_ids": [],
+      "evidence_span": [
+        "metric:metadata_image_count",
+        "metric:tree_image_count"
+      ],
+      "reason_trace": [
+        "compare frozen metadata count to independent tree scan",
+        "non-zero delta triggers metadata reconciliation",
+        "unresolved drift routes to investigation"
+      ],
+      "source_refs": [
+        "source-profile:sha256:8f6086ae8ce1e3b2a3df234cdcd52357886baace4dbcc5568e6a727982bd83a1",
+        "policy:visiondata-gate.industrial-v1"
+      ],
+      "result_sha256": "de6e9a8fd783c59fab8a06483371de9c84981eaa5694bb4139b11786ab3000a7",
+      "recommended_action": "Run one independent metadata reconciliation and retain human investigation authority."
+    }
+  ],
+  "metrics": {
+    "fixed_image_denominator": 180,
+    "source_profile_image_count": 4464,
+    "actual_model_call_count": 0
+  },
+  "tool_trace_ref": "tool-trace:governance-audit:example-001",
+  "raw_payload_included": false,
+  "error_class": null,
+  "claim_boundary": "This example is a path-redacted contract fixture. Its numbers mirror a bounded local pilot but it is not a redistributable dataset, customer acceptance, factory deployment, or production approval."
+}

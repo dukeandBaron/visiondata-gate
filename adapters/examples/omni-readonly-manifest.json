@@ -1,0 +1,22 @@
+{
+  "schema_version": "visiondata-gate.adapter-manifest.v1",
+  "adapter_id": "visiondata-gate.omni-readonly",
+  "adapter_version": "1.0.0",
+  "entrypoint": "visiondata_gate.omni_adapter:run_omni_readonly_gate",
+  "source_kinds": ["omni_ad_30_release"],
+  "capabilities": [
+    "source_profile",
+    "fixed_denominator_sampling",
+    "image_quality",
+    "duplicate_leakage",
+    "metadata_reconciliation"
+  ],
+  "input_contract_sha256": "17631d2f9fa51e58d8decdb13e4e9ef91f9d2119e2bba344e51db78f5f455098",
+  "output_schema_ref": "schemas/adapter-observation.schema.json",
+  "read_only": true,
+  "raw_bytes_export_allowed": false,
+  "network_access_required": false,
+  "timeout_ms": 300000,
+  "license_spdx": "Apache-2.0",
+  "claim_boundary": "This manifest describes an offline read-only adapter contract. It does not itself prove source authorization, runtime execution, dataset rights, or industrial accuracy."
+}

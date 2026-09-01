@@ -1,0 +1,78 @@
+{
+  "cards": [
+    {
+      "approval_sha256": "c160c09caf7704a9b7ae806cdbd646f5e7497c3b27e1dbe0bf10a3188fbb9d6d",
+      "content": {
+        "advisory_summary": "Historical advice only.",
+        "avoid_first_action": "reuse historical result",
+        "pattern": "fixed coordinate exposure drift",
+        "recommended_first_check": "compare approved normal reference"
+      },
+      "historical_reference_only": true,
+      "machine_action_permitted": false,
+      "may_set_current_case_fact": false,
+      "memory_id": "memory_1a8f7d204ad80e86e2e8",
+      "memory_sha256": "5e66f3e7be51c839e96bca8b9d612482638f4ffe3d86a3a54a931026d412f6e9",
+      "memory_type": "INVESTIGATION_HINT",
+      "memory_version": 1,
+      "policy_judge_input": false,
+      "schema_version": "visiondata-gate.approved-memory-card.v1",
+      "scope": {
+        "camera_id": "CAM-02",
+        "line_id": "LINE-03",
+        "product_family": "metal-part",
+        "site_id": "factory-a-line-01"
+      },
+      "source_case_ids": [
+        "incident_0123456789abcdefabcd"
+      ],
+      "status": "APPROVED",
+      "valid_from": "2026-08-01T00:00:00Z",
+      "valid_until": null
+    }
+  ],
+  "query": {
+    "as_of": "2026-08-10T00:00:00Z",
+    "camera_id": "CAM-02",
+    "current_case_sha256": "5ba08ed11401856dcd20e4dfa1ec7720a184278dc8e2beed50670c2182050237",
+    "limit": 4,
+    "line_id": "LINE-03",
+    "product_family": "metal-part",
+    "site_id": "factory-a-line-01",
+    "terms": [
+      "fixed coordinate",
+      "exposure drift"
+    ]
+  },
+  "receipt": {
+    "candidate_count": 1,
+    "cross_site_memory_selected_count": 0,
+    "current_case_sha256": "5ba08ed11401856dcd20e4dfa1ec7720a184278dc8e2beed50670c2182050237",
+    "historical_memory_used_as_fact_count": 0,
+    "memory_store_sha256": "18b58d3be0c2e38ab477df588eb09bfe2b347076d6a237290a56340f8c3120c2",
+    "query_sha256": "1d6d7b4d090c55ebee13744aaea9d8c7e91ef317e6d9503b5505405d7aaced6c",
+    "receipt_sha256": "371f38cb04ae254b41b33d88b2835c67c68f39b3d2943aaebb9d9b27c29e7e95",
+    "rejected": [],
+    "schema_version": "visiondata-gate.memory-retrieval-receipt.v1",
+    "selected": [
+      {
+        "historical_reference_only": true,
+        "memory_id": "memory_1a8f7d204ad80e86e2e8",
+        "memory_sha256": "5e66f3e7be51c839e96bca8b9d612482638f4ffe3d86a3a54a931026d412f6e9",
+        "rank": 1,
+        "score": 43,
+        "selection_reasons": [
+          "SITE_SCOPE_MATCH",
+          "APPROVED_AND_FRESH",
+          "QUERY_TOKEN_OVERLAP:4"
+        ],
+        "source_case_ids": [
+          "incident_0123456789abcdefabcd"
+        ]
+      }
+    ],
+    "selection_algorithm": "SCOPE_THEN_RELEVANCE_V1",
+    "stale_memory_selected_count": 0
+  },
+  "source_file_sha256": "7d65ddc058bd5090027e61770a7f63094b8c54657b582d5cab039d01f3c0c2e0"
+}

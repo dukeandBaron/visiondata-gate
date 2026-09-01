@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "visiondata-gate"
+version = "0.1.0"
+description = "Auditable industrial-vision data release gate with an AI Expert Council"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "numpy>=2.2,<2.3",
+  "pillow>=11,<13",
+  "pydantic>=2.12,<3",
+  "PyYAML>=6,<7",
+  "rfc8785>=0.1,<0.2",
+  "tzdata>=2026.3,<2027; platform_system == 'Windows'",
+]
+
+[project.optional-dependencies]
+ui = ["streamlit>=1.59,<2", "pandas>=2.3,<2.4"]
+api = [
+  "fastapi>=0.128,<1",
+  "python-multipart>=0.0.20,<1",
+  "uvicorn>=0.40,<1",
+]
+qa = ["httpx>=0.28,<1", "pytest>=9.0.3,<10", "ruff>=0.15,<0.16"]
+desktop = [
+    "pyinstaller>=6.16,<7",
+]
+
+[project.scripts]
+visiondata-gate = "visiondata_gate.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra --strict-markers"
+markers = [
+  "tier_core: deterministic contracts and focused unit tests",
+  "tier_integration: backend service, API, storage, and local protocol integration",
+  "tier_release: packaging, supply-chain, and release-attestation security",
+  "tier_benchmark: reproducible benchmark and evaluation workloads",
+  "tier_ui: Streamlit, React source-contract, website, and reviewer UI checks",
+  "slow: tests intentionally excluded from the sub-90-second quick regression",
+]

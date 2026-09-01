@@ -1,0 +1,53 @@
+{
+  "schema_version": "visiondata-gate.tool-lock.v1",
+  "transport": "local-deterministic",
+  "mcp_migration_target": "mcp-tool.v1",
+  "tools": [
+    {
+      "name": "image_quality",
+      "version": "1.0.0",
+      "permission": "read_batch_emit_finding",
+      "idempotency": "input_manifest_digest",
+      "input_schema": "BatchManifest + BatchContract",
+      "output_schema": "ToolTrace + Finding[] + metrics",
+      "side_effect": "none"
+    },
+    {
+      "name": "duplicate_leakage",
+      "version": "1.0.0",
+      "permission": "read_batch_emit_finding",
+      "idempotency": "input_manifest_digest",
+      "input_schema": "BatchManifest + BatchContract",
+      "output_schema": "ToolTrace + Finding[] + metrics",
+      "side_effect": "none"
+    },
+    {
+      "name": "annotation_integrity",
+      "version": "1.0.0",
+      "permission": "read_batch_emit_finding",
+      "idempotency": "input_manifest_digest",
+      "input_schema": "BatchManifest + BatchContract",
+      "output_schema": "ToolTrace + Finding[] + metrics",
+      "side_effect": "none"
+    },
+    {
+      "name": "coverage_matrix",
+      "version": "1.0.0",
+      "permission": "read_batch_emit_finding",
+      "idempotency": "input_manifest_digest",
+      "input_schema": "BatchManifest + BatchContract",
+      "output_schema": "ToolTrace + Finding[] + metrics",
+      "side_effect": "none"
+    },
+    {
+      "name": "governance_audit",
+      "version": "1.0.0",
+      "permission": "read_contract_emit_finding",
+      "idempotency": "input_contract_digest",
+      "input_schema": "BatchManifest + BatchContract + ScenarioProfile",
+      "output_schema": "ToolTrace + Finding[] + metrics",
+      "side_effect": "none"
+    }
+  ],
+  "boundary": "This lock describes the local adapter and migration shape; it is not a live MCP service receipt."
+}

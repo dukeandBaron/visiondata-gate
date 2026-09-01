@@ -1,0 +1,36 @@
+{
+  "schema_version": "visiondata-gate.legacy-incident-fixture-provenance.v1",
+  "captured_from": "output/goai_rc3_incident_ui_20260826_01/industrial_incidents",
+  "captured_at": "2026-08-27",
+  "fixtures": [
+    {
+      "file": "case_v2_root_real_20260826.json",
+      "case_schema": "visiondata-gate.industrial-incident-case.v2",
+      "case_sha256": "7c781fd1330c837a8dd3d9141a16b89fa1ee0ba2d7a1bd8067d30d4100302b69",
+      "request_schema": "visiondata-gate.industrial-incident-request.v1",
+      "request_sha256": "356849006ee0ecae5dff7519148b079586d16e9376abb1eed6b6345e85008614",
+      "coverage": "legacy root case and human decision source"
+    },
+    {
+      "file": "case_v2_resume_real_20260826.json",
+      "case_schema": "visiondata-gate.industrial-incident-case.v2",
+      "case_sha256": "59db352ec1414d93712987548f7cbbe86b1a322a2324d53b72a98f5d4d0c40cd",
+      "request_schema": "visiondata-gate.industrial-incident-request.v1",
+      "request_sha256": "09031c687bcf7d64a0ba3c5a2de0c322c40969df531eae5fa5c3c98835a797c5",
+      "coverage": "legacy single supersedes_case_id resume shape"
+    },
+    {
+      "file": "case_v3_transition_real_20260826.json",
+      "case_schema": "visiondata-gate.industrial-incident-case.v3",
+      "case_sha256": "1b6803cc9946d9e5fafe684a2b211fd05e037a40ee07925c202a663d63263c5c",
+      "request_schema": "visiondata-gate.industrial-incident-request.v1",
+      "request_sha256": "76b8a3cb6087df8571a38411d2f7828d6b0cf74b37d8a519cae4b6f50ddbc4a4",
+      "coverage": "transition case with v3 lineage and legacy request"
+    }
+  ],
+  "unavailable_real_goldens": [
+    "visiondata-gate.industrial-incident-request.v2",
+    "visiondata-gate.industrial-incident-case.v1"
+  ],
+  "claim_boundary": "Only the listed files are historical persisted artifacts. Any request v2 test is contract-generated and must not be described as a historical Golden."
+}

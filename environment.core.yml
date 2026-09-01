@@ -1,0 +1,8 @@
+name: visiondata-gate-core
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      - -e .[api,qa]

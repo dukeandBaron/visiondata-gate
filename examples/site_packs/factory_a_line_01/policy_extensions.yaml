@@ -1,0 +1,13 @@
+schema_version: visiondata-gate.policy-extensions.v1
+extension_version: 1.0.0
+display_labels:
+  Product: 产品编码
+  Batch: 生产批次
+  WorkOrder: 工单
+  Recipe: 视觉配方
+  InspectionResult: 检测结果
+investigation_hints:
+  - 换型后优先核验视觉配方版本与正常参考图。
+frozen_policy_mutation: false
+equipment_control_enabled: false
+production_release_enabled: false

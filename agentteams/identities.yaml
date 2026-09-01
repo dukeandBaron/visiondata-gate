@@ -1,0 +1,53 @@
+schema_version: agentteams.identity-set.v1
+team_id: team.visiondata-gate
+identities:
+  - agent_id: manager.gate
+    role: manager
+    capabilities: [goal-intake, lifecycle, permission-gate]
+    allowed_tools: []
+    permission_scope: [manifest:read, contract:read, task:write]
+  - agent_id: leader.release-gate
+    role: team_leader
+    capabilities: [task-decomposition, dispatch, context-assembly]
+    allowed_tools: [tool-catalog:read]
+    permission_scope: [task:read, worker:dispatch, context:write]
+  - agent_id: worker.image-quality
+    role: worker
+    capabilities: [typed-tool-execution, evidence-emission]
+    allowed_tools: [image_quality]
+    permission_scope: [batch:read, tool:image_quality, finding:write]
+  - agent_id: worker.duplicate-leakage
+    role: worker
+    capabilities: [typed-tool-execution, evidence-emission]
+    allowed_tools: [duplicate_leakage]
+    permission_scope: [batch:read, tool:duplicate_leakage, finding:write]
+  - agent_id: worker.annotation-integrity
+    role: worker
+    capabilities: [typed-tool-execution, evidence-emission]
+    allowed_tools: [annotation_integrity]
+    permission_scope: [batch:read, tool:annotation_integrity, finding:write]
+  - agent_id: worker.coverage-matrix
+    role: worker
+    capabilities: [typed-tool-execution, evidence-emission]
+    allowed_tools: [coverage_matrix]
+    permission_scope: [batch:read, tool:coverage_matrix, finding:write]
+  - agent_id: reviewer.ai-council
+    role: reviewer
+    capabilities: [evidence-grounded-review, cross-examination]
+    allowed_tools: []
+    permission_scope: [finding:read, trace:read, opinion:write]
+  - agent_id: judge.policy
+    role: judge
+    capabilities: [deterministic-policy, counterfactual-check]
+    allowed_tools: []
+    permission_scope: [finding:read, rule:read, decision:write, work-order:write]
+  - agent_id: operator.repair
+    role: operator
+    capabilities: [reserve-repair, same-contract-recheck]
+    allowed_tools: [reserve_only]
+    permission_scope: [reserve:read-write, batch:original-read, production:blocked]
+  - agent_id: operator.audit-clerk
+    role: operator
+    capabilities: [canonical-serialization, hashing, artifact-audit]
+    allowed_tools: [canonical_writer]
+    permission_scope: [evidence:write, decision:read, production:blocked]

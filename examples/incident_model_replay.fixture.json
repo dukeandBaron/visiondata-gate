@@ -1,0 +1,57 @@
+{
+  "schema_version": "visiondata-gate.incident-model-plan.v1",
+  "decision_authority": "none",
+  "hypotheses_to_discriminate": [
+    "H-PROCESS-DEVIATION",
+    "H-VISION-DRIFT"
+  ],
+  "missing_evidence": [
+    {
+      "evidence_ref": "process-owner-attestation",
+      "reason": "A qualified process-owner attestation can test whether the signal drift is a process event rather than a vision-only event.",
+      "related_hypothesis_ids": [
+        "H-PROCESS-DEVIATION"
+      ]
+    },
+    {
+      "evidence_ref": "vision-solution-manifest",
+      "reason": "The bound manifest can discriminate configuration drift from a true product defect.",
+      "related_hypothesis_ids": [
+        "H-VISION-DRIFT"
+      ]
+    }
+  ],
+  "recommended_workers": [
+    {
+      "worker_role": "ProcessContextAgent",
+      "reason_codes": [
+        "PROCESS_SIGNAL_OUT_OF_RANGE"
+      ],
+      "supporting_receipt_ids": [
+        "opcua-offline-snapshot"
+      ]
+    },
+    {
+      "worker_role": "VisionRecipeAgent",
+      "reason_codes": [
+        "VISION_SOLUTION_MANIFEST_DRIFT"
+      ],
+      "supporting_receipt_ids": [
+        "vision-solution-manifest"
+      ]
+    }
+  ],
+  "supporting_receipt_ids": [
+    "opcua-offline-snapshot",
+    "vision-solution-manifest"
+  ],
+  "counterevidence_questions": [
+    "Which qualified observation would contradict the process-deviation hypothesis?",
+    "Does the same frozen input reproduce the drift under the prior solution manifest?"
+  ],
+  "summary": "Prioritize process-window and vision-lineage checks; preserve both explanations until deterministic evidence closes one.",
+  "root_cause_claimed": false,
+  "capa_approval_claimed": false,
+  "production_release_recommended": false,
+  "equipment_control_requested": false
+}

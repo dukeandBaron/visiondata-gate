@@ -1,0 +1,60 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "VisionData Gate",
+  "version": "0.1.0",
+  "identifier": "io.visiondata.gate",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:5173",
+    "beforeBuildCommand": "npm run build -- --mode desktop",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "VisionData Gate",
+        "width": 1600,
+        "height": 1000,
+        "minWidth": 1180,
+        "minHeight": 720,
+        "center": true,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self' customprotocol: asset:; connect-src 'self' ipc: http://ipc.localhost http://127.0.0.1:*; img-src 'self' asset: http://asset.localhost blob: data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "publisher": "VisionData Gate",
+    "shortDescription": "Auditable industrial-vision data workspace",
+    "longDescription": "A local-first Windows workspace for auditable industrial-vision data inspection, Agent runs and human-gated CAPA workflows.",
+    "resources": {
+      "../../desktop/dist/visiondata-gate-backend": "backend",
+      "../../sample_data": "sample_data",
+      "../../.env.example": "config/.env.example",
+      "../../LICENSE": "legal/LICENSE",
+      "../../NOTICE": "legal/NOTICE"
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper",
+        "silent": true
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "compression": "lzma"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+schema_version: visiondata-gate.connector-profiles.v1
+connectors:
+  image_archive:
+    connector_type: local_directory
+    relative_path: evidence/images
+    read_only: true
+    credentials_included: false
+    live_connection_claimed: false
+  job_export:
+    connector_type: csv_fixture
+    relative_path: evidence/jobs.csv
+    read_only: true
+    credentials_included: false
+    live_connection_claimed: false
+  vision_export:
+    connector_type: visionmaster_offline_export
+    relative_path: evidence/vision_solution.json
+    read_only: true
+    credentials_included: false
+    live_connection_claimed: false

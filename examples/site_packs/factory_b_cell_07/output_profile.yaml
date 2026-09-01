@@ -1,0 +1,12 @@
+schema_version: visiondata-gate.output-profile.v1
+profile_version: 1.0.0
+primary_owner_role: QualityLead
+escalation_owner_roles:
+  - AutomationEngineer
+  - CellSupervisor
+enabled_formats:
+  - json
+  - html
+  - csv
+  - zip
+show_receipt_details_by_default: false

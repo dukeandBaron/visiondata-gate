@@ -1,0 +1,14 @@
+schema_version: visiondata-gate.site-manifest.v1
+site_id: factory-a-line-01
+pack_version: 1.0.0
+site_name: Factory A / Line 01 Fixture
+timezone: Asia/Shanghai
+quality_owner_roles:
+  - QualityManager
+  - VisionEngineer
+  - ProcessEngineer
+supported_case_types:
+  - POST_CHANGE_NG_SPIKE
+  - NEW_DEFECT_CLUSTER
+  - RECIPE_DRIFT_SUSPECTED
+production_site_claimed: false

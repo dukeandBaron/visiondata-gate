@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://visiondata-gate.local/schemas/adapter-observation.schema.json",
+  "title": "VisionData Gate Adapter Observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "adapter_id", "adapter_version", "invocation_id",
+    "input_snapshot_sha256", "status", "findings", "metrics",
+    "tool_trace_ref", "raw_payload_included", "error_class", "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "visiondata-gate.adapter-observation.v1"},
+    "adapter_id": {"type": "string", "minLength": 1},
+    "adapter_version": {"type": "string", "minLength": 1},
+    "invocation_id": {"type": "string", "minLength": 1},
+    "input_snapshot_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "status": {"enum": ["OK", "DEFER", "ERROR"]},
+    "findings": {"type": "array", "items": {"$ref": "evidence-finding.schema.json"}},
+    "metrics": {"type": "object", "additionalProperties": {"type": ["integer", "number", "string", "boolean"]}},
+    "tool_trace_ref": {"type": "string", "minLength": 1},
+    "raw_payload_included": {"const": false},
+    "error_class": {"type": ["string", "null"]},
+    "claim_boundary": {"type": "string", "minLength": 20}
+  }
+}

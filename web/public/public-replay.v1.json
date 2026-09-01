@@ -1,0 +1,134 @@
+{
+  "schema_version": "visiondata-gate.public-replay.v1",
+  "source_mode": "PUBLIC_SYNTHETIC_REPLAY",
+  "release_status": {
+    "local_candidate": "PASS_LOCAL_RC3_RELEASE_CANDIDATE",
+    "official_submission": "PENDING",
+    "official_evaluation": "NOT_EVALUATED",
+    "production_release_allowed": false
+  },
+  "evidence_boundary": {
+    "baseline_tag": "v0.1.0-goai-rc3-r3",
+    "baseline_claim": "PASS_LOCAL_RC3_RELEASE_CANDIDATE",
+    "release_artifacts_included": false,
+    "public_snapshot_attestation": "NOT_ISSUED"
+  },
+  "case": {
+    "case_id": "public-synthetic-conflict-01",
+    "title": "换型后视觉数据冲突 · 合成复验",
+    "dataset": "Synthetic-v3 public fixture",
+    "input_scope": "12 injected truth issues",
+    "initial_disposition": "RECAPTURE",
+    "child_disposition": "PASS_LOCAL_SYNTHETIC_ONLY",
+    "human_authority_required": true
+  },
+  "triggering_evidence": [
+    {
+      "id": "ev-sharpness",
+      "signal": "LOW_SHARPNESS",
+      "measurement": "1.8585",
+      "threshold": ">= 18",
+      "effect": "select image_quality worker"
+    },
+    {
+      "id": "ev-leakage",
+      "signal": "CROSS_SPLIT_DUPLICATE",
+      "measurement": "dHash distance 0",
+      "threshold": "> 0",
+      "effect": "select duplicate_leakage worker"
+    },
+    {
+      "id": "ev-geometry",
+      "signal": "ANNOTATION_OFFSET",
+      "measurement": "15 px",
+      "threshold": "<= 2 px",
+      "effect": "select annotation_geometry worker"
+    }
+  ],
+  "worker_selection": {
+    "budget": {
+      "selected": 3,
+      "maximum": 5,
+      "model_call_count": 0
+    },
+    "selected": [
+      {
+        "worker": "image_quality",
+        "reason": "sharpness evidence crossed the frozen threshold",
+        "triggering_evidence_id": "ev-sharpness"
+      },
+      {
+        "worker": "duplicate_leakage",
+        "reason": "cross-split identity conflict requires deterministic reconciliation",
+        "triggering_evidence_id": "ev-leakage"
+      },
+      {
+        "worker": "annotation_geometry",
+        "reason": "bounding-box displacement exceeded the frozen tolerance",
+        "triggering_evidence_id": "ev-geometry"
+      }
+    ],
+    "rejected": [
+      {
+        "worker": "metadata_reconciliation",
+        "reason": "no metadata count drift in this frozen fixture"
+      },
+      {
+        "worker": "external_model_advisor",
+        "reason": "not required; deterministic evidence is sufficient"
+      }
+    ]
+  },
+  "competing_hypotheses": [
+    {
+      "id": "H1",
+      "statement": "capture quality drift",
+      "state": "SUPPORTED_BY_SYNTHETIC_EVIDENCE"
+    },
+    {
+      "id": "H2",
+      "statement": "cross-split data leakage",
+      "state": "SUPPORTED_BY_SYNTHETIC_EVIDENCE"
+    },
+    {
+      "id": "H3",
+      "statement": "annotation geometry drift",
+      "state": "SUPPORTED_BY_SYNTHETIC_EVIDENCE"
+    },
+    {
+      "id": "H4",
+      "statement": "production process root cause",
+      "state": "NOT_ESTABLISHED"
+    }
+  ],
+  "missing_evidence": [
+    "factory shadow-test truth labels",
+    "customer acceptance receipt",
+    "production IAM binding",
+    "equipment write authorization"
+  ],
+  "phases": [
+    {"id": "intake", "label": "Intake", "state": "VERIFIED"},
+    {"id": "planner", "label": "Planner", "state": "BUDGET_BOUND"},
+    {"id": "tool", "label": "Tool", "state": "DETERMINISTIC"},
+    {"id": "council", "label": "Council", "state": "EVIDENCE_RECONCILED"},
+    {"id": "judge", "label": "Judge", "state": "FAIL_CLOSED_THEN_RECHECKED"},
+    {"id": "delivery", "label": "Delivery", "state": "TRACEABLE"}
+  ],
+  "lineage": [
+    {"id": "parent", "label": "Parent synthetic case", "state": "RECAPTURE"},
+    {"id": "human", "label": "Authorized human CAPA gate", "state": "REQUIRED"},
+    {"id": "derived", "label": "Private derived fixture", "state": "ISOLATED"},
+    {"id": "child", "label": "Child same-contract run", "state": "PASS_LOCAL_SYNTHETIC_ONLY"},
+    {"id": "outcome", "label": "Governed outcome", "state": "NO_PRODUCTION_RELEASE"}
+  ],
+  "demo_controls": {
+    "read_only": true,
+    "backend_connected": false,
+    "api_key_input_enabled": false,
+    "customer_data_included": false,
+    "personal_data_included": false,
+    "raw_industrial_images_included": false
+  },
+  "manifest_sha256": "44afc906eeb83f2c49f8062bb211ba283d135d766be759609ba75fcef17512c2"
+}

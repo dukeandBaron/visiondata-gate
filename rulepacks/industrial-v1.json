@@ -1,0 +1,110 @@
+{
+  "schema_version": "visiondata-gate.rulepack.v1",
+  "pack_id": "visiondata-gate.industrial-v1",
+  "version": "1.0.0",
+  "domain": "industrial_visual_data_release",
+  "intended_use": "sandbox_experiment_training_pool",
+  "required_tools": [
+    "image_quality",
+    "duplicate_leakage",
+    "annotation_integrity",
+    "coverage_matrix",
+    "governance_audit"
+  ],
+  "thresholds": {
+    "expected_width": 128,
+    "expected_height": 128,
+    "min_mean_luma": 35.0,
+    "max_mean_luma": 225.0,
+    "min_sharpness": 18.0,
+    "min_mask_fraction": 0.002,
+    "max_mask_fraction": 0.65,
+    "near_duplicate_hamming": 4,
+    "min_coverage_per_cell": 1
+  },
+  "dynamic_trigger_rules": [
+    {
+      "trigger_id": "metadata-count-drift",
+      "observed_condition": "metadata_count_delta != 0",
+      "worker_capability": "industrial-metadata-reconciliation",
+      "max_cost_units": 1,
+      "on_unavailable": "INVESTIGATE"
+    },
+    {
+      "trigger_id": "native-resolution-groups",
+      "observed_condition": "native_resolution_group_count > 1",
+      "worker_capability": "native-resolution-quality-reconciliation",
+      "max_cost_units": 1,
+      "on_unavailable": "DEFER"
+    },
+    {
+      "trigger_id": "cross-tool-action-conflict",
+      "observed_condition": "conflicting_action_sample_count > 0",
+      "worker_capability": "industrial-remediation-conflict-adjudication",
+      "max_cost_units": 1,
+      "on_unavailable": "INVESTIGATE"
+    }
+  ],
+  "decision_precedence": [
+    "INVESTIGATE",
+    "RECAPTURE",
+    "DEFER",
+    "RELEASE"
+  ],
+  "rules": [
+    {
+      "rule_id": "IQ.CAPTURE_QUALITY",
+      "finding_codes": ["LOW_SHARPNESS", "UNDEREXPOSED", "OVEREXPOSED", "INVALID_IMAGE_SIZE"],
+      "severity": "high",
+      "action": "RECAPTURE",
+      "human_gate_required": true,
+      "evidence_requirements": ["redacted sample id", "measurement", "threshold", "tool trace sha256"],
+      "acceptance_criteria": ["replacement sample passes the same frozen quality contract", "child Run binds a new input snapshot sha256"],
+      "safety_boundary": "Authorized backfill is not represented as physical recapture."
+    },
+    {
+      "rule_id": "DG.DUPLICATE_LEAKAGE",
+      "finding_codes": ["EXACT_DUPLICATE", "CROSS_SPLIT_EXACT_DUPLICATE", "CROSS_SPLIT_NEAR_DUPLICATE"],
+      "severity": "high",
+      "action": "REMOVE_OR_REPARTITION",
+      "human_gate_required": true,
+      "evidence_requirements": ["redacted pair ids", "split relation", "distance or content digest", "tool trace sha256"],
+      "acceptance_criteria": ["same-contract duplicate check passes", "derived manifest and rollback point are hash-bound"],
+      "safety_boundary": "Only a private derived version may change membership or split assignment."
+    },
+    {
+      "rule_id": "AN.ANNOTATION_INTEGRITY",
+      "finding_codes": ["MISSING_ANNOTATION", "MASK_OUT_OF_RANGE", "MASK_IMAGE_SIZE_MISMATCH"],
+      "severity": "high",
+      "action": "RELABEL",
+      "human_gate_required": true,
+      "evidence_requirements": ["redacted sample id", "annotation version sha256", "integrity measurement"],
+      "acceptance_criteria": ["revision import matches the exported contract", "child Run independently rechecks the revision"],
+      "safety_boundary": "The Agent proposes and verifies; the responsible annotator owns the correction."
+    },
+    {
+      "rule_id": "CV.COVERAGE_GAP",
+      "finding_codes": ["COVERAGE_GAP", "UNKNOWN_COVERAGE_VALUE"],
+      "severity": "high",
+      "action": "RECAPTURE",
+      "human_gate_required": true,
+      "evidence_requirements": ["coverage cell", "observed count", "required count", "contract sha256"],
+      "acceptance_criteria": ["all required cells meet the frozen minimum", "new samples remain within authorization and provenance scope"],
+      "safety_boundary": "Coverage cannot be repaired by silently relabelling unknown values."
+    },
+    {
+      "rule_id": "GV.EVIDENCE_CONFLICT",
+      "finding_codes": ["METADATA_COUNT_DRIFT", "CROSS_TOOL_ACTION_CONFLICT", "NATIVE_RESOLUTION_EVIDENCE_INCOMPLETE", "FOLLOWUP_TOOL_ERROR", "FOLLOWUP_BUDGET_EXHAUSTED"],
+      "severity": "critical",
+      "action": "INVESTIGATE",
+      "human_gate_required": true,
+      "evidence_requirements": ["conflicting source refs", "reason trace", "independent follow-up receipt", "unresolved contradiction"],
+      "acceptance_criteria": ["root cause and counter-evidence are recorded", "a responsible human authorizes any subsequent data change"],
+      "safety_boundary": "Missing, failed, or contradictory evidence must never degrade to RELEASE."
+    }
+  ],
+  "production_release_allowed_by_default": false,
+  "raw_redistribution_allowed": false,
+  "final_authority": "responsible_human",
+  "claim_boundary": "This reusable pack provides competition-stage default thresholds and fail-closed control semantics. A factory owner must review and calibrate it for each device, process, product, and safety regime before operational use."
+}

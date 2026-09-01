@@ -1,0 +1,20 @@
+schema_version: visiondata-gate.connector-profiles.v1
+connectors:
+  image_source:
+    connector_type: local_directory
+    relative_path: data/images
+    read_only: true
+    credentials_included: false
+    live_connection_claimed: false
+  production_context:
+    connector_type: json_fixture
+    relative_path: data/production_context.json
+    read_only: true
+    credentials_included: false
+    live_connection_claimed: false
+  opc_snapshot:
+    connector_type: offline_export
+    relative_path: data/opc_snapshot.json
+    read_only: true
+    credentials_included: false
+    live_connection_claimed: false

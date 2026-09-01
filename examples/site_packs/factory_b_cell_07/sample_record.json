@@ -1,0 +1,8 @@
+{
+  "sku": "polymer-housing-b",
+  "batch_ref": "BATCH-B-7781",
+  "order_no": "JOB-B-902",
+  "recipe_key": "CELL07-RCP-12",
+  "verdict": "ng",
+  "station_alias": "CELL-07-CAMERA"
+}

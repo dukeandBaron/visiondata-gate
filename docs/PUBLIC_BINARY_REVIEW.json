@@ -1,0 +1,40 @@
+{
+  "schema_version": "visiondata-gate.public-binary-review.v1",
+  "review_basis": "VISUAL_PIXEL_AND_METADATA_INSPECTION",
+  "reviewed_on": "2026-08-31",
+  "reviewer_identity_included": false,
+  "reviewed_file_count": 23,
+  "prohibited_content_checks": [
+    "PERSONAL_IDENTITY",
+    "CREDENTIAL_OR_SECRET",
+    "PRIVATE_LOCAL_PATH",
+    "CUSTOMER_OR_FACTORY_DATA",
+    "NON_SYNTHETIC_INDUSTRIAL_IMAGE"
+  ],
+  "files": [
+    {"path":"docs/assets/web-command-center.png","sha256":"8e7103711ecfc49c3886bfa0b037a765fa7706bdcce76dd698846fba843b58f3","size_bytes":351111,"category":"SYNTHETIC_WORKBENCH_SCREENSHOT","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"sample_data/clear/clean-test-bearing.png","sha256":"34d9e5d59af2238b528c26a67ccd27e88d0de46222099202645afb358538a4cc","size_bytes":25330,"category":"SYNTHETIC_GENERATED_SAMPLE","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"sample_data/clear/clean-val-bearing.png","sha256":"5745e41907a81a93f4be94357b0daf109c87522a927f5cfc9660fc5c5f4d2858","size_bytes":24825,"category":"SYNTHETIC_GENERATED_SAMPLE","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"sample_data/clear/clean-val-gear.png","sha256":"ed1a1ac2edbf099a8394ba35efcce25950346b71846482796495b295c3f46247","size_bytes":26347,"category":"SYNTHETIC_GENERATED_SAMPLE","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"sample_data/quality_anomalies/q-blur.png","sha256":"c7478a1f257e78d77fb7c7fec1d9d1a329aa8415ded8897e0c8561973c5cee5a","size_bytes":8616,"category":"SYNTHETIC_GENERATED_SAMPLE","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"sample_data/quality_anomalies/q-overexposed.png","sha256":"e0e609016cd445f2dad69e02b156fdfc0b2be974a6a796a5046f44c8f1cadc1b","size_bytes":17794,"category":"SYNTHETIC_GENERATED_SAMPLE","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"sample_data/quality_anomalies/q-underexposed.png","sha256":"06f3b7e228738f6fe086fca5092826079f46d69a5fdb64d28ac755b064d3fcb7","size_bytes":15287,"category":"SYNTHETIC_GENERATED_SAMPLE","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/128x128.png","sha256":"c819bc9d559c351e863946b43be76bcbcad12476dade3a8c0597451454dd1b92","size_bytes":3588,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/128x128@2x.png","sha256":"f86534dc7b709bfa47e1bc41c55673ad600cfec98c4d4a4b353975c1ae409274","size_bytes":6700,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/32x32.png","sha256":"23397df336a650da93f4b2099096891264dd217e15a4d76a38c7924583017adb","size_bytes":1063,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/64x64.png","sha256":"1d898fa2f93b29cd49f151fd302e535c18b84f04b17b478a7829a4e88f217a8a","size_bytes":2000,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/Square107x107Logo.png","sha256":"3db582dd7217e8a92b73430934cc04c9a2ac24d4741baf4bba879bf9285b56cf","size_bytes":3091,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/Square142x142Logo.png","sha256":"00bc0d29e581713ee56feb02b4bfdb1695cc97384d33e555e66e9b4f980f8c0c","size_bytes":3865,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/Square150x150Logo.png","sha256":"2700345feea7eeb357e4c19109a92b0bc70912a69e8abad05bdff4fffb5804c7","size_bytes":4172,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/Square284x284Logo.png","sha256":"ca6d2f370b244fc6b4a2f971115f7d174ced47d3416e59a46eece0607b451652","size_bytes":7364,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/Square30x30Logo.png","sha256":"3f5170a84294f96eef3976f7455486a3838eedfdfa97f6a22460d433934c5f8e","size_bytes":983,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/Square310x310Logo.png","sha256":"55ceb9b519f605418ad3ade9445eb4cb09d77716ff4cca69d160e8e020d92048","size_bytes":7879,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/Square44x44Logo.png","sha256":"55ed15661c554cc638357a4533b1ed826efd417e5d76c3cb56bc2a73442bc544","size_bytes":1418,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/Square71x71Logo.png","sha256":"e23ec0f681782bbfd5d37cf21e5bea72b2a4d39cdf2fb61ca86df68d9853aeb2","size_bytes":2144,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/Square89x89Logo.png","sha256":"447947cca8a6cf561f5b925dd1de44c907cd6b1d7bedf1494b389afabc107a3f","size_bytes":2588,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/StoreLogo.png","sha256":"d5f18efc431a3b46eeed4bf2b045f88490f71358b18105f8f45fad24cd25b6b7","size_bytes":1537,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/icon.ico","sha256":"0406af7414ef4343a1133aa32d8db1ec9985f0d09192302aeed0026b57c62858","size_bytes":15412,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"web/src-tauri/icons/icon.png","sha256":"c0681a5548db6920925dd6852ec383aa0e82c2a4891f6e1f611125a6b1f9d908","size_bytes":13433,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"}
+  ],
+  "manifest_sha256": "8942200c94236d912ddf924b48479c1312451b7e79d08b758658febd1ca33a72"
+}

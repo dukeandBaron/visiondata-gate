@@ -1,0 +1,22 @@
+schema_version: visiondata-gate.source-mapping.v1
+canonical_entities:
+  Product:
+    source_field: sku
+    aliases:
+      - material_no
+    required: true
+    transform: upper_string
+  Batch:
+    source_field: batch_ref
+    required: true
+  WorkOrder:
+    source_field: order_no
+    required: true
+  Recipe:
+    source_field: recipe_key
+    required: true
+  InspectionResult:
+    source_field: verdict
+    required: true
+    transform: upper_string
+unmapped_fields_policy: IGNORE_AND_REPORT

@@ -1,0 +1,13 @@
+schema_version: visiondata-gate.policy-extensions.v1
+extension_version: 1.0.0
+display_labels:
+  Product: SKU
+  Batch: Batch Reference
+  WorkOrder: Job Order
+  Recipe: Recipe Key
+  InspectionResult: Verdict
+investigation_hints:
+  - 新缺陷簇出现时先核验工件与检测结果的唯一关联。
+frozen_policy_mutation: false
+equipment_control_enabled: false
+production_release_enabled: false
