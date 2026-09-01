@@ -61,6 +61,9 @@ def test_public_export_requires_a_clean_source_worktree(monkeypatch) -> None:
 def test_public_export_is_allowlist_based_and_excludes_private_delivery_surfaces() -> (
     None
 ):
+    assert _selected("CONTRIBUTING.md")
+    assert _selected("SECURITY.md")
+    assert _selected("CODE_OF_CONDUCT.md")
     assert _selected("src/visiondata_gate/api.py")
     assert _selected("web/public/public-replay.v1.json")
     assert _selected("sample_data/clear/clean-val-gear.png")

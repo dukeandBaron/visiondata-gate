@@ -1,8 +1,8 @@
 # 开放复用合同｜Rule Pack、Evidence Schema 与 Adapter SDK
 
-状态：`LOCAL_CONTRACT_ONLY / REPOSITORY_PRIVATE_UNTIL_RELEASE_GATE`
+状态：`PUBLIC_SOURCE_AVAILABLE / EXTERNAL_CLEAN_CLONE_REPRO_PENDING`
 
-项目当前保持 Private，但开放复用能力已经在源码层实现。仓库重新公开前，不能把“代码存在”写成“外部评委已复现”。
+项目采用“私有权威仓 + 隐私安全公共镜像”。公共镜像已经提供可复用源码、锁文件、Schema、Rule Pack、Skills、Adapter、示例和文档；在取得第三方 clean-clone 回执前，仍不能把“代码公开”写成“外部评委已复现”。
 
 ## 1. 可复用资产
 
@@ -70,4 +70,4 @@ uv run --frozen pytest -q tests\test_industrial_skills.py
 - 当前 Registry 是显式调用扩展点；只有内置 Metadata Skill 存在固定 Worker 集成，
   不声称任意第三方 Skill 会被 Dynamic Leader 自动发现或安全调度。
 - 原始数据、密钥、绝对路径、模型权重和私有运行数据库不进入示例或开源包。
-- 2026-09-02 发布门禁前仓库保持 Private；公开后仍需 clean-extract 和第三方复验，才能把开放贡献状态从“已实现”升级为“外部可复验”。
+- 公共镜像必须通过完整历史隐私扫描、Pages 构建扫描和 source commit/tree 绑定；仍需独立 clean-clone 与第三方复验，才能把开放贡献状态从“已公开”升级为“外部已复现”。

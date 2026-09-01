@@ -56,3 +56,5 @@ python ..\tools\check_public_pages.py --dist dist
 - `tests/`：合同、失败关闭、安全边界和回放测试。
 
 Apache-2.0。合并 CycloneDX 同时绑定 `uv.lock`、`web/package-lock.json` 与 `web/src-tauri/Cargo.lock`；Rust 部分明确限定为 Windows `x86_64-pc-windows-msvc` 目标可达依赖，并使用不含作者或本机路径的许可证快照。详见 [SBOM](docs/SBOM.cdx.json)、[Cargo 许可证快照](docs/CARGO_LICENSES.locked.json)、[第三方许可证清单](docs/THIRD_PARTY_LICENSE_INVENTORY.generated.md) 和 [Notices](docs/THIRD_PARTY_NOTICES.md)。
+
+参与开发前请阅读 [贡献指南](CONTRIBUTING.md)、[安全策略](SECURITY.md) 与 [社区行为准则](CODE_OF_CONDUCT.md)。请勿在 Issue 或 PR 中上传真实工厂数据、密钥、个人信息或私有运行回执。

@@ -6,9 +6,9 @@
 
 VisionData Gate 是 GOAI 赛道二“无界应用 Boundless Agents”中 AI+工业制造方向的应用作品。目标用户是工业视觉算法工程师、质量负责人和数据治理团队；核心任务是把换型后的图像、标注、metadata、工单、工艺与视觉方案组织成版本化异常案件，并把证据资格化、动态调查、人工决定、私有派生整改、Child Run 复验和交付串成闭环。
 
-- 评委网站与仓库：当前保持 Private；2026-09-02 发布门禁通过后再开源，不把历史 URL 当作当前可访问性证据
+- 评委网站与仓库：采用“私有权威仓 + 隐私安全公共镜像”双仓边界；公共镜像只提供 `PUBLIC_SYNTHETIC_REPLAY`，是否为当前版本以 `PUBLIC_MIRROR_MANIFEST.json`、GitHub Actions 与 Pages 部署 SHA 为准
 - 官方手册规则锚点：[`GOAI_BOUNDLESS_AGENTS_HANDBOOK_20260825.md`](GOAI_BOUNDLESS_AGENTS_HANDBOOK_20260825.md)
-- 初赛历史 RC2 标识：`v0.1.0-goai-rc2`（当前仓库 Private，不把历史 URL 可访问性写成现时事实）
+- 初赛历史 RC2 标识：`v0.1.0-goai-rc2`（历史标签不代表当前 RC3 公共镜像或参赛包）
 - 复赛 RC3：`PASS_LOCAL_RC3_RELEASE_CANDIDATE / OFFICIAL_PENDING`
 - 冻结实验与证据命名空间：`vdg-20260816-rc1`（RC2 不改实验结论）
 - 附件摘要：[`../release/SHA256SUMS.txt`](../release/SHA256SUMS.txt)
@@ -55,7 +55,7 @@ VisionData Gate 是 GOAI 赛道二“无界应用 Boundless Agents”中 AI+工�
 
 ## 4. 核对声明没有越界
 
-先读 [`CLAIM_SCOPE.md`](CLAIM_SCOPE.md)、[`DATA_SOURCE_AND_COMPLIANCE_SEMIFINAL_RC3.md`](DATA_SOURCE_AND_COMPLIANCE_SEMIFINAL_RC3.md)，再看 [`REVIEWER_READINESS_MATRIX.md`](REVIEWER_READINESS_MATRIX.md)。当前可确认的是本地工程闭环、授权 Omni 数据源产品运行、固定 180 Gate、真实私有派生版本与 child Run、运行时加固固定集和本机后端协议夹具；仓库与网站仍为 Private，不能据此升级为公开 Demo、客户验收、工厂部署、生产 IAM、真实外部模型已连接、4,464 全量 Omni Gate 或 hosted AgentTeams 已连接。
+先读 [`CLAIM_SCOPE.md`](CLAIM_SCOPE.md)、[`DATA_SOURCE_AND_COMPLIANCE_SEMIFINAL_RC3.md`](DATA_SOURCE_AND_COMPLIANCE_SEMIFINAL_RC3.md)，再看 [`REVIEWER_READINESS_MATRIX.md`](REVIEWER_READINESS_MATRIX.md)。当前可确认的是本地工程闭环、授权 Omni 数据源产品运行、固定 180 Gate、真实私有派生版本与 child Run、运行时加固固定集、本机后端协议夹具，以及隐私安全的公开合成回放；公开镜像不连接私域后端，不能据此升级为客户验收、工厂部署、生产 IAM、真实外部模型已连接、4,464 全量 Omni Gate 或 hosted AgentTeams 已连接。
 
 AgentTeams 当前状态：静态契约 `PASS`、runtime transport `OPEN`、connection status `mapped_not_connected`。
 

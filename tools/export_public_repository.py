@@ -26,8 +26,11 @@ PUBLIC_EXACT_FILES = {
     ".env.example",
     ".gitattributes",
     ".gitignore",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
     "LICENSE",
     "NOTICE",
+    "SECURITY.md",
     "app.py",
     "build_windows_installer.ps1",
     "environment.core.yml",
@@ -281,7 +284,10 @@ def _assemble_snapshot(
         raise PublicExportError("public allowlist selected no tracked files")
     required = {
         PUBLIC_PAGES_TEMPLATE,
+        "CODE_OF_CONDUCT.md",
+        "CONTRIBUTING.md",
         "LICENSE",
+        "SECURITY.md",
         "docs/PUBLICATION_BOUNDARY.md",
         "docs/CARGO_LICENSES.locked.json",
         "docs/PUBLIC_BINARY_REVIEW.json",

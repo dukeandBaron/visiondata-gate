@@ -1,15 +1,15 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "3d276a1863c1937b7a3b5e47de4248e41c5e561f",
-  "source_tree_oid": "ef8636700c3df9e3cf3ca99c7083143392ca7f01",
+  "source_commit_oid": "c5fd68fc38025ffab4345cd739e611c96b13c530",
+  "source_tree_oid": "5501787b6ed452759af16e60dca76ce0c2ec54bf",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
   "customer_data_included": false,
   "personal_data_included": false,
   "tracked_source_only": true,
-  "file_count": 458,
-  "snapshot_sha256": "b5a00eafc34ad065241fa00c2b5cb3321d834bae3ecc30d308678bd28220f3f0",
+  "file_count": 463,
+  "snapshot_sha256": "ce0d55ca6d0bc09129ec5e7101b7c86165e7b83e2e8cdf461b61368723c22b5e",
   "files": [
     {
       "path": ".env.example",
@@ -33,6 +33,16 @@
       "size_bytes": 2188
     },
     {
+      "path": "CODE_OF_CONDUCT.md",
+      "sha256": "6cbb1b9994858850db33c009cadfb10a3807665178390ba33025cf560b7e29d8",
+      "size_bytes": 834
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "sha256": "dc4f619d9c4c0375f340fe6c750ef61b119b07e04eaf51b8544bd2dd41986dd8",
+      "size_bytes": 1221
+    },
+    {
       "path": "LICENSE",
       "sha256": "6a32034870a7e03e0ef8a286db9aa568bd81a42cda473335815652f999eac0a1",
       "size_bytes": 11358
@@ -44,9 +54,14 @@
     },
     {
       "path": "README.md",
-      "sha256": "da6151fe036e2bdcd126f54a5b2d342979dd6710148ce703a875356d5f12d79f",
-      "size_bytes": 3162,
+      "sha256": "1214e7c81dae4ef119f2c8a0ad919d2d62147b7e5048daacde4c1931d3da9d79",
+      "size_bytes": 3396,
       "source": "docs/PUBLIC_REPOSITORY_README.md"
+    },
+    {
+      "path": "SECURITY.md",
+      "sha256": "eab19343b391ba56524567b7fa205277af59b10fc41317a1fea95f8f4064d60c",
+      "size_bytes": 1254
     },
     {
       "path": "adapters/examples/omni-readonly-manifest.json",
@@ -100,8 +115,8 @@
     },
     {
       "path": "docs/00_OVERVIEW.md",
-      "sha256": "b330e4658a4c7d96e4d4f310d09b38cfd13d79ba56f0dbfa26ea7658749b8d43",
-      "size_bytes": 6390
+      "sha256": "72b26b8434177133b9fd24368cf7fc11199268d130702610ffc10540654ccc0a",
+      "size_bytes": 6512
     },
     {
       "path": "docs/AGENT_RUNTIME.md",
@@ -125,8 +140,8 @@
     },
     {
       "path": "docs/CLAIM_SCOPE.md",
-      "sha256": "1bdc82002df3f26ddac42b185387fc88c5ba077c61af7bb8d8cbe9e2ee9f354e",
-      "size_bytes": 11100
+      "sha256": "f9580b5eb787cb283480632785ec7f250ed2861b4326df2311d8ab596abf9808",
+      "size_bytes": 11143
     },
     {
       "path": "docs/DATA_SOURCE_AND_COMPLIANCE_SEMIFINAL_RC3.md",
@@ -155,8 +170,8 @@
     },
     {
       "path": "docs/GOAI_COMPETITION_EVALUATION.md",
-      "sha256": "500ac596e40808a2912cd15e8ba5a6d543c5e0181de5e1244eaef2c9fca1324b",
-      "size_bytes": 2770
+      "sha256": "192cacb3b97f4e3827e0062099bef443644767fa90dbe0bb67f1b7b4c986bb86",
+      "size_bytes": 2823
     },
     {
       "path": "docs/GOAI_SEMIFINAL_OFFICIAL_FEEDBACK_CLOSURE_20260831.md",
@@ -205,8 +220,8 @@
     },
     {
       "path": "docs/OPEN_REUSE_CONTRACTS.md",
-      "sha256": "1b6b02283da17d197239b0914ee7d991fe2b08f749e7d915166088c82eb5d2ab",
-      "size_bytes": 4382
+      "sha256": "21ffb4ac3335490bcb8c2ae51804c6efc9b04f27e0891e1a486da06f991d8456",
+      "size_bytes": 4550
     },
     {
       "path": "docs/PRODUCT_KERNEL_CLI.md",
@@ -215,8 +230,8 @@
     },
     {
       "path": "docs/PROJECT_STATUS.md",
-      "sha256": "e9207062441ef03a09ba215a6b213cd72c07c07e65bb079b82c434236a789770",
-      "size_bytes": 5641
+      "sha256": "e3ae178f8c4828455c2094f29b82a689655748cb6d8ea0f473602991c5fc8603",
+      "size_bytes": 6090
     },
     {
       "path": "docs/PUBLICATION_BOUNDARY.md",
@@ -230,8 +245,8 @@
     },
     {
       "path": "docs/PUBLIC_REPOSITORY_README.md",
-      "sha256": "da6151fe036e2bdcd126f54a5b2d342979dd6710148ce703a875356d5f12d79f",
-      "size_bytes": 3162
+      "sha256": "1214e7c81dae4ef119f2c8a0ad919d2d62147b7e5048daacde4c1931d3da9d79",
+      "size_bytes": 3396
     },
     {
       "path": "docs/RC3_DELIVERY_CONTRACT.md",
@@ -1440,8 +1455,8 @@
     },
     {
       "path": "tests/test_public_repository_tools.py",
-      "sha256": "4e38ffce7b59c0c354e92ccdb61c07137067ee73202273ade5c8e1b95e7f4c0f",
-      "size_bytes": 41527
+      "sha256": "4517a076ab2d10e71e3da70c77bea3039a5cbe98e4a5fd2d3dd30c8a6942b6be",
+      "size_bytes": 41646
     },
     {
       "path": "tests/test_public_runtime_benchmark.py",
@@ -1537,6 +1552,11 @@
       "path": "tests/test_submission_release.py",
       "sha256": "0e6aaada48565e3bde7ca9c7d88902d01484967833ec8bde6aa4bdbc3635674b",
       "size_bytes": 6999
+    },
+    {
+      "path": "tests/test_submission_upload_bundle.py",
+      "sha256": "4a3d5f19926c332d9d7221ce7017fd6a07c0ddfc073dadfb8848727684d4a8f4",
+      "size_bytes": 19451
     },
     {
       "path": "tests/test_supply_chain_artifacts.py",
@@ -1639,6 +1659,11 @@
       "size_bytes": 3962
     },
     {
+      "path": "tools/build_submission_upload_bundle.py",
+      "sha256": "13543f286dc9456704e7a6ca75aacccfcd860822b4b22eb11ed9ef4853d3bab5",
+      "size_bytes": 31238
+    },
+    {
       "path": "tools/check_public_pages.py",
       "sha256": "789dff7f7bb29f7d3b14e13b03b33eecd5ce4691548dbd59b9e592e05cc25bdd",
       "size_bytes": 14610
@@ -1670,8 +1695,8 @@
     },
     {
       "path": "tools/export_public_repository.py",
-      "sha256": "86debf8e96d9cf479a78990ffe0f4d2cd4479847d55044da860cc132fb6754e5",
-      "size_bytes": 12743
+      "sha256": "044b8df861dd820c15b890f48834b239afd5ed55ed8143f66de6ca30f00a8aa8",
+      "size_bytes": 12891
     },
     {
       "path": "tools/generate_cargo_license_snapshot.py",
