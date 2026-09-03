@@ -63,6 +63,7 @@ deliverables/_qa/*
 !schemas/*.json
 !rulepacks/*.json
 !10_reports/*.json
+!benchmarks/*.json
 !docs/CARGO_LICENSES.locked.json
 !docs/PUBLIC_BINARY_REVIEW.json
 !docs/SBOM.cdx.json

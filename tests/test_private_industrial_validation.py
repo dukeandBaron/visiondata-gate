@@ -318,11 +318,11 @@ def test_scoped_api_returns_503_when_private_session_is_not_configured(
         service.close(wait=True)
 
 
-def test_projection_json_does_not_disclose_host_paths_or_user_name() -> None:
+def test_projection_json_does_not_disclose_host_paths_or_home_directory() -> None:
     projection = _project(PrivateIndustrialValidationSource())
     serialized = projection.model_dump_json()
 
     assert "F:\\" not in serialized
     assert "C:\\" not in serialized
     assert str(Path.cwd()) not in serialized
-    assert "living" not in serialized.casefold()
+    assert str(Path.home()) not in serialized

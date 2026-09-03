@@ -109,8 +109,8 @@ const viewCopy: Record<
   },
   review: {
     eyebrow: "PUBLIC REVIEW PACK",
-    title: "评审证据索引",
-    description: "评分项只链接可公开材料与合成回放，不把页面文案当成测试回执。",
+    title: "产品证据索引",
+    description: "每项能力只链接可公开材料与合成回放，不把页面文案当成运行回执。",
   },
   account: {
     eyebrow: "PUBLIC SESSION",
@@ -480,11 +480,11 @@ function Governance({ manifest }: { manifest: PublicReplayManifest }) {
           {controls.map(([label, value]) => <DetailRow key={label} label={label} value={String(value).toUpperCase()} />)}
         </Panel>
         <Panel>
-          <PanelHeader eyebrow="RELEASE STATE" title="本地与官方状态分离" detail="网页部署成功不改变比赛或生产状态。" />
-          <DetailRow label="Frozen RC3 baseline" value={manifest.release_status.local_candidate} />
+          <PanelHeader eyebrow="RELEASE STATE" title="源码、静态投影与生产状态分离" detail="网页部署成功不改变生产授权状态。" />
+          <DetailRow label="Source verification" value={manifest.release_status.source_verification} />
+          <DetailRow label="Public projection" value={manifest.release_status.public_projection} />
           <DetailRow label="Public attestation" value={manifest.evidence_boundary.public_snapshot_attestation} />
-          <DetailRow label="Official submission" value={manifest.release_status.official_submission} />
-          <DetailRow label="Official evaluation" value={manifest.release_status.official_evaluation} />
+          <DetailRow label="Production readiness" value={manifest.release_status.production_readiness} />
           <DetailRow label="Production release" value="FALSE" />
         </Panel>
       </div>
@@ -497,17 +497,17 @@ function Governance({ manifest }: { manifest: PublicReplayManifest }) {
 
 function Review({ manifest }: { manifest: PublicReplayManifest }) {
   const rows = [
-    ["问题真实", "公开行业来源与场景边界", "README / INDUSTRY_SCENARIO_VALUE"],
-    ["能力真实", "选中/拒绝 Worker、预算、触发证据", "Public replay manifest"],
-    ["闭环结构可核验", "Parent / Human / Derived / Child", "Lineage view"],
-    ["异常稳定", "缺失事实保持 HOLD，不制造 PASS", "Governance view"],
-    ["安全合规", "无客户数据、无密钥、无人机写", "Publication boundary"],
+    ["行业问题", "公开场景与适用边界", "README / architecture"],
+    ["Agent 行为", "选中/拒绝 Worker、预算、触发证据", "Public replay manifest"],
+    ["闭环血缘", "Parent / Human / Derived / Child", "Lineage view"],
+    ["失败恢复", "缺失事实保持 HOLD，不制造 PASS", "Governance view"],
+    ["安全边界", "无客户数据、无密钥、无设备写入", "Compliance"],
     ["开放复用", "Apache-2.0、SBOM、格式合同", "Repository docs"],
   ];
   return (
     <>
       <Panel variant="raised">
-        <PanelHeader eyebrow="GOAI REVIEW INDEX" title="评审问题 → 客观证明物" detail="链接材料仍需评委独立核验。" />
+        <PanelHeader eyebrow="PRODUCT EVIDENCE INDEX" title="能力声明 → 可核验证据" detail="链接材料仍需使用者独立核验。" />
         <div className="public-review-table">
           {rows.map(([question, evidence, source]) => (
             <article key={question}><strong>{question}</strong><span>{evidence}</span><code>{source}</code></article>

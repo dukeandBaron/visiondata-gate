@@ -17,6 +17,7 @@ PUBLIC_TEST_MODULES = (
     "tests/test_private_industrial_validation.py",
     "tests/test_public_repository_tools.py",
     "tests/test_public_docs.py",
+    "tests/test_semifinal_demo.py",
     "tests/test_web_private_industrial_validation.py",
     "tests/test_web_source.py",
 )

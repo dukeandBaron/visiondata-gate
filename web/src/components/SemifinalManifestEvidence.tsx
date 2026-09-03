@@ -49,7 +49,7 @@ export function SemifinalManifestEvidence({ enabled }: { enabled: boolean }) {
         if (!current) return;
         setProjection(undefined);
         setLoadState("UNAVAILABLE");
-        setError(caught instanceof Error ? caught.message : "复赛 manifest 回执未通过浏览器合同核验");
+        setError(caught instanceof Error ? caught.message : "引导演示 manifest 未通过浏览器合同核验");
       });
     return () => { current = false; };
   }, [enabled, refreshToken]);
@@ -67,8 +67,8 @@ export function SemifinalManifestEvidence({ enabled }: { enabled: boolean }) {
       dataStatus={status}
     >
       <PanelHeader
-        eyebrow="SEMIFINAL PRODUCTROOT RECEIPT · READ ONLY"
-        title="Goal ↔ Goal3 演示主链"
+        eyebrow="GUIDED DEMO PRODUCTROOT RECEIPT · READ ONLY"
+        title="任务与复验主链"
         detail="从当前服务的 ProductRoot 重新核对 Task、Parent / Child Case、具名人工决定与交互回执。"
         actions={(
           <div className="semifinal-manifest__actions">
@@ -91,8 +91,8 @@ export function SemifinalManifestEvidence({ enabled }: { enabled: boolean }) {
         <div className="semifinal-manifest__state is-error" role="alert">
           <TriangleAlert size={20} />
           <span>
-            <strong>HOLD · SEMIFINAL MANIFEST UNAVAILABLE</strong>
-            {projection?.failure_code ?? error ?? "当前 ProductRoot 未提供可核对的复赛 manifest。"}
+            <strong>HOLD · GUIDED DEMO MANIFEST UNAVAILABLE</strong>
+            {projection?.failure_code ?? error ?? "当前 ProductRoot 未提供可核对的引导演示 manifest。"}
             <small>不使用 README、fixture 数字或旧截图补位。</small>
           </span>
         </div>
@@ -105,10 +105,10 @@ export function SemifinalManifestEvidence({ enabled }: { enabled: boolean }) {
             <em><ShieldCheck size={14} /> PAYLOAD JCS SHA + ETAG VERIFIED</em>
           </div>
 
-          <div className="semifinal-manifest__rail" aria-label="Goal 与 Goal3 复赛演示主链">
+          <div className="semifinal-manifest__rail" aria-label="任务与独立复验主链">
             <article>
               <span><FileCheck2 size={16} /></span>
-              <small>01 · GOAL TASK</small>
+              <small>01 · SOURCE TASK</small>
               <strong>{manifest.task_final_decision} · {manifest.task_release_readiness_status}</strong>
               <code>{compact(manifest.task_release_readiness_sha256)}</code>
             </article>
@@ -146,7 +146,7 @@ export function SemifinalManifestEvidence({ enabled }: { enabled: boolean }) {
             <span><strong>{manifest.visual_assets.length}</strong><small>FROZEN VISUAL ASSETS</small></span>
             <span><strong>{manifest.event_count}</strong><small>APPEND-ONLY EVENTS</small></span>
             <span><strong>{manifest.remaining_open_question_count}</strong><small>OPEN QUESTION · RETAINED</small></span>
-            <span><strong>{String(projection.submission_eligible)}</strong><small>SUBMISSION ELIGIBLE</small></span>
+            <span><strong>{String(projection.submission_eligible)}</strong><small>EXTERNAL RELEASE ELIGIBLE</small></span>
           </div>
 
           <div className="semifinal-manifest__digests">

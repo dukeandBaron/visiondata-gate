@@ -28,15 +28,10 @@ def test_public_docs_checker_reports_missing_and_escape_without_absolute_paths(
     ]
 
 
-def test_public_readme_template_resolves_links_from_repository_root(
-    tmp_path: Path,
-) -> None:
+def test_root_readme_resolves_links_from_repository_root(tmp_path: Path) -> None:
     (tmp_path / "docs").mkdir()
-    (tmp_path / "LICENSE").write_text("Apache-2.0\n", encoding="utf-8")
-    (tmp_path / "docs" / "PUBLIC_REPOSITORY_README.md").write_text(
-        "[License](LICENSE)\n",
-        encoding="utf-8",
-    )
+    (tmp_path / "docs" / "guide.md").write_text("# Guide\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text("[Guide](docs/guide.md)\n", encoding="utf-8")
     assert find_broken_links(tmp_path) == []
 
 

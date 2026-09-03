@@ -11,14 +11,14 @@ export interface PublicReplayManifest {
   schema_version: "visiondata-gate.public-replay.v1";
   source_mode: "PUBLIC_SYNTHETIC_REPLAY";
   release_status: {
-    local_candidate: string;
-    official_submission: "PENDING";
-    official_evaluation: "NOT_EVALUATED";
+    source_verification: "PASS_LOCAL_PUBLIC_SOURCE";
+    public_projection: "STATIC_REPLAY_VERIFIED";
+    production_readiness: "NOT_EVALUATED";
     production_release_allowed: false;
   };
   evidence_boundary: {
-    baseline_tag: "v0.1.0-goai-rc3-r3";
-    baseline_claim: "PASS_LOCAL_RC3_RELEASE_CANDIDATE";
+    baseline_tag: "v0.1.0-public-replay-r1";
+    baseline_claim: "PASS_LOCAL_PUBLIC_REPLAY";
     release_artifacts_included: false;
     public_snapshot_attestation: "NOT_ISSUED";
   };
@@ -115,15 +115,15 @@ function isPublicReplayManifest(value: unknown): value is PublicReplayManifest {
   return (
     manifest.schema_version === "visiondata-gate.public-replay.v1" &&
     manifest.source_mode === "PUBLIC_SYNTHETIC_REPLAY" &&
-    manifest.evidence_boundary?.baseline_tag === "v0.1.0-goai-rc3-r3" &&
+    manifest.evidence_boundary?.baseline_tag === "v0.1.0-public-replay-r1" &&
     manifest.evidence_boundary?.baseline_claim ===
-      "PASS_LOCAL_RC3_RELEASE_CANDIDATE" &&
+      "PASS_LOCAL_PUBLIC_REPLAY" &&
     manifest.evidence_boundary?.release_artifacts_included === false &&
     manifest.evidence_boundary?.public_snapshot_attestation === "NOT_ISSUED" &&
     hasExactKeys(manifest.release_status, [
-      "local_candidate",
-      "official_submission",
-      "official_evaluation",
+      "source_verification",
+      "public_projection",
+      "production_readiness",
       "production_release_allowed",
     ]) &&
     hasExactKeys(manifest.evidence_boundary, [

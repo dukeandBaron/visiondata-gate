@@ -115,7 +115,7 @@ function UnauthorizedImagePlaceholder() {
     <div className="causal-replay__image-placeholder" role="img" aria-label="无授权工厂图像，因果回放仅展示证据引用">
       <ImageOff size={22} aria-hidden="true" />
       <strong>NO AUTHORIZED IMAGE</strong>
-      <small>不以 Synthetic SVG 或示意图冒充 RC3 工厂原图</small>
+      <small>不以 Synthetic SVG 或示意图冒充真实工厂原图</small>
     </div>
   );
 }

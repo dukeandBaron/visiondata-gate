@@ -70,16 +70,32 @@ def test_public_export_is_allowlist_based_and_excludes_private_delivery_surfaces
     assert _selected("src/visiondata_gate/api.py")
     assert _selected("web/public/public-replay.v1.json")
     assert _selected("sample_data/clear/clean-val-gear.png")
-    assert _selected("docs/PUBLICATION_BOUNDARY.md")
+    assert _selected("README.md")
     assert _selected("docs/CARGO_LICENSES.locked.json")
-    for semifinal_document in (
+    for canonical_document in (
+        "docs/quickstart.md",
+        "docs/architecture.md",
+        "docs/api_reference.md",
+        "docs/compliance.md",
+        "docs/audit_envelope.md",
+        "benchmarks/README.md",
+        "benchmarks/dynamicbench-v3-report.json",
+        "benchmarks/visa-public-proxy-summary.json",
+    ):
+        assert _selected(canonical_document)
+    for internal_document in (
         "docs/GOAI_SEMIFINAL_GUIDE_20260902.md",
         "docs/DEMO_60S_SCRIPT_SEMIFINAL.md",
         "docs/DEFENSE_3MIN_SCRIPT_SEMIFINAL.md",
         "docs/DEFENSE_QA_SEMIFINAL.md",
         "docs/SEMIFINAL_DEFENSE_RUNBOOK_20260902.md",
+        "docs/GOAI_requirements_matrix.md",
+        "docs/INDUSTRIAL_AGENT_LANDSCAPE_20260825.md",
+        "docs/PROJECT_STATUS.md",
+        "docs/PUBLIC_REPOSITORY_README.md",
+        "docs/RC3_DELIVERY_CONTRACT.md",
     ):
-        assert _selected(semifinal_document)
+        assert not _selected(internal_document)
     assert _selected(PUBLIC_BINARY_REVIEW_PATH)
     assert _selected(PUBLIC_PAGES_TEMPLATE)
     assert _selected(PUBLIC_CI_TEMPLATE)

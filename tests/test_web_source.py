@@ -28,7 +28,7 @@ def test_public_facade_is_manifest_bound_and_fail_closed() -> None:
     assert "03 / OPERATOR WORKBENCH" in landing
     assert "BACKEND</span><strong>NOT CONNECTED" in landing
     assert "CUSTOMER DATA</span><strong>NOT INCLUDED" in landing
-    assert "GOAI review materials" in landing
+    assert "Evidence review" in landing
     assert "GOAI 2026 · 复赛" not in landing
     assert "REVIEWER PROOF MAP" not in landing
     assert "FROZEN RC3 BASELINE" not in landing

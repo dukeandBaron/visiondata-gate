@@ -4,7 +4,7 @@ VisionData Gate 目前由社区以尽力支持方式维护。
 
 ## 获取帮助
 
-1. 先查看 [运行说明](docs/RUNNING.md)、[API Quickstart](docs/API_QUICKSTART.md) 与 [外部模型配置](docs/EXTERNAL_MODEL_CONFIGURATION.md)。
+1. 先查看 [Quickstart](docs/quickstart.md)、[API Reference](docs/api_reference.md) 与 [Compliance](docs/compliance.md)。
 2. 使用 `sample_data/` 或合成数据准备最小复现。
 3. 通过仓库的 Bug report 模板提交操作系统、版本、步骤、预期行为与实际行为。
 
@@ -17,4 +17,3 @@ VisionData Gate 目前由社区以尽力支持方式维护。
 - GitHub Pages 是无后端、只读的合成回放，不提供账户、密钥配置或生产连接。
 - 外部 Adapter/Provider 的接口存在不代表服务可用或已获客户环境授权。
 - 项目不提供生产放行、设备控制或专业质量判断的替代服务。
-

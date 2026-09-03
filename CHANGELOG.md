@@ -1,6 +1,6 @@
 # Changelog
 
-本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 的结构。应用包版本与比赛快照标签分别管理；`v0.x.y-goai-*` 标签表示公开快照里程碑，不会自动改变 Python、Web 或 Desktop 的 API 兼容版本。
+本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 的结构。应用版本、数据合同版本与公开快照版本分别管理；快照标签不会自动改变 Python、Web 或 Desktop 的 API 兼容版本。
 
 ## [Unreleased]
 

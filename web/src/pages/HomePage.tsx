@@ -331,8 +331,8 @@ export function HomePage() {
         <section className="home-review-proof" id="review-proof">
           <header>
             <span><FileCheck2 size={14} /> REVIEWABLE BY DESIGN</span>
-            <h2>每个评审问题，都能落到一个可操作页面</h2>
-            <p>评分细则不是额外包装，而是产品真实工作路径的索引。点击即可进入对应证据现场。</p>
+            <h2>每个产品结论，都能落到一个可操作页面</h2>
+            <p>能力声明必须回到真实工作路径、测量值与责任凭证。点击即可进入对应证据现场。</p>
           </header>
           <div>
             {reviewProofPaths.map((item) => (

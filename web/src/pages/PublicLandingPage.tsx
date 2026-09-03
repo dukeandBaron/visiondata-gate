@@ -317,8 +317,8 @@ export function PublicLandingPage() {
         <nav aria-label="公开法律与安全链接">
           <a href={`${publicRepositoryUrl}/blob/main/LICENSE`} target="_blank" rel="noreferrer">Apache-2.0</a>
           <a href={`${publicRepositoryUrl}/blob/main/SECURITY.md`} target="_blank" rel="noreferrer">安全策略</a>
-          <a href={`${publicRepositoryUrl}/blob/main/docs/PUBLICATION_BOUNDARY.md`} target="_blank" rel="noreferrer">隐私边界</a>
-          <Link to="/review">GOAI review materials</Link>
+          <a href={`${publicRepositoryUrl}/blob/main/docs/compliance.md`} target="_blank" rel="noreferrer">隐私边界</a>
+          <Link to="/review">Evidence review</Link>
         </nav>
       </footer>
     </div>

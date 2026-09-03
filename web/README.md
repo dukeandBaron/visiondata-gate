@@ -1,23 +1,8 @@
 # VisionData Gate Web
 
-VisionData Gate Web 是项目的新一代多页面工业工作台。它复用同一套证据合同、案件语义和失败关闭边界，不是单张大屏，也不是聊天框套壳。
+VisionData Gate Web 是多页面工业数据治理工作台。它复用同一套证据合同、案件语义和失败关闭边界，不是单张大屏，也不是聊天框套壳。
 
-```text
-ui_implementation=PASS_LOCAL_UI
-development_state=RC3_FROZEN_LOCAL
-release_state=LOCAL_RELEASE_CANDIDATE
-release_candidate_ready=true
-submission_eligible=false
-local_release_decision=PASS_LOCAL_RC3_RELEASE_CANDIDATE
-official_submission=PENDING
-official_evaluation=NOT_EVALUATED
-production_release_allowed=false
-```
-
-本地候选状态只在 detached release namespace、匹配的 clean checkout 与声明 toolchain
-共同通过本地 verifier 并返回 `PASS_LOCAL_INTEGRITY` 时成立；候选 ZIP 与 Attestation
-两个文件本身不足以完成复验。
-它不表示官网已提交、官方已评测或生产已获授权。
+本地模式连接 FastAPI 与持久化产品状态；公开模式是经过 SHA-256 核验的静态合成回放。两种模式都不会授予生产放行或设备写入权限。
 
 ## 页面地图
 
@@ -34,7 +19,7 @@ production_release_allowed=false
 | `/runs` | 阶段事件、Dynamic Leader 和 Tool Receipts |
 | `/integrations` | CVAT、FiftyOne、API、Adapter 与模型合同状态；登记本机 allowlist 内的只读来源 |
 | `/governance` | 授权历史批次影子评测、治理效果分母、权限矩阵、审计封套与发布门禁 |
-| `/review` | 60 秒只读评委路径 |
+| `/review` | 只读证据审阅路径 |
 | `/settings` | 平台能力与桌面封装准备状态 |
 
 ## Windows 快速启动
@@ -60,7 +45,7 @@ production_release_allowed=false
 
 ## 真实图片 Operator Workbench
 
-`/workspace` 是可写的本地操作界面，不是冻结比赛展示页：
+`/workspace` 是可写的本地操作界面，不是静态展示页：
 
 - IDE 式 Activity Bar、Explorer、编辑器标签、图片资源列表、画布和 Inspector；
 - 点击选择或拖拽批量上传 JPEG、PNG、BMP、TIFF、WebP，单文件最大 32 MiB；
@@ -115,7 +100,7 @@ python ..\tools\check_public_pages.py --dist dist
 
 该模式只读取 public-replay.v1.json。浏览器先复算 JCS SHA-256，再显示 selected/rejected Workers、冻结预算、触发证据、竞争假设和 Parent/Human/Child 血缘。清单失败时不使用组件中的旧 fixture 补位。
 
-公开模式不会渲染 Provider Center，不会读取 .env，不会创建账户、项目或工单，也不会发送业务 API 请求。完整隐私和发布边界见[GitHub 与 Pages 公开边界](../docs/PUBLICATION_BOUNDARY.md)。
+公开模式不会渲染 Provider Center，不会读取 .env，不会创建账户、项目或工单，也不会发送业务 API 请求。完整隐私和发布边界见 [Compliance](../docs/compliance.md)。
 
 ## 本地 API 与冻结 fallback
 
@@ -145,7 +130,7 @@ cd web
 npm run check
 ```
 
-多页面只读路径的浏览器验收覆盖 `1440×900`、`1366×768`、`1036×768`、`390×844` 四种视口，以及 12 个路由模式对应的 15 个实际 URL（含 4 个案件 URL）。另外，Operator Workbench 已在 `1600×1000` 下验证真实上传、缩放/适应窗口、框选保存、刷新恢复、重复图片提示、Agent Trace、Copilot 证据回答与拒答、人工复核 Checkbox，以及工单 `OPEN -> ACKNOWLEDGED -> IN_CAPA`。评委页面的批准、执行和生产放行按钮保持禁用；冻结模式不发送 POST、PUT、PATCH 或 DELETE。
+多页面只读路径的浏览器验收覆盖 `1440×900`、`1366×768`、`1036×768`、`390×844` 四种视口，以及 12 个路由模式对应的 15 个实际 URL（含 4 个案件 URL）。另外，Operator Workbench 已在 `1600×1000` 下验证真实上传、缩放/适应窗口、框选保存、刷新恢复、重复图片提示、Agent Trace、Copilot 证据回答与拒答、人工复核 Checkbox，以及工单 `OPEN -> ACKNOWLEDGED -> IN_CAPA`。只读审阅页的批准、执行和生产放行按钮保持禁用；冻结模式不发送 POST、PUT、PATCH 或 DELETE。
 
 ## 桌面端边界
 
@@ -160,5 +145,4 @@ npm run check
 
 桌面端会复用本目录，不再维护第二套 UI。
 
-当前桌面端、签名、clean-machine 与跨平台边界见
-[`PROJECT_STATUS.md`](../docs/PROJECT_STATUS.md)。
+当前桌面端、签名与跨平台边界见 [Quickstart](../docs/quickstart.md) 和 [Architecture](../docs/architecture.md)。

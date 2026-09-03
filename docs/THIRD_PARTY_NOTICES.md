@@ -1,6 +1,6 @@
 # Third-party notices
 
-VisionData Gate is licensed under Apache-2.0. Its source submission ZIP does
+VisionData Gate is licensed under Apache-2.0. Its source distribution does
 not vendor the Python distributions listed below, model weights, or external
 datasets. The packages are resolved by `uv.lock` and installed separately by
 the user's package manager. Each installed distribution remains governed by

@@ -19,7 +19,6 @@ HISTORY_PATH_UNAVAILABLE = "<git-object-without-tree-path>"
 PUBLIC_GENERATED_FILE_SOURCES = {
     ".github/workflows/ci.yml": "tools/templates/public-ci.yml",
     ".github/workflows/pages.yml": "tools/templates/public-pages.yml",
-    "README.md": "docs/PUBLIC_REPOSITORY_README.md",
 }
 
 FORBIDDEN_TRACKED_PREFIXES = (
@@ -311,7 +310,6 @@ def _mirror_manifest_violations(
         expected_source = PUBLIC_GENERATED_FILE_SOURCES.get(relative)
         if expected_source is not None and entry.get("source") != expected_source:
             rule = {
-                "README.md": "public-readme-source-drift",
                 ".github/workflows/ci.yml": "public-ci-workflow-source-drift",
                 ".github/workflows/pages.yml": "public-pages-workflow-source-drift",
             }[relative]

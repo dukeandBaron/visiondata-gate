@@ -897,11 +897,11 @@ export function ReviewPage() {
         <header className="review-brief__header">
           <div>
             <span className="review-brief__eyebrow">
-              {isSyntheticDemo ? "GOAI REVIEWER · FROZEN DEMO EVIDENCE" : "GOAI REVIEWER · LOCAL API PROJECT EVIDENCE"}
+              {isSyntheticDemo ? "READ-ONLY REVIEW · FROZEN DEMO EVIDENCE" : "READ-ONLY REVIEW · LOCAL API PROJECT EVIDENCE"}
             </span>
             <div className="review-brief__title-row">
               <h1 id="review-brief-title">异常案件评审台</h1>
-              <StatusBadge tone="warning" compact>60 秒评审路径</StatusBadge>
+              <StatusBadge tone="warning" compact>只读证据路径</StatusBadge>
             </div>
             <p>先看工业现场，再沿同一 Task 核对 Agent 补证、人工闸门与最终放行边界。</p>
           </div>
@@ -1354,17 +1354,17 @@ export function ReviewPage() {
         scope={connection.api === "CONNECTED" ? { kind: "GLOBAL_REVIEW" } : undefined}
       />
 
-      <div className="review-authority-boundary" aria-label="评委只读权限证明">
-        <strong><LockKeyhole size={16} /> 评委只读权限</strong>
+      <div className="review-authority-boundary" aria-label="审阅者只读权限证明">
+        <strong><LockKeyhole size={16} /> 审阅者只读权限</strong>
         <span><FileCheck2 size={15} /> CAPA 决定 · 仅查看</span>
         <span><ShieldCheck size={15} /> Child Run · 仅查看</span>
         <span><LockKeyhole size={15} /> 生产放行 · 人工专属</span>
         <em><BookOpenCheck size={15} /> 本页不会发送业务写请求</em>
       </div>
 
-      <ClaimBoundary title="评委页面声明" tone="info">
+      <ClaimBoundary title="只读审阅边界" tone="info">
         当前页面只汇总本机 API 返回的项目级只读证据；接口失败时保持缺失，不用 fixture 补位。历史影子回执仍是操作者声明绑定的评测证据，
-        不等于客户验收；本地任务、SHA 完整性与 UI 可运行也不等于生产部署、官方提交或官方评测通过。
+        不等于客户验收；本地任务、SHA 完整性与 UI 可运行也不等于生产部署或外部机构批准。
       </ClaimBoundary>
     </div>
   );
