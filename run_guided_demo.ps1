@@ -18,10 +18,10 @@ $VenvPython = Join-Path $ProjectRoot ".venv\Scripts\python.exe"
 $WebNodeModules = Join-Path $ProjectRoot "web\node_modules"
 
 if (-not (Test-Path -LiteralPath $PrepareScript)) {
-    throw "The semifinal demo preparation tool is missing: $PrepareScript"
+    throw "The guided demo preparation tool is missing: $PrepareScript"
 }
 if (-not (Test-Path -LiteralPath $VerifyScript)) {
-    throw "The semifinal demo manifest verifier is missing: $VerifyScript"
+    throw "The guided demo manifest verifier is missing: $VerifyScript"
 }
 if (-not (Test-Path -LiteralPath $WorkbenchScript)) {
     throw "The workbench launcher is missing: $WorkbenchScript"
@@ -45,15 +45,15 @@ $ResolvedProductRoot = if ($ProductRoot) {
     }
 }
 else {
-    Join-Path $ProjectRoot "output\semifinal_demo\product"
+    Join-Path $ProjectRoot "output\guided_demo\product"
 }
 
 Set-Location -LiteralPath $ProjectRoot
 $env:PYTHONPATH = Join-Path $ProjectRoot "src"
-Write-Host "Preparing an isolated, idempotent semifinal reviewer project..."
+Write-Host "Preparing an isolated, idempotent guided demonstration project..."
 $PrepareOutput = (& $PythonExe $PrepareScript --product-root $ResolvedProductRoot | Out-String).Trim()
 if ($LASTEXITCODE -ne 0) {
-    throw "Semifinal demo preparation failed with code $LASTEXITCODE."
+    throw "Guided demo preparation failed with code $LASTEXITCODE."
 }
 $ManifestPath = Join-Path $ResolvedProductRoot "semifinal_demo_manifest.json"
 $ManifestJson = (
@@ -63,13 +63,13 @@ $ManifestJson = (
         Out-String
 ).Trim()
 if ($LASTEXITCODE -ne 0) {
-    throw "Semifinal demo manifest verification failed with code $LASTEXITCODE."
+    throw "Guided demo manifest verification failed with code $LASTEXITCODE."
 }
 try {
     $Manifest = $ManifestJson | ConvertFrom-Json -ErrorAction Stop
 }
 catch {
-    throw "Semifinal demo preparation returned an invalid manifest."
+    throw "Guided demo preparation returned an invalid manifest."
 }
 if (
     $Manifest.status -ne "PASS_LOCAL_DEMO_PREPARED" -or
@@ -86,7 +86,7 @@ if (
     $Manifest.remaining_open_question_count -ne 1 -or
     $Manifest.manifest_sha256 -notmatch '^[0-9a-f]{64}$'
 ) {
-    throw "Semifinal demo manifest failed the isolated reviewer contract."
+    throw "Guided demo manifest failed the isolated product contract."
 }
 $ReviewStartPath = [string]$Manifest.review_start_path
 Write-Host $ManifestJson
@@ -99,7 +99,7 @@ if ($EffectiveInstall -and -not $Install.IsPresent) {
     )
 }
 
-Write-Host "Starting the real multi-page workbench in Reviewer Mode."
+Write-Host "Starting the real multi-page workbench in Guided Demo mode."
 Write-Host "Synthetic fixture replay remains explicitly labelled; production authority stays false."
 & $WorkbenchScript `
     -Mode Preview `

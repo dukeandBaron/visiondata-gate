@@ -1,7 +1,7 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "2adf28a6c0b2d55f7ee2c400b720a913c2daa920",
-  "source_tree_oid": "55e0741f3d6a78c542ba2ccb52921a85d87d10e4",
+  "source_commit_oid": "ed2c9c6bd98dc09950790b010111ee71fd052831",
+  "source_tree_oid": "8ff20f18b2519f4f66a911895efb4847b74ba66d",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
@@ -9,7 +9,7 @@
   "personal_data_included": false,
   "tracked_source_only": true,
   "file_count": 458,
-  "snapshot_sha256": "2725dd8108d8631b98288f46200fc067d9ca1bc36cfe44b4a1343eee1748c112",
+  "snapshot_sha256": "71c3b7332de7534c131f345ddad2fab57ea2f12a1e96451f4a7ee3f6fa838098",
   "files": [
     {
       "path": ".env.example",
@@ -330,13 +330,13 @@
     },
     {
       "path": "run_demo.ps1",
-      "sha256": "cf0914f2933236150a4ad8de5ea9a130fd12cea01fff7b382f9f93fae2aac17b",
-      "size_bytes": 667
+      "sha256": "3841feb49f43b733d3ee5af2a2ad1eef8dde2853f3cf6c2d38c26ec8f526ad6b",
+      "size_bytes": 664
     },
     {
-      "path": "run_semifinal_demo.ps1",
-      "sha256": "4a9c2bb9e47f14e6d6d4a1b4bb9083a959e8f7be8c7caa574d75fc2b207d729b",
-      "size_bytes": 4125
+      "path": "run_guided_demo.ps1",
+      "sha256": "1ac2791f7742cf0e1d5bc73c360108c546dd2e6f66bf79351f4abeba9f4f3463",
+      "size_bytes": 4108
     },
     {
       "path": "run_tests.ps1",
@@ -800,8 +800,8 @@
     },
     {
       "path": "src/visiondata_gate/package.py",
-      "sha256": "0061d6a6409d4077fc3b28a42d1dd20f8f46fd7b01f69774b03af9f6984ccc04",
-      "size_bytes": 53667
+      "sha256": "f85ac9a6a4035df4e6cb017a817d0bd901191816af3933827721bc02dfc90f6c",
+      "size_bytes": 53664
     },
     {
       "path": "src/visiondata_gate/pipeline.py",
@@ -1150,8 +1150,8 @@
     },
     {
       "path": "tests/test_evidence_package.py",
-      "sha256": "8f98384ffdbbf5cd650863593766bd3850d1e8b2d747857bd56ab57cdd25a1bd",
-      "size_bytes": 48955
+      "sha256": "24815bbe0b4ad5e1e41fcd61e4f372f71ac1c3951c57ee6334f0f68567ca4211",
+      "size_bytes": 48952
     },
     {
       "path": "tests/test_evidence_state.py",
@@ -1465,8 +1465,8 @@
     },
     {
       "path": "tests/test_semifinal_demo.py",
-      "sha256": "d6eceed7a54c7d02b789f7034c2bf241aabb7561f9d6d027856a22692ac7e312",
-      "size_bytes": 15815
+      "sha256": "188e0377a5e1061532b28a07fba32752a9e78af4e5760a95af84a93643505621",
+      "size_bytes": 15809
     },
     {
       "path": "tests/test_semifinal_manifest_projection.py",
@@ -1630,8 +1630,8 @@
     },
     {
       "path": "tools/export_public_repository.py",
-      "sha256": "e743dad5ba148aa0d57c89379381fe021ae33e5ef60f62a3991e9d48d61cf7dc",
-      "size_bytes": 13432
+      "sha256": "782a275029c6663ba88a7d81a37a6bdedce0b8d2b49e7b8db48c1c819ac8ca0e",
+      "size_bytes": 13429
     },
     {
       "path": "tools/generate_cargo_license_snapshot.py",

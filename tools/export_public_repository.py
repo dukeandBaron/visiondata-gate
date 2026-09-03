@@ -49,7 +49,7 @@ PUBLIC_EXACT_FILES = {
     "run_api.ps1",
     "run_app.ps1",
     "run_demo.ps1",
-    "run_semifinal_demo.ps1",
+    "run_guided_demo.ps1",
     "run_tests.ps1",
     "run_web.ps1",
     "run_workbench.ps1",

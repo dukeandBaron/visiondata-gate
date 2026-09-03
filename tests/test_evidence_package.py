@@ -931,7 +931,7 @@ def test_default_required_paths_cover_final_submission_anchors() -> None:
         "web/src-tauri/src/lib.rs",
         "desktop/visiondata_gate_backend.spec",
         "build_windows_installer.ps1",
-        "run_semifinal_demo.ps1",
+        "run_guided_demo.ps1",
         "run_web.ps1",
         "run_workbench.ps1",
         "tools/import_local_env.ps1",

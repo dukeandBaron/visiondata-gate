@@ -120,11 +120,11 @@ def test_semifinal_manifest_verifier_rejects_boundary_or_digest_drift(
 
 def test_semifinal_launcher_uses_isolated_review_mode() -> None:
     alias = (PROJECT_ROOT / "run_demo.ps1").read_text(encoding="utf-8")
-    launcher = (PROJECT_ROOT / "run_semifinal_demo.ps1").read_text(encoding="utf-8")
+    launcher = (PROJECT_ROOT / "run_guided_demo.ps1").read_text(encoding="utf-8")
     workbench = (PROJECT_ROOT / "run_workbench.ps1").read_text(encoding="utf-8")
     api = (PROJECT_ROOT / "run_api.ps1").read_text(encoding="utf-8")
 
-    assert '$Launcher = Join-Path $ProjectRoot "run_semifinal_demo.ps1"' in alias
+    assert '$Launcher = Join-Path $ProjectRoot "run_guided_demo.ps1"' in alias
     assert "& $Launcher @PSBoundParameters" in alias
     assert "evidence\\submission" not in alias
     assert "prepare_semifinal_demo.py" in launcher

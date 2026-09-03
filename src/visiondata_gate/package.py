@@ -261,7 +261,7 @@ CURRENT_DESKTOP_AND_SAMPLE_REQUIRED_PATHS = (
     "build_windows_installer.ps1",
     "desktop/backend_main.py",
     "desktop/visiondata_gate_backend.spec",
-    "run_semifinal_demo.ps1",
+    "run_guided_demo.ps1",
     "run_web.ps1",
     "run_workbench.ps1",
     "sample_data/README.md",

@@ -11,7 +11,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$Launcher = Join-Path $ProjectRoot "run_semifinal_demo.ps1"
+$Launcher = Join-Path $ProjectRoot "run_guided_demo.ps1"
 if (-not (Test-Path -LiteralPath $Launcher)) {
     throw "The guided demo launcher is missing: $Launcher"
 }
