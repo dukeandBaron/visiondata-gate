@@ -86,6 +86,12 @@ PUBLIC_PREFIXES = (
     "web/",
 )
 
+PUBLIC_EXCLUDED_FILES = {
+    "tests/test_build_semifinal_defense_kit.py",
+    "tools/build_semifinal_defense_kit.py",
+    "tools/build_semifinal_governance_evidence.py",
+}
+
 FORBIDDEN_PREFIXES = (
     ".git/",
     ".playwright-cli/",
@@ -201,6 +207,8 @@ def _selected(path: str) -> bool:
     if any(lowered.startswith(prefix) for prefix in FORBIDDEN_PREFIXES):
         return False
     if Path(lowered).suffix in FORBIDDEN_SUFFIXES:
+        return False
+    if normalized in PUBLIC_EXCLUDED_FILES:
         return False
     return normalized in PUBLIC_EXACT_FILES or normalized.startswith(PUBLIC_PREFIXES)
 

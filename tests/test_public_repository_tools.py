@@ -96,6 +96,12 @@ def test_public_export_is_allowlist_based_and_excludes_private_delivery_surfaces
         "docs/RC3_DELIVERY_CONTRACT.md",
     ):
         assert not _selected(internal_document)
+    for internal_tool in (
+        "tests/test_build_semifinal_defense_kit.py",
+        "tools/build_semifinal_defense_kit.py",
+        "tools/build_semifinal_governance_evidence.py",
+    ):
+        assert not _selected(internal_tool)
     assert _selected(PUBLIC_BINARY_REVIEW_PATH)
     assert _selected(PUBLIC_PAGES_TEMPLATE)
     assert _selected(PUBLIC_CI_TEMPLATE)
