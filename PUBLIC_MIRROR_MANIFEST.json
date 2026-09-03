@@ -1,7 +1,7 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "ed2c9c6bd98dc09950790b010111ee71fd052831",
-  "source_tree_oid": "8ff20f18b2519f4f66a911895efb4847b74ba66d",
+  "source_commit_oid": "72d418b2d38d32a62e6614a2d7d756262ef1a531",
+  "source_tree_oid": "2a54c71678f4c1c9bb401151063af25db525e7a1",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
@@ -9,7 +9,7 @@
   "personal_data_included": false,
   "tracked_source_only": true,
   "file_count": 458,
-  "snapshot_sha256": "71c3b7332de7534c131f345ddad2fab57ea2f12a1e96451f4a7ee3f6fa838098",
+  "snapshot_sha256": "b67d731735ad5b74c38230f1cb30741cdcdbb84a98153a2e822168a353ef86c1",
   "files": [
     {
       "path": ".env.example",
@@ -95,8 +95,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "abededcf3905d9ed14cc697c571f7e2c9343725a336f07d57a5ff8f885d33997",
-      "size_bytes": 9889
+      "sha256": "d4856d8fa86ea2dbd2dbef274cee07fbea62362c002b12360fa1384a5c6b5244",
+      "size_bytes": 11351
     },
     {
       "path": "SECURITY.md",
