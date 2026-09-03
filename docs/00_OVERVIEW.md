@@ -4,12 +4,13 @@
 
 ## 1. 先确认赛题与用户价值
 
-VisionData Gate 是 GOAI 赛道二“无界应用 Boundless Agents”中 AI+工业制造方向的应用作品。目标用户是工业视觉算法工程师、质量负责人和数据治理团队；核心任务是把换型后的图像、标注、metadata、工单、工艺与视觉方案组织成版本化异常案件，并把证据资格化、动态调查、人工决定、私有派生整改、Child Run 复验和交付串成闭环。
+VisionData Gate 是 GOAI 赛道二“无界应用 Boundless Agents”应用作品；2026-09-02 最新排期为第 03 队、AI+其他，项目应用领域是工业视觉数据治理 / 制造业。目标用户是工业视觉算法工程师、质量负责人和数据治理团队；核心任务是把换型后的图像、标注、metadata、工单、工艺与视觉方案组织成版本化异常案件，并把证据资格化、动态调查、人工决定、私有派生整改、Child Run 复验和交付串成闭环。
 
 - 评委网站与仓库：采用“私有权威仓 + 隐私安全公共镜像”双仓边界；公共镜像只提供 `PUBLIC_SYNTHETIC_REPLAY`，是否为当前版本以 `PUBLIC_MIRROR_MANIFEST.json`、GitHub Actions 与 Pages 部署 SHA 为准
 - 官方手册规则锚点：[`GOAI_BOUNDLESS_AGENTS_HANDBOOK_20260825.md`](GOAI_BOUNDLESS_AGENTS_HANDBOOK_20260825.md)
 - 初赛历史 RC2 标识：`v0.1.0-goai-rc2`（历史标签不代表当前 RC3 公共镜像或参赛包）
-- 复赛 RC3：`PASS_LOCAL_RC3_RELEASE_CANDIDATE / OFFICIAL_PENDING`
+- 冻结复赛 RC3：`PASS_LOCAL_RC3_RELEASE_CANDIDATE / OFFICIAL_PENDING`，仅绑定 `source_commit=c5fd68fc38025ffab4345cd739e611c96b13c530`、`source_tree=5501787b6ed452759af16e60dca76ce0c2ec54bf`
+- 当前 RC4 Defense Kit：`PASS_LOCAL_RC4_DEFENSE_KIT_INTEGRITY`；新版 PPT/PDF、当前公开工作台 57.33 秒备用视频、公共源码快照、附件 ZIP 与匹配回执已完成本地包级联检；GitHub 公共镜像 RC4 同步与官网提交仍为 `PENDING`
 - 冻结实验与证据命名空间：`vdg-20260816-rc1`（RC2 不改实验结论）
 - 附件摘要：[`../release/SHA256SUMS.txt`](../release/SHA256SUMS.txt)
 - 小白技术路线：[`BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md`](BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md)
@@ -22,7 +23,7 @@ VisionData Gate 是 GOAI 赛道二“无界应用 Boundless Agents”中 AI+工�
 先读 [`ARCHITECTURE_BENCHMARK_AND_DYNAMIC_PLANNING.md`](ARCHITECTURE_BENCHMARK_AND_DYNAMIC_PLANNING.md)：
 
 - ArchBench-v2 固定了输入、工具、合同与 Judge，得到 288 条同协议记录；
-- 传统流水线、单 Agent、多 Agent 的错误放行率均为 0%，F1 均为 0.96；
+- 传统流水线、单 Agent、多 Agent 在 ArchBench-v2 冻结合成协议内的错误放行率均为 0%，F1 均为 0.96；该数字不是工厂误放行率；
 - 因而项目不宣称多 Agent 普遍优越，只把必要边界放在“中间证据改变后续任务”；
 - Omni-180-v1 中的 metadata 漂移、分辨率分组和跨工具冲突触发了 1 次 replan 与 3 个动态 Worker。
 - 当前 RC3 `_03` 将用户授权的本地源接入产品对象链：4,464 张只读 profile、固定 180 Gate、48→49 findings/原子记录、5→8 ToolTrace、1 replan、3 Workers；49 条底账聚合为 3 个风险处置流和 3 套候选方案，独立验证 27/27 `PASS`；与 RC2 的 45 条历史数字分开保存。

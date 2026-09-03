@@ -201,7 +201,7 @@ L4  Governed Production Integration
 
 > 工业视觉团队在换型后通常面对的不是一个模型问题，而是一组相互关联的数据风险：采集条件变化、跨划分重复、标注错误、覆盖缺口和 metadata 冲突。VisionData Gate 把这些风险放进同一个版本化案件，先由确定性工具测量，再由 Agent 只在证据改变下一步时补证，最后通过具名 CAPA、私有派生版本和 Child Run 独立复验完成闭环。当前我们已完成本地授权离线 Pilot；客户误放行、误拦截和 ROI 仍等待独立 shadow 真值，不提前宣称。
 
-### 90 秒证明顺序
+### 复赛证明顺序（3 分钟陈述 + 60 秒公开 Demo）
 
 ```text
 真实异常图与 metadata
@@ -209,7 +209,7 @@ L4  Governed Production Integration
 → 跨工具冲突 / 工具故障触发补证
 → Gate 失败关闭
 → 三类风险流与 CAPA 方案
-→ 具名批准和私有派生版本
+→ 独立私域 Pilot 中的具名批准和私有派生版本（非公开回放轨）
 → Child Run 仍失败并转调查
 → 指标卡显示 NOT_MEASURED / 0 of 1 / production_release=false
 ```

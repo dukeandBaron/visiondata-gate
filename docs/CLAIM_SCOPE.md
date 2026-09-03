@@ -23,7 +23,7 @@
 - RC3 `_06` 将三套冻结方案与 `_05` 唯一实跑结果绑定。当前授权候选池未观察到可发布方案，最小恢复成本为 `NOT_ESTIMABLE`；另外两套未执行方案没有成功率、工时、金额或 ROI；
 - 当前 RC3 授权产品事件 18 条，人工生产授权保持 `pending`；含审批绑定、工业交付和方案回执的 18-member Evidence ZIP SHA-256 为 `17631D2F9FA51E58D8DECDB13E4E9EF91F9D2119E2BBA344E51DB78F5F455098`；
 - 独立验证 27/27 `PASS`，新增覆盖审批四重绑定、精确 finding 关联、风险流与方案哈希、child Run 末波、来源注册库只读不漂移；原图/私有路径排除、可选模型未连接和人工权限边界继续通过；
-- ArchBench-v2 含 288 条同协议记录。三种架构错误放行率均为 0%、成功率与扰动稳定率均为 100%、F1 均为 0.96，因此固定 SOP 下多 Agent 必要性未被支持；
+- ArchBench-v2 含 288 条冻结合成同协议记录。三种架构在该协议内的错误放行率均为 0%、成功率与扰动稳定率均为 100%、F1 均为 0.96，因此固定 SOP 下多 Agent 必要性未被支持；这些数字不能外推为工厂误放行率；
 - DynamicBench-v1 含 4 架构 × 24 fixtures × 3 repeats = 288 records；Dynamic Leader 触发 P/R 为 1.0/1.0，相对固定多 Agent 避免 57 次无效补证，但与单 Agent 质量持平且本机 P95 更慢；实际模型调用、Token 和 API 费用均为 0；
 - 当前开发分支新增 Runtime Invariant Guard：工业 Gate PASS 缺少必需工具/证据检查时失败关闭，具名 CAPA 与只读父证据 Child Run 在跃迁前生成 JCS 回执；这是 executable runtime invariant monitoring，不是 formal verification 或 model checking；
 - 当前开发分支的只读 `EvidenceBeliefSnapshot` / Ledger 将支持状态与时效状态拆分；Incident v5 在规划阶段绑定 v2 Ledger，但仍由既有 hypothesis、evidence edge、案件和 evidence bundle SHA 派生，不替代原案件事实源；

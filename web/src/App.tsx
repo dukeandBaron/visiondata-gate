@@ -19,13 +19,14 @@ const SettingsPage = lazy(() => import("./pages/SettingsPage").then((module) => 
 const AccountPage = lazy(() => import("./pages/AccountPage").then((module) => ({ default: module.AccountPage })));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage").then((module) => ({ default: module.NotFoundPage })));
 const PublicReplayPage = lazy(() => import("./pages/PublicReplayPage").then((module) => ({ default: module.PublicReplayPage })));
+const PublicLandingPage = lazy(() => import("./pages/PublicLandingPage").then((module) => ({ default: module.PublicLandingPage })));
 
 export function App() {
   if (publicReplayMode) {
     return (
       <Suspense fallback={<div className="route-loading" role="status">正在核验公开回放清单…</div>}>
         <Routes>
-          <Route path="/" element={<Navigate to="/command-center" replace />} />
+          <Route path="/" element={<PublicLandingPage />} />
           <Route element={<AppShell />}>
             <Route path="/workspace" element={<PublicReplayPage view="workspace" />} />
             <Route path="/command-center" element={<PublicReplayPage view="command-center" />} />
@@ -40,7 +41,7 @@ export function App() {
             <Route path="/review" element={<PublicReplayPage view="review" />} />
             <Route path="/account" element={<PublicReplayPage view="account" />} />
             <Route path="/settings" element={<PublicReplayPage view="settings" />} />
-            <Route path="*" element={<Navigate to="/command-center" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
       </Suspense>

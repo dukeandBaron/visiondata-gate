@@ -69,10 +69,20 @@ def test_public_export_is_allowlist_based_and_excludes_private_delivery_surfaces
     assert _selected("sample_data/clear/clean-val-gear.png")
     assert _selected("docs/PUBLICATION_BOUNDARY.md")
     assert _selected("docs/CARGO_LICENSES.locked.json")
+    for semifinal_document in (
+        "docs/GOAI_SEMIFINAL_GUIDE_20260902.md",
+        "docs/DEMO_60S_SCRIPT_SEMIFINAL.md",
+        "docs/DEFENSE_3MIN_SCRIPT_SEMIFINAL.md",
+        "docs/DEFENSE_QA_SEMIFINAL.md",
+        "docs/SEMIFINAL_DEFENSE_RUNBOOK_20260902.md",
+    ):
+        assert _selected(semifinal_document)
     assert _selected(PUBLIC_BINARY_REVIEW_PATH)
     assert _selected(PUBLIC_PAGES_TEMPLATE)
     assert not _selected(PUBLIC_PAGES_WORKFLOW)
     assert not _selected("docs/assets/reviewer-mode.png")
+    assert _selected(".env.example")
+    assert _selected("web/.env.example")
 
     for private_path in (
         "../src/visiondata_gate/api.py",
@@ -85,6 +95,16 @@ def test_public_export_is_allowlist_based_and_excludes_private_delivery_surfaces
         "output/product/product.db",
         "release/candidate.zip",
         "website/data/site-data.json",
+        ".env",
+        ".env.local",
+        ".env.production",
+        "web/.env",
+        "web/.env.local",
+        "web/.env.production",
+        "src/nested/.ENV.staging",
+        "web/.env.example.local",
+        "web/.env.production/secret.txt",
+        "web/.env.example/secret.txt",
     ):
         assert not _selected(private_path)
 
@@ -186,6 +206,28 @@ def test_public_repository_gate_rejects_media_and_unreviewed_binary_locations() 
         "screenshots/operator.png",
     ) in rules_by_path
     assert not any(item["path"].startswith("sample_data/") for item in violations)
+
+
+def test_public_repository_gate_rejects_nested_env_files_except_examples() -> None:
+    paths = [
+        ".env",
+        ".env.local",
+        ".env.production",
+        "web/.env",
+        "web/.env.local",
+        "web/.env.production",
+        "src/nested/.ENV.staging",
+        "web/.env.example.local",
+        "web/.env.production/secret.txt",
+        "web/.env.example/secret.txt",
+        ".env.example",
+        "web/.env.example",
+    ]
+    violations = _path_violations(paths)
+    forbidden_paths = {
+        item["path"] for item in violations if item["rule"] == "forbidden-path"
+    }
+    assert forbidden_paths == set(paths[:-2])
 
 
 def test_public_repository_gate_rejects_private_identity_without_echoing_value() -> (
@@ -684,6 +726,25 @@ def test_history_blob_classifier_is_fail_closed_and_sha_bound() -> None:
         object_id=object_id,
         reviewed_binaries=reviewed,
     )
+
+    prior_binary = b"\x89PNG\r\n\x1a\nprior-synthetic"
+    reviewed_revisions = {
+        reviewed_path: frozenset(
+            {
+                hashlib.sha256(prior_binary).hexdigest(),
+                hashlib.sha256(binary).hexdigest(),
+            }
+        )
+    }
+    assert (
+        _historical_blob_violations(
+            prior_binary,
+            path=reviewed_path,
+            object_id=object_id,
+            reviewed_binaries=reviewed_revisions,
+        )
+        == []
+    )
     assert {
         "rule": "history-binary-missing-semantic-review",
         "path": "docs/assets/unreviewed.png",
@@ -732,6 +793,67 @@ def test_history_blob_classifier_is_fail_closed_and_sha_bound() -> None:
         "path": "docs/private.zip",
         "object": object_id,
     } in forbidden_archive
+
+
+def test_history_binary_approvals_include_valid_prior_manifest_revisions(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    reviewed_path = "docs/assets/reviewed.png"
+    prior_binary = b"\x89PNG\r\n\x1a\nprior-synthetic"
+    current_binary = b"\x89PNG\r\n\x1a\ncurrent-synthetic"
+
+    def review_manifest(binary: bytes, reviewed_on: str) -> bytes:
+        stable = {
+            "schema_version": "visiondata-gate.public-binary-review.v1",
+            "review_basis": "VISUAL_PIXEL_AND_METADATA_INSPECTION",
+            "reviewed_on": reviewed_on,
+            "reviewer_identity_included": False,
+            "reviewed_file_count": 1,
+            "prohibited_content_checks": ["PERSONAL_IDENTITY"],
+            "files": [
+                {
+                    "path": reviewed_path,
+                    "sha256": hashlib.sha256(binary).hexdigest(),
+                    "size_bytes": len(binary),
+                    "category": "SYNTHETIC_WORKBENCH_SCREENSHOT",
+                    "review_result": "PASS_NO_PRIVATE_CONTENT_OBSERVED",
+                }
+            ],
+        }
+        manifest = {
+            **stable,
+            "manifest_sha256": hashlib.sha256(
+                public_repository_checker._canonical_json_bytes(stable)
+            ).hexdigest(),
+        }
+        return json.dumps(manifest, ensure_ascii=False).encode("utf-8")
+
+    prior_manifest_id = "1" * 40
+    current_manifest_id = "2" * 40
+    payloads = {
+        prior_manifest_id: review_manifest(prior_binary, "2026-08-31"),
+        current_manifest_id: review_manifest(current_binary, "2026-09-02"),
+    }
+
+    def fake_git(*args: str, text: bool = False) -> bytes:
+        assert args[:2] == ("cat-file", "blob")
+        assert text is False
+        return payloads[args[2]]
+
+    monkeypatch.setattr(public_repository_checker, "_git", fake_git)
+    approvals = public_repository_checker._reviewed_binary_history_records(
+        {
+            prior_manifest_id: (PUBLIC_BINARY_REVIEW_PATH,),
+            current_manifest_id: (PUBLIC_BINARY_REVIEW_PATH,),
+        },
+        current_records={reviewed_path: hashlib.sha256(current_binary).hexdigest()},
+    )
+    assert approvals[reviewed_path] == frozenset(
+        {
+            hashlib.sha256(prior_binary).hexdigest(),
+            hashlib.sha256(current_binary).hexdigest(),
+        }
+    )
 
 
 def test_history_scan_preserves_every_path_for_deleted_binary(

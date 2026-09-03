@@ -1,11 +1,12 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "../components/AppShell";
+import { PublicLandingPage } from "../pages/PublicLandingPage";
 import { PublicReplayPage } from "../pages/PublicReplayPage";
 
 export function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/command-center" replace />} />
+      <Route path="/" element={<PublicLandingPage />} />
       <Route element={<AppShell />}>
         <Route path="/workspace" element={<PublicReplayPage view="workspace" />} />
         <Route path="/command-center" element={<PublicReplayPage view="command-center" />} />
@@ -20,7 +21,7 @@ export function App() {
         <Route path="/review" element={<PublicReplayPage view="review" />} />
         <Route path="/account" element={<PublicReplayPage view="account" />} />
         <Route path="/settings" element={<PublicReplayPage view="settings" />} />
-        <Route path="*" element={<Navigate to="/command-center" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
   );

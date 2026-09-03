@@ -72,7 +72,7 @@ const viewCopy: Record<
   "case-detail": {
     eyebrow: "PUBLIC CASE WORKBENCH",
     title: "合成冲突案件",
-    description: "从首次 RECAPTURE 到具名人工闸门、派生副本和 Child 同合同复验。",
+    description: "从首次 RECAPTURE 到人工闸门要求、派生副本和 Child 同合同复验。",
   },
   evidence: {
     eyebrow: "PUBLIC EVIDENCE",
@@ -81,7 +81,7 @@ const viewCopy: Record<
   },
   capa: {
     eyebrow: "PUBLIC CAPA",
-    title: "只读整改闭环",
+    title: "闭环结构回放",
     description: "演示 Parent → Human → Derived → Child，不提供审批、执行或生产放行写操作。",
   },
   lineage: {
@@ -91,7 +91,7 @@ const viewCopy: Record<
   },
   runs: {
     eyebrow: "PUBLIC AGENT TRACE",
-    title: "六阶段运行与选择回执",
+    title: "六阶段状态与预算快照",
     description: "展示受控编排的可观察事实，不展示或伪造模型私有思维链。",
   },
   integrations: {
@@ -288,7 +288,7 @@ function Capa({ manifest }: { manifest: PublicReplayManifest }) {
   return (
     <>
       <Panel variant="raised">
-        <PanelHeader eyebrow="PARENT / HUMAN / CHILD" title="受控整改链" detail="公开回放只呈现已冻结状态。" />
+        <PanelHeader eyebrow="PARENT / HUMAN / CHILD" title="冻结血缘回放" detail="公开回放只呈现已冻结状态。" />
         <div className="public-lineage-rail">
           {manifest.lineage.map((item, index) => (
             <article key={item.id}>
@@ -384,7 +384,7 @@ function Review({ manifest }: { manifest: PublicReplayManifest }) {
   const rows = [
     ["问题真实", "公开行业来源与场景边界", "README / INDUSTRY_SCENARIO_VALUE"],
     ["能力真实", "选中/拒绝 Worker、预算、触发证据", "Public replay manifest"],
-    ["闭环真实", "Parent / Human / Derived / Child", "Lineage view"],
+    ["闭环结构可核验", "Parent / Human / Derived / Child", "Lineage view"],
     ["异常稳定", "缺失事实保持 HOLD，不制造 PASS", "Governance view"],
     ["安全合规", "无客户数据、无密钥、无人机写", "Publication boundary"],
     ["开放复用", "Apache-2.0、SBOM、格式合同", "Repository docs"],

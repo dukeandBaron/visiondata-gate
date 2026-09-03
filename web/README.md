@@ -34,7 +34,7 @@ production_release_allowed=false
 | `/runs` | 阶段事件、Dynamic Leader 和 Tool Receipts |
 | `/integrations` | CVAT、FiftyOne、API、Adapter 与模型合同状态；登记本机 allowlist 内的只读来源 |
 | `/governance` | 授权历史批次影子评测、治理效果分母、权限矩阵、审计封套与发布门禁 |
-| `/review` | 90 秒只读评委路径 |
+| `/review` | 60 秒只读评委路径 |
 | `/settings` | 平台能力与桌面封装准备状态 |
 
 ## Windows 快速启动

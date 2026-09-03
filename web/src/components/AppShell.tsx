@@ -9,6 +9,7 @@ import {
   FileSearch,
   FolderKanban,
   GitBranch,
+  House,
   Images,
   LayoutDashboard,
   Network,
@@ -624,7 +625,7 @@ export function AppShell() {
       <a className="skip-to-content" href="#main-content">跳到主要内容</a>
       <aside className="linear-sidebar" aria-label="工作空间导航">
         <header className="linear-sidebar__header">
-          <NavLink to="/workspace" aria-label="打开图像工作簿">
+          <NavLink to={publicReplayMode ? "/" : "/workspace"} aria-label={publicReplayMode ? "返回项目首页" : "打开图像工作簿"}>
             <BrandMark compact={sidebarCollapsed} />
           </NavLink>
           <button
@@ -770,6 +771,12 @@ export function AppShell() {
           </div>
           <div className="linear-topbar__actions">
             {workspaceError ? <span className="linear-topbar__error">{workspaceError}</span> : null}
+            {publicReplayMode ? (
+              <NavLink to="/" className="linear-public-home" aria-label="返回公开项目首页">
+                <House size={14} />
+                <span>项目首页</span>
+              </NavLink>
+            ) : null}
             <NavLink
               to="/review"
               className={({ isActive }) => `linear-review-shortcut${isActive ? " is-active" : ""}`}

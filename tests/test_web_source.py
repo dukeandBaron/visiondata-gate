@@ -11,6 +11,36 @@ def _source(relative_path: str) -> str:
     return (WEB_SRC / relative_path).read_text(encoding="utf-8")
 
 
+def test_public_facade_is_manifest_bound_and_fail_closed() -> None:
+    landing = _source("pages/PublicLandingPage.tsx")
+    public_app = _source("public/PublicApp.tsx")
+    shell = _source("components/AppShell.tsx")
+    main = _source("main.tsx")
+    styles = _source("styles/public-facade.css")
+    html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+
+    assert "usePublicReplayManifest()" in landing
+    assert 'state.status === "VERIFIED"' in landing
+    assert "FAIL CLOSED" in landing
+    assert "NO VERIFIED FACTS · NO PASS" in landing
+    assert "production_release_allowed=false" in landing
+    assert "official_submission" in landing
+    assert "official_evaluation" in landing
+    assert "manifest.manifest_sha256" in landing
+    assert "manifest.worker_selection.budget" in landing
+    assert "missing_evidence" in landing
+
+    assert '<Route path="/" element={<PublicLandingPage />} />' in public_app
+    assert 'to={publicReplayMode ? "/" : "/workspace"}' in shell
+    assert "document.documentElement.dataset.runtimeMode = publicReplayMode" in main
+    assert 'data-runtime-mode="public-replay"' in styles
+    assert ".facade-gate-spine::before" in styles
+
+    assert 'property="og:title"' in html
+    assert 'property="og:image"' in html
+    assert "%BASE_URL%favicon.svg" in html
+
+
 def test_canvas_annotation_selection_and_hover_are_bidirectional() -> None:
     page = _source("pages/ImageWorkspacePage.tsx")
     canvas = _source("components/InteractiveImageCanvas.tsx")

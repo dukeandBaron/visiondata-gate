@@ -1,7 +1,7 @@
 # 数据来源与合规说明｜GOAI 复赛 RC3
 
 作品：VisionData Gate｜工业视觉数据治理与发布 Agent
-场景：AI+工业制造
+官方排期方向：AI+其他；应用场景：工业视觉数据治理 / 制造业
 状态：`PASS_LOCAL_BOUNDARY / OWNER_SOURCE_URL_ACTION_REQUIRED`
 
 本文件对应官方参赛手册第 8、10-14 页要求。它记录当前本地处理事实和边界，不构成法律意见、数据所有权证明、赛事方背书、客户验收或生产批准。
@@ -22,7 +22,7 @@
 
 项目同时参考 Omni-AD 方法的公开代码仓库 <https://github.com/easyoo/Omni-AD> 与论文信息，但代码仓库/论文不是本地 `Omni-AD-30-release` 数据子集的许可证证明，二者不得混用。
 
-在提交 RC3 前，账号持有人应从原下载页面、赛事平台下载记录或组委会说明补填准确来源 URL、取得方式与允许使用范围。若无法补齐，材料必须继续保留 `NO_EXPLICIT_REDISTRIBUTION_LICENSE_FOUND`，且不得把原始数据随代码或证据包提交。
+在本次复赛材料上传前，账号持有人应从原下载页面、赛事平台下载记录或组委会说明补填准确来源 URL、取得方式与允许使用范围。若无法补齐，材料必须继续保留 `OWNER_SOURCE_URL_ACTION_REQUIRED` / `NO_EXPLICIT_REDISTRIBUTION_LICENSE_FOUND`，且不得把原始数据随公共源码镜像或附件包提交。
 
 ## 2. 授权与访问控制
 
@@ -91,7 +91,7 @@
 
 ## 7. 代码、依赖与知识产权
 
-项目自有代码按 Apache-2.0 发布，包含顶层 `LICENSE`、`NOTICE`、CycloneDX SBOM、第三方依赖精确版本与许可证清单。代码许可不扩展到外部数据、模型权重、客户资产或第三方素材。RC3 源码包不得包含 Python distributions、模型权重或原始 Omni 数据。
+项目自有代码按 Apache-2.0 发布，包含顶层 `LICENSE`、`NOTICE`、CycloneDX SBOM、第三方依赖精确版本与许可证清单。代码许可不扩展到外部数据、模型权重、客户资产或第三方素材。公共源码镜像和 RC4 附件包均不得包含 Python distributions、模型权重或原始 Omni 数据。
 
 ## 8. 人工确认与行业边界
 

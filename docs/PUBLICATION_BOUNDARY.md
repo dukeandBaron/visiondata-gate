@@ -41,7 +41,7 @@ VisionData Gate 的公开交付采用“私有权威仓 + 干净公共镜像”�
 - selected / rejected Workers、选择原因、冻结预算和 triggering evidence；
 - 竞争假设与缺失证据；
 - Intake → Planner → Tool → Council → Judge → Delivery 六阶段；
-- Parent → Human → Derived → Child 血缘；
+- Parent → Human Gate (`REQUIRED`) → Derived → Child 血缘；公开清单不证明具名审批已完成；
 - **official_submission=PENDING**、**official_evaluation=NOT_EVALUATED**；
 - **production_release_allowed=false**。
 
@@ -78,7 +78,8 @@ Pages 工作流在部署前依次执行：
 - **PASS_PUBLIC_REPOSITORY_PRIVACY**
 - **PASS_PUBLIC_PAGES_PRIVACY**
 - **PUBLIC_SYNTHETIC_REPLAY**
-- **PASS_LOCAL_RC3_RELEASE_CANDIDATE**
+- **FROZEN_RC3_BASELINE / PASS_LOCAL_RC3_RELEASE_CANDIDATE**（只绑定冻结 RC3 commit/tree）
+- **CURRENT_RC4_DEFENSE_KIT / PASS_LOCAL_RC4_DEFENSE_KIT_INTEGRITY**（仅表示本地附件内容、隐私与字节完整性通过；公共镜像同步和官网提交独立）
 
 不得因此升级为：
 

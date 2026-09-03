@@ -51,11 +51,15 @@ PUBLIC_EXACT_FILES = {
     "docs/CARGO_LICENSES.locked.json",
     "docs/CLAIM_SCOPE.md",
     "docs/DATA_SOURCE_AND_COMPLIANCE_SEMIFINAL_RC3.md",
+    "docs/DEFENSE_3MIN_SCRIPT_SEMIFINAL.md",
+    "docs/DEFENSE_QA_SEMIFINAL.md",
+    "docs/DEMO_60S_SCRIPT_SEMIFINAL.md",
     "docs/DYNAMICBENCH_V3.md",
     "docs/DYNAMICBENCH_V4.md",
     "docs/EVIDENCE_AND_BENCHMARKS.md",
     "docs/EXTERNAL_MODEL_CONFIGURATION.md",
     "docs/GOAI_COMPETITION_EVALUATION.md",
+    "docs/GOAI_SEMIFINAL_GUIDE_20260902.md",
     "docs/GOAI_SEMIFINAL_OFFICIAL_FEEDBACK_CLOSURE_20260831.md",
     "docs/GOVERNED_AUDIT_ENVELOPE.md",
     "docs/GOVERNED_OUTCOME_ENVELOPE.md",
@@ -74,6 +78,7 @@ PUBLIC_EXACT_FILES = {
     "docs/RELEASE_ATTESTATION_V1.md",
     "docs/RUNNING.md",
     "docs/SBOM.cdx.json",
+    "docs/SEMIFINAL_DEFENSE_RUNBOOK_20260902.md",
     "docs/THIRD_PARTY_LICENSE_INVENTORY.generated.md",
     "docs/THIRD_PARTY_NOTICES.md",
     "docs/TOOLS_AND_MCP_CONTRACT.md",
@@ -143,6 +148,19 @@ class PublicExportError(RuntimeError):
     """Raised when a public snapshot cannot be exported safely."""
 
 
+def _contains_forbidden_env_path(parts: list[str]) -> bool:
+    last_index = len(parts) - 1
+    for index, part in enumerate(parts):
+        env_name = part.casefold()
+        if env_name == ".env":
+            return True
+        if env_name.startswith(".env.") and not (
+            env_name == ".env.example" and index == last_index
+        ):
+            return True
+    return False
+
+
 def _git_text(*args: str) -> str:
     return subprocess.check_output(
         ["git", *args],
@@ -193,6 +211,8 @@ def _selected(path: str) -> bool:
     ):
         return False
     lowered = normalized.casefold()
+    if _contains_forbidden_env_path(parts):
+        return False
     if lowered in FORBIDDEN_NAMES:
         return False
     if any(lowered.startswith(prefix) for prefix in FORBIDDEN_PREFIXES):

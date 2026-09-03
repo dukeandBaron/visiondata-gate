@@ -1504,6 +1504,8 @@ def _parse_evidence_projections(
     resolved_paths: set[Path] = set()
     for label, reference in receipt.evidence_projections.items():
         try:
+            if "\x00" in reference.path:
+                raise ValueError("projection path contains a NUL byte")
             lexical = base / reference.path
             reparse = bool(
                 lexical.is_symlink()

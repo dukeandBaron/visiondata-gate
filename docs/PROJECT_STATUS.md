@@ -1,29 +1,34 @@
 # VisionData Gate｜产品与发布状态
 
-更新时间：2026-09-01
+更新时间：2026-09-02
 
 ## 当前裁决
 
 ```text
-development_state=RC3_FROZEN_LOCAL
-release_state=LOCAL_RELEASE_CANDIDATE
-release_candidate_ready=true
+current_worktree_state=RC4_DEFENSE_KIT_LOCALLY_VERIFIED
+current_release_decision=PASS_LOCAL_RC4_DEFENSE_KIT_INTEGRITY
+public_mirror_rc4_sync=PENDING
+frozen_rc3_state=RC3_FROZEN_LOCAL
+frozen_rc3_release_candidate_ready=true
+frozen_rc3_release_decision=PASS_LOCAL_RC3_RELEASE_CANDIDATE
+frozen_rc3_source_commit=c5fd68fc38025ffab4345cd739e611c96b13c530
+frozen_rc3_source_tree=5501787b6ed452759af16e60dca76ce0c2ec54bf
 submission_eligible=false
-local_release_decision=PASS_LOCAL_RC3_RELEASE_CANDIDATE
 official_submission=PENDING
 official_evaluation=NOT_EVALUATED
 production_release_allowed=false
 machine_write_permitted=false
+authority=human_only
 factory_shadow_metrics=NOT_MEASURED_PENDING_ADJUDICATION
 release_evidence_binding=DETACHED_RELEASE_NAMESPACE_REQUIRED
 public_distribution=PRIVACY_SAFE_MIRROR_ONLY
 ```
 
-这组状态只表示本地候选代码、材料与可复现实跑已经进入 RC3 封版形态。它不代表官网已经上传、评委已经验收、客户已经采用，或工厂允许生产放行。
+冻结 RC3 的本地候选代码、材料与可复现实跑只绑定上述 commit/tree 及其 detached 验证集。当前 RC4 的 PPT/PDF、当前公开工作台 57.33 秒备用视频、公共源码快照、Defense Kit ZIP 和匹配回执已完成独立的本地隐私、内容与完整性联检，因此取得 `PASS_LOCAL_RC4_DEFENSE_KIT_INTEGRITY`；GitHub 公共镜像 RC4 同步仍为 `PENDING`。这些状态都不代表官网已经上传、评委已经验收、客户已经采用，或工厂允许生产放行。
 
 公开交付采用私有权威仓与公共镜像分离：公共镜像只含允许公开的源码、合成样本、锁文件、文档与静态 `PUBLIC_SYNTHETIC_REPLAY`，不含私域运行证据、原始 Omni/CAPA 资产、密钥、本机路径或完整私有 Git 历史。公共仓和 Pages 是否与当前权威源码一致，必须同时核对 mirror manifest 的 source commit/tree 与部署 SHA。
 
-`PASS_LOCAL_RC3_RELEASE_CANDIDATE` 只有在完整本地验证集由 verifier 返回 `PASS_LOCAL_INTEGRITY` 时才成立。detached release namespace 必须含 Attestation、两份候选 ZIP、四份 receipt 与 Full JUnit；项目根还必须是匹配的 clean checkout，具有精确 commit/tree、`uv.lock`、SBOM 和 Attestation 声明的本地 toolchain。Attestation 位于 release namespace 根，候选 ZIP 位于其 build 子目录；单独复制“候选 ZIP + Attestation”不能完成复验。本文不复制会随重新封包变化的哈希。任一旁车、checkout 或 toolchain 对账失败时，状态立即退回 `HOLD_AS_RELEASE_TREE`。
+`PASS_LOCAL_RC3_RELEASE_CANDIDATE` 只有在冻结 RC3 的完整本地验证集由 verifier 返回 `PASS_LOCAL_INTEGRITY` 时才成立。detached release namespace 必须含 Attestation、两份候选 ZIP、四份 receipt 与 Full JUnit；项目根还必须是匹配的 clean checkout，具有精确 commit/tree、`uv.lock`、SBOM 和 Attestation 声明的本地 toolchain。Attestation 位于 release namespace 根，候选 ZIP 位于其 build 子目录；单独复制“候选 ZIP + Attestation”不能完成复验。本文不复制会随重新封包变化的哈希。任一旁车、checkout 或 toolchain 对账失败时，状态立即退回 `HOLD_AS_RELEASE_TREE`。RC4 使用独立的附件清单、公共源码快照、内容/隐私 QA 与确定性 ZIP 回执；任一匹配检查失败时，RC4 状态立即退回 `HOLD_RC4_DEFENSE_KIT`。
 
 ## 当前主版本
 

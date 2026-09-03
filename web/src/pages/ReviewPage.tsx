@@ -901,7 +901,7 @@ export function ReviewPage() {
             </span>
             <div className="review-brief__title-row">
               <h1 id="review-brief-title">异常案件评审台</h1>
-              <StatusBadge tone="warning" compact>90 秒评审路径</StatusBadge>
+              <StatusBadge tone="warning" compact>60 秒评审路径</StatusBadge>
             </div>
             <p>先看工业现场，再沿同一 Task 核对 Agent 补证、人工闸门与最终放行边界。</p>
           </div>

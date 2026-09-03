@@ -369,12 +369,26 @@ def _tracked_paths() -> list[str]:
     return sorted(item.decode("utf-8") for item in raw.split(b"\0") if item)
 
 
+def _contains_forbidden_env_path(parts: list[str]) -> bool:
+    last_index = len(parts) - 1
+    for index, part in enumerate(parts):
+        env_name = part.casefold()
+        if env_name == ".env":
+            return True
+        if env_name.startswith(".env.") and not (
+            env_name == ".env.example" and index == last_index
+        ):
+            return True
+    return False
+
+
 def _path_violations(paths: Iterable[str]) -> list[dict[str, str]]:
     violations: list[dict[str, str]] = []
     for path in paths:
         normalized = path.replace("\\", "/")
         lowered = normalized.casefold()
-        if lowered in FORBIDDEN_TRACKED_NAMES:
+        forbidden_env = _contains_forbidden_env_path(lowered.split("/"))
+        if lowered in FORBIDDEN_TRACKED_NAMES or forbidden_env:
             violations.append({"rule": "forbidden-path", "path": normalized})
         if any(lowered.startswith(prefix) for prefix in FORBIDDEN_TRACKED_PREFIXES):
             violations.append({"rule": "forbidden-prefix", "path": normalized})
@@ -681,30 +695,100 @@ def _scan_current(
     )
 
 
-def _reviewed_binary_records(*, root: Path | None = None) -> dict[str, str]:
-    project_root = PROJECT_ROOT if root is None else root
+def _reviewed_binary_records_from_bytes(data: bytes) -> dict[str, str]:
     try:
-        manifest = json.loads(
-            (project_root / PUBLIC_BINARY_REVIEW_PATH).read_text(encoding="utf-8")
-        )
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        manifest = json.loads(data.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
         return {}
-    entries = manifest.get("files") if isinstance(manifest, dict) else None
-    if not isinstance(entries, list):
+    if not isinstance(manifest, dict) or set(manifest) != {
+        "schema_version",
+        "review_basis",
+        "reviewed_on",
+        "reviewer_identity_included",
+        "reviewed_file_count",
+        "prohibited_content_checks",
+        "files",
+        "manifest_sha256",
+    }:
+        return {}
+    if (
+        manifest.get("schema_version") != "visiondata-gate.public-binary-review.v1"
+        or manifest.get("review_basis") != "VISUAL_PIXEL_AND_METADATA_INSPECTION"
+        or manifest.get("reviewer_identity_included") is not False
+    ):
+        return {}
+    stable = dict(manifest)
+    expected_manifest_sha256 = stable.pop("manifest_sha256", None)
+    if (
+        expected_manifest_sha256
+        != hashlib.sha256(_canonical_json_bytes(stable)).hexdigest()
+    ):
+        return {}
+    entries = manifest.get("files")
+    if not isinstance(entries, list) or manifest.get("reviewed_file_count") != len(
+        entries
+    ):
         return {}
     records: dict[str, str] = {}
     for entry in entries:
-        if not isinstance(entry, dict):
-            continue
+        if not isinstance(entry, dict) or set(entry) != {
+            "path",
+            "sha256",
+            "size_bytes",
+            "category",
+            "review_result",
+        }:
+            return {}
         path = entry.get("path")
         sha256 = entry.get("sha256")
+        normalized = path.replace("\\", "/") if isinstance(path, str) else None
         if (
-            isinstance(path, str)
-            and isinstance(sha256, str)
-            and re.fullmatch(r"[0-9a-f]{64}", sha256) is not None
+            normalized is None
+            or normalized in records
+            or not isinstance(sha256, str)
+            or re.fullmatch(r"[0-9a-f]{64}", sha256) is None
+            or not isinstance(entry.get("size_bytes"), int)
+            or entry["size_bytes"] < 0
+            or not isinstance(entry.get("category"), str)
+            or entry.get("review_result") != "PASS_NO_PRIVATE_CONTENT_OBSERVED"
         ):
-            records[path.replace("\\", "/")] = sha256
+            return {}
+        records[normalized] = sha256
     return records
+
+
+def _reviewed_binary_records(*, root: Path | None = None) -> dict[str, str]:
+    project_root = PROJECT_ROOT if root is None else root
+    try:
+        data = (project_root / PUBLIC_BINARY_REVIEW_PATH).read_bytes()
+    except OSError:
+        return {}
+    return _reviewed_binary_records_from_bytes(data)
+
+
+def _reviewed_binary_history_records(
+    objects: dict[str, tuple[str, ...]],
+    *,
+    current_records: dict[str, str] | None = None,
+) -> dict[str, frozenset[str]]:
+    """Collect every SHA explicitly approved by a valid review manifest revision."""
+
+    approved: dict[str, set[str]] = {}
+    seed = _reviewed_binary_records() if current_records is None else current_records
+    for path, sha256 in seed.items():
+        approved.setdefault(path, set()).add(sha256)
+
+    for object_id, paths in objects.items():
+        if PUBLIC_BINARY_REVIEW_PATH not in paths:
+            continue
+        raw = _git("cat-file", "blob", object_id)
+        assert isinstance(raw, bytes)
+        for path, sha256 in _reviewed_binary_records_from_bytes(raw).items():
+            approved.setdefault(path, set()).add(sha256)
+
+    return {
+        path: frozenset(sorted(digests)) for path, digests in sorted(approved.items())
+    }
 
 
 def _history_entry(rule: str, *, path: str, object_id: str) -> dict[str, str]:
@@ -738,7 +822,7 @@ def _historical_blob_violations(
     *,
     path: str,
     object_id: str,
-    reviewed_binaries: dict[str, str],
+    reviewed_binaries: dict[str, str | frozenset[str]],
 ) -> list[dict[str, str]]:
     normalized = path.replace("\\", "/")
     report_path, violations = _historical_path_policy(
@@ -767,7 +851,13 @@ def _historical_blob_violations(
                     object_id=object_id,
                 )
             )
-        elif expected_sha256 != observed_sha256:
+        else:
+            approved_sha256 = (
+                {expected_sha256}
+                if isinstance(expected_sha256, str)
+                else expected_sha256
+            )
+        if expected_sha256 is not None and observed_sha256 not in approved_sha256:
             violations.append(
                 _history_entry(
                     "history-binary-sha-drift",
@@ -940,11 +1030,13 @@ def _history_objects() -> dict[str, tuple[str, ...]]:
 def _scan_history_blobs(
     objects: dict[str, tuple[str, ...]],
     *,
-    reviewed_binaries: dict[str, str] | None = None,
+    reviewed_binaries: dict[str, str | frozenset[str]] | None = None,
 ) -> list[dict[str, str]]:
     violations: list[dict[str, str]] = []
     approved_binaries = (
-        _reviewed_binary_records() if reviewed_binaries is None else reviewed_binaries
+        _reviewed_binary_history_records(objects)
+        if reviewed_binaries is None
+        else reviewed_binaries
     )
     process = subprocess.Popen(
         ["git", "--no-replace-objects", "cat-file", "--batch"],
