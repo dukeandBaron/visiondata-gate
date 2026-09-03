@@ -1,7 +1,7 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "da190be523ccf8043741c20419181b6ff5d83676",
-  "source_tree_oid": "d28d9e134e6f2c9f6312d22dda37788a173a138f",
+  "source_commit_oid": "46f413026941d8948c3571f7bd36daa583a8d3b9",
+  "source_tree_oid": "01594fd9fc94f9b0719d7b4008edd51c15e2c514",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
@@ -9,7 +9,7 @@
   "personal_data_included": false,
   "tracked_source_only": true,
   "file_count": 458,
-  "snapshot_sha256": "94002b8750d4f119b7699efea0739d87b5c5c178dcad1cb0d52b3bc2af69d7c4",
+  "snapshot_sha256": "2f521b67f50cb3a5600c69170f39efb13f1449a61b584880ab6db2e099269455",
   "files": [
     {
       "path": ".env.example",
@@ -1520,7 +1520,7 @@
     },
     {
       "path": "tests/test_web_source.py",
-      "sha256": "0c6cb8259f10d01db1d14f2278dc952aff20315c017fc1f4f6fa07dbfe2307f6",
+      "sha256": "d598d2d8c4709322fb2531de01e3461df57c39ef9577b01a9bfd3cc62027b27c",
       "size_bytes": 46455
     },
     {
