@@ -17,8 +17,8 @@ import {
 } from "../publicReplay";
 
 const publicRepositoryUrl =
-  "https://github.com/dukeandBaron/visiondata-gate-public";
-const runningGuideUrl = `${publicRepositoryUrl}/blob/main/docs/RUNNING.md`;
+  "https://github.com/dukeandBaron/visiondata-gate";
+const runningGuideUrl = `${publicRepositoryUrl}/blob/main/docs/quickstart.md`;
 
 const workbenchSurfaces = [
   {
@@ -145,7 +145,7 @@ export function PublicLandingPage() {
           <a href="#boundary">验证边界</a>
         </nav>
         <Link className="facade-nav__workbench" to="/command-center">
-          打开工作台 <ArrowRight size={15} />
+          查看只读回放 <ArrowRight size={15} />
         </Link>
       </header>
 
@@ -167,10 +167,12 @@ export function PublicLandingPage() {
               整改后由 Child Run 独立复验。
             </p>
             <div className="facade-hero__actions">
+              <a href={runningGuideUrl} target="_blank" rel="noreferrer">
+                启动真实本地工作台 <ExternalLink size={14} />
+              </a>
               <Link to="/command-center">
-                进入公开工作台 <ArrowRight size={16} />
+                查看只读回放 <ArrowRight size={16} />
               </Link>
-              <a href={runningGuideUrl} target="_blank" rel="noreferrer">本地运行指南</a>
               <a href={publicRepositoryUrl} target="_blank" rel="noreferrer">
                 查看源码 <ExternalLink size={14} />
               </a>
@@ -308,7 +310,7 @@ export function PublicLandingPage() {
             <span>TRACE THE EVIDENCE. CONTROL THE DECISION.</span>
             <h2>从一个冻结合成案件开始，检查工具、Worker、人工门禁与独立复验</h2>
           </div>
-          <Link to="/command-center">打开公开工作台 <ArrowRight size={17} /></Link>
+          <Link to="/command-center">查看公开只读回放 <ArrowRight size={17} /></Link>
         </section>
       </main>
 

@@ -7,6 +7,5 @@ authors:
 version: 0.1.0
 date-released: 2026-09-03
 license: Apache-2.0
-repository-code: "https://github.com/dukeandBaron/visiondata-gate-public"
-url: "https://dukeandbaron.github.io/visiondata-gate-public/"
-
+repository-code: "https://github.com/dukeandBaron/visiondata-gate"
+url: "https://dukeandbaron.github.io/visiondata-gate/"

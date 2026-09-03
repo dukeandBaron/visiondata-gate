@@ -93,7 +93,7 @@ npm run preview
 
 ```powershell
 $env:VITE_VISIONDATA_PUBLIC_REPLAY = "true"
-$env:VISIONDATA_WEB_BASE_PATH = "/visiondata-gate-public/"
+$env:VISIONDATA_WEB_BASE_PATH = "/visiondata-gate/"
 npm run build
 python ..\tools\check_public_pages.py --dist dist
 ```

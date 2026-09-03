@@ -19,8 +19,8 @@ The React source is portable to macOS and Linux. Prebuilt, signed desktop packag
 ## Install
 
 ```powershell
-git clone https://github.com/dukeandBaron/visiondata-gate-public.git
-cd visiondata-gate-public
+git clone https://github.com/dukeandBaron/visiondata-gate.git
+cd visiondata-gate
 .\setup_env.ps1
 ```
 
@@ -40,6 +40,8 @@ The launcher creates an ephemeral local session and starts both services on loop
 | API health | `http://127.0.0.1:8787/v1/health` |
 | OpenAPI | `http://127.0.0.1:8787/docs` |
 
+Open `/workspace`, create or select a project, then use **Upload images** for individual files or **Import dataset** for COCO, YOLO, VOC, or LabelMe inputs. The browser streams the selected bytes to the loopback API; the service persists them in the local operator workspace and returns a SHA-256-bound asset receipt. This path is interactive and does not use the public replay fixtures.
+
 For hot reload:
 
 ```powershell
@@ -54,7 +56,7 @@ For hot reload:
 
 This command prepares an isolated synthetic project, verifies its manifest, and opens the exact Review deep link. It never grants production authority and never converts an unresolved Child Run into a production `PASS`.
 
-The hosted [Live Demo](https://dukeandbaron.github.io/visiondata-gate-public/) is a static `PUBLIC_SYNTHETIC_REPLAY`. It does not call the local API or accept writes.
+The hosted [read-only replay](https://dukeandbaron.github.io/visiondata-gate/) is a static `PUBLIC_SYNTHETIC_REPLAY`. It does not call the local API, accept uploads, or write project state.
 
 ## Use authorized local data
 

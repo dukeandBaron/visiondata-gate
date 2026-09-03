@@ -9,7 +9,7 @@
 <p align="center"><em>A governed evidence agent for industrial vision data readiness.</em></p>
 
 <p align="center">
-  <a href="https://github.com/dukeandBaron/visiondata-gate-public/actions/workflows/ci.yml"><img src="https://github.com/dukeandBaron/visiondata-gate-public/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://github.com/dukeandBaron/visiondata-gate/actions/workflows/ci.yml"><img src="https://github.com/dukeandBaron/visiondata-gate/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-334155.svg" alt="Apache-2.0" /></a>
   <img src="https://img.shields.io/badge/Python-3.12-334155.svg" alt="Python 3.12" />
   <img src="https://img.shields.io/badge/FastAPI-0.141-334155.svg" alt="FastAPI 0.141" />
@@ -20,7 +20,9 @@
 </p>
 
 <p align="center">
-  <a href="https://dukeandbaron.github.io/visiondata-gate-public/"><strong>Open Workbench</strong></a>
+  <a href="docs/quickstart.md"><strong>Run Local Workbench</strong></a>
+  ·
+  <a href="https://dukeandbaron.github.io/visiondata-gate/"><strong>View Read-only Replay</strong></a>
   ·
   <a href="docs/quickstart.md"><strong>Quickstart</strong></a>
   ·
@@ -34,7 +36,7 @@
 <p align="center">
   <img src="docs/assets/web-command-center.png" alt="VisionData Gate industrial evidence workbench" width="1180" />
   <br />
-  <sub>同一工作台支持本地受控 API 与公开只读回放；数据来源和权限始终显式标注。</sub>
+  <sub>本地版本连接受控 API、接受真实图片并保存项目状态；GitHub Pages 仅提供明确标注的只读证据回放。</sub>
 </p>
 
 ## Why VisionData Gate
@@ -95,19 +97,21 @@ flowchart LR
 
 状态缺失、摘要漂移、工具失败或并发版本过期都会返回类型化阻断状态，并区分可重试与不可重试。Review/Case 投影界面不会用 Incident 原始字段、静态 Fixture 或上一次 `PASS` 覆盖失败的 LIVE 读取。
 
-## Quick Start
+## Run the Real Workbench
 
 要求：Windows 10/11、Python 3.12、[uv](https://docs.astral.sh/uv/) 和 Node.js 22+。
 
 ```powershell
-git clone https://github.com/dukeandBaron/visiondata-gate-public.git
-cd visiondata-gate-public
+git clone https://github.com/dukeandBaron/visiondata-gate.git
+cd visiondata-gate
 
 .\setup_env.ps1
 .\run_workbench.ps1 -Install
 ```
 
-启动后访问：
+启动后打开 `http://127.0.0.1:4173/workspace`。这是连接本机 FastAPI 的真实工作台，不是预设回放：可以创建项目、上传单张图片或带 COCO / YOLO / VOC / LabelMe 标注的数据集，并继续生成分析、工单与受控 Agent 任务。上传字节保存在本地工作区，返回的资产回执包含服务端复算的 SHA-256。
+
+服务入口：
 
 - Workbench：`http://127.0.0.1:4173/workspace`
 - API health：`http://127.0.0.1:8787/v1/health`
@@ -121,7 +125,7 @@ cd visiondata-gate-public
 
 该入口会创建独立项目、验证 Manifest，并打开对应案件的审阅页。它不会连接生产设备，也不会把仍受阻的 Child Run 改写为生产 `PASS`。
 
-不安装即可浏览 [公开工作台](https://dukeandbaron.github.io/visiondata-gate-public/)。该站点固定为 `PUBLIC_SYNTHETIC_REPLAY`：无后端、无账户、无 API Key、无客户数据、无写入能力。
+不安装即可浏览 [公开只读回放](https://dukeandbaron.github.io/visiondata-gate/)。该站点固定为 `PUBLIC_SYNTHETIC_REPLAY`：无后端、无账户、无 API Key、无客户数据、无上传或写入能力。它用于检查产品流程与审计合同，不替代本地真实工作台。
 
 完整安装、授权本地目录和 BYOP 配置见 [Quickstart](docs/quickstart.md)。当前发布的是可复现源码；已签名的桌面安装包尚未提供。
 
@@ -180,7 +184,7 @@ Provider Key 由本地服务保存且不会通过 API 回显。SHA-256 用于内
 ## Repository Map
 
 ```text
-visiondata-gate-public/
+visiondata-gate/
 ├── src/visiondata_gate/   # governed runtime, API, evidence and audit contracts
 ├── web/                   # React 19 industrial workbench
 ├── desktop/               # Tauri 2 desktop shell

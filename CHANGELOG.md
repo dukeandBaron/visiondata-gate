@@ -18,5 +18,5 @@
 - FastAPI、React 19 工作台与 Tauri 2 Windows 外壳源码。
 - Schema、Rule Pack、Skill、Adapter、sample data 和公开合成回放。
 
-[Unreleased]: https://github.com/dukeandBaron/visiondata-gate-public/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/dukeandBaron/visiondata-gate-public/releases/tag/v0.1.0
+[Unreleased]: https://github.com/dukeandBaron/visiondata-gate/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/dukeandBaron/visiondata-gate/releases/tag/v0.1.0

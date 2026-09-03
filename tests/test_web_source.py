@@ -410,6 +410,12 @@ def test_vite_proxy_rejects_cross_site_requests_before_session_injection() -> No
     assert "window.history.replaceState" in bootstrap
     assert "#visiondata_session=$SessionToken" in launcher
     assert "VISIONDATA_WEB_SESSION_TOKEN" not in launcher
+    assert '$env:VITE_VISIONDATA_PUBLIC_REPLAY = "false"' in launcher
+    assert '$env:VISIONDATA_WEB_BASE_PATH = "/"' in launcher
+    assert '$env:VITE_VISIONDATA_API_BASE_URL = ""' in launcher
+    assert '$env:VITE_VISIONDATA_REVIEWER_BASE_URL = ""' in launcher
+    assert '$env:VITE_VISIONDATA_ACTOR_USER_ID = $Actor' in launcher
+    assert '$env:VISIONDATA_WEB_API_TARGET = $ApiBaseUrl' in launcher
     assert "will not disclose a new" in launcher
 
 

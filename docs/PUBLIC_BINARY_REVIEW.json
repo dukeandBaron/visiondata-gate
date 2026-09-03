@@ -12,7 +12,7 @@
     "NON_SYNTHETIC_INDUSTRIAL_IMAGE"
   ],
   "files": [
-    {"path":"docs/assets/web-command-center.png","sha256":"6f17984aa20f026b15b096804f1149c1f98a8047de9d2f375121643b233c2203","size_bytes":190091,"category":"SYNTHETIC_WORKBENCH_SCREENSHOT","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
+    {"path":"docs/assets/web-command-center.png","sha256":"bd1cd59d93625ae4042f036bf035796fd27508a1163bf61386e747ef6328736f","size_bytes":378120,"category":"SYNTHETIC_WORKBENCH_SCREENSHOT","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
     {"path":"sample_data/clear/clean-test-bearing.png","sha256":"34d9e5d59af2238b528c26a67ccd27e88d0de46222099202645afb358538a4cc","size_bytes":25330,"category":"SYNTHETIC_GENERATED_SAMPLE","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
     {"path":"sample_data/clear/clean-val-bearing.png","sha256":"5745e41907a81a93f4be94357b0daf109c87522a927f5cfc9660fc5c5f4d2858","size_bytes":24825,"category":"SYNTHETIC_GENERATED_SAMPLE","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
     {"path":"sample_data/clear/clean-val-gear.png","sha256":"ed1a1ac2edbf099a8394ba35efcce25950346b71846482796495b295c3f46247","size_bytes":26347,"category":"SYNTHETIC_GENERATED_SAMPLE","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
@@ -36,5 +36,5 @@
     {"path":"web/src-tauri/icons/icon.ico","sha256":"0406af7414ef4343a1133aa32d8db1ec9985f0d09192302aeed0026b57c62858","size_bytes":15412,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"},
     {"path":"web/src-tauri/icons/icon.png","sha256":"c0681a5548db6920925dd6852ec383aa0e82c2a4891f6e1f611125a6b1f9d908","size_bytes":13433,"category":"PROJECT_LOGO","review_result":"PASS_NO_PRIVATE_CONTENT_OBSERVED"}
   ],
-  "manifest_sha256": "7610d00b88cb0b1b1ab32bee132d0cd07c9a1ce4e0959894e478732db7453bfd"
+  "manifest_sha256": "e3c06dcbcad7f65eb2213bdb32ee38ed5dc69015219e3e99f56cdcb1d821ac36"
 }

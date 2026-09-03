@@ -108,10 +108,19 @@ if (Test-LocalEndpoint -Url $WorkbenchUrl) {
 else {
     Write-Host "Starting the Web workbench..."
     $WebJob = Start-Job -Name "visiondata-gate-web" -ScriptBlock {
-        param($ScriptPath, $SelectedMode, $Port, $InstallDependencies, $ApiBaseUrl)
+        param($ScriptPath, $SelectedMode, $Port, $InstallDependencies, $ApiBaseUrl, $Actor)
+        # A local launch must never inherit the static GitHub Pages build mode
+        # or a stale cross-origin endpoint from the caller's shell.  Keep the
+        # browser on the same-origin /v1 proxy so the generated session remains
+        # scoped to this launcher-owned API process.
+        $env:VITE_VISIONDATA_PUBLIC_REPLAY = "false"
+        $env:VISIONDATA_WEB_BASE_PATH = "/"
+        $env:VITE_VISIONDATA_API_BASE_URL = ""
+        $env:VITE_VISIONDATA_REVIEWER_BASE_URL = ""
+        $env:VITE_VISIONDATA_ACTOR_USER_ID = $Actor
         $env:VISIONDATA_WEB_API_TARGET = $ApiBaseUrl
         & $ScriptPath -Mode $SelectedMode -Port $Port -Install:$InstallDependencies
-    } -ArgumentList $WebScript, $Mode, $WebPort, $Install.IsPresent, "http://127.0.0.1:$ApiPort"
+    } -ArgumentList $WebScript, $Mode, $WebPort, $Install.IsPresent, "http://127.0.0.1:$ApiPort", $SessionActor
     $OwnedJobs.Add($WebJob)
 }
 

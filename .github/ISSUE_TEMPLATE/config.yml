@@ -1,6 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security report
-    url: https://github.com/dukeandBaron/visiondata-gate-public/blob/main/SECURITY.md
+    url: https://github.com/dukeandBaron/visiondata-gate/blob/main/SECURITY.md
     about: 安全问题请按私密报告流程处理，不要公开披露密钥或客户数据。
-
