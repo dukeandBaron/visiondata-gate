@@ -1,0 +1,297 @@
+.private-validation-loading,
+.private-validation-failure {
+  display: grid;
+  min-height: 94px;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line-strong);
+  background: #0f151b;
+}
+
+.private-validation-loading {
+  grid-template-columns: max-content minmax(0, 1fr);
+  color: var(--muted);
+  font: 700 11px/1.4 var(--font-mono);
+  letter-spacing: 0.08em;
+}
+
+.private-validation-failure {
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  border-left: 3px solid #d45b4c;
+}
+
+.private-validation-failure > svg {
+  color: #e27362;
+}
+
+.private-validation-failure strong {
+  color: #f0d3cd;
+  font: 700 12px/1.4 var(--font-mono);
+}
+
+.private-validation-failure p,
+.private-validation-failure small {
+  margin: 5px 0 0;
+  color: #a99591;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.private-validation-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.private-validation-actions .action-button {
+  min-height: 32px;
+}
+
+.private-validation-metrics .metric {
+  min-height: 116px;
+}
+
+.private-validation-metrics .metric > strong {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.private-validation-metrics .metric > small {
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+
+.private-validation-hold-reasons {
+  display: grid;
+  grid-template-columns: max-content max-content minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 13px;
+  border: 1px solid #7b463f;
+  background: #1b1313;
+  color: #c99b92;
+}
+
+.private-validation-hold-reasons > svg {
+  color: #e27362;
+}
+
+.private-validation-hold-reasons strong {
+  color: #f0d3cd;
+  font: 700 10px/1.4 var(--font-mono);
+}
+
+.private-validation-hold-reasons span {
+  font: 10px/1.5 var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.private-validation-tracks {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 14px;
+  border: 1px solid #56616c;
+  background: #0d1217;
+}
+
+.private-validation-tracks > article {
+  min-width: 0;
+  padding: 16px;
+  border-right: 1px solid #56616c;
+}
+
+.private-validation-tracks > article:last-child {
+  border-right: 0;
+}
+
+.private-validation-tracks > article[data-tone="hold"] {
+  box-shadow: inset 0 3px 0 #d45b4c;
+}
+
+.private-validation-tracks header {
+  display: flex;
+  min-height: 30px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #343d46;
+}
+
+.private-validation-tracks header > small,
+.private-validation-tracks > article > small,
+.private-validation-scenarios small {
+  color: #80b6d5;
+  font: 700 10px/1.45 var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.private-validation-tracks > article > strong {
+  display: block;
+  margin: 13px 0 10px;
+  color: #e9eef3;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.private-validation-tracks p {
+  margin: 7px 0;
+  color: #a8b3bd;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.private-validation-tracks p b {
+  margin-right: 7px;
+  color: #d8e3ec;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.private-validation-tracks > article > small {
+  display: block;
+  margin-top: 13px;
+  color: #8695a2;
+}
+
+.private-validation-scenarios {
+  margin-top: 14px;
+  border: 1px solid #56616c;
+  background: #0d1217;
+}
+
+.private-validation-scenarios > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #56616c;
+}
+
+.private-validation-scenarios > header > div {
+  display: grid;
+  gap: 5px;
+}
+
+.private-validation-scenarios > header strong {
+  color: #e9eef3;
+  font-size: 15px;
+}
+
+.private-validation-scenarios > header > span {
+  color: #9aa8b4;
+  font-size: 11px;
+}
+
+.private-validation-scenarios > article {
+  display: grid;
+  grid-template-columns: minmax(210px, 0.28fr) minmax(0, 0.72fr);
+  border-bottom: 1px solid #343d46;
+}
+
+.private-validation-scenarios > article:last-child {
+  border-bottom: 0;
+}
+
+.private-validation-scenarios__label {
+  display: grid;
+  align-content: center;
+  gap: 7px;
+  padding: 15px 16px;
+  border-right: 1px solid #56616c;
+}
+
+.private-validation-scenarios__label strong {
+  color: #e4ebf1;
+  font-size: 13px;
+}
+
+.private-validation-scenarios__label span {
+  color: #8b99a5;
+  font: 10px/1.45 var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.private-validation-strategies {
+  display: grid;
+}
+
+.private-validation-strategies > div {
+  display: grid;
+  grid-template-columns: minmax(155px, 1.2fr) repeat(3, minmax(95px, 0.8fr)) minmax(115px, 0.9fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #2c343c;
+}
+
+.private-validation-strategies > div:last-child {
+  border-bottom: 0;
+}
+
+.private-validation-strategies strong {
+  color: #e2e9ef;
+  font-size: 11px;
+}
+
+.private-validation-strategies span {
+  color: #a7b5c0;
+  font-size: 10px;
+}
+
+.private-validation-strategies code {
+  color: #80b6d5;
+  font: 10px/1.45 var(--font-mono);
+}
+
+.private-validation-digests {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.private-validation-digests .digest {
+  margin: 0;
+}
+
+@media (max-width: 1280px) {
+  .private-validation-tracks {
+    grid-template-columns: 1fr;
+  }
+
+  .private-validation-tracks > article {
+    border-right: 0;
+    border-bottom: 1px solid #56616c;
+  }
+
+  .private-validation-tracks > article:last-child {
+    border-bottom: 0;
+  }
+
+  .private-validation-scenarios > article {
+    grid-template-columns: 1fr;
+  }
+
+  .private-validation-scenarios__label {
+    border-right: 0;
+    border-bottom: 1px solid #56616c;
+  }
+}
+
+@media (max-width: 980px) {
+  .private-validation-failure,
+  .private-validation-digests,
+  .private-validation-strategies > div,
+  .private-validation-hold-reasons {
+    grid-template-columns: 1fr;
+  }
+
+  .private-validation-failure {
+    justify-items: start;
+  }
+}

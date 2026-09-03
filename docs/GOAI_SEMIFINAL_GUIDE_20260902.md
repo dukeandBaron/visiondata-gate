@@ -48,16 +48,14 @@
 
 ## 复赛硬性要求
 
-指南第 2–5 页把复赛核心收敛为六个可核验结果：
+指南第 3–5 页把复赛核心收敛为四项优先核验：
 
-1. 项目完成度；
-2. Demo 可运行性；
-3. 用户流程闭环；
-4. 技术实现；
-5. 数据与合规说明；
-6. 开放 / 复用规范。
+1. 行业场景价值；
+2. Demo 与应用验证；
+3. 工程与材料可核验性；
+4. 数据与合规边界。
 
-作品还必须面向真实、明确的行业场景，具备 Agent 能力，并至少完成一条可验证的端到端任务链。评委必须能够访问代码、工程材料、Demo 与运行证据；高风险场景必须写清风险提示和人工确认边界。
+其中 Demo 与工程核验继续要求作品具备 Agent 能力并至少完成一条可验证的端到端任务链；评委必须能够访问代码、工程材料、Demo 与运行证据；高风险场景必须写清风险提示和人工确认边界。开放/复用仍可作为此前 20 页手册六维评分中的能力证据，但不能被写成最新指南另列的第五项硬核验。
 
 ## 四项提交材料
 
@@ -111,7 +109,13 @@ VisionData Gate 的 60 秒公开路径对应为：
 
 ```text
 current_rc4_defense_kit=PASS_LOCAL_RC4_DEFENSE_KIT_INTEGRITY
-public_mirror_rc4_sync=PENDING
+public_mirror_rc4_sync=PASS_PUBLIC_RC4_SYNC
+public_mirror_source_commit=46a7242f9aa746f9b8f0f78b776d662422d32c72
+public_mirror_source_tree=ab27540b18b8d63db6d9db9256fa2b3330f44dfc
+public_mirror_head=eb3ef24f7b7df771a4be51a1a3263a060c561db3
+public_pages_workflow=33718870200_SUCCESS
+public_release=v0.4.0-goai-semifinal-rc4
+current_rc5_document_publication=PENDING
 frozen_rc3_candidate=PASS_LOCAL_RC3_RELEASE_CANDIDATE
 frozen_rc3_source_commit=c5fd68fc38025ffab4345cd739e611c96b13c530
 frozen_rc3_source_tree=5501787b6ed452759af16e60dca76ce0c2ec54bf
@@ -123,6 +127,6 @@ machine_write_permitted=false
 authority=human_only
 ```
 
-冻结 RC3 的 PASS 只绑定上述 commit/tree。当前 RC4 的 PPT/PDF、当前公开工作台 57.33 秒备用视频、公共源码快照和 Defense Kit 已取得独立的 `PASS_LOCAL_RC4_DEFENSE_KIT_INTEGRITY`，没有从 RC3 继承 PASS；GitHub 公共镜像 RC4 同步与官网提交仍分别保持 `PENDING`。
+冻结 RC3 的 PASS 只绑定上述 commit/tree。RC4 的 PPT/PDF、当前公开工作台 57.33 秒备用视频、公共源码快照和 Defense Kit 已取得独立的 `PASS_LOCAL_RC4_DEFENSE_KIT_INTEGRITY`，没有从 RC3 继承 PASS；RC4 公共镜像已取得 `PASS_PUBLIC_RC4_SYNC` 并绑定上述 source/public 身份。本轮 RC5 文档尚未发布，官网提交仍为 `PENDING`。
 
 答辩排期确认不等于官网提交完成；公开工作台可访问不等于工厂验证；Child 的本地合成结果不等于生产放行。

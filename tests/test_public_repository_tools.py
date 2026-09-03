@@ -38,6 +38,8 @@ from tools.check_public_repository import (
     validate_snapshot,
 )
 from tools.export_public_repository import (
+    PUBLIC_CI_TEMPLATE,
+    PUBLIC_CI_WORKFLOW,
     PUBLIC_PAGES_TEMPLATE,
     PUBLIC_PAGES_WORKFLOW,
     _selected,
@@ -64,6 +66,7 @@ def test_public_export_is_allowlist_based_and_excludes_private_delivery_surfaces
     assert _selected("CONTRIBUTING.md")
     assert _selected("SECURITY.md")
     assert _selected("CODE_OF_CONDUCT.md")
+    assert _selected(".streamlit/config.toml")
     assert _selected("src/visiondata_gate/api.py")
     assert _selected("web/public/public-replay.v1.json")
     assert _selected("sample_data/clear/clean-val-gear.png")
@@ -79,7 +82,9 @@ def test_public_export_is_allowlist_based_and_excludes_private_delivery_surfaces
         assert _selected(semifinal_document)
     assert _selected(PUBLIC_BINARY_REVIEW_PATH)
     assert _selected(PUBLIC_PAGES_TEMPLATE)
+    assert _selected(PUBLIC_CI_TEMPLATE)
     assert not _selected(PUBLIC_PAGES_WORKFLOW)
+    assert not _selected(PUBLIC_CI_WORKFLOW)
     assert not _selected("docs/assets/reviewer-mode.png")
     assert _selected(".env.example")
     assert _selected("web/.env.example")
@@ -150,10 +155,18 @@ def test_public_export_injects_sha_bound_pages_workflow(
     workflow = destination / PUBLIC_PAGES_WORKFLOW
     assert workflow.read_bytes() == template.read_bytes()
 
+    ci_template = destination / PUBLIC_CI_TEMPLATE
+    ci_workflow = destination / PUBLIC_CI_WORKFLOW
+    assert ci_workflow.read_bytes() == ci_template.read_bytes()
+
     workflow_entry = next(
         item for item in manifest["files"] if item["path"] == PUBLIC_PAGES_WORKFLOW
     )
     assert workflow_entry["source"] == PUBLIC_PAGES_TEMPLATE
+    ci_workflow_entry = next(
+        item for item in manifest["files"] if item["path"] == PUBLIC_CI_WORKFLOW
+    )
+    assert ci_workflow_entry["source"] == PUBLIC_CI_TEMPLATE
 
     monkeypatch.setattr(public_repository_checker, "PROJECT_ROOT", destination)
     tracked = [item["path"] for item in manifest["files"]]
@@ -193,6 +206,10 @@ def test_public_repository_gate_rejects_media_and_unreviewed_binary_locations() 
     violations = _path_violations(
         [
             "deliverables/demo.mp4",
+            "evidence/private-receipt.json",
+            "10_reports/internal.md",
+            "release/private-receipt.json",
+            "website/data/site-data.json",
             "docs/private.pdf",
             "screenshots/operator.png",
             "sample_data/clear/clean-val-gear.png",
@@ -200,6 +217,13 @@ def test_public_repository_gate_rejects_media_and_unreviewed_binary_locations() 
     )
     rules_by_path = {(item["rule"], item["path"]) for item in violations}
     assert ("forbidden-suffix", "deliverables/demo.mp4") in rules_by_path
+    for private_path in (
+        "evidence/private-receipt.json",
+        "10_reports/internal.md",
+        "release/private-receipt.json",
+        "website/data/site-data.json",
+    ):
+        assert ("forbidden-prefix", private_path) in rules_by_path
     assert ("forbidden-suffix", "docs/private.pdf") in rules_by_path
     assert (
         "binary-outside-reviewed-prefix",

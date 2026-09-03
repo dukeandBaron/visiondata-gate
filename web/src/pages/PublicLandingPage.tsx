@@ -3,63 +3,59 @@ import {
   BadgeCheck,
   Braces,
   CircleOff,
-  Download,
   ExternalLink,
-  FileCheck2,
-  GitBranch,
   LockKeyhole,
+  RefreshCw,
   ScanLine,
   Workflow,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BrandMark } from "../components/BrandMark";
 import {
-  publicReplayManifestUrl,
   usePublicReplayManifest,
   type PublicReplayManifest,
 } from "../publicReplay";
 
 const publicRepositoryUrl =
   "https://github.com/dukeandBaron/visiondata-gate-public";
-const publicDocsUrl = `${publicRepositoryUrl}/tree/main/docs`;
+const runningGuideUrl = `${publicRepositoryUrl}/blob/main/docs/RUNNING.md`;
 
-const scoreRows = [
+const workbenchSurfaces = [
   {
-    weight: "25%",
-    title: "行业场景价值",
-    proof: "多源工业视觉证据、目标用户、影子评测合同与迁移梯度",
-    href: `${publicRepositoryUrl}/blob/main/docs/INDUSTRY_SCENARIO_VALUE.md`,
+    index: "01",
+    title: "证据取证",
+    description: "查看图像、标注、元数据测点与来源摘要",
+    href: "/evidence",
   },
   {
-    weight: "25%",
-    title: "Agent 任务闭环",
-    proof: "Intake → Planner → Tool → Judge → CAPA → Child Run",
-    href: `${publicRepositoryUrl}/blob/main/docs/AGENT_RUNTIME.md`,
-  },
-  {
-    weight: "20%",
-    title: "产品与 Demo",
-    proof: "可交互多页面工作台、独立静态清单读取、错误与缺失状态失败关闭",
+    index: "02",
+    title: "动态调查",
+    description: "跟踪 Worker 选择、补证原因、预算与工具状态",
     href: "/command-center",
-    internal: true,
   },
   {
-    weight: "15%",
-    title: "技术实现",
-    proof: "typed kernel、确定性工具、动态补证、JCS / SHA-256 证据绑定",
-    href: `${publicRepositoryUrl}/blob/main/docs/BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md`,
+    index: "03",
+    title: "案件审阅",
+    description: "检查竞争假设、缺失证据与下一安全动作",
+    href: "/cases",
   },
   {
-    weight: "10%",
-    title: "安全与可追溯",
-    proof: "只读来源、具名人工权限、私有派生整改、production=false",
-    href: `${publicRepositoryUrl}/blob/main/docs/PUBLICATION_BOUNDARY.md`,
+    index: "04",
+    title: "人工 CAPA",
+    description: "让具名人员审批整改，保留 Agent 权限边界",
+    href: "/capa",
   },
   {
-    weight: "5%",
-    title: "开放与复用",
-    proof: "Apache-2.0、SBOM、Schema、Rule Pack、Adapter 与示例数据",
-    href: `${publicRepositoryUrl}/blob/main/docs/OPEN_REUSE_CONTRACTS.md`,
+    index: "05",
+    title: "血缘复验",
+    description: "追踪 Parent、Human、Derived 与 Child Run",
+    href: "/lineage",
+  },
+  {
+    index: "06",
+    title: "治理边界",
+    description: "区分公开回放、私域验证与尚未取得的工厂证据",
+    href: "/governance",
   },
 ] as const;
 
@@ -101,7 +97,13 @@ function IntegrityDossier({ manifest }: { manifest: PublicReplayManifest }) {
   );
 }
 
-function IntegrityUnavailable({ failedReason }: { failedReason?: string }) {
+function IntegrityUnavailable({
+  failedReason,
+  onRetry,
+}: {
+  failedReason?: string;
+  onRetry: () => void;
+}) {
   return (
     <aside className={`facade-dossier facade-dossier--pending${failedReason ? " is-failed" : ""}`} aria-live="polite">
       <header className="facade-dossier__header">
@@ -112,6 +114,11 @@ function IntegrityUnavailable({ failedReason }: { failedReason?: string }) {
         <Braces size={28} />
         <h2>{failedReason ? "公开清单未通过完整性核验" : "正在复算 JCS SHA-256"}</h2>
         <p>{failedReason ?? "任何案件数字都要等摘要一致后才显示。"}</p>
+        {failedReason ? (
+          <button type="button" className="facade-dossier__retry" onClick={onRetry}>
+            <RefreshCw size={15} /> 重新加载并核验
+          </button>
+        ) : null}
       </div>
       <footer className="facade-dossier__digest">
         <span>DISPLAY POLICY</span>
@@ -133,9 +140,9 @@ export function PublicLandingPage() {
           <BrandMark />
         </Link>
         <nav aria-label="公开项目导航">
+          <a href="#capabilities">产品能力</a>
           <a href="#workflow">任务闭环</a>
-          <a href="#proof">评审证据</a>
-          <a href="#boundary">公开边界</a>
+          <a href="#boundary">验证边界</a>
         </nav>
         <Link className="facade-nav__workbench" to="/command-center">
           打开工作台 <ArrowRight size={15} />
@@ -146,9 +153,9 @@ export function PublicLandingPage() {
         <section className="facade-hero" aria-labelledby="facade-title">
           <div className="facade-hero__copy">
             <div className="facade-eyebrow">
-              <span>GOAI 2026 · 复赛</span>
+              <span>LOCAL-FIRST · INDUSTRIAL VISION GOVERNANCE</span>
               <i />
-              <span>第 03 队 · AI + 其他 / 工业视觉</span>
+              <span>EVIDENCE · CAPA · RECHECK</span>
             </div>
             <h1 id="facade-title">
               让工业视觉 Agent<br />
@@ -161,12 +168,25 @@ export function PublicLandingPage() {
             </p>
             <div className="facade-hero__actions">
               <Link to="/command-center">
-                进入已核验合成工作台 <ArrowRight size={16} />
+                进入公开工作台 <ArrowRight size={16} />
               </Link>
-              <Link to="/review">按评分项查看证据</Link>
+              <a href={runningGuideUrl} target="_blank" rel="noreferrer">本地运行指南</a>
               <a href={publicRepositoryUrl} target="_blank" rel="noreferrer">
                 查看源码 <ExternalLink size={14} />
               </a>
+            </div>
+            <div className="facade-validation-ledger" aria-label="公开与私有验证边界">
+              <article>
+                <span>PRIVATE_OFFLINE_VALIDATION</span>
+                <strong>私有工业数据只留在本地工作台</strong>
+                <small>本地部署路径不等于本页已经取得客户验收或工厂真值。</small>
+              </article>
+              <article>
+                <span>PUBLIC_SYNTHETIC_REPLAY</span>
+                <strong>公开页只回放 SHA 绑定合成案件</strong>
+                <small>访客可以检查编排、测点和闭环结构；浏览器不连接后端。</small>
+              </article>
+              <p><b>NO_FACTORY_TRUTH</b> 当前没有厂级双人裁决真值，因此不声明真实工厂误放行率或生产 PASS。</p>
             </div>
             <div className="facade-mode-strip" role="note">
               <span>PUBLIC SYNTHETIC REPLAY</span>
@@ -180,11 +200,14 @@ export function PublicLandingPage() {
           {manifest ? (
             <IntegrityDossier manifest={manifest} />
           ) : (
-            <IntegrityUnavailable failedReason={state.status === "FAILED" ? state.reason : undefined} />
+            <IntegrityUnavailable
+              failedReason={state.status === "FAILED" ? state.reason : undefined}
+              onRetry={state.retry}
+            />
           )}
         </section>
 
-        <section className="facade-problem" aria-labelledby="problem-title">
+        <section className="facade-problem" id="capabilities" aria-labelledby="problem-title">
           <header className="facade-section-heading">
             <span>01 / REAL PROBLEM</span>
             <h2 id="problem-title">现场缺的不是又一张报表，而是一段能追责的处理流程</h2>
@@ -241,30 +264,20 @@ export function PublicLandingPage() {
 
         <section className="facade-proof" id="proof" aria-labelledby="proof-title">
           <header className="facade-section-heading">
-            <span>03 / REVIEWER PROOF MAP</span>
-            <h2 id="proof-title">沿着评分表取证，不靠口号拿分</h2>
+            <span>03 / OPERATOR WORKBENCH</span>
+            <h2 id="proof-title">从证据发现到 Child Run 复验，每一步都能进入</h2>
           </header>
           <div className="facade-score-ledger">
-            {scoreRows.map((row) => {
-              const content = (
+            {workbenchSurfaces.map((surface) => (
+              <Link key={surface.title} to={surface.href}>
                 <>
-                  <b>{row.weight}</b>
-                  <strong>{row.title}</strong>
-                  <span>{row.proof}</span>
+                  <b>{surface.index}</b>
+                  <strong>{surface.title}</strong>
+                  <span>{surface.description}</span>
                   <ArrowRight size={15} />
                 </>
-              );
-              return "internal" in row && row.internal ? (
-                <Link key={row.title} to={row.href}>{content}</Link>
-              ) : (
-                <a key={row.title} href={row.href} target="_blank" rel="noreferrer">{content}</a>
-              );
-            })}
-          </div>
-          <div className="facade-proof__actions">
-            <Link to="/review"><FileCheck2 size={16} /> 打开评审证据索引</Link>
-            <a href={publicDocsUrl} target="_blank" rel="noreferrer"><GitBranch size={16} /> 浏览公开文档</a>
-            <a href={publicReplayManifestUrl} download><Download size={16} /> 下载回放清单</a>
+              </Link>
+            ))}
           </div>
         </section>
 
@@ -275,10 +288,10 @@ export function PublicLandingPage() {
           </header>
           <div className="facade-boundary__grid">
             <div className="facade-boundary__state">
-              <article><span>FROZEN RC3 BASELINE</span><strong>{manifest?.release_status.local_candidate ?? "VERIFYING"}</strong></article>
-              <article><span>OFFICIAL SUBMISSION</span><strong>{manifest?.release_status.official_submission ?? "PENDING"}</strong></article>
-              <article><span>OFFICIAL EVALUATION</span><strong>{manifest?.release_status.official_evaluation ?? "NOT_EVALUATED"}</strong></article>
-              <article><span>PRODUCTION RELEASE</span><strong>FALSE</strong></article>
+              <article><span>SOURCE MODE</span><strong>PUBLIC_SYNTHETIC_REPLAY</strong></article>
+              <article><span>BACKEND</span><strong>NOT CONNECTED</strong></article>
+              <article><span>CUSTOMER DATA</span><strong>NOT INCLUDED</strong></article>
+              <article><span>PRODUCTION</span><strong>FALSE</strong></article>
             </div>
             <div className="facade-boundary__missing">
               <header><Workflow size={17} /><strong>仍缺少的外部证据</strong></header>
@@ -292,8 +305,8 @@ export function PublicLandingPage() {
 
         <section className="facade-final-cta">
           <div>
-            <span>READ THE EVIDENCE. REPLAY THE CASE.</span>
-            <h2>用 60 秒看清输入、Agent、工具、异常处理与复验</h2>
+            <span>TRACE THE EVIDENCE. CONTROL THE DECISION.</span>
+            <h2>从一个冻结合成案件开始，检查工具、Worker、人工门禁与独立复验</h2>
           </div>
           <Link to="/command-center">打开公开工作台 <ArrowRight size={17} /></Link>
         </section>
@@ -305,6 +318,7 @@ export function PublicLandingPage() {
           <a href={`${publicRepositoryUrl}/blob/main/LICENSE`} target="_blank" rel="noreferrer">Apache-2.0</a>
           <a href={`${publicRepositoryUrl}/blob/main/SECURITY.md`} target="_blank" rel="noreferrer">安全策略</a>
           <a href={`${publicRepositoryUrl}/blob/main/docs/PUBLICATION_BOUNDARY.md`} target="_blank" rel="noreferrer">隐私边界</a>
+          <Link to="/review">GOAI review materials</Link>
         </nav>
       </footer>
     </div>

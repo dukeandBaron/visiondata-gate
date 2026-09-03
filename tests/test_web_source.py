@@ -24,14 +24,24 @@ def test_public_facade_is_manifest_bound_and_fail_closed() -> None:
     assert "FAIL CLOSED" in landing
     assert "NO VERIFIED FACTS · NO PASS" in landing
     assert "production_release_allowed=false" in landing
-    assert "official_submission" in landing
-    assert "official_evaluation" in landing
+    assert "LOCAL-FIRST · INDUSTRIAL VISION GOVERNANCE" in landing
+    assert "03 / OPERATOR WORKBENCH" in landing
+    assert "BACKEND</span><strong>NOT CONNECTED" in landing
+    assert "CUSTOMER DATA</span><strong>NOT INCLUDED" in landing
+    assert "GOAI review materials" in landing
+    assert "GOAI 2026 · 复赛" not in landing
+    assert "REVIEWER PROOF MAP" not in landing
+    assert "FROZEN RC3 BASELINE" not in landing
+    assert "OFFICIAL SUBMISSION" not in landing
     assert "manifest.manifest_sha256" in landing
     assert "manifest.worker_selection.budget" in landing
     assert "missing_evidence" in landing
 
     assert '<Route path="/" element={<PublicLandingPage />} />' in public_app
     assert 'to={publicReplayMode ? "/" : "/workspace"}' in shell
+    assert 'publicReplayMode && item.path === "/review" ? "验证档案"' in shell
+    assert 'publicReplayMode ? "Public Operator"' in shell
+    assert 'location.pathname === "/review" ? "当前复核" : "审计复核"' in shell
     assert "document.documentElement.dataset.runtimeMode = publicReplayMode" in main
     assert 'data-runtime-mode="public-replay"' in styles
     assert ".facade-gate-spine::before" in styles
@@ -39,6 +49,87 @@ def test_public_facade_is_manifest_bound_and_fail_closed() -> None:
     assert 'property="og:title"' in html
     assert 'property="og:image"' in html
     assert "%BASE_URL%favicon.svg" in html
+
+
+def test_public_replay_rc5_is_retryable_legible_and_truth_bounded() -> None:
+    runtime = _source("publicReplay.ts")
+    landing = _source("pages/PublicLandingPage.tsx")
+    replay = _source("pages/PublicReplayPage.tsx")
+    styles = _source("styles/index.css")
+    facade_styles = _source("styles/public-facade.css")
+
+    assert "const [attempt, setAttempt] = useState(0)" in runtime
+    assert 'setState({ status: "LOADING" })' in runtime
+    assert "}, [attempt])" in runtime
+    assert "return { ...state, retry }" in runtime
+    assert "onClick={state.retry}" in replay
+    assert "onRetry={state.retry}" in landing
+    assert "重新加载并核验公开清单" in replay
+    assert "重新加载并核验" in landing
+
+    assert "PRIVATE_OFFLINE_VALIDATION" in landing
+    assert "PUBLIC_SYNTHETIC_REPLAY" in landing
+    assert "NO_FACTORY_TRUTH" in landing
+    assert "不声明真实工厂误放行率或生产 PASS" in landing
+
+    assert "SyntheticClosureComparison" in replay
+    assert "manifest.triggering_evidence.map" in replay
+    assert "POST-REPAIR MEASUREMENTS · NOT PUBLISHED IN THIS MANIFEST" in replay
+    assert "TOOL_FAULT_RECEIPT · NOT INCLUDED" in replay
+    assert "不宣称工具故障恢复率" in replay
+    assert "ReviewBoundaryLedger" in replay
+    assert "production_release_allowed=false" in replay
+
+    assert ".public-closure-comparison__track::before" in styles
+    assert ".public-replay-failure .action-button" in styles
+    assert ".public-replay-page .panel-header p" in styles
+    assert ".public-replay-page .public-review-table code" in styles
+    assert ".facade-validation-ledger" in facade_styles
+    assert ".facade-dossier__retry" in facade_styles
+
+
+def test_governance_private_industrial_validation_is_live_fail_closed_and_scoped() -> (
+    None
+):
+    governance = _source("pages/GovernancePage.tsx")
+    panel = _source("components/PrivateIndustrialValidationPanel.tsx")
+    api = _source("data/privateIndustrialValidationApi.ts")
+    public_replay = _source("pages/PublicReplayPage.tsx")
+
+    assert "PrivateIndustrialValidationPanel" in governance
+    assert 'id="private-industrial-validation"' in panel
+    assert "workspaceId={activeWorkspace?.workspace_id}" in governance
+    assert "projectId={activeProject?.project_id}" in governance
+    assert 'apiConnected={connection.api === "CONNECTED"}' in governance
+
+    assert "/evaluation-evidence/industrial-validation?" in api
+    assert "domainJcsSha256" in api
+    assert "visiondata-gate.private-industrial-validation.v1\\0" in api
+    assert 'domainJcsSha256("industrial-validation-projection", stable)' in api
+    assert 'domainJcsSha256(\n        "visa-scenario-groups"' in api
+    assert 'response.headers.get("X-Content-SHA256")' in api
+    assert 'normalizedEtag(response.headers.get("ETag"))' in api
+    assert "INDUSTRIAL_VALIDATION_CONTRACT_DRIFT" in api
+    assert "字段集合漂移" in api
+    assert '"mismatched_artifacts", "missing_artifacts"' in api
+    assert '"transient_recovery_rate", "non_retryable_retry_rate"' in api
+    assert (
+        '"source_artifact_name", "source_report_file_sha256", "capa_receipt_sha256"'
+        in api
+    )
+    assert '"customer_shadow_execution_receipt_sha256"' in api
+    assert "summary.visa_public_proxy === null" in api
+
+    assert "404、503、网络故障或合同漂移" in panel
+    assert "重新读取并核验" in panel
+    assert "NO FIXTURE FALLBACK · NO EMBEDDED METRICS" in panel
+    assert "DATASET_OFFLINE_VALIDATION ≠ FACTORY_SHADOW_METRICS" in panel
+    assert "NORMAL_NO_FAULT" in panel
+    assert "TRANSIENT_RECOVERABLE_FAULT" in panel
+    assert "PERSISTENT_FAULT_SAFETY_COST" in panel
+    assert "actual_factory_truth" in panel
+    assert "recomputable_now" in panel
+    assert "PrivateIndustrialValidationPanel" not in public_replay
 
 
 def test_canvas_annotation_selection_and_hover_are_bidirectional() -> None:

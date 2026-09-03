@@ -66,6 +66,7 @@ deliverables/_qa/*
 !docs/CARGO_LICENSES.locked.json
 !docs/PUBLIC_BINARY_REVIEW.json
 !docs/SBOM.cdx.json
+!docs/evidence/visa_public_proxy_summary.v1.json
 !skills/manifest.json
 !tests/fixtures/runtime_workbench/legacy_cases/*.json
 !tests/fixtures/legacy_memory_v1_golden.json

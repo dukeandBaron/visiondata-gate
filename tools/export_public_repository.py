@@ -21,16 +21,26 @@ from typing import Iterable
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_PAGES_TEMPLATE = "tools/templates/public-pages.yml"
 PUBLIC_PAGES_WORKFLOW = ".github/workflows/pages.yml"
+PUBLIC_CI_TEMPLATE = "tools/templates/public-ci.yml"
+PUBLIC_CI_WORKFLOW = ".github/workflows/ci.yml"
 
 PUBLIC_EXACT_FILES = {
     ".env.example",
     ".gitattributes",
     ".gitignore",
+    ".streamlit/config.toml",
+    ".github/ISSUE_TEMPLATE/bug_report.yml",
+    ".github/ISSUE_TEMPLATE/config.yml",
+    ".github/ISSUE_TEMPLATE/feature_request.yml",
+    ".github/pull_request_template.md",
+    "CHANGELOG.md",
+    "CITATION.cff",
     "CODE_OF_CONDUCT.md",
     "CONTRIBUTING.md",
     "LICENSE",
     "NOTICE",
     "SECURITY.md",
+    "SUPPORT.md",
     "app.py",
     "build_windows_installer.ps1",
     "environment.core.yml",
@@ -59,6 +69,7 @@ PUBLIC_EXACT_FILES = {
     "docs/EVIDENCE_AND_BENCHMARKS.md",
     "docs/EXTERNAL_MODEL_CONFIGURATION.md",
     "docs/GOAI_COMPETITION_EVALUATION.md",
+    "docs/GOAI_SCORE_EVIDENCE_INDEX.md",
     "docs/GOAI_SEMIFINAL_GUIDE_20260902.md",
     "docs/GOAI_SEMIFINAL_OFFICIAL_FEEDBACK_CLOSURE_20260831.md",
     "docs/GOVERNED_AUDIT_ENVELOPE.md",
@@ -76,6 +87,7 @@ PUBLIC_EXACT_FILES = {
     "docs/PUBLIC_REPOSITORY_README.md",
     "docs/RC3_DELIVERY_CONTRACT.md",
     "docs/RELEASE_ATTESTATION_V1.md",
+    "docs/REVIEWER_READINESS_MATRIX.md",
     "docs/RUNNING.md",
     "docs/SBOM.cdx.json",
     "docs/SEMIFINAL_DEFENSE_RUNBOOK_20260902.md",
@@ -83,6 +95,7 @@ PUBLIC_EXACT_FILES = {
     "docs/THIRD_PARTY_NOTICES.md",
     "docs/TOOLS_AND_MCP_CONTRACT.md",
     "docs/TOOL_REPLAY_AND_MIGRATION.md",
+    "docs/evidence/visa_public_proxy_summary.v1.json",
     "docs/PUBLIC_BINARY_REVIEW.json",
     "docs/assets/web-command-center.png",
 }
@@ -279,19 +292,30 @@ def _copy_files(destination: Path, paths: Iterable[str]) -> list[dict[str, objec
 
 
 def _validate_export_snapshot(destination: Path) -> None:
-    checker = PROJECT_ROOT / "tools" / "check_public_repository.py"
-    result = subprocess.run(
-        [sys.executable, str(checker), "--snapshot-root", str(destination)],
-        cwd=PROJECT_ROOT,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=False,
+    validators = (
+        (
+            PROJECT_ROOT / "tools" / "check_public_repository.py",
+            ("--snapshot-root", str(destination)),
+        ),
+        (
+            PROJECT_ROOT / "tools" / "check_markdown_links.py",
+            ("--root", str(destination)),
+        ),
     )
-    if result.returncode == 0:
-        return
-    raise PublicExportError("pre-publish privacy scan rejected the exported snapshot")
+    for checker, arguments in validators:
+        result = subprocess.run(
+            [sys.executable, str(checker), *arguments],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+        if result.returncode != 0:
+            raise PublicExportError(
+                "pre-publish public snapshot validation rejected the export"
+            )
 
 
 def _assemble_snapshot(
@@ -303,6 +327,7 @@ def _assemble_snapshot(
     if not selected:
         raise PublicExportError("public allowlist selected no tracked files")
     required = {
+        PUBLIC_CI_TEMPLATE,
         PUBLIC_PAGES_TEMPLATE,
         "CODE_OF_CONDUCT.md",
         "CONTRIBUTING.md",
@@ -314,6 +339,7 @@ def _assemble_snapshot(
         "docs/PUBLIC_REPOSITORY_README.md",
         "tools/check_public_pages.py",
         "tools/check_public_repository.py",
+        "tools/run_public_test_suite.py",
         "web/package-lock.json",
         "web/public/public-replay.v1.json",
     }
@@ -324,19 +350,24 @@ def _assemble_snapshot(
         )
 
     manifest = _copy_files(resolved, selected)
-    pages_template = resolved / PUBLIC_PAGES_TEMPLATE
-    pages_workflow = resolved / PUBLIC_PAGES_WORKFLOW
-    pages_workflow.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(pages_template, pages_workflow)
-    pages_data = pages_workflow.read_bytes()
-    manifest.append(
-        {
-            "path": PUBLIC_PAGES_WORKFLOW,
-            "sha256": hashlib.sha256(pages_data).hexdigest(),
-            "size_bytes": len(pages_data),
-            "source": PUBLIC_PAGES_TEMPLATE,
-        }
-    )
+    generated_workflows = {
+        PUBLIC_CI_WORKFLOW: PUBLIC_CI_TEMPLATE,
+        PUBLIC_PAGES_WORKFLOW: PUBLIC_PAGES_TEMPLATE,
+    }
+    for workflow_path, template_path in generated_workflows.items():
+        template = resolved / template_path
+        workflow = resolved / workflow_path
+        workflow.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(template, workflow)
+        workflow_data = workflow.read_bytes()
+        manifest.append(
+            {
+                "path": workflow_path,
+                "sha256": hashlib.sha256(workflow_data).hexdigest(),
+                "size_bytes": len(workflow_data),
+                "source": template_path,
+            }
+        )
     public_readme = resolved / "docs" / "PUBLIC_REPOSITORY_README.md"
     shutil.copy2(public_readme, resolved / "README.md")
     readme_data = (resolved / "README.md").read_bytes()

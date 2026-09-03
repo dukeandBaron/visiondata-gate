@@ -1,0 +1,66 @@
+name: Bug report
+description: 报告可复现的产品、API、构建或文档问题
+title: "[Bug] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。请只提交可公开的最小复现，不要上传工厂数据、API Key、访问令牌、本机数据库或私域运行回执。
+  - type: textarea
+    id: summary
+    attributes:
+      label: 问题说明
+      description: 说明预期行为和实际行为。
+      placeholder: 预期……；实际……
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 最小复现
+      description: 提供使用 sample_data 或合成数据的步骤。
+      placeholder: |
+        1. 运行……
+        2. 打开……
+        3. 观察……
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本或提交
+      placeholder: v0.1.0 或 commit SHA
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: 影响范围
+      options:
+        - Python / CLI
+        - FastAPI
+        - React Web
+        - Tauri Desktop
+        - Public synthetic replay
+        - Documentation / packaging
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境
+      description: 只写操作系统与工具版本，不要粘贴用户名、绝对路径或环境变量值。
+      placeholder: Windows 11; Python 3.12.x; Node.js 22.x
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: 公开安全确认
+      options:
+        - label: 我已移除客户/工厂数据、个人信息、密钥、令牌、本机绝对路径和私域回执。
+          required: true
+        - label: 我没有把合成或离线结果描述成工厂生产指标。
+          required: true
+

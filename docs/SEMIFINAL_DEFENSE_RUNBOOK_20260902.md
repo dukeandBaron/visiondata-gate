@@ -72,10 +72,14 @@
 
 ```text
 current_rc4_defense_kit=PASS_LOCAL_RC4_DEFENSE_KIT_INTEGRITY
-public_mirror_rc4_sync=PENDING
+public_mirror_rc4_sync=PASS_PUBLIC_RC4_SYNC
+public_mirror_source_commit=46a7242f9aa746f9b8f0f78b776d662422d32c72
+public_mirror_source_tree=ab27540b18b8d63db6d9db9256fa2b3330f44dfc
+public_mirror_head=eb3ef24f7b7df771a4be51a1a3263a060c561db3
+current_rc5_document_publication=PENDING
 official_submission=PENDING
 official_evaluation=NOT_EVALUATED
 production_release_allowed=false
 ```
 
-新版 PPT/PDF、当前公开工作台 57.33 秒视频、公共源码快照、SHA 清单、Defense Kit ZIP 与匹配回执已完成本地包级联检。该 PASS 不自动升级 GitHub 公共镜像、官网提交、官方评测或生产放行；这些状态必须读取各自外部回执。
+新版 PPT/PDF、当前公开工作台 57.33 秒视频、公共源码快照、SHA 清单、Defense Kit ZIP 与匹配回执已完成本地包级联检。RC4 公共镜像已有独立 GitHub Actions/Pages 成功回执；当前 RC5 文档尚未发布。官网提交、官方评测和生产放行仍必须读取各自外部回执。

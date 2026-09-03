@@ -315,6 +315,64 @@
   font-weight: 700;
 }
 
+.facade-validation-ledger {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 24px;
+  border: 1px solid var(--facade-line-strong);
+  background: rgba(5, 14, 21, 0.76);
+}
+
+.facade-validation-ledger article {
+  display: grid;
+  gap: 7px;
+  min-height: 98px;
+  align-content: center;
+  padding: 15px 17px;
+  border-right: 1px solid var(--facade-line-strong);
+}
+
+.facade-validation-ledger article:nth-child(2) {
+  border-right: 0;
+}
+
+.facade-validation-ledger article > span,
+.facade-validation-ledger > p b {
+  color: var(--facade-cyan);
+  font: 700 10px/1.35 var(--font-facade-mono);
+  letter-spacing: 0.08em;
+}
+
+.facade-validation-ledger article > strong {
+  color: var(--facade-white);
+  font-size: 14px;
+}
+
+.facade-validation-ledger article > small {
+  color: var(--facade-steel);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.facade-validation-ledger > p {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 11px 17px;
+  border-top: 1px solid var(--facade-line-strong);
+  color: var(--facade-steel);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.facade-validation-ledger > p b {
+  margin-right: 9px;
+  color: var(--facade-red);
+}
+
+.facade-validation-ledger + .facade-mode-strip {
+  margin-top: 18px;
+}
+
 .facade-dossier {
   position: relative;
   min-width: 0;
@@ -505,6 +563,26 @@
 .facade-dossier__unavailable > svg { color: var(--facade-cyan); }
 .facade-dossier__unavailable h2 { margin: 5px 0 0; font-size: 18px; }
 .facade-dossier__unavailable p { max-width: 350px; margin: 0; color: var(--facade-steel); font-size: 11px; line-height: 1.6; }
+
+.facade-dossier__retry {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--facade-line-strong);
+  background: transparent;
+  color: var(--facade-white);
+  font: 700 11px/1 var(--font-facade-mono);
+  cursor: pointer;
+}
+
+.facade-dossier__retry:hover {
+  border-color: var(--facade-white);
+  background: var(--facade-cyan-soft);
+}
 
 .facade-section-heading {
   display: grid;
@@ -864,6 +942,9 @@
   .facade-hero { min-height: auto; padding: 62px 0 70px; }
   .facade-hero h1 { font-size: clamp(40px, 13vw, 64px); }
   .facade-mode-strip strong { width: 100%; margin-left: 0; }
+  .facade-validation-ledger { grid-template-columns: 1fr; }
+  .facade-validation-ledger article { border-right: 0; border-bottom: 1px solid var(--facade-line-strong); }
+  .facade-validation-ledger article:nth-child(2) { border-bottom: 0; }
   .facade-section-heading { grid-template-columns: 1fr; gap: 14px; }
   .facade-section-heading > span { padding-top: 0; }
   .facade-problem,

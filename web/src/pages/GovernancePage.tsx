@@ -55,6 +55,7 @@ import type {
 import type { StatusTone } from "../domain";
 import { useProduct } from "../ProductContext";
 import { EvaluationEvidencePanel } from "../components/EvaluationEvidencePanel";
+import { PrivateIndustrialValidationPanel } from "../components/PrivateIndustrialValidationPanel";
 
 interface ShadowManifestImportState {
   taskId: string;
@@ -587,6 +588,7 @@ export function GovernancePage() {
     <div className="page-stack">
       <nav className="governance-command-rail system-hub-toolbar" aria-label="治理页面导航">
         <a className="is-active" href="#effectiveness"><BarChart3 size={15} /><span><small>01</small>效果指标</span></a>
+        <a href="#private-industrial-validation"><DatabaseZap size={15} /><span><small>LIVE</small>离线工业验证</span></a>
         <a href="#shadow-ledger"><DatabaseZap size={15} /><span><small>02</small>影子回执</span></a>
         <a href="#dynamicbench-evidence"><Fingerprint size={15} /><span><small>REF</small>动态基准</span></a>
         <a href="#release-control"><PackageCheck size={15} /><span><small>03</small>发布门禁</span></a>
@@ -631,6 +633,12 @@ export function GovernancePage() {
         <div><small>CURRENT TASK RELEASE READINESS</small><strong>{currentReleaseOutcome}</strong><p>{releaseTask ? `来自最新完成任务 ${releaseTask.task_id} 的实时就绪回执；效果指标不会覆盖任务门禁。` : "当前项目尚无带证据的完成任务；页面保持 NOT MEASURED。"}</p></div>
         <StatusBadge tone={releaseReadiness ? readinessTone(releaseReadiness.overall_status) : "warning"}>{currentReleaseStatus}</StatusBadge>
       </div>
+
+      <PrivateIndustrialValidationPanel
+        workspaceId={activeWorkspace?.workspace_id}
+        projectId={activeProject?.project_id}
+        apiConnected={connection.api === "CONNECTED"}
+      />
 
       <EvaluationEvidencePanel
         id="dynamicbench-evidence"

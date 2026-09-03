@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { detachedJcsSha256 } from "./data/jcs";
 
 export const publicReplayMode =
@@ -78,6 +78,10 @@ type PublicReplayManifestState =
   | { status: "VERIFIED"; manifest: PublicReplayManifest }
   | { status: "FAILED"; reason: string };
 
+type PublicReplayManifestResult = PublicReplayManifestState & {
+  retry: () => void;
+};
+
 function hasExactKeys(
   value: unknown,
   expected: readonly string[],
@@ -155,14 +159,19 @@ function isPublicReplayManifest(value: unknown): value is PublicReplayManifest {
   );
 }
 
-export function usePublicReplayManifest(): PublicReplayManifestState {
+export function usePublicReplayManifest(): PublicReplayManifestResult {
   const [state, setState] = useState<PublicReplayManifestState>({
     status: "LOADING",
   });
+  const [attempt, setAttempt] = useState(0);
+  const retry = useCallback(() => {
+    setAttempt((current) => current + 1);
+  }, []);
 
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
+    setState({ status: "LOADING" });
     void fetch(publicReplayManifestUrl, {
       cache: "no-store",
       credentials: "omit",
@@ -198,7 +207,7 @@ export function usePublicReplayManifest(): PublicReplayManifestState {
       active = false;
       controller.abort();
     };
-  }, []);
+  }, [attempt]);
 
-  return state;
+  return { ...state, retry };
 }

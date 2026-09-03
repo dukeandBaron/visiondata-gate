@@ -1,0 +1,51 @@
+name: Public source verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-ci-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python contracts and API
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Verify public history and export manifest
+        run: python tools/check_public_repository.py --history
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.11.8"
+          enable-cache: true
+
+      - name: Install locked dependencies
+        run: uv sync --all-extras --locked
+
+      - name: Check lint and formatting
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: Compile Python sources
+        run: uv run python -m compileall -q src desktop tools
+
+      - name: Verify local documentation links
+        run: uv run python tools/check_markdown_links.py --root .
+
+      - name: Verify runtime, API and publication contracts
+        run: uv run python tools/run_public_test_suite.py

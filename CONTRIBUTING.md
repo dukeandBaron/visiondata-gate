@@ -12,8 +12,8 @@ VisionData Gate welcomes fixes and reusable industrial-data governance improveme
 ## Local checks
 
 ```powershell
-uv sync --frozen
-uv run python -m pytest
+uv sync --all-extras --locked
+uv run python tools/run_public_test_suite.py
 uv run ruff check .
 uv run ruff format --check .
 
@@ -23,11 +23,21 @@ npm run typecheck
 npm run build
 ```
 
-Public-mirror changes must also pass:
+After committing a public-mirror change, build a new allowlisted snapshot into
+an absent directory outside this checkout. The exporter runs the privacy,
+manifest and local-link gates before making the destination visible:
 
 ```powershell
-python tools\check_public_repository.py --history
-python tools\check_public_pages.py
+uv run python tools\export_public_repository.py `
+  --destination ..\visiondata-gate-public-audit
 ```
 
-The public repository exposes only `PUBLIC_SYNTHETIC_REPLAY`. A successful public build is not customer acceptance, production deployment, or official competition evaluation.
+The public repository's own GitHub workflows then rescan its complete public
+history, run the Python contract/API suite, and build the React Pages artifact.
+It exposes only `PUBLIC_SYNTHETIC_REPLAY`. A successful public build is not
+customer acceptance, production deployment, or official competition evaluation.
+
+The private release and benchmark tiers bind frozen evidence that is
+deliberately not redistributed. Their test source remains visible for audit,
+but a public clone must not synthesize missing private receipts to make those
+tiers pass.

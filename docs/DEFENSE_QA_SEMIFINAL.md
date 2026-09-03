@@ -16,7 +16,7 @@
 | 能接 MES、PLC、OPC UA 吗？ | 当前提供显式适配合同和未连接状态；没有真实身份与探测回执前，不能说已经在线接入。 | Integrations、Adapter SDK | 接口存在等于已经连接 |
 | 如何复现？ | 仓库提供锁文件、固定合成样本、运行入口、公开清单、测试和 SHA 校验；第三方 clean-clone 回执仍需外部完成。 | README、RUNNING、SBOM、public export | 本地通过等于第三方已复现 |
 | 你们属于哪个方向？ | 最新 9 页复赛排期把第 03 队 VisionDataGate 列为 `AI+其他`；项目应用领域仍是工业视觉与制造业数据治理。 | 最新复赛指南第 6 页 | 把历史分类冒充当前排期 |
-| 现在是否已经全部提交？ | 冻结 RC3 候选与 RC4 Defense Kit 分别通过各自的本地完整性门；RC4 公共镜像线上同步与官网提交仍为 `PENDING`，官方评测仍为 `NOT_EVALUATED`。 | Project Status、Submission Checklist | 本地附件 PASS 等于公共部署、官网已提交或官方已验收 |
+| 现在是否已经全部提交？ | 冻结 RC3 候选与 RC4 Defense Kit 分别通过各自的本地完整性门；RC4 公共镜像已取得 `PASS_PUBLIC_RC4_SYNC`，但本轮 RC5 文档发布和官网提交仍为 `PENDING`，官方评测仍为 `NOT_EVALUATED`。 | Project Status、Submission Checklist、Actions `33718870200` | RC4 公共部署 PASS 等于 RC5 已发布、官网已提交或官方已验收 |
 
 ## 遇到证据缺失时的标准句
 

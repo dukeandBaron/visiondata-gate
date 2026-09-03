@@ -94,11 +94,16 @@ const navigationGroups: NavigationGroup[] = [
 
 const allNavigation = navigationGroups.flatMap((group) => group.items);
 
-function routeTitle(pathname: string): string {
+function routeTitle(pathname: string, publicReplayMode = false): string {
   if (pathname.startsWith("/cases/") && pathname !== "/cases") {
     return `案件 · ${pathname.split("/").filter(Boolean).at(-1)}`;
   }
+  if (publicReplayMode && pathname === "/review") return "验证档案";
   return allNavigation.find((item) => item.path === pathname)?.label ?? "VisionData Gate";
+}
+
+function navigationLabel(item: NavigationItem, publicReplayMode: boolean): string {
+  return publicReplayMode && item.path === "/review" ? "验证档案" : item.label;
 }
 
 function routeIcon(pathname: string): LucideIcon {
@@ -749,15 +754,15 @@ export function AppShell() {
 
         <nav className="linear-nav linear-nav--footer" aria-label="系统页面">
           {navigationGroups[2]!.items.map((item) => (
-            <NavLink key={item.path} to={item.path} title={item.label} data-nav-path={item.path}>
+            <NavLink key={item.path} to={item.path} title={navigationLabel(item, publicReplayMode)} data-nav-path={item.path}>
               <item.icon size={15} />
-              <span>{item.label}</span>
+              <span>{navigationLabel(item, publicReplayMode)}</span>
             </NavLink>
           ))}
         </nav>
         <NavLink className="linear-user" to="/account" title="账户与会话中心">
-          <span className="linear-user__avatar">{publicReplayMode ? "PR" : operatorInitials(profile)}</span>
-          <span><strong>{publicReplayMode ? "Public Reviewer" : profile.displayName}</strong><small>{publicReplayMode ? "anonymous · read only" : profile.role}</small></span>
+          <span className="linear-user__avatar">{publicReplayMode ? "PO" : operatorInitials(profile)}</span>
+          <span><strong>{publicReplayMode ? "Public Operator" : profile.displayName}</strong><small>{publicReplayMode ? "anonymous · read only" : profile.role}</small></span>
           <i className={`runtime-dot runtime-dot--${connection.api.toLowerCase()}`} />
         </NavLink>
       </aside>
@@ -767,7 +772,7 @@ export function AppShell() {
           <div className="linear-breadcrumbs">
             <span>{activeWorkspace?.name ?? "Workspace"}</span>
             <span>{activeProject?.name ?? "未选择项目"}</span>
-            <strong>{routeTitle(location.pathname)}</strong>
+            <strong>{routeTitle(location.pathname, publicReplayMode)}</strong>
           </div>
           <div className="linear-topbar__actions">
             {workspaceError ? <span className="linear-topbar__error">{workspaceError}</span> : null}
@@ -780,10 +785,14 @@ export function AppShell() {
             <NavLink
               to="/review"
               className={({ isActive }) => `linear-review-shortcut${isActive ? " is-active" : ""}`}
-              aria-label="打开评审快速路径"
+              aria-label={publicReplayMode ? "打开审计复核" : "打开评审快速路径"}
             >
               <Eye size={14} />
-              <span>{location.pathname === "/review" ? "当前评审路径" : "评审快速路径"}</span>
+              <span>
+                {publicReplayMode
+                  ? location.pathname === "/review" ? "当前复核" : "审计复核"
+                  : location.pathname === "/review" ? "当前评审路径" : "评审快速路径"}
+              </span>
             </NavLink>
             <button type="button" onClick={() => setPaletteOpen(true)}>
               <Search size={14} /> 快速查找

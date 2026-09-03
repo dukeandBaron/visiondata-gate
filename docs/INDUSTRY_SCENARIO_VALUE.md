@@ -1,6 +1,6 @@
 # 行业场景价值｜GOAI 25% 证据合同
 
-更新时间：2026-08-30
+更新时间：2026-09-03
 
 本文件只回答三个问题：问题是否真实且具有代表性、谁会使用以及价值如何测量、能力是否可以迁移。它不是官方评分，也不把本地运行、公开论文或合成基准升级为客户验收。
 
@@ -10,6 +10,7 @@
 INDUSTRY_PROBLEM_DEFINITION       = PASS_LOCAL
 PROBLEM_CLASS_REPRESENTATIVENESS  = PASS_EXTERNAL_SOURCES_BOUNDED
 AUTHORIZED_PRIVATE_PILOT          = PASS_LOCAL_BOUNDED
+PUBLIC_INDUSTRIAL_PROXY           = PASS_RC5_CURRENT_ENV_BOUNDED
 TARGET_USER_AND_WORKFLOW          = PASS_LOCAL
 CUSTOMER_VALUE_METRICS            = PARTIAL_MEASUREMENT
 CUSTOMER_SHADOW_VALIDATION        = HOLD_PENDING_ADJUDICATION
@@ -67,8 +68,11 @@ PRODUCTION_RELEASE_ALLOWED        = false
 | DynamicBench-v3 | 当前文件 SHA-256 `424be5fc8f51d55bf412b6e73c88a4943bc2d403b1e2d85817b7eb7de9e36d21`；8 个冻结合成夹具 | 冲突、故障、不确定性和正常输入上的编排差异；不回答工厂效果 |
 | 授权 Omni 私域 Pilot | 本地离线只读 Source Profile 与固定 180 Gate、CAPA 和 Child Run | 产品链能否处理真实字节并正确失败关闭；不回答客户验收 |
 | Omni Governance v2 | 文件 SHA-256 `d4f4ca6bcdfc4e130ca165846fae7f0446c37869ddb2e4eb63e9ec44e4563a3a`；内部域分离 Report SHA-256 `28aad63b274e657178938442c8e12e39992da742a39d3b757c05619715d1a542` | 当前私域评测分子、分母、状态和声明边界 |
+| VisA 公开工业代理 RC5 正式复验 | 2026-09-03 当前环境 `PASS`；300 clean + 300 programmatic block；Dynamic / Fixed 正确终态均 `525/600`，unsafe release 均为 0；调用 `2,550 vs 2,700`，不可恢复冗余重试 `0 vs 150` | 公开工业图像上的合同感知恢复效率；不回答 Worker replanning、自然缺陷精度、工厂误放行/误拦截、真实故障率或客户 ROI |
 
 两种 SHA 的语义不同：文件 SHA 绑定保存字节；Report SHA 绑定 JCS 规范化后的报告语义。二者不能互相替代。
+
+VisA RC5 正式复验的 report semantic SHA-256 为 `1e332d3852100c00db60ed739fa5219b198c6e608ecb3e3a977c8aa9dc5cfa2c`，implementation receipt semantic SHA-256 为 `7966b61b18bafd7a17f23427e6b50bd0ee30849ab7e60343dcc54b9a408896bf`。两路瞬时故障恢复均为 `150/150`；Dynamic 的正向差异是避免 150 次不可恢复故障冗余重试，而不是提升终态准确性。配置的故障切片不是生产发生率，程序化治理真值也不能写成工厂指标。原始 VisA 字节与本机报告路径不公开。
 
 ## 3. Q2｜目标用户、痛点、现实需求和价值收益
 
@@ -222,6 +226,7 @@ L4  Governed Production Integration
 
 - “公开标准和同行评审研究证明本项目处理的问题类别真实且具有代表性。”
 - “已在操作者声明授权的本地离线工业数据副本上完成有边界的产品 Pilot。”
+- “已在 RC5 当前环境完成 VisA 600-episode 公开工业代理正式复验；它只证明合同感知效率。”
 - “误放行、误拦截和整改通过率的逐案件评测合同已经实现；缺真值时保持未测量。”
 - “Site/Rule/Adapter/Skill/API 提供本地迁移合同，外部复制仍需 clean-run 回执。”
 

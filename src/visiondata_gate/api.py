@@ -66,6 +66,12 @@ from .incident_runtime_profile import (
     IncidentRuntimeCapabilities,
     IncidentRuntimeProfileBinding,
 )
+from .private_industrial_validation import (
+    PrivateIndustrialValidationSource,
+    PrivateIndustrialValidationSummary,
+    global_industrial_validation_scope,
+    scoped_industrial_validation_scope,
+)
 from .governed_context import AssembledIncidentContext
 from .governed_outcome import GovernedOutcomeEnvelope
 from .goal3_bridge import Goal3HandoffReceipt
@@ -267,6 +273,7 @@ def create_app(
     enable_account_bootstrap: bool = False,
     ensure_demo_tenant: bool = True,
     evaluation_evidence_source: DynamicBenchEvaluationEvidenceSource | None = None,
+    industrial_validation_source: PrivateIndustrialValidationSource | None = None,
 ) -> FastAPI:
     (
         session_token,
@@ -326,6 +333,9 @@ def create_app(
     app.state.product_service = product_service
     app.state.evaluation_evidence_source = (
         evaluation_evidence_source or DynamicBenchEvaluationEvidenceSource()
+    )
+    app.state.industrial_validation_source = (
+        industrial_validation_source or PrivateIndustrialValidationSource()
     )
     app.state.operator_image_store = OperatorImageStore(
         product_service.product_root / "operator_workspace"
@@ -483,11 +493,20 @@ def create_app(
     ) -> DynamicBenchEvaluationEvidenceSource:
         return request.app.state.evaluation_evidence_source
 
+    def industrial_validation_source_dep(
+        request: Request,
+    ) -> PrivateIndustrialValidationSource:
+        return request.app.state.industrial_validation_source
+
     Service = Annotated[ProductService, Depends(service_dep)]
     OperatorStore = Annotated[OperatorImageStore, Depends(operator_store_dep)]
     EvaluationEvidenceSource = Annotated[
         DynamicBenchEvaluationEvidenceSource,
         Depends(evaluation_evidence_source_dep),
+    ]
+    IndustrialValidationSource = Annotated[
+        PrivateIndustrialValidationSource,
+        Depends(industrial_validation_source_dep),
     ]
 
     def authenticated_actor(
@@ -667,6 +686,24 @@ def create_app(
     ) -> DynamicBenchEvaluationEvidenceProjection:
         projection = source.project(scope=global_evaluation_evidence_scope())
         bind_evaluation_projection_headers(response, projection)
+        return projection
+
+    @app.get(
+        "/v1/review/evaluation-evidence/industrial-validation",
+        response_model=PrivateIndustrialValidationSummary,
+        tags=["review", "evaluation", "governance"],
+        description=(
+            "Read-only reviewer projection that keeps current-environment RC5 VisA "
+            "public-proxy evidence, historical Omni offline validation, and "
+            "unmeasured factory shadow metrics in separate evidence tracks."
+        ),
+    )
+    def get_global_industrial_validation_evidence(
+        source: IndustrialValidationSource,
+        response: Response,
+    ) -> PrivateIndustrialValidationSummary:
+        projection = source.project(scope=global_industrial_validation_scope())
+        _bind_sha256_response(response, projection.projection_sha256)
         return projection
 
     def require_visible_workspace(
@@ -1239,6 +1276,35 @@ def create_app(
             )
         )
         bind_evaluation_projection_headers(response, projection)
+        return projection
+
+    @app.get(
+        "/v1/workspaces/{workspace_id}/evaluation-evidence/industrial-validation",
+        response_model=PrivateIndustrialValidationSummary,
+        responses={404: _NOT_FOUND_RESPONSE},
+        tags=["workspaces", "projects", "evaluation", "governance"],
+        description=(
+            "Return the global bounded industrial-validation evidence as a read-only "
+            "workspace or project reference; the association is not project-derived."
+        ),
+    )
+    def get_scoped_industrial_validation_evidence(
+        workspace_id: str,
+        actor: Actor,
+        product: Service,
+        source: IndustrialValidationSource,
+        response: Response,
+        project_id: Annotated[str | None, Query(min_length=1)] = None,
+    ) -> PrivateIndustrialValidationSummary:
+        require_visible_workspace(actor, workspace_id, product)
+        require_project_in_workspace(actor, workspace_id, project_id, product)
+        projection = source.project(
+            scope=scoped_industrial_validation_scope(
+                workspace_id=workspace_id,
+                project_id=project_id,
+            )
+        )
+        _bind_sha256_response(response, projection.projection_sha256)
         return projection
 
     @app.get(

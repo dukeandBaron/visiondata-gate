@@ -1,80 +1,126 @@
-# VisionData Gate｜评委五分钟导航
+# VisionData Gate｜产品与开发者导航
 
-本页把现有工程、证据和边界材料组织成一条最短审阅路径，不新增事实，也不替代机器可读 receipt。
+VisionData Gate 是一个本地优先的工业视觉数据治理工作台。它把图像、标注、metadata、批次、工单、工艺与视觉方案组织成版本化案件，让确定性工具负责测量、受控 Agent 负责补证规划、具名人员负责高风险决定，最后由 Child Run 按同一合同复验。
 
-## 1. 先确认赛题与用户价值
+公开 GitHub Pages 是隐私安全的 `PUBLIC_SYNTHETIC_REPLAY`；连接本地 FastAPI 后端后，工作台才会读取授权数据源、案件、CAPA 与治理指标。两种模式共用前端路由，但证据来源不会混用。
 
-VisionData Gate 是 GOAI 赛道二“无界应用 Boundless Agents”应用作品；2026-09-02 最新排期为第 03 队、AI+其他，项目应用领域是工业视觉数据治理 / 制造业。目标用户是工业视觉算法工程师、质量负责人和数据治理团队；核心任务是把换型后的图像、标注、metadata、工单、工艺与视觉方案组织成版本化异常案件，并把证据资格化、动态调查、人工决定、私有派生整改、Child Run 复验和交付串成闭环。
+## 从哪里开始
 
-- 评委网站与仓库：采用“私有权威仓 + 隐私安全公共镜像”双仓边界；公共镜像只提供 `PUBLIC_SYNTHETIC_REPLAY`，是否为当前版本以 `PUBLIC_MIRROR_MANIFEST.json`、GitHub Actions 与 Pages 部署 SHA 为准
-- 官方手册规则锚点：[`GOAI_BOUNDLESS_AGENTS_HANDBOOK_20260825.md`](GOAI_BOUNDLESS_AGENTS_HANDBOOK_20260825.md)
-- 初赛历史 RC2 标识：`v0.1.0-goai-rc2`（历史标签不代表当前 RC3 公共镜像或参赛包）
-- 冻结复赛 RC3：`PASS_LOCAL_RC3_RELEASE_CANDIDATE / OFFICIAL_PENDING`，仅绑定 `source_commit=c5fd68fc38025ffab4345cd739e611c96b13c530`、`source_tree=5501787b6ed452759af16e60dca76ce0c2ec54bf`
-- 当前 RC4 Defense Kit：`PASS_LOCAL_RC4_DEFENSE_KIT_INTEGRITY`；新版 PPT/PDF、当前公开工作台 57.33 秒备用视频、公共源码快照、附件 ZIP 与匹配回执已完成本地包级联检；GitHub 公共镜像 RC4 同步与官网提交仍为 `PENDING`
-- 冻结实验与证据命名空间：`vdg-20260816-rc1`（RC2 不改实验结论）
-- 附件摘要：[`../release/SHA256SUMS.txt`](../release/SHA256SUMS.txt)
-- 小白技术路线：[`BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md`](BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md)
-- 一页纸：[`one_pager.md`](one_pager.md)
+| 你想完成的事情 | 推荐入口 |
+|---|---|
+| 在本机启动完整工作台 | [运行说明](RUNNING.md) |
+| 调用 REST API | [API Quick Start](API_QUICKSTART.md) |
+| 理解 Agent 的权限与状态机 | [Agent Runtime](AGENT_RUNTIME.md) |
+| 扩展工业 Skill 或数据适配 | [工业 Skill SDK](INDUSTRIAL_SKILL_SDK.md) · [开放复用合同](OPEN_REUSE_CONTRACTS.md) |
+| 配置自有模型 / API Key | [外部模型配置](EXTERNAL_MODEL_CONFIGURATION.md) |
+| 核对结果、分母与禁止外推项 | [Evidence & Benchmarks](EVIDENCE_AND_BENCHMARKS.md) · [Claim Scope](CLAIM_SCOPE.md) |
+| 审阅安全、隐私与发布边界 | [数据与合规](DATA_SOURCE_AND_COMPLIANCE_SEMIFINAL_RC3.md) · [公开边界](PUBLICATION_BOUNDARY.md) |
 
-项目采用双层结构：工业视觉异常处置 Agent 是用户可见的应用主线；Agent Runtime、Skill、Tool Contract、Policy Judge、可重放证据和 AgentTeams adapter 是可复用的 Infra 加分层。后者直接增强 Agent 闭环、技术深度、安全追溯和开放复用，同时保持应用赛道定位清晰。
-
-## 2. 再看为什么不是固定 Workflow
-
-先读 [`ARCHITECTURE_BENCHMARK_AND_DYNAMIC_PLANNING.md`](ARCHITECTURE_BENCHMARK_AND_DYNAMIC_PLANNING.md)：
-
-- ArchBench-v2 固定了输入、工具、合同与 Judge，得到 288 条同协议记录；
-- 传统流水线、单 Agent、多 Agent 在 ArchBench-v2 冻结合成协议内的错误放行率均为 0%，F1 均为 0.96；该数字不是工厂误放行率；
-- 因而项目不宣称多 Agent 普遍优越，只把必要边界放在“中间证据改变后续任务”；
-- Omni-180-v1 中的 metadata 漂移、分辨率分组和跨工具冲突触发了 1 次 replan 与 3 个动态 Worker。
-- 当前 RC3 `_03` 将用户授权的本地源接入产品对象链：4,464 张只读 profile、固定 180 Gate、48→49 findings/原子记录、5→8 ToolTrace、1 replan、3 Workers；49 条底账聚合为 3 个风险处置流和 3 套候选方案，独立验证 27/27 `PASS`；与 RC2 的 45 条历史数字分开保存。
-- DynamicBench-v1 另用 12 个动态正例、12 个负例与四架构同协议网格固定触发分母：Dynamic Leader P/R 为 1.0/1.0，但与单 Agent 质量持平且本机 P95 更慢；固定多 Agent 多做 57 次无效补证。
-- `_05` 已在私有派生版本执行最高覆盖方案并创建独立 child Run：49→33 findings，但只证实关闭 6 条责任项、43 条仍打开，终态为 `TRANSFERRED_TO_INVESTIGATION`；`_06` 因此将当前授权候选池的最小恢复成本标为 `NOT_ESTIMABLE`。
-
-机器可读入口：
-
-- [`../evidence/submission/vdg-20260816-rc1/architecture_benchmark.json`](../evidence/submission/vdg-20260816-rc1/architecture_benchmark.json)
-- [`../evidence/submission/vdg-20260816-rc1/dynamic_leader_plan.json`](../evidence/submission/vdg-20260816-rc1/dynamic_leader_plan.json)
-- [`../evidence/submission/vdg-20260816-rc1/omni_gate_receipt.json`](../evidence/submission/vdg-20260816-rc1/omni_gate_receipt.json)
-
-## 3. 抽查完整任务闭环
-
-按以下链路抽查任意一条问题：
+## 产品工作流
 
 ```text
-工具输出 → finding → 原子记录 → 风险处置流 → 候选方案 → 人工批准
-→ 私有派生版本 → child Run 同合同复验 → 关闭 / 退回 / 转调查 → GateResult
+授权只读来源
+  → Evidence Gate
+  → 竞争假设与证据缺口
+  → 白名单 Worker 补证
+  → Frozen Policy Judge
+  → 具名人工决定
+  → 私有派生整改
+  → Child Run 同合同复验
+  → 责任队列 + Governed Outcome Envelope
 ```
 
-实现与协议入口：
+工作台会显示 selected/rejected Worker、选择原因、triggering evidence、冻结预算、Tool Receipt、缺失证据和 Parent/Human/Derived/Child 血缘。详情见 [Incident Control Plane](INCIDENT_CONTROL_PLANE.md)、[模型与 Planner 合同](INCIDENT_MODEL_PLANNER.md) 以及 [工具/MCP 合同](TOOLS_AND_MCP_CONTRACT.md)。
 
-- Runtime：[`AGENT_RUNTIME.md`](AGENT_RUNTIME.md)
-- 工具/MCP 契约：[`TOOLS_AND_MCP_CONTRACT.md`](TOOLS_AND_MCP_CONTRACT.md)
-- 重放与迁移：[`TOOL_REPLAY_AND_MIGRATION.md`](TOOL_REPLAY_AND_MIGRATION.md)
-- Agent 评测工具与故障干预：[`AGENT_EVALUATION_TOOLS_20260823.md`](AGENT_EVALUATION_TOOLS_20260823.md)
-- 运行时网络、注入与后端合同总 QA：[`../10_reports/RUNTIME_HARDENING_QA_20260824.md`](../10_reports/RUNTIME_HARDENING_QA_20260824.md)
-- API：[`API_QUICKSTART.md`](API_QUICKSTART.md)
+## 核心模块
 
-## 4. 核对声明没有越界
+| 模块 | 作用 | 关键边界 |
+|---|---|---|
+| Incident Kernel v6 | 运行 Intake → Planner → Tool → Council → Judge → Delivery | 仅调用白名单工具和 Worker |
+| Deterministic Tool Gateway | 执行图像质量、重复泄漏、标注几何、覆盖与治理合同测量 | 工具事实优先于模型文本 |
+| CAPA + Child Run | 将具名选择、批准、私有派生版本与独立复验串成闭环 | 不覆盖 Parent，不自动批准 |
+| Governed Audit Envelope | 用 JCS、域分离 SHA-256 与血缘关系绑定内容 | 摘要不是数字签名或可信时间戳 |
+| Governed Outcome Envelope | 固定投影 Parent、Human、Derived、Child 与最终责任队列 | Envelope 不能替代源工件 |
+| Evaluation Plane | 将私域 Pilot、公开代理和合成基准按真实分母分轨展示 | 未裁决工厂指标保持 null |
 
-先读 [`CLAIM_SCOPE.md`](CLAIM_SCOPE.md)、[`DATA_SOURCE_AND_COMPLIANCE_SEMIFINAL_RC3.md`](DATA_SOURCE_AND_COMPLIANCE_SEMIFINAL_RC3.md)，再看 [`REVIEWER_READINESS_MATRIX.md`](REVIEWER_READINESS_MATRIX.md)。当前可确认的是本地工程闭环、授权 Omni 数据源产品运行、固定 180 Gate、真实私有派生版本与 child Run、运行时加固固定集、本机后端协议夹具，以及隐私安全的公开合成回放；公开镜像不连接私域后端，不能据此升级为客户验收、工厂部署、生产 IAM、真实外部模型已连接、4,464 全量 Omni Gate 或 hosted AgentTeams 已连接。
+协议细节见 [Governed Audit Envelope](GOVERNED_AUDIT_ENVELOPE.md)、[Governed Outcome Envelope](GOVERNED_OUTCOME_ENVELOPE.md) 与 [重放/迁移](TOOL_REPLAY_AND_MIGRATION.md)。
 
-AgentTeams 当前状态：静态契约 `PASS`、runtime transport `OPEN`、connection status `mapped_not_connected`。
+## 当前验证边界
 
-## 5. 一条命令校验证据
+### Omni 私域离线 Pilot（历史）
 
-在已经安装锁定依赖的环境中运行：
+- 只读 profile：4,464 images / 1,439 masks；
+- 固定 Gate：180；
+- Parent → Child findings：49 → 33；
+- 责任项：6 closed / 43 open；
+- 整改后通过：0/1，终态转人工调查。
 
-```powershell
-.\.venv\Scripts\python.exe tools\check_release_consistency.py
-.\.venv\Scripts\python.exe tools\check_website_data.py
-.\.venv\Scripts\python.exe tools\check_release_assets.py --require-all
-```
+它证明产品链能处理操作者声明授权的真实字节并保留失败关闭，不等于客户数据、在线工厂 shadow、生产恢复或 ROI。工厂误放行率、误拦截率仍为 `NOT_MEASURED_PENDING_ADJUDICATION`，对应 numerator、denominator、value 与置信区间均保持 null。
 
-以上三项只校验冻结 RC2。当前 RC3 使用 `build_rc3_release_evidence.py` 生成 detached release namespace，并用 `verify_release_attestation.py` 对该 namespace、匹配的 clean checkout 与声明 toolchain 做本地完整性验证；只有 verifier 返回 `PASS_LOCAL_INTEGRITY` 才成立本地候选状态。RC2 工具不得用 `--force` 覆盖历史附件。
+### VisA 公开工业代理（RC5）
 
-## 当前仍需权利主体完成
+2026-09-03 已在 RC5 当前环境完成 300 clean + 300 programmatic block 正式复验：
 
-- 补全 Omni 原下载页面 URL/平台记录；在无明确再分发许可证时继续排除全部原始数据；
-- 对最终候选执行独立 post-build fresh-extract API/Web 与浏览器 smoke；该回执不冒充 Attestation 绑定项；
-- 通过比赛账号提交复赛材料，保存官方作品 ID、实际上传文件哈希与平台回执；
-- 如需扩大落地声明，补充客户 shadow test、工厂在线系统/现场验收、真实 LongCat/VGGT/OmniVGGT 或第三方复验材料。
+- 600 episodes；
+- Dynamic / Fixed 正确终态均为 525/600；
+- unsafe release 均为 0；
+- 瞬时故障恢复均为 150/150；
+- 工具调用 2,550 vs 2,700；
+- 不可恢复故障冗余重试 0 vs 150。
+
+语义摘要：
+
+- report semantic SHA-256：`1e332d3852100c00db60ed739fa5219b198c6e608ecb3e3a977c8aa9dc5cfa2c`；
+- implementation receipt semantic SHA-256：`7966b61b18bafd7a17f23427e6b50bd0ee30849ab7e60343dcc54b9a408896bf`。
+
+该运行只证明合同感知的有界恢复效率；它不证明 Worker replanning、工厂指标、自然缺陷检测精度、真实故障分布或客户 ROI。原始 VisA 字节和本机报告路径不进入公共仓。
+
+### 合成编排
+
+DynamicBench-v3 在 8 个冻结冲突、故障、不确定性与正常夹具上比较 Dynamic 与 Fixed 的编排行为；结果和分母见 [DynamicBench-v3](DYNAMICBENCH_V3.md)。DynamicBench-v1 是历史动态触发协议，不与 v3 或 VisA 合并。历史 `_05` 表示已执行但未恢复的 CAPA/Child，`_06` 将当前候选池可行性标为 `NOT_ESTIMABLE`。
+
+## 安全默认值
+
+- 原始来源只读，整改只进入私有派生版本；
+- API Key 保留在本机服务端，不进入浏览器 bundle、公开 Pages 或 Git；
+- CAPA、根因和生产放行由具名人员决定；
+- `production_release_allowed=false`、`machine_write_permitted=false`；
+- 缺证、冲突、预算耗尽、摘要漂移或工具失败时 fail closed；
+- 公开导出排除客户原图、mask、设备帧、私域回执、本机路径和个人信息。
+
+## 文档地图
+
+### 使用
+
+- [运行说明](RUNNING.md)
+- [API Quick Start](API_QUICKSTART.md)
+- [Product Kernel CLI](PRODUCT_KERNEL_CLI.md)
+- [外部模型配置](EXTERNAL_MODEL_CONFIGURATION.md)
+
+### 架构与扩展
+
+- [Agent Runtime](AGENT_RUNTIME.md)
+- [Incident Control Plane](INCIDENT_CONTROL_PLANE.md)
+- [模型与 Planner 合同](INCIDENT_MODEL_PLANNER.md)
+- [工业 Skill SDK](INDUSTRIAL_SKILL_SDK.md)
+- [开放复用合同](OPEN_REUSE_CONTRACTS.md)
+- [工具与 MCP 合同](TOOLS_AND_MCP_CONTRACT.md)
+
+### 证据与治理
+
+- [Evidence & Benchmarks](EVIDENCE_AND_BENCHMARKS.md)
+- [Governed Audit Envelope](GOVERNED_AUDIT_ENVELOPE.md)
+- [Governed Outcome Envelope](GOVERNED_OUTCOME_ENVELOPE.md)
+- [Claim Scope](CLAIM_SCOPE.md)
+- [数据来源与合规](DATA_SOURCE_AND_COMPLIANCE_SEMIFINAL_RC3.md)
+- [公开边界](PUBLICATION_BOUNDARY.md)
+- [第三方许可证清单](THIRD_PARTY_LICENSE_INVENTORY.generated.md)
+
+### GOAI 2026
+
+- [复赛指南核验](GOAI_SEMIFINAL_GUIDE_20260902.md)
+- [评分证据索引](GOAI_SCORE_EVIDENCE_INDEX.md)
+- [官方反馈闭环](GOAI_SEMIFINAL_OFFICIAL_FEEDBACK_CLOSURE_20260831.md)
+- [评审就绪矩阵](REVIEWER_READINESS_MATRIX.md)
+
+本页只导航已经公开 allowlist 覆盖的文档，不链接私域 receipt、release、evidence、`10_reports/` 或本机生成物。

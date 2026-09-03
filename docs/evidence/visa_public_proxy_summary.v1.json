@@ -1,0 +1,84 @@
+{
+  "schema_version": "visiondata-gate.visa-public-proxy-compact-evidence.v1",
+  "source_run_label": "formal_300x300_rc5_20260903",
+  "evidence_track": "PUBLIC_INDUSTRIAL_PROXY_WITH_PROGRAMMATIC_GOVERNANCE_TRUTH",
+  "evidence_origin": "CURRENT_ENVIRONMENT_RECOMPUTED_RECEIPT",
+  "recomputable_now": true,
+  "dataset_id": "VisA",
+  "benchmark_id": "Public-GovernanceBench-v1-runtime-recovery-v2",
+  "benchmark_file_sha256": "d9aea6dff535220e35f0dba0a93271314c082fe10be7ca570f73d01f37966ae6",
+  "benchmark_report_sha256": "1e332d3852100c00db60ed739fa5219b198c6e608ecb3e3a977c8aa9dc5cfa2c",
+  "implementation_receipt_file_sha256": "6db748f5bc65e06d26f22f8f6583f60828ccc4750aaa20d15a1574534d56e3bf",
+  "implementation_receipt_sha256": "7966b61b18bafd7a17f23427e6b50bd0ee30849ab7e60343dcc54b9a408896bf",
+  "dataset_identity_sha256": "0494a8a0faba1f8a433573c84a7d63186130d7aa3a8cf3553377bb1ac9c79beb",
+  "source_binding_sha256": "4c61dd87ee4c6842097834cc7b8b2fd20bea6a6efdaa10c0e7566fc49355263a",
+  "programmatic_manifest_sha256": "412b950b72e18552f43e3c94d11f88a89c7ef2d1a7a025ecccc5336f0d1600ce",
+  "truth_receipt_sha256": "fded77b35b19502d2359cd0229ca3f2f7e570c64debca64cd0a54089e39a7482",
+  "core_components": [
+    {"artifact": "src/visiondata_gate/public_runtime_benchmark.py", "sha256": "3e1ef0bb7ffb58c04c1c6acf62fa3d4481fc94509b53f94fb5f001d227ded294"},
+    {"artifact": "src/visiondata_gate/agent_runtime.py", "sha256": "97f422fc728c156b68604a2c8e8c594df5d1b6f116b3245e846f70543c2f94fd"},
+    {"artifact": "src/visiondata_gate/tools.py", "sha256": "2fa9c51bac54833800224fbf8ac8b7ed2fb9874230c2b40bd2df4d83cbed6120"},
+    {"artifact": "src/visiondata_gate/policy.py", "sha256": "b49e1b32e00c34c7eac9049a84bcbb4c58de48f08808dfe22a8bc5f28b564388"},
+    {"artifact": "src/visiondata_gate/governance_effectiveness_v2.py", "sha256": "6e7fc291ff075e1a93d3b7f8c103613aef53964159793a2e4aef5a7d6bd97dc6"},
+    {"artifact": "src/visiondata_gate/public_governance_bench.py", "sha256": "991a8ad442923d361d376234940230d540696d4099cc1c9df84d6fa450a752fb"},
+    {"artifact": "src/visiondata_gate/contracts.py", "sha256": "7f1feac6a0ed6d7f397cf7d20e21be0e957d8e2131c8c29ef1b8943c2de0e6f3"},
+    {"artifact": "src/visiondata_gate/duplicates.py", "sha256": "d247d5fe04e2fbd897531064df44a51b4d83932ad20d39f5e981b2a76da491b6"},
+    {"artifact": "src/visiondata_gate/quality.py", "sha256": "001bf0bc16c38c2499b1fa60786353c10ad85f76164dca6416ce79e935ede955"},
+    {"artifact": "src/visiondata_gate/annotations.py", "sha256": "1040200446f4f65f6c81b07e60ed3929cd5c0c0bd7de7bb38bb537ad2361256e"},
+    {"artifact": "src/visiondata_gate/coverage.py", "sha256": "4563f572d856f5eb4bc459cdd9bd7ac6197fc2f2a7915f98b888ff1a469e15ca"},
+    {"artifact": "src/visiondata_gate/audit_envelope.py", "sha256": "4f22dafb751e8ce86267f968c7747bd58d5485ea7425bc7fa4d9831525c2d6ae"},
+    {"artifact": "src/visiondata_gate/runtime_models.py", "sha256": "cba8af317a74f09acc92124a338fbb965b085fe477cb4b962aca2fce02e174ba"},
+    {"artifact": "src/visiondata_gate/agents.py", "sha256": "b7aa3ab7a6a5d2cac7bda170639c226072b1a8ece08a74825be71e87d469cd99"},
+    {"artifact": "src/visiondata_gate/runtime_safety.py", "sha256": "d77e468650efb6f370b6d30a4408347ad91d4cfc9cadf57c908769cca6f5abb3"},
+    {"artifact": "src/visiondata_gate/product_models.py", "sha256": "ede362d256150a020a93adbca560396d3c44b139ffa8dadc2cc638018a5c981f"},
+    {"artifact": "src/visiondata_gate/evidence.py", "sha256": "dfa14b7261023bdce43913f6cabe97baf3849b1a3fb64968caa6288ba01ccae2"}
+  ],
+  "project_environment": [
+    {"artifact": "pyproject.toml", "sha256": "6a395fda3f0f70c33084b44e473c34ceb02fd305fbbc01b335423e1992d11c64"},
+    {"artifact": "uv.lock", "sha256": "bd66ed683a498a1e391733b1bf7c29b1649251dc9540dd4c8aec3766d61c6395"}
+  ],
+  "dynamic_capability_claim": "CONTRACT_AWARE_BOUNDED_RECOVERY_NOT_WORKER_REPLANNING",
+  "scenario_groups": [
+    {
+      "scenario_group": "NORMAL_NO_FAULT",
+      "fault_modes": ["NONE"],
+      "episode_denominator": 300,
+      "release_allowed_denominator": 150,
+      "block_required_denominator": 150,
+      "strategies": [
+        {"execution_strategy": "FIXED_SINGLE_ATTEMPT", "correct_decision_count": 300, "false_release_count": 0, "false_block_count": 0, "transient_recovery_count": null, "non_retryable_retry_count": null, "physical_tool_call_count": 1200, "retry_count": 0},
+        {"execution_strategy": "FIXED_UNIFORM_BOUNDED_RETRY", "correct_decision_count": 300, "false_release_count": 0, "false_block_count": 0, "transient_recovery_count": null, "non_retryable_retry_count": null, "physical_tool_call_count": 1200, "retry_count": 0},
+        {"execution_strategy": "DYNAMIC_CONTRACT_AWARE_RETRY", "correct_decision_count": 300, "false_release_count": 0, "false_block_count": 0, "transient_recovery_count": null, "non_retryable_retry_count": null, "physical_tool_call_count": 1200, "retry_count": 0}
+      ]
+    },
+    {
+      "scenario_group": "TRANSIENT_RECOVERABLE_FAULT",
+      "fault_modes": ["TRANSIENT_TIMEOUT_ONCE"],
+      "episode_denominator": 150,
+      "release_allowed_denominator": 75,
+      "block_required_denominator": 75,
+      "strategies": [
+        {"execution_strategy": "FIXED_SINGLE_ATTEMPT", "correct_decision_count": 75, "false_release_count": 0, "false_block_count": 75, "transient_recovery_count": 0, "non_retryable_retry_count": null, "physical_tool_call_count": 600, "retry_count": 0},
+        {"execution_strategy": "FIXED_UNIFORM_BOUNDED_RETRY", "correct_decision_count": 150, "false_release_count": 0, "false_block_count": 0, "transient_recovery_count": 150, "non_retryable_retry_count": null, "physical_tool_call_count": 750, "retry_count": 150},
+        {"execution_strategy": "DYNAMIC_CONTRACT_AWARE_RETRY", "correct_decision_count": 150, "false_release_count": 0, "false_block_count": 0, "transient_recovery_count": 150, "non_retryable_retry_count": null, "physical_tool_call_count": 750, "retry_count": 150}
+      ]
+    },
+    {
+      "scenario_group": "PERSISTENT_FAULT_SAFETY_COST",
+      "fault_modes": ["PERMISSION_DENIED_PERSISTENT", "TOOL_RESPONSE_INTEGRITY_PERSISTENT"],
+      "episode_denominator": 150,
+      "release_allowed_denominator": 75,
+      "block_required_denominator": 75,
+      "strategies": [
+        {"execution_strategy": "FIXED_SINGLE_ATTEMPT", "correct_decision_count": 75, "false_release_count": 0, "false_block_count": 75, "transient_recovery_count": null, "non_retryable_retry_count": 0, "physical_tool_call_count": 600, "retry_count": 0},
+        {"execution_strategy": "FIXED_UNIFORM_BOUNDED_RETRY", "correct_decision_count": 75, "false_release_count": 0, "false_block_count": 75, "transient_recovery_count": null, "non_retryable_retry_count": 150, "physical_tool_call_count": 750, "retry_count": 150},
+        {"execution_strategy": "DYNAMIC_CONTRACT_AWARE_RETRY", "correct_decision_count": 75, "false_release_count": 0, "false_block_count": 75, "transient_recovery_count": null, "non_retryable_retry_count": 0, "physical_tool_call_count": 600, "retry_count": 0}
+      ]
+    }
+  ],
+  "configured_intervention_distribution_is_production_prevalence": false,
+  "actual_factory_truth": false,
+  "production_release_allowed": false,
+  "claim_boundary": "The formal_300x300_rc5_20260903 VisA public industrial proxy was recomputed and independently reverified in the current release environment over 600 source-bound episodes. It uses programmatic governance truth and an artificial intervention distribution, so it proves bounded contract-aware recovery behavior, not Worker replanning, factory prevalence, customer acceptance, or production performance. Raw VisA images are not redistributed by this compact receipt.",
+  "receipt_sha256": "722abbcabc2115e4514e2f5936c334d45721d960b815b16bc9d88042a20bc377"
+}

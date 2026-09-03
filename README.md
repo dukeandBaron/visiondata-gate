@@ -1,145 +1,243 @@
 <p align="center">
-  <img src="web/public/favicon.svg" alt="VisionData Gate" width="76" />
+  <img src="web/public/favicon.svg" alt="VisionData Gate" width="82" />
 </p>
 
 <h1 align="center">VisionData Gate</h1>
 
-<p align="center"><strong>把工业视觉异常办到可复验</strong></p>
-
-<p align="center"><strong>GOAI 2026 赛道二「无界应用」· 第 03 队 · 官方排期 AI+其他（工业视觉应用）</strong></p>
-
-VisionData Gate 是面向工业视觉算法工程师与质量负责人的证据驱动异常处置 Agent。确定性工具先测量图像、标注、泄漏、覆盖与治理边界；Agent 只在中间证据改变下一步时动态补证；CAPA、根因和生产决定保留给具名人员，整改后由 Child Run 按同一合同独立复验。
-
-**[打开公开评审首页](https://dukeandbaron.github.io/visiondata-gate-public/)** · **[进入合成工作台](https://dukeandbaron.github.io/visiondata-gate-public/#/command-center)**
+<p align="center"><strong>让工业视觉异常从发现走到可复验决策</strong></p>
+<p align="center"><em>Evidence-first governance for industrial vision data, with human authority and reproducible outcomes.</em></p>
 
 <p align="center">
-  <img src="docs/assets/web-command-center.png" alt="VisionData Gate 公开合成工作台" width="1180" />
+  <a href="https://github.com/dukeandBaron/visiondata-gate-public/actions/workflows/ci.yml"><img src="https://github.com/dukeandBaron/visiondata-gate-public/actions/workflows/ci.yml/badge.svg" alt="Public source verification" /></a>
+  <a href="https://github.com/dukeandBaron/visiondata-gate-public/actions/workflows/pages.yml"><img src="https://github.com/dukeandBaron/visiondata-gate-public/actions/workflows/pages.yml/badge.svg" alt="Public workbench build" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-2563eb.svg" alt="Apache-2.0" /></a>
+  <img src="https://img.shields.io/badge/Python-3.12--3.13-3776ab.svg" alt="Python 3.12 to 3.13" />
+  <img src="https://img.shields.io/badge/React-19-61dafb.svg" alt="React 19" />
+  <img src="https://img.shields.io/badge/Tauri-2-f59e0b.svg" alt="Tauri 2" />
+  <img src="https://img.shields.io/badge/authority-human--only-d97706.svg" alt="Human-only authority" />
 </p>
 
-## 复赛快速入口
+<p align="center">
+  <a href="https://dukeandbaron.github.io/visiondata-gate-public/"><strong>在线体验</strong></a> ·
+  <a href="https://dukeandbaron.github.io/visiondata-gate-public/#/command-center"><strong>打开工作台</strong></a> ·
+  <a href="docs/RUNNING.md"><strong>本地运行</strong></a> ·
+  <a href="docs/API_QUICKSTART.md"><strong>API</strong></a> ·
+  <a href="https://github.com/dukeandBaron/visiondata-gate-public/releases"><strong>发布版本</strong></a>
+</p>
 
-本次线上答辩的官方窗口为 8 分钟，其中项目陈述 3 分钟、现场 Demo 1 分钟、问答 3 分钟、评分与切换 1 分钟。当前材料使用 60 秒 Demo 路径；此前 89.9 秒 RC3 视频只作为完整历史备用，不冒充本次现场时限。
+<p align="center">
+  <img src="docs/assets/web-command-center.png" alt="VisionData Gate 工业视觉数据治理工作台" width="1180" />
+</p>
 
-- [2026-09-02 最新复赛指南核验](docs/GOAI_SEMIFINAL_GUIDE_20260902.md)
-- [60 秒 Demo 脚本](docs/DEMO_60S_SCRIPT_SEMIFINAL.md)
-- [3 分钟项目陈述稿](docs/DEFENSE_3MIN_SCRIPT_SEMIFINAL.md)
-- [答辩 Q&A 防守卡](docs/DEFENSE_QA_SEMIFINAL.md)
-- [答辩运行手册](docs/SEMIFINAL_DEFENSE_RUNBOOK_20260902.md)
-- [数据来源与合规说明](docs/DATA_SOURCE_AND_COMPLIANCE_SEMIFINAL_RC3.md)
+<p align="center"><sub>公开站点为隐私安全的合成回放；本地部署将同一工作台连接到受控 Python API。</sub></p>
 
-官方提交与评测状态仍分别为 `PENDING` 和 `NOT_EVALUATED`；公开页面可访问不代表官网提交成功。
+## 这是什么
 
-## 公开网页能证明什么
+VisionData Gate 是一个本地优先的工业视觉数据治理与发布工作台。它把图像、标注、metadata、批次上下文与整改工作组织成版本化案件：
 
-GitHub Pages 运行同一套 React 多页面工作台的 `PUBLIC_SYNTHETIC_REPLAY` 模式。它不是截图：浏览器会下载冻结 JSON 清单并复算 JCS SHA-256；只有摘要一致时，页面才展示：
+- 确定性工具测量可观察事实；
+- 只有当证据缺口会改变下一步动作时，Agent 才选择额外 Worker；
+- Frozen Policy Judge 在证据缺失、冲突或无效时失败关闭；
+- CAPA、根因和生产决定始终由具名人员负责；
+- Child Run 按同一合同复验私有派生版本。
 
-- selected / rejected Workers、选择原因、冻结预算与 triggering evidence；
-- 竞争假设、缺失证据和六阶段 Incident v6 状态；
-- Parent → Human Gate → Derived → Child 血缘，其中公开清单只证明 `human gate=REQUIRED`；
-- `official_submission=PENDING`、`official_evaluation=NOT_EVALUATED` 与 `production_release_allowed=false`。
+这是数据治理与发布控制系统，不是缺陷检测模型、自动 PLC 控制器，也不替代质量负责人。
 
-清单缺失、字段漂移或摘要不一致时，页面显示 `FAIL CLOSED`，不会使用嵌入数字补位，也不会制造 PASS。
+> **私有数据验证边界**
+>
+> 产品链已在操作者声明授权的私有离线数据副本上运行，证明软件可以在只读来源合同下处理真实数据字节；它**不证明**客户验收、在线工厂 shadow、生产误放行/误拦截率或 ROI。
 
-公开清单的计数固定为 `3 selected / maximum 5 / 2 rejected / 4 hypotheses / 4 external evidence gaps`，且 `public_snapshot_attestation=NOT_ISSUED`；它只证明静态清单 JCS SHA 自一致，不是后端 provenance、上游不可篡改凭证或具名审批回执。另一条 Goal3 本地持久回执是 `5 selected / budget 5 / 3 rejected / Child CONTINUE_HOLD`；两者不是同一案件或同一来源，数字、ETag、SHA 与结论不得互借。
+## 为什么需要 VisionData Gate
 
-## 一次完整任务闭环
+工业视觉风险很少只是单一的“模型准确率”问题：
 
-```text
+1. **证据分散**：图像、标注、采集 metadata、工单和策略版本散落在不同工具中；
+2. **多个解释并存**：采集漂移、跨划分泄漏、标注几何、覆盖缺口与工艺变化可能同时成立；
+3. **整改与复验断链**：finding 变少不会自动证明根因、关闭责任或授权生产。
+
+VisionData Gate 把这些事实收进同一个案件，并让每一次状态转换都可检查、可追溯。
+
+## 治理闭环如何运行
+
+~~~text
 授权只读来源
-→ 确定性 Evidence Gate
-→ 竞争假设与证据缺口
-→ 动态补证 Worker
-→ Frozen Policy Judge
-→ 人工闸门 REQUIRED（公开轨不证明具名审批完成）
-→ 私有派生整改
-→ Child Run 同合同复验
-→ 责任队列与 Governed Outcome Envelope
-```
+        |
+        v
+Typed Intake + Evidence Gate
+        |
+        v
+竞争假设 + 缺失证据
+        |
+        v
+Selected / Rejected Workers + 原因 + 预算 + 回执
+        |
+        v
+Frozen Policy Judge: PASS | RECAPTURE | HOLD | DEFER
+        |
+        v
+具名人工决定
+        |
+        v
+私有派生整改
+        |
+        v
+Child Run 同合同复验
+        |
+        v
+责任队列 + Decision Packet + Audit Envelope
+~~~
 
-AI 可以调查、解释和建议；不能确立根因、批准 CAPA、控制设备或放行生产。
+## 核心能力
 
-## 量化结果与边界
+| 能力 | 仓库中的真实实现 |
+|---|---|
+| 确定性证据工具 | 只读检查图像质量、重复/跨划分泄漏、标注几何、覆盖与 metadata 合同 |
+| 证据缺口规划 | 记录 selected/rejected Worker、原因、triggering evidence 与有界预算 |
+| 故障感知执行 | 可重试与不可重试故障遵循不同合同；未解决证据保持阻断 |
+| 人工治理 CAPA | 批准绑定具名人员与版本；整改只写入私有派生副本，不覆盖 Parent |
+| 独立复验 | 即使 Child 仍失败，Parent → Human Gate → Derived → Child 血缘依然可见 |
+| 可核验交付 | ToolTrace、GateResult、DecisionPacket 与 GovernedOutcomeEnvelope 通过 JCS/SHA-256 和响应 ETag 绑定 |
+| 本地集成 | FastAPI、SQLite、React/Tauri、BYOK Provider、Site/Rule Pack 与窄接口 Adapter |
 
-| 证据轨 | 当前结果 | 禁止外推 |
+这里的 SHA-256 用于内容身份与篡改感知；它不是数字签名、可信时间戳，也不能证明谁批准了某个动作。
+
+## 产品工作台
+
+React 应用是多页面操作工作台，不是单一脚本化仪表盘。
+
+| 页面 | 操作者任务 |
+|---|---|
+| 图像工作簿 | 导入授权图像、检查像素/梯度、修订 BBox 并创建 Agent 任务 |
+| 工作总览 | 跟踪计划阶段、Worker 选择、证据缺口、预算与工具故障 |
+| 案件与审核 | 检查 Parent Case、竞争假设、缺失证据和下一安全动作 |
+| CAPA | 准备、批准或拒绝受控整改，并启动 Child Run |
+| 证据与运行 | 查看或下载强类型工件、回执与复验状态 |
+| 血缘 | 回放 Parent → Human → Derived → Child |
+| 治理 | 分离私域离线验证与工厂 shadow 指标；缺失真值保持未测量 |
+| 集成与设置 | 配置本地数据源与 BYOK Provider，密钥不暴露给浏览器或公开站点 |
+
+GitHub Pages 固定为 <code>PUBLIC_SYNTHETIC_REPLAY</code>：没有私域 API、账户、密钥输入或机台写入路径；冻结清单缺失或摘要漂移时会失败关闭。
+
+## 验证证据：分母严格分离
+
+| 证据轨 | 已观察结果 | 只支持什么结论 |
 |---|---|---|
-| 操作者声明授权的私域离线 Pilot | findings `49 → 33`；`6 closed / 43 open`；整改后通过率 `0/1`；转人工调查 | 独立权属认证、客户验收、工厂部署、生产恢复 |
-| DynamicBench-v3 | Dynamic 正确终态 `8/8`，Fixed `4/8`；工具调用 `14 vs 24`；故障恢复 `2/2` | 工厂准确率、客户 ROI |
-| 独立复杂冲突配对子集 | Dynamic 误放行 `0/4`，Fixed `4/4` | 与 v3 分母合并 |
-| 工厂级误放行/误拦截 | `NOT_MEASURED_PENDING_ADJUDICATION` | 在没有独立双人/QMS 真值时填写百分比 |
+| 授权私域离线 Pilot（历史） | Source Profile：4,464 images / 1,439 masks；固定 Gate：180；Parent → Child findings：49 → 33；责任项：6 closed / 43 open；整改通过：0/1 | 产品闭环能处理授权数据字节并保留失败复验；不是客户验收或工厂效果 |
+| VisA 公开工业代理 RC5 正式复验 | 300 clean + 300 programmatic block = 600 episodes；Dynamic / Fixed 正确终态均 525/600；unsafe release 均为 0；瞬时恢复均 150/150；调用 2,550 vs 2,700；不可恢复冗余重试 0 vs 150 | 程序化治理真值下的合同感知效率；不证明 Worker replanning、自然缺陷精度、工厂指标或 ROI |
+| DynamicBench-v3 合成编排 | 正确终态 8/8 Dynamic vs 4/8 Fixed；调用 14 vs 24；可恢复工具故障 2/2 vs 0/2 | 冻结冲突、故障、不确定性与正常夹具下的动态编排差异；不是工业 KPI |
 
-详细分母和协议见 [官方反馈闭环](docs/GOAI_SEMIFINAL_OFFICIAL_FEEDBACK_CLOSURE_20260831.md)、[行业场景价值](docs/INDUSTRY_SCENARIO_VALUE.md) 与 [DynamicBench-v3](docs/DYNAMICBENCH_V3.md)。
+VisA 正式运行已于 2026-09-03 在 RC5 当前环境复验为 `PASS`。report semantic SHA-256：`1e332d3852100c00db60ed739fa5219b198c6e608ecb3e3a977c8aa9dc5cfa2c`；implementation receipt semantic SHA-256：`7966b61b18bafd7a17f23427e6b50bd0ee30849ab7e60343dcc54b9a408896bf`。Dynamic 与 Fixed 终态质量相同，因此不主张 Dynamic 更准确；可支持的差异是 Dynamic 避免了 150 次不可恢复故障冗余重试。
 
-## 公开边界
+工厂误放行率、误拦截率与独立裁决的整改通过率仍保持 `NOT_MEASURED_PENDING_ADJUDICATION`，直到预注册 shadow 窗口提供 QMS 或双人复核真值；对应 numerator、denominator、value 与置信区间均为 null。Synthetic、公开代理和私域 Pilot 的分母不会合并。完整协议与限制见 [Evidence & Benchmarks](docs/EVIDENCE_AND_BENCHMARKS.md)、[行业场景价值](docs/INDUSTRY_SCENARIO_VALUE.md) 与 [DynamicBench-v3](docs/DYNAMICBENCH_V3.md)。
 
-- 只读静态回放；无 Python 后端、账户、API Key 输入或生产写操作；
-- 不包含客户/工厂原图、私域 mask、真实类别名、设备帧、本机数据库、调试日志、API Key、DPAPI 密文、个人提交历史或私有运行回执；
-- 公开二进制逐文件绑定 SHA-256，并经过当前树、完整历史与 Pages 构建三道隐私扫描；
-- AI 不替代质量负责人、客户机构或主管部门的最终判断；
-- 私域 Pilot 的来源 URL 与数据再分发许可仍分别为 `OWNER_SOURCE_URL_ACTION_REQUIRED` / `NO_EXPLICIT_REDISTRIBUTION_LICENSE_FOUND`；公共镜像不包含对应原始数据；
-- 公共镜像使用独立 Git 历史，不包含私有 Release ZIP、PPTX、PDF、视频或完整私有 Git 历史。
+## 快速开始
 
-完整规则见 [GitHub 与 GitHub Pages 公开边界](docs/PUBLICATION_BOUNDARY.md)。
+### Windows 工作台
 
-## 本地开发
+环境要求：Python 3.12 或 3.13、Node.js 22+、[uv](https://docs.astral.sh/uv/)。
 
-Python 内核：
+~~~powershell
+git clone https://github.com/dukeandBaron/visiondata-gate-public.git
+cd visiondata-gate-public
 
-```powershell
-uv sync --frozen
-uv run python -m pytest
-```
+.\setup_env.ps1
+.\run_workbench.ps1 -Install
+~~~
 
-React 工作台：
+启动器会创建本地会话能力，在 <code>127.0.0.1:8787</code> 启动 FastAPI，构建 React 工作台，并打开 <code>127.0.0.1:4173/workspace</code>。
 
-```powershell
+### 分别启动后端与 Web
+
+~~~powershell
+# 终端 1：按 docs/RUNNING.md 配置本地会话
+.\run_api.ps1
+
+# 终端 2
+.\run_web.ps1 -Install
+~~~
+
+### 验证
+
+~~~powershell
+uv run python tools/run_public_test_suite.py
+
 cd web
 npm ci
-npm run typecheck
-npm run build
-```
+npm run check
+~~~
 
-公开 Pages 构建：
+会话、product root 和公开回放参数见 [运行说明](docs/RUNNING.md)。启用 BYOK Provider 前请先阅读 [外部模型配置](docs/EXTERNAL_MODEL_CONFIGURATION.md)。
 
-```powershell
-cd web
-$env:VITE_VISIONDATA_PUBLIC_REPLAY = "true"
-$env:VISIONDATA_WEB_BASE_PATH = "/visiondata-gate-public/"
-npm run build
-python ..\tools\check_public_pages.py --dist dist
-```
+## 架构与扩展点
 
-本地真实工作台、BYOK Provider、Hosted AgentTeams 和桌面封装具有更强的本机信任边界；请先阅读 [运行说明](docs/RUNNING.md)、[API 快速上手](docs/API_QUICKSTART.md) 与 [外部模型配置](docs/EXTERNAL_MODEL_CONFIGURATION.md)。
+~~~text
+web/                       React 19 + TypeScript 工作台、Tauri 2 外壳
+src/visiondata_gate/       Incident 内核、工具、CAPA、血缘与交付
+schemas/                   可移植 Evidence 与 Adapter 合同
+rulepacks/                 声明式策略扩展
+skills/                    受控工业 Skill 合同
+adapters/                  只读集成示例
+agentteams/                Hosted / Local Transport 合同
+sample_data/               隐私安全的确定性夹具
+tests/                     合同、故障、安全与回放验证
+tools/                     构建、基准、隐私与发布门
+docs/                      架构、API、证据与运行文档
+~~~
 
-## 可复用资产
+接口存在不等于部署已经完成。CVAT/FiftyOne 已有本地合同覆盖；MES、OPC UA、PLC、VisionMaster 与 Hosted AgentTeams 在取得真实身份、端点和探测回执前保持未连接。
 
-- `src/visiondata_gate/`：受控 Agent 内核、证据、CAPA、血缘与门禁；
-- `schemas/`、`rulepacks/`、`skills/`：可迁移合同与工业规则；
-- `adapters/`、`agentteams/`：外部系统的显式适配边界；
-- `sample_data/`：固定 seed 合成样本与 SHA-256 清单；
-- `web/`：React/Tauri 多页面工作台与静态公开回放；
-- `tests/`：合同、失败关闭、安全边界和回放验证。
+## 源码与公开边界
 
-接口存在不等于外部平台已经连接。CVAT/FiftyOne 已完成本地合同验证；MES、OPC UA、PLC、VisionMaster 和 Hosted AgentTeams 在取得真实身份与探测回执前保持未连接。
+公共镜像由显式 allowlist 从干净私有提交中导出。
 
-## 状态
+| 公开包含 | 明确排除 |
+|---|---|
+| <code>src/</code>、<code>web/</code>、<code>desktop/</code>、<code>reviewer_workbench/</code>、<code>tools/</code>、<code>tests/</code>、<code>schemas/</code>、<code>skills/</code>、<code>rulepacks/</code>、<code>adapters/</code>、<code>agentteams/</code> 与 <code>examples/</code> 下全部 Git 已跟踪源码 | 私有图像/mask、客户或操作者回执、本地数据库、API Key、DPAPI 密文、日志、构建缓存、release 归档和私有 Git 历史 |
+| 锁文件、示例、sample data、许可证清单与 CycloneDX SBOM | 再分发权未确认的来源 URL 或标签 |
 
-```text
-current_rc4_defense_kit=PASS_LOCAL_RC4_DEFENSE_KIT_INTEGRITY
-public_mirror_rc4_sync=PENDING
-frozen_rc3_candidate=PASS_LOCAL_RC3_RELEASE_CANDIDATE
-frozen_rc3_source_commit=c5fd68fc38025ffab4345cd739e611c96b13c530
-frozen_rc3_source_tree=5501787b6ed452759af16e60dca76ce0c2ec54bf
-official_submission=PENDING
-official_evaluation=NOT_EVALUATED
-factory_shadow_metrics=NOT_MEASURED_PENDING_ADJUDICATION
-production_release_allowed=false
-authority=human_only
-```
+<code>PUBLIC_MIRROR_MANIFEST.json</code> 为每个导出文件登记 SHA-256；导出器与隐私扫描器本身也包含在仓库中。文件总数不在 README 中硬编码。
 
-冻结 RC3 的 PASS 只绑定上述 commit/tree；当前 RC4 答辩包装未完成全套附件 QA 前保持 HOLD。网页部署成功不会改变比赛、客户、工厂或生产状态。
+## 安全与责任边界
+
+- 来源数据默认只读；整改只写入私有派生版本；
+- 私域原始图像不进入公共镜像或参赛附件；
+- Provider 密钥留在服务端，公开 Pages 不渲染密钥；
+- <code>machine_write_permitted=false</code>，生产决定权保持 <code>human_only</code>；
+- 缺失证据、无效合同、预算耗尽和无法核验的响应全部失败关闭；
+- 不要在 Issue 或 Pull Request 中提交工厂数据、密钥、个人信息或私域运行回执。
+
+使用非公开数据前，请阅读 [Security](SECURITY.md)、[公开边界](docs/PUBLICATION_BOUNDARY.md) 与 [数据来源和合规](docs/DATA_SOURCE_AND_COMPLIANCE_SEMIFINAL_RC3.md)。
+
+## 文档
+
+| 快速入口 | 深入阅读 |
+|---|---|
+| [产品总览](docs/00_OVERVIEW.md) | [Agent Runtime](docs/AGENT_RUNTIME.md) |
+| [运行说明](docs/RUNNING.md) | [Incident Control Plane](docs/INCIDENT_CONTROL_PLANE.md) |
+| [API Quickstart](docs/API_QUICKSTART.md) | [Governed Outcome Envelope](docs/GOVERNED_OUTCOME_ENVELOPE.md) |
+| [外部模型配置](docs/EXTERNAL_MODEL_CONFIGURATION.md) | [开放复用合同](docs/OPEN_REUSE_CONTRACTS.md) |
+| [Evidence & Benchmarks](docs/EVIDENCE_AND_BENCHMARKS.md) | [声明边界](docs/CLAIM_SCOPE.md) |
+
+<details>
+<summary><strong>GOAI 2026 复赛证据与答辩附录</strong></summary>
+
+比赛材料放在折叠附录中，让仓库首页首先服务产品用户与开发者。当前复赛指南强调行业价值、可演示的应用闭环、可核验工程材料以及数据/合规边界。
+
+- [GOAI 评分证据索引](docs/GOAI_SCORE_EVIDENCE_INDEX.md)
+- [最新复赛指南核验](docs/GOAI_SEMIFINAL_GUIDE_20260902.md)
+- [3 分钟陈述稿](docs/DEFENSE_3MIN_SCRIPT_SEMIFINAL.md)
+- [60 秒 Demo 路径](docs/DEMO_60S_SCRIPT_SEMIFINAL.md)
+- [答辩 Q&A](docs/DEFENSE_QA_SEMIFINAL.md)
+- [评审就绪矩阵](docs/REVIEWER_READINESS_MATRIX.md)
+
+公共部署、官网提交、官方评测、客户验收与生产放行是相互独立的状态。当前证据绑定标签见 [项目状态](docs/PROJECT_STATUS.md)。
+
+</details>
+
+## 参与贡献
+
+欢迎提交 Issue 与边界清晰的 Pull Request。开始前请阅读 [贡献指南](CONTRIBUTING.md)、[支持说明](SUPPORT.md)、[安全说明](SECURITY.md)、[行为准则](CODE_OF_CONDUCT.md) 与 [变更记录](CHANGELOG.md)。研究复用时可通过 [CITATION.cff](CITATION.cff) 绑定所用版本或提交。
 
 ## License 与供应链
 
-代码采用 [Apache License 2.0](LICENSE)，版权与声明见 [NOTICE](NOTICE)。合并 CycloneDX SBOM 同时绑定 `uv.lock`、`web/package-lock.json` 与 `web/src-tauri/Cargo.lock`；依赖、SPDX 和第三方许可证证据见 [SBOM](docs/SBOM.cdx.json)、[Cargo 许可证快照](docs/CARGO_LICENSES.locked.json)、[第三方依赖清单](docs/THIRD_PARTY_LICENSE_INVENTORY.generated.md) 与 [Notices](docs/THIRD_PARTY_NOTICES.md)。
-
-参与开发前请阅读 [贡献指南](CONTRIBUTING.md)、[安全策略](SECURITY.md) 与 [社区行为准则](CODE_OF_CONDUCT.md)。请勿在 Issue 或 PR 中上传真实工厂数据、密钥、个人信息或私有运行回执。
+VisionData Gate 采用 [Apache License 2.0](LICENSE)，版权说明见 [NOTICE](NOTICE)。依赖来源通过 [CycloneDX SBOM](docs/SBOM.cdx.json)、[生成式许可证清单](docs/THIRD_PARTY_LICENSE_INVENTORY.generated.md) 与 [第三方声明](docs/THIRD_PARTY_NOTICES.md) 发布。

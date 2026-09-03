@@ -1,8 +1,8 @@
 # 开放复用合同｜Rule Pack、Evidence Schema 与 Adapter SDK
 
-状态：`PUBLIC_SOURCE_AVAILABLE / EXTERNAL_CLEAN_CLONE_REPRO_PENDING`
+状态：`PUBLIC_SOURCE_AVAILABLE / GITHUB_ACTIONS_CLEAN_BUILD_PASS / THIRD_PARTY_REUSE_PENDING`
 
-项目采用“私有权威仓 + 隐私安全公共镜像”。公共镜像已经提供可复用源码、锁文件、Schema、Rule Pack、Skills、Adapter、示例和文档；在取得第三方 clean-clone 回执前，仍不能把“代码公开”写成“外部评委已复现”。
+项目采用“私有权威仓 + 隐私安全公共镜像”。公共镜像已经提供可复用源码、锁文件、Schema、Rule Pack、Skills、Adapter、示例和文档；GitHub Actions 已在托管 runner 完成 clean checkout、隐私门、类型检查、静态构建和 Pages 部署。它证明公开工程可被自动化干净构建，但不等于独立评委/终端用户已经完成复用、客户采用或生产部署。
 
 ## 1. 可复用资产
 

@@ -17,6 +17,7 @@ PUBLIC_BINARY_REVIEW_PATH = "docs/PUBLIC_BINARY_REVIEW.json"
 PUBLIC_MIRROR_MANIFEST_PATH = "PUBLIC_MIRROR_MANIFEST.json"
 HISTORY_PATH_UNAVAILABLE = "<git-object-without-tree-path>"
 PUBLIC_GENERATED_FILE_SOURCES = {
+    ".github/workflows/ci.yml": "tools/templates/public-ci.yml",
     ".github/workflows/pages.yml": "tools/templates/public-pages.yml",
     "README.md": "docs/PUBLIC_REPOSITORY_README.md",
 }
@@ -26,12 +27,19 @@ FORBIDDEN_TRACKED_PREFIXES = (
     ".pytest_cache/",
     ".ruff_cache/",
     ".playwright-cli/",
+    "07_results/",
+    "10_reports/",
+    "deliverables/",
     "desktop/build/",
     "desktop/dist/",
+    "evidence/",
     "output/",
+    "release/",
     "tmp/",
     "web/node_modules/",
     "web/dist/",
+    "web/src-tauri/target/",
+    "website/",
 )
 FORBIDDEN_TRACKED_NAMES = {
     ".env",
@@ -133,6 +141,7 @@ PLACEHOLDER_MARKERS = (
     b"<absolute-path>",
 )
 GENERIC_PATH_SCANNED_SUFFIXES = {
+    ".cff",
     ".cfg",
     ".conf",
     ".csv",
@@ -301,11 +310,11 @@ def _mirror_manifest_violations(
         ordered_paths.append(relative)
         expected_source = PUBLIC_GENERATED_FILE_SOURCES.get(relative)
         if expected_source is not None and entry.get("source") != expected_source:
-            rule = (
-                "public-readme-source-drift"
-                if relative == "README.md"
-                else "public-pages-workflow-source-drift"
-            )
+            rule = {
+                "README.md": "public-readme-source-drift",
+                ".github/workflows/ci.yml": "public-ci-workflow-source-drift",
+                ".github/workflows/pages.yml": "public-pages-workflow-source-drift",
+            }[relative]
             violations.append({"rule": rule, "path": relative})
         source = project_root / relative
         if relative not in tracked or not source.is_file():

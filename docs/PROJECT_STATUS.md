@@ -1,13 +1,19 @@
 # VisionData Gate｜产品与发布状态
 
-更新时间：2026-09-02
+更新时间：2026-09-03
 
 ## 当前裁决
 
 ```text
 current_worktree_state=RC4_DEFENSE_KIT_LOCALLY_VERIFIED
 current_release_decision=PASS_LOCAL_RC4_DEFENSE_KIT_INTEGRITY
-public_mirror_rc4_sync=PENDING
+public_mirror_rc4_sync=PASS_PUBLIC_RC4_SYNC
+public_mirror_source_commit=46a7242f9aa746f9b8f0f78b776d662422d32c72
+public_mirror_source_tree=ab27540b18b8d63db6d9db9256fa2b3330f44dfc
+public_mirror_head=eb3ef24f7b7df771a4be51a1a3263a060c561db3
+public_pages_workflow=33718870200_SUCCESS
+public_release=v0.4.0-goai-semifinal-rc4
+current_rc5_document_publication=PENDING
 frozen_rc3_state=RC3_FROZEN_LOCAL
 frozen_rc3_release_candidate_ready=true
 frozen_rc3_release_decision=PASS_LOCAL_RC3_RELEASE_CANDIDATE
@@ -24,9 +30,9 @@ release_evidence_binding=DETACHED_RELEASE_NAMESPACE_REQUIRED
 public_distribution=PRIVACY_SAFE_MIRROR_ONLY
 ```
 
-冻结 RC3 的本地候选代码、材料与可复现实跑只绑定上述 commit/tree 及其 detached 验证集。当前 RC4 的 PPT/PDF、当前公开工作台 57.33 秒备用视频、公共源码快照、Defense Kit ZIP 和匹配回执已完成独立的本地隐私、内容与完整性联检，因此取得 `PASS_LOCAL_RC4_DEFENSE_KIT_INTEGRITY`；GitHub 公共镜像 RC4 同步仍为 `PENDING`。这些状态都不代表官网已经上传、评委已经验收、客户已经采用，或工厂允许生产放行。
+冻结 RC3 的本地候选代码、材料与可复现实跑只绑定上述 commit/tree 及其 detached 验证集。RC4 的 PPT/PDF、当前公开工作台 57.33 秒备用视频、公共源码快照、Defense Kit ZIP 和匹配回执已完成独立的本地隐私、内容与完整性联检，因此取得 `PASS_LOCAL_RC4_DEFENSE_KIT_INTEGRITY`；公共镜像已由 GitHub Actions/Pages 成功运行取得 `PASS_PUBLIC_RC4_SYNC`，并绑定上述 source commit/tree、public head 与 Release。本轮 RC5 文档尚未发布。以上状态都不代表官网已经上传、评委已经验收、客户已经采用，或工厂允许生产放行。
 
-公开交付采用私有权威仓与公共镜像分离：公共镜像只含允许公开的源码、合成样本、锁文件、文档与静态 `PUBLIC_SYNTHETIC_REPLAY`，不含私域运行证据、原始 Omni/CAPA 资产、密钥、本机路径或完整私有 Git 历史。公共仓和 Pages 是否与当前权威源码一致，必须同时核对 mirror manifest 的 source commit/tree 与部署 SHA。
+公开交付采用私有权威仓与公共镜像分离：公共镜像只含允许公开的源码、合成样本、锁文件、文档与静态 `PUBLIC_SYNTHETIC_REPLAY`，不含私域运行证据、原始 Omni/CAPA 资产、密钥、本机路径或完整私有 Git 历史。RC4 当前已按 mirror manifest 的 source commit/tree 与部署 SHA 完成对账；后续 RC5 改动仍须取得新的镜像和 Pages 回执后才能升级发布状态。
 
 `PASS_LOCAL_RC3_RELEASE_CANDIDATE` 只有在冻结 RC3 的完整本地验证集由 verifier 返回 `PASS_LOCAL_INTEGRITY` 时才成立。detached release namespace 必须含 Attestation、两份候选 ZIP、四份 receipt 与 Full JUnit；项目根还必须是匹配的 clean checkout，具有精确 commit/tree、`uv.lock`、SBOM 和 Attestation 声明的本地 toolchain。Attestation 位于 release namespace 根，候选 ZIP 位于其 build 子目录；单独复制“候选 ZIP + Attestation”不能完成复验。本文不复制会随重新封包变化的哈希。任一旁车、checkout 或 toolchain 对账失败时，状态立即退回 `HOLD_AS_RELEASE_TREE`。RC4 使用独立的附件清单、公共源码快照、内容/隐私 QA 与确定性 ZIP 回执；任一匹配检查失败时，RC4 状态立即退回 `HOLD_RC4_DEFENSE_KIT`。
 

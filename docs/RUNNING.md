@@ -196,7 +196,7 @@ production_release_allowed=false
 
 CVAT/FiftyOne 当前完成的是本地合同验证；真实外部连接需要只读可达、身份读取与响应哈希同时成立。外部模型同样必须提供端点、后端身份、真实响应与运行回执。OpenAI-compatible Gateway 的 Base URL 与本机 Key 配置见 [EXTERNAL_MODEL_CONFIGURATION.md](EXTERNAL_MODEL_CONFIGURATION.md)；Reviewer Workbench 只显示是否已配置，永不接收或返回 Key。
 
-连接方法见 [API_QUICKSTART.md](API_QUICKSTART.md) 和 [ECOSYSTEM_P0_UPGRADE.md](ECOSYSTEM_P0_UPGRADE.md)。没有这些回执时，状态必须保持 `NOT_CONNECTED`、`LOCAL_CONTRACT_ONLY` 或 `NOT_TESTED`。
+连接方法见 [API_QUICKSTART.md](API_QUICKSTART.md)、[外部模型配置](EXTERNAL_MODEL_CONFIGURATION.md) 和 [开放复用合同](OPEN_REUSE_CONTRACTS.md)。没有这些回执时，状态必须保持 `NOT_CONNECTED`、`LOCAL_CONTRACT_ONLY` 或 `NOT_TESTED`。
 
 ## 11. 分层测试与完整回归
 
@@ -227,6 +227,14 @@ CVAT/FiftyOne 当前完成的是本地合同验证；真实外部连接需要只
 `-NoJUnit`，但冻结报告必须保留 Full 的 JUnit 文件。直接运行
 `uv run --frozen python -m pytest -q` 与 `Full` 等价；不能用 Quick 的通过结果替代
 Full，也不能把 marker deselected 项写成已通过。
+
+> **公共镜像的测试分母**：公共仓保留 Release/Benchmark 测试源码供审计，
+> 但不会再分发私域 `evidence/`、`07_results/`、`10_reports/`、`release/` 或
+> `deliverables/`。公共 clone 请运行
+> `uv run python tools/run_public_test_suite.py`；该入口与公开 CI 使用同一组
+> Runtime、API、Web 合同和隐私门测试。缺少私域冻结工件的 Full 不能写成
+> PASS，也不得生成替代回执。上面的 Full 说明只适用于持有匹配冻结工件的
+> 私有权威仓。
 
 历史 Quick 数字只证明对应工作树的快速层级，不能替代当前 Full，也不在本页硬编码。
 当前 Full 计数、JUnit SHA、Git commit/tree 与候选 ZIP SHA 只从最终 detached receipt 读取。

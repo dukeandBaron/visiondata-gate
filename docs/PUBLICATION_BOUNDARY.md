@@ -79,7 +79,10 @@ Pages 工作流在部署前依次执行：
 - **PASS_PUBLIC_PAGES_PRIVACY**
 - **PUBLIC_SYNTHETIC_REPLAY**
 - **FROZEN_RC3_BASELINE / PASS_LOCAL_RC3_RELEASE_CANDIDATE**（只绑定冻结 RC3 commit/tree）
-- **CURRENT_RC4_DEFENSE_KIT / PASS_LOCAL_RC4_DEFENSE_KIT_INTEGRITY**（仅表示本地附件内容、隐私与字节完整性通过；公共镜像同步和官网提交独立）
+- **CURRENT_RC4_DEFENSE_KIT / PASS_LOCAL_RC4_DEFENSE_KIT_INTEGRITY**（仅表示本地附件内容、隐私与字节完整性通过）
+- **PASS_PUBLIC_RC4_SYNC**（只绑定 source `46a7242.../ab27540...`、public head `eb3ef24...` 与成功工作流 `33718870200`；当前 RC5 文档尚未发布）
+
+公共镜像同步、官网提交、官方评测与生产放行始终是相互独立的状态；RC4 镜像 PASS 不会升级其余三项。
 
 不得因此升级为：
 
