@@ -26,6 +26,14 @@ from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .acceptance import AcceptanceScorecard
+from .compute_handoff import (
+    ComputeHandoffError,
+    ComputeHandoffRequest,
+    compute_preflight,
+    prepare_compute_handoff,
+    read_compute_handoffs,
+    export_compute_handoff,
+)
 from .annotation_roundtrip import (
     AnnotationExportRecord,
     AnnotationImportPackage,
@@ -2454,6 +2462,38 @@ def create_app(
         product: Service,
     ) -> list[ShadowEvaluationManifestV2]:
         return product.list_shadow_evaluation_manifests_v2(actor, task_id)
+
+    @app.exception_handler(ComputeHandoffError)
+    def compute_handoff_error(
+        _request: Request, exc: ComputeHandoffError
+    ) -> JSONResponse:
+        return _error_response(exc.code, str(exc), status.HTTP_409_CONFLICT)
+
+    @app.get("/v1/tasks/{task_id}/compute-preflight", tags=["compute"])
+    def read_compute_preflight(
+        task_id: str, actor: Actor, product: Service, response: Response
+    ):
+        result = compute_preflight(product, actor, task_id)
+        response.headers["ETag"] = f'"{result["receipt_sha256"]}"'
+        return result
+
+    @app.post("/v1/tasks/{task_id}/compute-handoffs", tags=["compute"], status_code=201)
+    def create_compute_handoff(
+        task_id: str, payload: ComputeHandoffRequest, actor: Actor, product: Service
+    ):
+        return prepare_compute_handoff(product, actor, task_id, payload)
+
+    @app.get("/v1/tasks/{task_id}/compute-handoffs", tags=["compute"])
+    def list_compute_handoffs(task_id: str, actor: Actor, product: Service):
+        return read_compute_handoffs(product, actor, task_id)
+
+    @app.get(
+        "/v1/tasks/{task_id}/compute-handoffs/{handoff_id}/export", tags=["compute"]
+    )
+    def download_compute_handoff(
+        task_id: str, handoff_id: str, actor: Actor, product: Service
+    ):
+        return export_compute_handoff(product, actor, task_id, handoff_id)
 
     return app
 

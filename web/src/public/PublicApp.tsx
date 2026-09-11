@@ -2,12 +2,16 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "../components/AppShell";
 import { PublicLandingPage } from "../pages/PublicLandingPage";
 import { PublicReplayPage } from "../pages/PublicReplayPage";
+import { PilotPlanPage } from "../pages/PilotPlanPage";
+import { TaskGuidePage } from "../pages/TaskGuidePage";
 
 export function App() {
   return (
     <Routes>
       <Route path="/" element={<PublicLandingPage />} />
       <Route element={<AppShell />}>
+        <Route path="/start" element={<TaskGuidePage />} />
+        <Route path="/pilot" element={<PilotPlanPage />} />
         <Route path="/workspace" element={<PublicReplayPage view="workspace" />} />
         <Route path="/command-center" element={<PublicReplayPage view="command-center" />} />
         <Route path="/cases" element={<PublicReplayPage view="cases" />} />

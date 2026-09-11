@@ -259,6 +259,9 @@ interface OperatorAgentPanelProps {
   onRun: () => void;
   onAsk: (question: string) => void;
   onCreateWorkOrder: () => void;
+  onHandoffProject: () => void;
+  handoffPending: boolean;
+  handoffDisabled: boolean;
   onOpenCapa: () => void;
   onOpenEvidence: () => void;
   onOpenTaskWorkbench: () => void;
@@ -280,6 +283,9 @@ export function OperatorAgentPanel({
   onRun,
   onAsk,
   onCreateWorkOrder,
+  onHandoffProject,
+  handoffPending,
+  handoffDisabled,
   onOpenCapa,
   onOpenEvidence,
   onOpenTaskWorkbench,
@@ -397,8 +403,40 @@ export function OperatorAgentPanel({
     };
   });
   const recommendationTone = run.recommendation.severity.toLowerCase();
-  const bindingMatches = run.asset_sha256 === asset.source_sha256 && !traceStale;
-  const canCreateWorkOrder = Boolean(selectedAnnotationLabel) && !traceStale;
+  const bindingMatches =
+    run.asset_id === asset.asset_id &&
+    run.workspace_id === asset.workspace_id &&
+    (run.project_id ?? null) === (asset.project_id ?? null) &&
+    run.asset_sha256 === asset.source_sha256 && !traceStale;
+  const canCreateWorkOrder = Boolean(selectedAnnotationLabel) && bindingMatches;
+  const duplicateReview = run.recommendation.code === "DUPLICATE_REVIEW";
+  const duplicateHandoff = duplicateReview ? (
+    <section className="agent-action-dock">
+      <header>
+        <span><ClipboardCheck size={13} /> NEXT CONTROLLED ACTION</span>
+        <em>PROJECT REVIEW</em>
+      </header>
+      <p>重复证据属于项目级问题，无需绘制缺陷框。先封存当前项目，再创建受控任务；任务完成后可进入审计与 CAPA。</p>
+      <button
+        type="button"
+        className="is-primary"
+        disabled={!bindingMatches || analyzing || handoffPending || handoffDisabled}
+        onClick={onHandoffProject}
+      >
+        {handoffPending ? <LoaderCircle size={14} className="is-spinning" /> : <ShieldCheck size={14} />}
+        <span>
+          <strong>冻结项目并交给 Agent</strong>
+          <small>{handoffPending
+            ? "正在核验并封存项目快照…"
+            : !bindingMatches
+              ? "证据绑定已变化，请先重新运行 Agent"
+              : "绑定真实项目快照 → 创建任务 → 人工审批与运行 → CAPA"}</small>
+        </span>
+        <ArrowRight size={13} />
+      </button>
+      <small>先确认逐样本要求与具名复核，再冻结项目；不会自动批准整改或关闭工单。</small>
+    </section>
+  ) : null;
 
   return (
     <div className="agent-panel">
@@ -471,6 +509,7 @@ export function OperatorAgentPanel({
       >
         {activeView === "OVERVIEW" ? (
           <>
+            {duplicateHandoff}
             <section className="agent-binding-card">
               <header>
                 <span><FileCheck2 size={13} /> CURRENT BINDING</span>
@@ -644,12 +683,13 @@ export function OperatorAgentPanel({
               <small>decision_authority = {run.recommendation.decision_authority}</small>
             </section>
 
+            {duplicateHandoff}
             <section className="agent-action-dock">
               <header>
                 <span><ClipboardCheck size={13} /> NEXT CONTROLLED ACTION</span>
                 <em>HUMAN REQUIRED</em>
               </header>
-              <button
+              {!duplicateReview ? <button
                 type="button"
                 className="is-primary"
                 disabled={!canCreateWorkOrder}
@@ -667,7 +707,7 @@ export function OperatorAgentPanel({
                   </small>
                 </span>
                 <ArrowRight size={13} />
-              </button>
+              </button> : null}
               <div>
                 <button type="button" onClick={onOpenCapa}><ExternalLink size={12} />CAPA 队列</button>
                 <button type="button" onClick={onOpenEvidence}><FileCheck2 size={12} />证据库</button>

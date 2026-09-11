@@ -1,3 +1,4 @@
+import type { OperatorAcceptanceRequirements } from "../snapshotAcceptance";
 import type {
   CausalReplayReport,
   CausalReplayStep,
@@ -1307,6 +1308,7 @@ export async function authorizeOperatorProjectSnapshot(input: {
   workspaceId: string;
   projectId: string;
   displayName?: string;
+  acceptanceRequirements?: OperatorAcceptanceRequirements;
 }): Promise<LocalTaskSource> {
   const response = await operatorFetch(
     "/v1/data-sources/operator-project-snapshots",
@@ -1318,6 +1320,7 @@ export async function authorizeOperatorProjectSnapshot(input: {
         project_id: input.projectId,
         display_name: input.displayName ?? "工作簿受控快照",
         operator_attests_authorized_use: true,
+        ...(input.acceptanceRequirements ? { acceptance_requirements: input.acceptanceRequirements } : {}),
       }),
     },
     120_000,

@@ -10,6 +10,7 @@ import pytest
 from visiondata_gate.api import create_app
 from visiondata_gate.private_industrial_validation import (
     DEFAULT_VISA_COMPACT_RECEIPT_PATH,
+    ArtifactIdentityBinding,
     DYNAMIC_CAPABILITY_CLAIM,
     PrivateIndustrialValidationSource,
     global_industrial_validation_scope,
@@ -31,7 +32,26 @@ def _project(source: PrivateIndustrialValidationSource):
     return source.project(scope=global_industrial_validation_scope())
 
 
-def test_projection_separates_public_proxy_offline_and_factory_tracks() -> None:
+def test_projection_separates_public_proxy_offline_and_factory_tracks(
+    monkeypatch,
+) -> None:
+    # This is a frozen-receipt projection fixture, not a fresh benchmark run.
+    # Actual current-source drift is independently exercised below and by the API test.
+    def matched_fixture(_root, expected):
+        return ArtifactIdentityBinding(
+            status="MATCHED",
+            total_count=len(expected),
+            matched_count=len(expected),
+            drifted_count=0,
+            missing_count=0,
+            mismatched_artifacts=[],
+            missing_artifacts=[],
+        )
+
+    monkeypatch.setattr(
+        "visiondata_gate.private_industrial_validation._identity_binding",
+        matched_fixture,
+    )
     projection = _project(PrivateIndustrialValidationSource())
 
     assert projection.status == "HOLD"
@@ -117,6 +137,28 @@ def test_projection_separates_public_proxy_offline_and_factory_tracks() -> None:
         assert metric.value is None
         assert metric.wilson_95_lower is None
         assert metric.wilson_95_upper is None
+
+
+def test_default_projection_cannot_reuse_frozen_metrics_after_source_changes() -> None:
+    root = Path(__file__).resolve().parents[1]
+    receipt = json.loads(DEFAULT_VISA_COMPACT_RECEIPT_PATH.read_text(encoding="utf-8"))
+    changed = [
+        item
+        for item in receipt["core_components"]
+        if hashlib.sha256((root / item["artifact"]).read_bytes()).hexdigest()
+        != item["sha256"]
+    ]
+    projection = _project(PrivateIndustrialValidationSource())
+    if changed:
+        assert projection.verification_status == "FAILED_CLOSED"
+        assert projection.visa_public_proxy is None
+        assert (
+            "VISA_CURRENT_CORE_COMPONENT_BINDING_NOT_MATCHED"
+            in projection.failure_codes
+        )
+    else:
+        assert projection.visa_public_proxy is not None
+    assert projection.production_release_allowed is False
 
 
 def test_missing_compact_receipt_fails_closed_without_proxy_metrics(

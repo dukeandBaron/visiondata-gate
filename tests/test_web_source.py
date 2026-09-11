@@ -475,13 +475,17 @@ def test_workbook_project_snapshot_handoff_uses_the_live_product_api() -> None:
     page = _source("pages/ImageWorkspacePage.tsx")
     api = _source("data/api.ts")
 
-    assert "authorizeOperatorProjectSnapshot" in page
+    dialog = _source("components/SnapshotAcceptanceDialog.tsx")
+    assert "SnapshotAcceptanceDialog" in page
+    assert "authorizeOperatorProjectSnapshot" in dialog
     assert 'operatorFetch(\n    "/v1/data-sources/operator-project-snapshots"' in api
     assert "await save()" in page
     assert "activeProjectIdRef.current !== handoffProjectId" in page
-    assert "operator_snapshot_receipt_sha256" in page
+    assert "acceptance_requirements_sha256" in dialog
     assert "冻结项目并交给 Agent" in page
-    assert "command-center?create=1&source=" in page
+    navigation = _source("businessTaskNavigation.ts")
+    assert 'snapshotTaskUrl(source.source_id,searchParams.get("purpose"))' in page
+    assert 'new URLSearchParams({ create: "1", source: sourceId })' in navigation
 
 
 def test_product_context_reconnects_without_reloading_the_workbench() -> None:

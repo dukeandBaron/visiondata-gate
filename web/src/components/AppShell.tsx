@@ -66,6 +66,9 @@ const navigationGroups: NavigationGroup[] = [
   {
     label: "WORK",
     items: [
+      { label: "开始一项工作", path: "/start", icon: FileSearch, keywords: "start task 任务 指引" },
+      { label: "试点计划", path: "/pilot", icon: FileSearch, keywords: "pilot 试点 交付" },
+      ...(publicReplayMode ? [] : [{label:"算力交接",path:"/compute",icon:Network,keywords:"compute ascend cann 昇腾 算力"}]),
       { label: "图像工作簿", path: "/workspace", icon: Images, keywords: "workbook canvas image annotation 图像 标注 画布" },
       { label: "工作总览", path: "/command-center", icon: LayoutDashboard, keywords: "overview inbox dashboard 总览 收件箱" },
       { label: "案件", path: "/cases", icon: BriefcaseBusiness, keywords: "case incident 案件 调查" },

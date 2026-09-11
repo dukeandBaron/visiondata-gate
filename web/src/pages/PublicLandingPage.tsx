@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BrandMark } from "../components/BrandMark";
+import { CommercialStory } from "../components/CommercialStory";
 import {
   usePublicReplayManifest,
   type PublicReplayManifest,
@@ -136,7 +137,7 @@ export function PublicLandingPage() {
     <div className="public-facade">
       <a className="facade-skip" href="#facade-main">跳到主要内容</a>
       <header className="facade-nav">
-        <Link className="facade-nav__brand" to="/" aria-label="VisionData Gate 公开首页">
+        <Link className="facade-nav__brand" to="/" aria-label="工业视觉交付站公开首页">
           <BrandMark />
         </Link>
         <nav aria-label="公开项目导航">
@@ -162,11 +163,12 @@ export function PublicLandingPage() {
               <em>把异常办到可复验</em>
             </h1>
             <p>
-              VisionData Gate 把图像、标注、批次、工艺与视觉方案组织成一个版本化案件。
+              工作台把图像、标注、批次、工艺与视觉方案组织成一个版本化案件。
               确定性工具先测量，Agent 只在证据改变下一步时补证；高风险决定交给具名人员，
               整改后由 Child Run 独立复验。
             </p>
             <div className="facade-hero__actions">
+              <Link to="/start">选择数据交付或标注复核任务 <ArrowRight size={16} /></Link>
               <a href={runningGuideUrl} target="_blank" rel="noreferrer">
                 启动真实本地工作台 <ExternalLink size={14} />
               </a>
@@ -208,6 +210,8 @@ export function PublicLandingPage() {
             />
           )}
         </section>
+
+        <CommercialStory publicMode />
 
         <section className="facade-problem" id="capabilities" aria-labelledby="problem-title">
           <header className="facade-section-heading">

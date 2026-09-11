@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+import hashlib
+import json
 
 from fastapi.testclient import TestClient
 
@@ -64,9 +66,32 @@ def test_scoped_industrial_validation_response_matches_frontend_contract(
         assert response.status_code == 200
         payload = response.json()
         assert payload["status"] == "HOLD"
-        assert payload["availability"] == (
-            "CURRENT_PUBLIC_PROXY_WITH_HISTORICAL_OFFLINE_EVIDENCE"
+        receipt = json.loads(
+            (ROOT / "benchmarks/visa-public-proxy-summary.json").read_text(
+                encoding="utf-8"
+            )
         )
+        changed = any(
+            hashlib.sha256((ROOT / item["artifact"]).read_bytes()).hexdigest()
+            != item["sha256"]
+            for item in receipt["core_components"]
+        )
+        if changed:
+            assert (
+                payload["availability"]
+                == "PUBLIC_PROXY_UNAVAILABLE_WITH_HISTORICAL_OFFLINE_EVIDENCE"
+            )
+            assert payload["verification_status"] == "FAILED_CLOSED"
+            assert payload["visa_public_proxy"] is None
+            assert (
+                "VISA_CURRENT_CORE_COMPONENT_BINDING_NOT_MATCHED"
+                in payload["failure_codes"]
+            )
+        else:
+            assert (
+                payload["availability"]
+                == "CURRENT_PUBLIC_PROXY_WITH_HISTORICAL_OFFLINE_EVIDENCE"
+            )
         assert payload["scope"] == {
             "scope_kind": "PROJECT_REFERENCE",
             "workspace_id": workspace_id,

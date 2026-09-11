@@ -22,8 +22,9 @@ import zipfile
 import numpy as np
 from pydantic import Field, model_validator
 
-from .contracts import BatchManifest, Finding
-from .duplicates import _file_sha256, _perceptual_fingerprint
+from .contracts import BatchContract, BatchManifest, Finding
+from .coverage import inspect_coverage
+from .duplicates import _file_sha256, _perceptual_fingerprint, inspect_duplicates
 from .evidence import canonical_json_bytes, sha256_file, write_canonical_json
 from .industrial_delivery import (
     IndustrialExecutableWorkOrder,
@@ -44,6 +45,7 @@ from .omni_adapter import (
 )
 from .operator_snapshot import (
     OperatorProjectSnapshotReceipt,
+    materialize_operator_snapshot_subset,
     profile_operator_project_snapshot,
 )
 from .product_models import ProductModel
@@ -212,6 +214,7 @@ class DerivedOperation(ProductModel):
         "QUARANTINE_AND_BACKFILL",
         "REPARTITION_BY_BACKFILL",
         "RECONCILE_DERIVED_METADATA",
+        "EXCLUDE_EXACT_DUPLICATE",
         "INVESTIGATION_HOLD",
     ]
     status: Literal["EXECUTED", "BLOCKED", "NOT_REQUIRED"]
@@ -970,6 +973,165 @@ def _publish_staged_version(staging: Path, destination: Path) -> None:
             time.sleep(0.05 * (attempt + 1))
 
 
+def _operator_duplicate_exclusions(
+    frozen_root: Path,
+    receipt: OperatorProjectSnapshotReceipt,
+    selected_orders: list[IndustrialExecutableWorkOrder],
+) -> tuple[set[str], list[DerivedOperation], list[str]]:
+    """Re-measure approved duplicate evidence and preserve contract coverage."""
+
+    manifest = BatchManifest.model_validate_json(
+        (frozen_root / receipt.batch_manifest_relative_path).read_bytes()
+    )
+    contract = BatchContract.model_validate_json(
+        (frozen_root / receipt.batch_contract_relative_path).read_bytes()
+    )
+    samples = {sample.sample_id: sample for sample in manifest.samples}
+    assets = {asset.asset_id: asset for asset in receipt.assets}
+    if set(samples) != set(assets):
+        raise ValueError("snapshot manifest samples do not match asset bindings")
+    findings, _ = inspect_duplicates(frozen_root / "batch", manifest, contract)
+    measured = {finding.finding_id: finding for finding in findings}
+    retained_ids = set(assets)
+    operations: list[DerivedOperation] = []
+    unresolved: list[str] = []
+    for order in selected_orders:
+        sample_ids = sorted(
+            {sample_id for span in order.evidence_span for sample_id in span.sample_ids}
+        )
+        codes = sorted({span.code for span in order.evidence_span})
+        reason = (
+            "当前冻结工作簿没有独立授权的替换图像或标注修订；系统只创建"
+            "派生副本并保留责任项，不合成物理重采结果，也不覆盖 Parent。"
+        )
+        supported = (
+            order.action == "REMOVE_OR_REPARTITION"
+            and len(order.evidence_span) == 1
+            and codes == ["EXACT_DUPLICATE"]
+            and len(sample_ids) >= 2
+            and set(sample_ids).issubset(retained_ids)
+        )
+        if supported:
+            span = order.evidence_span[0]
+            finding = measured.get(span.finding_id)
+            supported = (
+                finding is not None
+                and finding.code == span.code
+                and finding.tool == span.tool == "duplicate_leakage"
+                and sorted(finding.sample_ids) == sample_ids
+            )
+            reason = "工单引用无法与重新测量的完全重复证据及样本身份一致绑定。"
+        if supported:
+            identities = set()
+            for sample_id in sample_ids:
+                sample, asset = samples[sample_id], assets[sample_id]
+                annotation_policies = contract.sample_annotation_requirements
+                if (
+                    annotation_policies is not None
+                    and sample_id not in annotation_policies
+                ):
+                    raise ValueError(
+                        "snapshot sample has no frozen annotation requirement"
+                    )
+                if (
+                    f"batch/{sample.relative_path}" != asset.source_relative_path
+                    or (
+                        f"batch/{sample.annotation_path}"
+                        if sample.annotation_path is not None
+                        else None
+                    )
+                    != asset.mask_relative_path
+                ):
+                    raise ValueError("snapshot sample does not match its asset binding")
+                identities.add(
+                    (
+                        asset.source_sha256,
+                        asset.width,
+                        asset.height,
+                        sample.split,
+                        sample.category,
+                        sample.view,
+                        sample.condition,
+                        sample.source_sample_id,
+                        asset.annotation_revision,
+                        asset.annotation_document_sha256,
+                        asset.annotation_count,
+                        asset.mask_sha256,
+                        annotation_policies[sample_id]
+                        if annotation_policies is not None
+                        else None,
+                    )
+                )
+            supported = len(identities) == 1
+            reason = (
+                "完全相同像素的划分、类别、工况或冻结标注文档身份不一致；"
+                "需要人工补证，禁止自动丢弃语义不同的样本。"
+            )
+            if (
+                contract.sample_annotation_requirements is not None
+                and len(
+                    {
+                        contract.sample_annotation_requirements[sample_id]
+                        for sample_id in sample_ids
+                    }
+                )
+                > 1
+            ):
+                reason = (
+                    "完全相同像素的逐样本标注要求不一致；需要人工补证，"
+                    "禁止在 REQUIRED、OPTIONAL 或 NOT_APPLICABLE 之间自动合并。"
+                )
+        if supported:
+            proposed_ids = retained_ids - set(sample_ids[1:])
+            proposed = manifest.model_copy(
+                update={
+                    "samples": [
+                        s for s in manifest.samples if s.sample_id in proposed_ids
+                    ]
+                }
+            )
+            coverage_findings, _ = inspect_coverage(
+                frozen_root / "batch", proposed, contract
+            )
+            supported = not coverage_findings and set(
+                contract.required_splits
+            ).issubset({sample.split for sample in proposed.samples})
+            reason = "排除副本将不满足原冻结合同的覆盖数量或必要划分，整改保持阻断。"
+        if supported:
+            retained_ids = proposed_ids
+            operations.append(
+                DerivedOperation(
+                    operation_id=f"op-exact-deduplicate-{order.work_order_id}",
+                    work_order_ids=[order.work_order_id],
+                    action="EXCLUDE_EXACT_DUPLICATE",
+                    status="EXECUTED",
+                    before_sample_ids=sample_ids,
+                    after_sample_ids=[sample_ids[0]],
+                    finding_codes=codes,
+                    reason=(
+                        "已重新核验相同 SHA-256、划分、类别、工况及冻结标注身份；"
+                        "派生清单仅保留稳定排序首份，原冻结合同覆盖不减少至阈值以下。"
+                        "Parent 只读，工单关闭仍须由同合同 Child Run 实测确认。"
+                    ),
+                )
+            )
+        else:
+            unresolved.append(order.work_order_id)
+            operations.append(
+                DerivedOperation(
+                    operation_id=f"op-evidence-hold-{order.work_order_id}",
+                    work_order_ids=[order.work_order_id],
+                    action="INVESTIGATION_HOLD",
+                    status="BLOCKED",
+                    before_sample_ids=sample_ids,
+                    after_sample_ids=[],
+                    finding_codes=codes,
+                    reason=reason,
+                )
+            )
+    return retained_ids, operations, unresolved
+
+
 def build_operator_snapshot_derived_version(
     *,
     source_root: str | Path,
@@ -984,14 +1146,18 @@ def build_operator_snapshot_derived_version(
     work_orders: list[IndustrialExecutableWorkOrder],
     created_at: str,
 ) -> DerivedVersionBuild:
-    """Clone one immutable Operator snapshot without inventing repair evidence.
+    """Apply approved exact deduplication, holding unsupported corrective actions."""
 
-    A workbook snapshot contains only assets explicitly frozen by the operator.  It
-    has no larger authorized candidate pool from which a blurred or mislabeled sample
-    can be silently replaced.  The derived copy can still enter a same-contract Child
-    Run, while every selected corrective action remains open until independently
-    authorized replacement evidence exists.
-    """
+    verify_sealed_model(plan, "plan_sha256")
+    verify_sealed_model(approval, "binding_sha256")
+    if not (
+        approval.case_id == case_id
+        and approval.parent_task_id == parent_task_id == plan.task_id
+        and approval.source_id == parent_source_id
+        and approval.remediation_plan_id == plan.plan_id
+        and hmac.compare_digest(approval.remediation_plan_sha256, plan.plan_sha256)
+    ):
+        raise ValueError("CAPA approval does not bind this source, case and plan")
 
     frozen_root = Path(source_root).expanduser().resolve(strict=True)
     frozen_profile = profile_operator_project_snapshot(
@@ -1019,29 +1185,10 @@ def build_operator_snapshot_derived_version(
         selected_orders = [order_by_id[item] for item in plan.selected_work_order_ids]
     except KeyError as error:
         raise ValueError("selected CAPA work order is unavailable") from error
-    operations: list[DerivedOperation] = []
-    unresolved_ids: list[str] = []
-    for order in selected_orders:
-        sample_ids = sorted(
-            {sample_id for span in order.evidence_span for sample_id in span.sample_ids}
-        )
-        codes = sorted({span.code for span in order.evidence_span})
-        unresolved_ids.append(order.work_order_id)
-        operations.append(
-            DerivedOperation(
-                operation_id=f"op-evidence-hold-{order.work_order_id}",
-                work_order_ids=[order.work_order_id],
-                action="INVESTIGATION_HOLD",
-                status="BLOCKED",
-                before_sample_ids=sample_ids,
-                after_sample_ids=[],
-                finding_codes=codes,
-                reason=(
-                    "当前冻结工作簿没有独立授权的替换图像或标注修订；系统只创建"
-                    "派生副本并保留责任项，不合成物理重采结果，也不覆盖 Parent。"
-                ),
-            )
-        )
+    retained_ids, operations, unresolved_ids = _operator_duplicate_exclusions(
+        frozen_root, snapshot_receipt, selected_orders
+    )
+    deduplicated = len(retained_ids) < snapshot_receipt.asset_count
 
     final_version_root = Path(output_version_root).expanduser().resolve(strict=False)
     final_source_root = final_version_root / snapshot_receipt.snapshot_id
@@ -1055,9 +1202,23 @@ def build_operator_snapshot_derived_version(
         tempfile.mkdtemp(prefix=f".{version_id}.staging-", dir=publish_parent)
     ).resolve(strict=True)
     staging_source_root = staging_version_root / snapshot_receipt.snapshot_id
-    staging_source_root.mkdir(parents=False, exist_ok=False)
-
     try:
+        if deduplicated:
+            subset = materialize_operator_snapshot_subset(
+                frozen_root,
+                snapshots_root=staging_version_root,
+                retained_asset_ids=retained_ids,
+                expected_receipt_sha256=parent_source_archive_sha256,
+                created_at=created_at,
+            )
+            staging_source_root = subset.root
+            final_source_root = final_version_root / subset.receipt.snapshot_id
+            derived_snapshot_receipt = subset.receipt
+            observed_profile = subset.source_profile
+        else:
+            staging_source_root.mkdir(parents=False, exist_ok=False)
+            derived_snapshot_receipt = snapshot_receipt
+            observed_profile = frozen_profile
         members = {
             "operator_project_snapshot_receipt.json",
             snapshot_receipt.batch_manifest_relative_path,
@@ -1068,7 +1229,7 @@ def build_operator_snapshot_derived_version(
             members.add(asset.preview_relative_path)
             if asset.mask_relative_path is not None:
                 members.add(asset.mask_relative_path)
-        for relative in sorted(members):
+        for relative in sorted(members) if not deduplicated else []:
             normalized = relative.replace("\\", "/")
             if normalized.startswith("/") or ".." in normalized.split("/"):
                 raise ValueError("operator snapshot member path is unsafe")
@@ -1088,9 +1249,9 @@ def build_operator_snapshot_derived_version(
 
         observed_profile = profile_operator_project_snapshot(
             staging_source_root,
-            expected_receipt_sha256=parent_source_archive_sha256,
+            expected_receipt_sha256=derived_snapshot_receipt.receipt_sha256,
         )
-        if not hmac.compare_digest(
+        if not deduplicated and not hmac.compare_digest(
             str(observed_profile["profile_sha256"]),
             str(frozen_profile["profile_sha256"]),
         ):
@@ -1102,8 +1263,12 @@ def build_operator_snapshot_derived_version(
             "version_id": version_id,
             "parent_task_id": parent_task_id,
             "parent_source_id": parent_source_id,
-            "operator_snapshot_receipt_sha256": snapshot_receipt.receipt_sha256,
-            "copy_mode": "frozen_snapshot_clone_no_automatic_remediation",
+            "operator_snapshot_receipt_sha256": derived_snapshot_receipt.receipt_sha256,
+            "copy_mode": (
+                "approved_exact_duplicate_subset_same_contract"
+                if deduplicated
+                else "frozen_snapshot_clone_no_automatic_remediation"
+            ),
             "asset_bindings": [
                 {
                     "asset_id": asset.asset_id,
@@ -1111,7 +1276,7 @@ def build_operator_snapshot_derived_version(
                     "annotation_document_sha256": (asset.annotation_document_sha256),
                     "mask_sha256": asset.mask_sha256,
                 }
-                for asset in snapshot_receipt.assets
+                for asset in derived_snapshot_receipt.assets
             ],
             "operations": [item.model_dump(mode="json") for item in operations],
             "unresolved_work_order_ids": sorted(unresolved_ids),
@@ -1127,7 +1292,7 @@ def build_operator_snapshot_derived_version(
                     "parent_source_archive_sha256": parent_source_archive_sha256,
                     "plan_sha256": plan.plan_sha256,
                     "operator_snapshot_receipt_sha256": (
-                        snapshot_receipt.receipt_sha256
+                        derived_snapshot_receipt.receipt_sha256
                     ),
                 }
             )
@@ -1168,10 +1333,10 @@ def build_operator_snapshot_derived_version(
             "remediation_plan_sha256": plan.plan_sha256,
             "approval_binding_sha256": approval.binding_sha256,
             "original_selection_count": snapshot_receipt.asset_count,
-            "derived_image_count": snapshot_receipt.asset_count,
+            "derived_image_count": derived_snapshot_receipt.asset_count,
             "derived_mask_count": sum(
                 asset.mask_relative_path is not None
-                for asset in snapshot_receipt.assets
+                for asset in derived_snapshot_receipt.assets
             ),
             "operation_count": len(operations),
             "operations": operations,

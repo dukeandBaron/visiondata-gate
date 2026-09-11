@@ -71,6 +71,7 @@ deliverables/_qa/*
 !skills/manifest.json
 !tests/fixtures/runtime_workbench/legacy_cases/*.json
 !tests/fixtures/legacy_memory_v1_golden.json
+!tests/fixtures/commercial_pilot_v1.draft.json
 !evidence/submission/vdg-20260831-rc3/evidence_index.json
 !evidence/submission/vdg-20260831-rc3/goal3/*.json
 !web/package.json
