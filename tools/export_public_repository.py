@@ -25,6 +25,7 @@ PUBLIC_CI_TEMPLATE = "tools/templates/public-ci.yml"
 PUBLIC_CI_WORKFLOW = ".github/workflows/ci.yml"
 
 PUBLIC_EXACT_FILES = {
+    "docs/DATASET_REVIEW_AND_COMPUTE.md",
     ".env.example",
     ".gitattributes",
     ".gitignore",

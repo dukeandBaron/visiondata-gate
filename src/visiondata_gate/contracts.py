@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class StrictModel(BaseModel):
@@ -99,8 +99,72 @@ class CoverageContract(StrictModel):
     )
 
 
+class OperatorHumanAnnotationReview(StrictModel):
+    """A named operator attestation, not independent semantic ground truth."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True, str_strip_whitespace=True)
+
+    reviewer_name: str = Field(min_length=2, max_length=120)
+    note: str = Field(min_length=8, max_length=2000)
+    expected_asset_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    expected_annotation_revision: int = Field(ge=0)
+    expected_annotation_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    operator_attests_reviewed: Literal[True]
+
+
+class OperatorSampleAcceptanceRequirement(StrictModel):
+    model_config = ConfigDict(extra="forbid", frozen=True, str_strip_whitespace=True)
+
+    asset_id: str = Field(min_length=1, max_length=120)
+    split: Literal["train", "val", "test"]
+    category: str = Field(min_length=1, max_length=120)
+    annotation_requirement: Literal["REQUIRED", "OPTIONAL", "NOT_APPLICABLE", "UNKNOWN"]
+    human_review: OperatorHumanAnnotationReview
+
+
+class OperatorAcceptanceRequirements(StrictModel):
+    """Private input requirements; UNKNOWN is draft-only, never an approval."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True, str_strip_whitespace=True)
+
+    schema_version: Literal["visiondata-gate.operator-acceptance-requirements.v1"] = (
+        "visiondata-gate.operator-acceptance-requirements.v1"
+    )
+    purpose_description: str = Field(min_length=8, max_length=1000)
+    category_vocabulary: list[str] = Field(min_length=1, max_length=500)
+    samples: list[OperatorSampleAcceptanceRequirement] = Field(
+        min_length=1, max_length=10000
+    )
+
+    @field_validator("category_vocabulary")
+    @classmethod
+    def validate_vocabulary(cls, values: list[str]) -> list[str]:
+        normalized = [value.strip() for value in values]
+        if any(not value or len(value) > 120 for value in normalized):
+            raise ValueError("category vocabulary contains a blank or oversized label")
+        if len(normalized) != len(set(normalized)):
+            raise ValueError("category vocabulary must be unique")
+        return sorted(normalized)
+
+    @field_validator("samples")
+    @classmethod
+    def validate_samples(cls, values: list[OperatorSampleAcceptanceRequirement]):
+        identifiers = [sample.asset_id for sample in values]
+        if len(identifiers) != len(set(identifiers)):
+            raise ValueError("acceptance samples must have unique asset IDs")
+        return sorted(values, key=lambda sample: sample.asset_id)
+
+    @model_validator(mode="after")
+    def validate_sample_categories(self):
+        if any(
+            sample.category not in self.category_vocabulary for sample in self.samples
+        ):
+            raise ValueError("sample category is outside the declared vocabulary")
+        return self
+
+
 class BatchContract(StrictModel):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["1.0", "2.0"] = "1.0"
     contract_id: str = "visiondata-image-demo-v1"
     intended_use: Literal["sandbox_experiment_training_pool"] = (
         "sandbox_experiment_training_pool"
@@ -118,6 +182,26 @@ class BatchContract(StrictModel):
         )
     )
     policy_version: str = "gate-policy-1.0"
+    # Omit new optional fields from v1 serialization, including canonical hashes.
+    acceptance_requirements_sha256: str | None = Field(
+        default=None, pattern=r"^[0-9a-f]{64}$", exclude_if=lambda value: value is None
+    )
+    sample_annotation_requirements: (
+        dict[str, Literal["REQUIRED", "OPTIONAL", "NOT_APPLICABLE"]] | None
+    ) = Field(default=None, exclude_if=lambda value: value is None)
+
+    @model_validator(mode="after")
+    def validate_explicit_annotation_contract(self):
+        explicit = self.schema_version == "2.0"
+        if explicit != (self.acceptance_requirements_sha256 is not None):
+            raise ValueError(
+                "v2 contract requires a bound acceptance requirements digest"
+            )
+        if explicit != (self.sample_annotation_requirements is not None):
+            raise ValueError("v2 contract requires per-sample annotation requirements")
+        if explicit and not self.sample_annotation_requirements:
+            raise ValueError("v2 sample annotation requirements cannot be empty")
+        return self
 
 
 class Finding(StrictModel):

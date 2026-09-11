@@ -1103,6 +1103,7 @@ class ProductService:
                 workspace_id=request.workspace_id,
                 project_id=request.project_id,
                 snapshots_root=self.product_root / "operator_project_snapshots",
+                acceptance_requirements=request.acceptance_requirements,
             )
         except (OSError, RuntimeError, ValueError) as exc:
             raise UnsupportedSourceError(
@@ -5246,7 +5247,14 @@ class ProductService:
                     "published Operator derived version has an ambiguous source root"
                 )
             derived_root = source_roots[0].resolve(strict=True)
-            source_archive_sha256 = parent_binding.receipt.source_archive_sha256
+            private_manifest = json.loads(manifest_path.read_bytes())
+            source_archive_sha256 = private_manifest.get(
+                "operator_snapshot_receipt_sha256"
+            )
+            if not isinstance(source_archive_sha256, str):
+                raise ArtifactUnavailableError(
+                    "published Operator derived version lost its snapshot binding"
+                )
             source_profile = profile_operator_project_snapshot(
                 derived_root,
                 expected_receipt_sha256=source_archive_sha256,
@@ -5497,7 +5505,7 @@ class ProductService:
                 )
         _write_once_json(case_root / "derived_version.json", build.receipt)
         derived_source_archive_sha256 = (
-            parent_binding.receipt.source_archive_sha256
+            str(build.source_profile["operator_snapshot_receipt_sha256"])
             if parent_binding.receipt.adapter_kind
             is LocalSourceAdapterKind.OPERATOR_PROJECT_SNAPSHOT
             else build.receipt.derived_content_sha256
@@ -6193,6 +6201,52 @@ class ProductService:
                 actor_user_id, task_id, "initial/gate_result.json"
             )
         )
+        if (
+            task.source_kind is DataSourceKind.LOCAL_AUTHORIZED_DIRECTORY
+            and task.source_id is not None
+        ):
+            source = self.store.get_local_source_authorization(
+                actor_user_id, task.source_id
+            )
+            if source.adapter_kind is LocalSourceAdapterKind.OPERATOR_PROJECT_SNAPSHOT:
+                if source.status != "active":
+                    raise ArtifactUnavailableError(
+                        "annotation remediation requires an active source authorization"
+                    )
+                # Reuse the source/receipt/asset validation used by visual evidence;
+                # annotations must come from this frozen task, not the live editor.
+                _task, source_root, snapshot, _profile = (
+                    self._operator_snapshot_visual_context(actor_user_id, task_id)
+                )
+                try:
+                    manifest_bytes = (
+                        source_root / snapshot.batch_manifest_relative_path
+                    ).read_bytes()
+                    contract_bytes = (
+                        source_root / snapshot.batch_contract_relative_path
+                    ).read_bytes()
+                    if not (
+                        hmac.compare_digest(
+                            hashlib.sha256(manifest_bytes).hexdigest(),
+                            snapshot.batch_manifest_sha256,
+                        )
+                        and hmac.compare_digest(
+                            hashlib.sha256(contract_bytes).hexdigest(),
+                            snapshot.batch_contract_sha256,
+                        )
+                    ):
+                        raise ValueError("frozen annotation context digest mismatch")
+                    manifest = BatchManifest.model_validate_json(manifest_bytes)
+                    contract = BatchContract.model_validate_json(contract_bytes)
+                    batch_root = (source_root / "batch").resolve(strict=True)
+                    batch_root.relative_to(source_root)
+                except (OSError, RuntimeError, ValueError) as error:
+                    raise ArtifactUnavailableError(
+                        "annotation remediation failed frozen snapshot validation"
+                    ) from error
+                return task, batch_root, manifest, contract, gate_result
+
+        # Historical generated tasks keep their original layout and contract.
         task_root = self._task_root(task)
         batch_root = (task_root / "dataset" / "batch").resolve(strict=True)
         try:

@@ -35,6 +35,7 @@ import {
   type FormEvent,
 } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { BusinessTaskContext } from "../components/BusinessTaskContext";
 import type {
   AgentIntervention,
   AgentInterventionAction,
@@ -1463,6 +1464,16 @@ export function CommandCenterPage() {
 
   return (
     <div className="agent-page">
+      <BusinessTaskContext
+        purpose={searchParams.get("purpose")}
+        surface="task"
+        onNavigate={navigate}
+        onClear={() => setSearchParams((current) => {
+          const next = new URLSearchParams(current);
+          next.delete("purpose");
+          return next;
+        }, { replace: true })}
+      />
       <header className="agent-page__toolbar">
         <div>
           <span>AGENT TASK WORKBENCH</span>
@@ -1486,6 +1497,7 @@ export function CommandCenterPage() {
             <RefreshCw className={inboxLoading ? "is-spinning" : ""} size={14} />
           </button>
           <ActionButton icon={Plus} onClick={() => setCreateOpen(true)}>新建任务</ActionButton>
+          <ActionButton icon={DatabaseZap} disabled={!selectedTaskId} onClick={()=>navigate(`/compute?task=${encodeURIComponent(selectedTaskId ?? '')}`)}>算力交接</ActionButton>
         </div>
       </header>
 

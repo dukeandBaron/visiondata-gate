@@ -10,6 +10,10 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_TEST_MODULES = (
+    "tests/test_operator_exact_duplicate_capa.py",
+    "tests/test_compute_handoff.py",
+    "tests/test_operator_snapshot_acceptance_requirements.py",
+    "tests/test_operator_snapshot_annotation_roundtrip.py",
     "tests/test_agent_runtime.py",
     "tests/test_runtime_safety.py",
     "tests/test_api.py",

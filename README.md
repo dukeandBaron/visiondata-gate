@@ -8,6 +8,14 @@
 <p align="center">把图像、标注与工况证据，转成可复验、可追溯、由人最终负责的发布决策。</p>
 <p align="center"><em>A governed evidence agent for industrial vision data readiness.</em></p>
 
+## 数据交付、标注复核与算力交接
+
+新增任务入口将工作分为：交付前检查一批数据、人工标注复核与返修、下一批/第二项目复用。冻结前可明确每张图的 train/val/test、类别及标注要求，并把具名复核说明绑定到实际图像摘要与标注版本；未知要求或版本漂移不会默默放行。
+
+完成真实检查且满足条件的 v2 快照，可在本地“算力交接”页面准备面向昇腾/CANN的作业元数据：固定镜像摘要、NPU/CPU/内存需求和时间预算。申请会持久化、支持幂等对账与摘要核验，但保持 **PREPARED_NOT_SUBMITTED**：未连接调度器、未上传图像、未分配NPU，也不代表模型效果或生产批准。
+
+使用流程、API、兼容范围与后续调度适配合同见 [数据集复核与昇腾算力交接](docs/DATASET_REVIEW_AND_COMPUTE.md)。公开 Pages 仍只提供公开浏览/回放和本地试点草稿，真实写入需本地部署；不能把页面可访问当作客户采用或设备联调完成。
+
 <p align="center">
   <a href="https://github.com/dukeandBaron/visiondata-gate/actions/workflows/ci.yml"><img src="https://github.com/dukeandBaron/visiondata-gate/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-334155.svg" alt="Apache-2.0" /></a>

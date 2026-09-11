@@ -1,6 +1,6 @@
 export function BrandMark({ compact = false }: { compact?: boolean }) {
   return (
-    <div className={`brand-mark${compact ? " is-compact" : ""}`} aria-label="VisionData Gate">
+    <div className={`brand-mark${compact ? " is-compact" : ""}`} aria-label="工业视觉交付站">
       <span className="brand-mark__glyph" aria-hidden="true">
         <svg viewBox="0 0 36 36" role="img">
           <path d="M18 2.5 31 7v9.8c0 8.1-5.2 13.7-13 16.7C10.2 30.5 5 24.9 5 16.8V7l13-4.5Z" />
@@ -9,7 +9,7 @@ export function BrandMark({ compact = false }: { compact?: boolean }) {
       </span>
       {!compact ? (
         <span className="brand-mark__copy">
-          <strong>VisionData Gate</strong>
+          <strong>工业视觉交付站</strong>
           <small>Industrial Data Release</small>
         </span>
       ) : null}

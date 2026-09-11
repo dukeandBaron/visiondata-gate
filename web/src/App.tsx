@@ -4,6 +4,9 @@ import { AppShell } from "./components/AppShell";
 import { publicReplayMode } from "./publicReplay";
 
 const HomePage = lazy(() => import("./pages/HomePage").then((module) => ({ default: module.HomePage })));
+const PilotPlanPage = lazy(() => import("./pages/PilotPlanPage").then((module) => ({ default: module.PilotPlanPage })));
+const TaskGuidePage = lazy(() => import("./pages/TaskGuidePage").then((module) => ({ default: module.TaskGuidePage })));
+const ComputeHandoffPage = lazy(() => import("./pages/ComputeHandoffPage").then((module) => ({ default: module.ComputeHandoffPage })));
 const ImageWorkspacePage = lazy(() => import("./pages/ImageWorkspacePage").then((module) => ({ default: module.ImageWorkspacePage })));
 const CommandCenterPage = lazy(() => import("./pages/CommandCenterPage").then((module) => ({ default: module.CommandCenterPage })));
 const CasesPage = lazy(() => import("./pages/CasesPage").then((module) => ({ default: module.CasesPage })));
@@ -28,6 +31,8 @@ export function App() {
         <Routes>
           <Route path="/" element={<PublicLandingPage />} />
           <Route element={<AppShell />}>
+            <Route path="/start" element={<TaskGuidePage />} />
+            <Route path="/pilot" element={<PilotPlanPage />} />
             <Route path="/workspace" element={<PublicReplayPage view="workspace" />} />
             <Route path="/command-center" element={<PublicReplayPage view="command-center" />} />
             <Route path="/cases" element={<PublicReplayPage view="cases" />} />
@@ -53,6 +58,9 @@ export function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route element={<AppShell />}>
+          <Route path="/start" element={<TaskGuidePage />} />
+          <Route path="/pilot" element={<PilotPlanPage />} />
+          <Route path="/compute" element={<ComputeHandoffPage />} />
           <Route path="/workspace" element={<ImageWorkspacePage />} />
           <Route path="/command-center" element={<CommandCenterPage />} />
           <Route path="/cases" element={<CasesPage />} />

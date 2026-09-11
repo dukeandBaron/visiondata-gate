@@ -38,6 +38,9 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { BusinessTaskContext } from "../components/BusinessTaskContext";
+import { SnapshotAcceptanceDialog } from "../components/SnapshotAcceptanceDialog";
+import { snapshotTaskUrl, workbookAssetSearch } from "../businessTaskNavigation";
 import { useProduct } from "../ProductContext";
 import { InteractiveImageCanvas } from "../components/InteractiveImageCanvas";
 import {
@@ -50,7 +53,6 @@ import {
 } from "../components/OperatorAgentPanel";
 import { OperatorWorkspaceTour } from "../components/OperatorWorkspaceTour";
 import {
-  authorizeOperatorProjectSnapshot,
   createOperatorAnalysisRun,
   createOperatorCopilotTurn,
   createOperatorWorkOrder,
@@ -117,7 +119,7 @@ function messageForError(error: unknown): string {
   if (error instanceof DOMException && error.name === "AbortError") {
     return "本地 API 响应超时，请检查服务状态。";
   }
-  return "无法连接本地图片工作区。请先启动 VisionData Gate API。";
+  return "无法连接本地图片工作区。请先启动本地工作台 API。";
 }
 
 interface DropZoneProps {
@@ -236,6 +238,7 @@ export function ImageWorkspacePage() {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [snapshotting, setSnapshotting] = useState(false);
+  const [acceptanceScope, setAcceptanceScope] = useState<{workspaceId: string; projectId: string; projectName: string; assets: OperatorImageAsset[]} | null>(null);
   const [dirty, setDirty] = useState(false);
   const [query, setQuery] = useState("");
   const [assetSlice, setAssetSlice] = useState<AssetSlice>("ALL");
@@ -447,7 +450,7 @@ export function ImageWorkspacePage() {
     if (filteredAssets.some((asset) => asset.asset_id === selectedAssetId)) return;
     const nextAssetId = filteredAssets[0]?.asset_id;
     changeSelectedAsset(nextAssetId);
-    setSearchParams(nextAssetId ? { asset: nextAssetId } : {}, { replace: true });
+    setSearchParams((current) => workbookAssetSearch(current, nextAssetId), { replace: true });
   }, [
     changeSelectedAsset,
     dirty,
@@ -650,7 +653,7 @@ export function ImageWorkspacePage() {
     if (assetId === selectedAssetId) return;
     if (dirty && !window.confirm("当前标注尚未保存。放弃修改并切换图片吗？")) return;
     changeSelectedAsset(assetId);
-    setSearchParams({ asset: assetId }, { replace: true });
+    setSearchParams((current) => workbookAssetSearch(current, assetId), { replace: true });
     setNotice(undefined);
   };
 
@@ -681,7 +684,7 @@ export function ImageWorkspacePage() {
       const first = result.assets[0];
       if (first) {
         changeSelectedAsset(first.asset_id);
-        setSearchParams({ asset: first.asset_id }, { replace: true });
+        setSearchParams((current) => workbookAssetSearch(current, first.asset_id), { replace: true });
       }
       setNotice(
         `已导入 ${result.uploaded_count} 张图片到 ${activeWorkspace?.name ?? "当前工作空间"}；未自动运行 Agent。`,
@@ -722,7 +725,7 @@ export function ImageWorkspacePage() {
     const first = result.assets[0];
     if (first && !dirtyRef.current) {
       changeSelectedAsset(first.asset_id);
-      setSearchParams({ asset: first.asset_id }, { replace: true });
+      setSearchParams((current) => workbookAssetSearch(current, first.asset_id), { replace: true });
     }
     setError(undefined);
     const rejected = result.rejectedImageCount > 0
@@ -894,20 +897,7 @@ export function ImageWorkspacePage() {
         activeWorkspaceIdRef.current !== handoffWorkspaceId
         || activeProjectIdRef.current !== handoffProjectId
       ) return;
-      const source = await authorizeOperatorProjectSnapshot({
-        workspaceId: handoffWorkspaceId,
-        projectId: handoffProjectId,
-        displayName: `${activeProject.name} · 工作簿受控快照`,
-      });
-      if (
-        activeWorkspaceIdRef.current !== handoffWorkspaceId
-        || activeProjectIdRef.current !== handoffProjectId
-      ) return;
-      const binding = typeof source.data_profile.operator_snapshot_receipt_sha256 === "string"
-        ? source.data_profile.operator_snapshot_receipt_sha256
-        : source.source_archive_sha256;
-      setNotice(`项目快照 ${source.source_id} 已封存 · binding ${shortDigest(binding)}；正在交给 Agent Task 工作台。`);
-      navigate(`/command-center?create=1&source=${encodeURIComponent(source.source_id)}`);
+      setAcceptanceScope({workspaceId:handoffWorkspaceId,projectId:handoffProjectId,projectName:activeProject.name,assets:[...assets]});
     } catch (caught) {
       if (
         activeWorkspaceIdRef.current === handoffWorkspaceId
@@ -1104,6 +1094,15 @@ export function ImageWorkspacePage() {
 
   return (
     <div className="operator-workspace">
+      {acceptanceScope && acceptanceScope.workspaceId===workspaceId && acceptanceScope.projectId===activeProject?.project_id ? <SnapshotAcceptanceDialog
+        {...acceptanceScope}
+        onClose={()=>setAcceptanceScope(null)}
+        onCreated={(source)=>{
+          if(activeWorkspaceIdRef.current!==acceptanceScope.workspaceId || activeProjectIdRef.current!==acceptanceScope.projectId)return;
+          setAcceptanceScope(null);
+          navigate(snapshotTaskUrl(source.source_id,searchParams.get("purpose")));
+        }}
+      /> : null}
       <input
         ref={inputRef}
         className="sr-only"
@@ -1165,6 +1164,20 @@ export function ImageWorkspacePage() {
           </button>
         </div>
       </header>
+
+      <BusinessTaskContext
+        purpose={searchParams.get("purpose")}
+        surface="workbook"
+        onNavigate={(href) => {
+          if (dirty && !window.confirm("当前标注尚未保存。放弃修改并离开工作簿吗？")) return;
+          navigate(href);
+        }}
+        onClear={() => setSearchParams((current) => {
+          const next = new URLSearchParams(current);
+          next.delete("purpose");
+          return next;
+        }, { replace: true })}
+      />
 
       {error ? (
         <div className="operator-message is-error" role="alert">
@@ -1373,7 +1386,10 @@ export function ImageWorkspacePage() {
                 onRun={() => void runAgentAnalysis()}
                 onAsk={(question) => void askCopilot(question)}
                 onCreateWorkOrder={() => openWorkOrderReview(selectedAnnotationId)}
-                onOpenCapa={() => navigate("/capa")}
+                onHandoffProject={() => void handoffProjectToAgent()}
+                handoffPending={snapshotting}
+                handoffDisabled={saving || uploading || !workspaceId || !activeProject || assets.length === 0}
+                onOpenCapa={() => navigate(analysisRun?.recommendation.code === "DUPLICATE_REVIEW" ? "/capa?layer=controlled" : "/capa")}
                 onOpenEvidence={() => navigate("/evidence")}
                 onOpenTaskWorkbench={() => navigate("/command-center")}
               />

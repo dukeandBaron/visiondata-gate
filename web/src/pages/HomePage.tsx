@@ -18,6 +18,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BrandMark } from "../components/BrandMark";
+import { CommercialStory } from "../components/CommercialStory";
 import {
   getProjectGovernanceEffectiveness,
   listAgentTasks,
@@ -144,7 +145,7 @@ export function HomePage() {
       <header className="product-home__nav">
         <BrandMark />
         <nav aria-label="产品页面锚点">
-          <a href="#product">产品</a>
+          <a href="#business-story">应用场景</a>
           <a href="#proof">实时证明</a>
           <a href="#workflow">工作闭环</a>
           <a href="#review-proof">评审证据</a>
@@ -162,15 +163,15 @@ export function HomePage() {
       <main>
         <section className="home-hero-v2" id="product">
           <div className="home-hero-v2__copy">
-            <span className="home-hero-v2__signal"><span>🚀</span> FROM PIXEL EVIDENCE TO GOVERNED ACTION</span>
-            <h1>把像素证据<br />变成<span>可复验的行动</span></h1>
+            <span className="home-hero-v2__signal"><span>✦</span> 视觉数据集交付与标注复核工作台</span>
+            <h1>让每批数据，<br /><span>有依据地交付</span></h1>
             <p>
-              VisionData Gate 把真实数据输入、确定性检测、受控 Agent 计划、具名人工闸门与 Child Run 复验收进同一工作簿。
-              不只给出建议，而是把一段工业数据治理流程办到底。
+              收到新数据，检查图像与标注；发现疑点，留下返修要求；修订完成，再核对新版本。
+              为视觉方案商与数据团队组织这段工作，让测了什么、谁改了什么、还缺什么都有依据。
             </p>
             <div className="home-hero-v2__actions">
               <button type="button" onClick={() => navigate("/workspace")}>进入图像工作簿 <ArrowRight size={16} /></button>
-              <button type="button" onClick={() => navigate("/command-center")}><Activity size={15} /> 查看工作总览</button>
+              <button type="button" onClick={() => navigate("/start")}><FileCheck2 size={15} /> 选择一项工作</button>
             </div>
             <div className="home-trust-chips" aria-label="产品原则">
               <span>★ Local-first</span>
@@ -223,6 +224,8 @@ export function HomePage() {
             <div className="home-stage-verdict"><span>GATE</span><strong>HUMAN REVIEW</strong><i /></div>
           </div>
         </section>
+
+        <CommercialStory />
 
         <section className="home-marquee" aria-label="完整产品域">
           <span>IMAGE WORKBOOK</span><i>✦</i><span>AGENT TASKS</span><i>✦</i><span>EVIDENCE</span><i>✦</i><span>CAPA</span><i>✦</i><span>LINEAGE</span><i>✦</i><span>GOVERNANCE</span>
@@ -368,12 +371,12 @@ export function HomePage() {
           <span>★ READY FOR REAL WORK</span>
           <h2>从你的数据开始，而不是从预设结论开始</h2>
           <p>建立项目、导入数据集、进入像素现场，再让 Agent 为证据和行动服务。</p>
-          <div><button type="button" onClick={() => navigate("/workspace")}>打开 VisionData Gate <ArrowRight size={16} /></button><button type="button" onClick={() => navigate("/settings")}>配置本机环境</button></div>
+          <div><button type="button" onClick={() => navigate("/workspace")}>打开工业视觉交付站 <ArrowRight size={16} /></button><button type="button" onClick={() => navigate("/settings")}>配置本机环境</button></div>
         </section>
       </main>
 
       <footer className="product-home__footer">
-        <span>VisionData Gate · Industrial data release workspace</span>
+        <span>Industrial Vision Delivery Workbench</span>
         <span>Apache-2.0 · Local-first · Human authority</span>
       </footer>
     </div>
