@@ -23,7 +23,7 @@ const modules = new Map([
     import {canonicalizeJcs,sha256HexUtf8} from '/src/data/jcs.ts';
     export class OperatorApiError extends Error {constructor(code,message=code,status=503){super(message);this.code=code;this.status=status;}}
     export async function listOperatorImages() { return window.__testAssets; }
-    export async function loadOperatorAnnotations(_workspace, id) { return { revision: 0, document_sha256: 'b'.repeat(64), annotations: [], asset_id: id }; }
+    export async function loadOperatorAnnotations(_workspace, id) { if(window.__snapshotLoadFail)throw new OperatorApiError('HTTP_503','Synthetic annotation read failed',503);return { revision: 0, document_sha256: 'b'.repeat(64), annotations: [], asset_id: id }; }
     export async function loadOperatorPreview() { return URL.createObjectURL(new Blob(['test'], {type:'image/png'})); }
     export async function listOperatorAnalysisRuns() { return []; }
     export async function listOperatorCopilotTurns() { return []; }
@@ -119,6 +119,7 @@ test('workbook selection, upload and dataset import retain the actual chosen pur
   const {page,errors}=await scenario('annotation-rework');
   try {
     await page.getByRole('button',{name:/two.png/}).click();
+    await page.getByTestId('location').filter({hasText:/asset=asset-two/}).waitFor();
     assert.match(await page.getByTestId('location').innerText(),/purpose=annotation-rework&asset=asset-two/);
     await page.locator('input[type=file]').setInputFiles({name:'upload-test.png',mimeType:'image/png',buffer:Buffer.from('synthetic API fixture, not image validation')});
     await page.getByRole('button',{name:/upload-test.png/}).waitFor();
@@ -169,6 +170,7 @@ test('snapshot handoff requires explicit review before binding source and purpos
       await page.getByLabel('类别 '+id,{exact:true}).selectOption('sample');
       await page.getByLabel('标注要求 '+id,{exact:true}).selectOption('OPTIONAL');
     }
+    assert.equal(await dialog.getByRole('alert').count(),0);
     await page.getByRole('checkbox').check();
     await page.screenshot({path:path.join(root,'output/playwright/explicit-snapshot-acceptance.png')});
     await page.getByRole('button',{name:'确认要求并冻结快照',exact:true}).click();
@@ -195,6 +197,20 @@ test('unknown workbook purpose remains recoverable without changing data',async(
     assert.equal(await page.getByRole('button',{name:/two.png/}).isVisible(),true);
     assert.deepEqual(await page.evaluate(()=>window.__writes),{upload:0,snapshot:[]});
     assert.deepEqual(errors,[]);
+  } finally {await page.close();}
+});
+
+test('snapshot annotation-load failure remains visible when form fields change',async()=>{
+  const {page}=await scenario('annotation-rework');
+  try {
+    await page.evaluate(()=>{window.__snapshotLoadFail=true;});
+    await page.getByRole('button',{name:'冻结项目并交给 Agent',exact:true}).click();
+    const dialog=page.getByRole('dialog',{name:'这批图像，按什么标准检查？'});
+    await dialog.getByRole('alert').waitFor();
+    await dialog.getByLabel('本次用途说明',{exact:false}).fill('Changed scope after a failed annotation read');
+    assert.match(await dialog.getByRole('alert').innerText(),/标注版本读取失败/);
+    assert.equal(await page.getByRole('button',{name:'确认要求并冻结快照',exact:true}).isDisabled(),true);
+    assert.equal((await page.evaluate(()=>window.__writes.snapshot)).length,0);
   } finally {await page.close();}
 });
 

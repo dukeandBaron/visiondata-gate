@@ -1,7 +1,7 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "774b5ec2beb40aab1ba290c50e28140ebd95f914",
-  "source_tree_oid": "42ccf413e5f57957f59cd8e9afc81a9a9ccb2e6c",
+  "source_commit_oid": "05a310b4bc4c30603d47690f2192ee597d906eb9",
+  "source_tree_oid": "72daa29183a319ad4e8655fc1dea595f3d4d43ee",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
@@ -9,7 +9,7 @@
   "personal_data_included": false,
   "tracked_source_only": true,
   "file_count": 485,
-  "snapshot_sha256": "450bf267aa9c7ff679dae967a00ef9a709f2e34ad6f8d126edbf017d4cd9fe59",
+  "snapshot_sha256": "190567cc30125965347817db0314a717a9fa7535901f746b958592b2f85959a8",
   "files": [
     {
       "path": ".env.example",
@@ -43,8 +43,8 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "40a85e70821e221081ddf4c5804963a028075bcb691526500e4e4fe8b904661f",
-      "size_bytes": 1381,
+      "sha256": "8c0539661066fcda28be2c16bff3b615bb392a3dcae216060ac5ddc9857030c0",
+      "size_bytes": 1535,
       "source": "tools/templates/public-ci.yml"
     },
     {
@@ -1580,8 +1580,8 @@
     },
     {
       "path": "tests/web_business_context.browser.mjs",
-      "sha256": "48351a10bd2b9a2b27761f1fab4d1dab967032cc725f41a375f4958bf93b0fda",
-      "size_bytes": 19672
+      "sha256": "3c86b4e96d3bd2dc83239cb420a1610e6405ab35ebfcea10e9df498649ccbc3e",
+      "size_bytes": 20815
     },
     {
       "path": "tests/web_business_task_navigation.test.mjs",
@@ -1780,8 +1780,8 @@
     },
     {
       "path": "tools/templates/public-ci.yml",
-      "sha256": "40a85e70821e221081ddf4c5804963a028075bcb691526500e4e4fe8b904661f",
-      "size_bytes": 1381
+      "sha256": "8c0539661066fcda28be2c16bff3b615bb392a3dcae216060ac5ddc9857030c0",
+      "size_bytes": 1535
     },
     {
       "path": "tools/templates/public-pages.yml",
@@ -2095,8 +2095,8 @@
     },
     {
       "path": "web/src/components/SnapshotAcceptanceDialog.tsx",
-      "sha256": "6f62d7d5c0687784cc0d015218e342a925549ddfd513df084ad4a56ca5e53fbd",
-      "size_bytes": 9342
+      "sha256": "3ebcc1ecd17d60a6cfd5f9696695253f53bb1dae09b8ff8ebc256c1fe8517f15",
+      "size_bytes": 9419
     },
     {
       "path": "web/src/components/TaskVisualEvidencePanel.tsx",

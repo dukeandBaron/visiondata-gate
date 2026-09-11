@@ -67,7 +67,7 @@ export function SnapshotAcceptanceDialog({workspaceId,projectId,projectName,asse
     <header><div><small>冻结前 · 人工确认输入要求</small><h2 id="acceptance-title">这批图像，按什么标准检查？</h2></div><button type="button" disabled={busy} onClick={onClose} aria-label="关闭验收要求"><X size={18}/></button></header>
     <p>本次包含项目全部 {assets.length} 张图片。标注语义由你复核；系统会再次核对图片摘要和标注版本。此确认不等于客户接受或生产放行。</p>
     {loading?<p role="status"><LoaderCircle size={16}/>正在读取全部标注版本…</p>:null}
-    <form onSubmit={event=>void submit(event)}>
+    <form onSubmit={event=>void submit(event)} onChange={()=>{if(!uncertainSha&&rows.length===assets.length)setError("");}}>
       <fieldset disabled={loading||busy||Boolean(uncertainSha)}>
         <div className="acceptance-fields"><label>本次用途说明<textarea value={purpose} minLength={8} maxLength={1000} required onChange={e=>{setPurpose(e.target.value);setAttested(false);}}/></label><label>数据类别与框标签词表<textarea value={vocabulary} placeholder="用逗号或换行分隔，必须包含已有框标签" required onChange={e=>{setVocabulary(e.target.value);setAttested(false);}}/></label></div>
         <p>每张图片的标注要求初始为“未明确”，请逐项选择。无标注不等于合格，已有标注也不等于已复核。</p>
