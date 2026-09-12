@@ -1,0 +1,24 @@
+server:
+  address: 127.0.0.1
+  port: ${VISIONDATA_GATEWAY_PORT:8790}
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+
+spring:
+  application:
+    name: visiondata-gate-local-gateway
+  main:
+    banner-mode: "off"
+  lifecycle:
+    timeout-per-shutdown-phase: 5s
+  jmx:
+    enabled: false
+
+visiondata:
+  fastapi-base-url: ${VISIONDATA_FASTAPI_BASE_URL:http://127.0.0.1:8787}
+
+logging:
+  level:
+    root: WARN

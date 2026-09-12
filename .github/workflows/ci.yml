@@ -38,10 +38,8 @@ jobs:
       - name: Install locked dependencies
         run: uv sync --all-extras --locked
 
-      - name: Check lint and formatting
-        run: |
-          uv run ruff check .
-          uv run ruff format --check .
+      - name: Check Python correctness lint
+        run: uv run ruff check .
 
       - name: Compile Python sources
         run: uv run python -m compileall -q src desktop tools
@@ -51,3 +49,45 @@ jobs:
 
       - name: Verify runtime, API and publication contracts
         run: uv run python tools/run_public_test_suite.py
+
+  formatting:
+    # Independent, blocking result: known frozen-source debt is not hidden and
+    # must not prevent the API tests from reporting their actual outcome.
+    name: Python formatting (frozen-source debt visible)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+        with:
+          version: "0.11.8"
+      - run: uv sync --extra qa --locked
+      - run: uv run ruff format --check .
+
+  web:
+    name: Web and public-static boundary
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - working-directory: web
+        run: npm ci
+      - working-directory: web
+        run: npm run typecheck
+      - working-directory: web
+        run: npm run build
+      - working-directory: web
+        env:
+          VITE_VISIONDATA_PUBLIC_REPLAY: "true"
+          VISIONDATA_WEB_BASE_PATH: /${{ github.event.repository.name }}/
+        run: npm run build
+      - run: python tools/check_public_pages.py --dist web/dist

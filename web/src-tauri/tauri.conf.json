@@ -35,8 +35,10 @@
     "longDescription": "A local-first Windows workspace for auditable industrial-vision data inspection, Agent runs and human-gated CAPA workflows.",
     "resources": {
       "../../desktop/dist/visiondata-gate-backend": "backend",
+      "../../gateway/target/visiondata-gate-gateway.jar": "gateway/visiondata-gate-gateway.jar",
+      "../../gateway/runtime": "gateway/runtime",
       "../../sample_data": "sample_data",
-      "../../.env.example": "config/.env.example",
+      "../../desktop/default.env.example": "config/.env.example",
       "../../LICENSE": "legal/LICENSE",
       "../../NOTICE": "legal/NOTICE"
     },

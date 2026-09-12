@@ -26,6 +26,10 @@ datas = [
     (str(project_root / "examples"), "examples"),
     (str(project_root / "rulepacks"), "rulepacks"),
     (str(project_root / "schemas"), "schemas"),
+    # The optional external Python executes this reviewed standalone source by
+    # __file__; keeping only its PYZ bytecode would make probe/train unavailable.
+    (str(source_root / "visiondata_gate/learning_yolo_backend.py"), "visiondata_gate"),
+    (str(project_root / "docs/WINDOWS_INSTALLER.md"), "docs"),
     *frozen_evaluation_report_datas,
 ]
 
@@ -42,10 +46,19 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=["pandas", "pytest", "streamlit"],
+    excludes=["pandas", "pytest", "streamlit", "torch", "torchvision", "ultralytics"],
     noarchive=False,
     optimize=1,
 )
+# PEP 610 local/editable installation origins describe this build machine, not
+# runtime dependencies. Retain METADATA, RECORD and all legal/license files.
+a.datas = [
+    entry for entry in a.datas
+    if not (
+        ".dist-info/" in entry[0].replace("\\", "/").lower()
+        and entry[0].replace("\\", "/").lower().endswith("/direct_url.json")
+    )
+]
 pyz = PYZ(a.pure)
 
 exe = EXE(

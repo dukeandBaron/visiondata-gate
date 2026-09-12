@@ -8,6 +8,7 @@ import json
 import os
 import threading
 import uuid
+import weakref
 from collections.abc import Callable, Iterable, Mapping
 from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import UTC, datetime
@@ -76,6 +77,14 @@ from .capa import (
 from .case_replay import CausalReplayReport, build_causal_replay_report
 from .contracts import BatchContract, BatchManifest, EvaluationResult, GateResult
 from .evidence import canonical_json_bytes, sha256_file, write_canonical_json
+from .execution_recovery import (
+    RecoverTaskExecutionRequest,
+    TaskExecutionRecoveryProjection,
+    TaskExecutionRecoveryReceipt,
+    new_execution_owner,
+    seal_execution_model,
+    task_execution_lock,
+)
 from .grounding import LLMGroundingReceipt
 from .incident_commands import (
     IncidentCommandAdmission,
@@ -593,7 +602,8 @@ class ProductService:
         )
         self._futures: dict[str, Future[None]] = {}
         self._future_lock = threading.Lock()
-        self._incident_lock = threading.Lock()
+        self._incident_locks_guard = threading.Lock()
+        self._incident_case_locks = weakref.WeakValueDictionary()
         if recover_interrupted:
             self.store.recover_interrupted()
 
@@ -1943,6 +1953,141 @@ class ProductService:
             lambda completed, run_id=task_id: self._discard_future(run_id, completed)
         )
 
+    def task_execution_recovery(
+        self, actor_user_id: str, task_id: str
+    ) -> TaskExecutionRecoveryProjection:
+        """Project current OS ownership without treating a missing PID as proof."""
+
+        task = self.store.get_task(actor_user_id, task_id)
+        classification = "NOT_APPLICABLE"
+        reasons = ["TASK_NOT_RUNNING"]
+        if task.execution_status in {
+            TaskExecutionStatus.RUNNING,
+            TaskExecutionStatus.VERIFYING,
+        }:
+            classification, reasons = "LEGACY_UNKNOWN", ["OWNERSHIP_NOT_RECORDED"]
+            try:
+                owner = self.store.task_execution_owner(task_id)
+            except ValueError:
+                owner = None
+                reasons = ["OWNERSHIP_METADATA_INVALID"]
+            if owner is not None and (
+                owner.task_id == task_id
+                and owner.workspace_id == task.workspace_id
+                and owner.project_id == task.project_id
+                and owner.request_sha256 == task.request_sha256
+            ):
+                try:
+                    with task_execution_lock(self.product_root, task_id) as acquired:
+                        classification = "INTERRUPTED" if acquired else "OWNED_RUNNING"
+                        reasons = [
+                            "MANAGED_OWNER_ABSENT"
+                            if acquired
+                            else "OS_EXECUTION_LOCK_HELD"
+                        ]
+                        # Capture state while holding/probing its execution lock so
+                        # a completed run is never offered as recoverable.
+                        task = self.store.get_task(actor_user_id, task_id)
+                        if task.execution_status not in {
+                            TaskExecutionStatus.RUNNING,
+                            TaskExecutionStatus.VERIFYING,
+                        }:
+                            classification, reasons = (
+                                "NOT_APPLICABLE",
+                                ["TASK_NOT_RUNNING"],
+                            )
+                except OSError:
+                    classification, reasons = (
+                        "LEGACY_UNKNOWN",
+                        ["OWNERSHIP_PROBE_UNAVAILABLE"],
+                    )
+        return seal_execution_model(
+            TaskExecutionRecoveryProjection,
+            task_id=task_id,
+            workspace_id=task.workspace_id,
+            project_id=task.project_id,
+            execution_status=task.execution_status,
+            classification=classification,
+            can_recover=classification == "INTERRUPTED",
+            reason_codes=reasons,
+            task_snapshot_sha256=self.store.task_snapshot_sha256(task),
+        )
+
+    def recover_task_execution(
+        self, actor_user_id: str, task_id: str, request: RecoverTaskExecutionRequest
+    ) -> TaskExecutionRecoveryReceipt:
+        """Preserve an interrupted attempt and require a new plan approval."""
+
+        request = RecoverTaskExecutionRequest.model_validate(
+            request.model_dump(mode="json")
+        )
+        task = self.store.get_task(actor_user_id, task_id)
+        try:
+            existing = self.store.task_execution_recovery_receipt(
+                actor_user_id, task_id
+            )
+        except ValueError as error:
+            raise ArtifactUnavailableError(
+                "task execution recovery receipt failed verification"
+            ) from error
+        if existing is not None:
+            if not (
+                existing.original_snapshot_sha256 == request.expected_snapshot_sha256
+                and existing.recovered_by == actor_user_id
+                and existing.reviewer_identity == request.reviewer_identity
+                and existing.note == request.note
+            ):
+                raise ConflictError("task already has a different recovery receipt")
+            return existing
+        with task_execution_lock(self.product_root, task_id) as acquired:
+            if not acquired:
+                raise ConflictError(
+                    "execution owner is active; task cannot be recovered"
+                )
+            task = self.store.get_task(actor_user_id, task_id)
+            if (
+                task.execution_status
+                not in {TaskExecutionStatus.RUNNING, TaskExecutionStatus.VERIFYING}
+                or self.store.task_snapshot_sha256(task)
+                != request.expected_snapshot_sha256
+            ):
+                raise ConflictError("task changed before explicit recovery")
+            try:
+                owner = self.store.task_execution_owner(task_id)
+            except ValueError as error:
+                raise ArtifactUnavailableError(
+                    "task execution ownership metadata failed verification"
+                ) from error
+            if owner is None or not (
+                owner.task_id == task_id
+                and owner.request_sha256 == task.request_sha256
+                and owner.workspace_id == task.workspace_id
+                and owner.project_id == task.project_id
+            ):
+                raise ConflictError("legacy execution ownership is unknown")
+            replacement_request = CreateTaskRequest(
+                project_id=task.project_id,
+                goal=task.goal,
+                seed=task.seed,
+                scenario_profile=task.scenario_profile,
+                source_kind=task.source_kind,
+                source_id=task.source_id,
+                plan_approval_required=True,
+                allowed_tools=list(task.allowed_tools),
+            )
+            source_digest = self._task_source_binding_sha256(task)
+            return self.store.recover_owned_task_execution(
+                actor_user_id,
+                task_id,
+                request,
+                owner_receipt_sha256=owner.receipt_sha256,
+                replacement_request_sha256=self.request_sha256(
+                    replacement_request,
+                    task.scenario_profile.value,
+                    source_binding_sha256=source_digest,
+                ),
+            )
+
     def _discard_future(self, task_id: str, expected: Future[None]) -> None:
         with self._future_lock:
             if self._futures.get(task_id) is expected:
@@ -1982,13 +2127,34 @@ class ProductService:
             ) from exc
 
     def _execute_task(self, task_id: str) -> None:
+        with task_execution_lock(self.product_root, task_id) as acquired:
+            if acquired:
+                self._execute_owned_task(task_id)
+
+    def _execute_owned_task(self, task_id: str) -> None:
+        from .identity_service import IdentityError, require_active_actor
+
         planned_task = self.store.get_task_unscoped(task_id)
         planned_snapshot_sha256 = self.store.task_snapshot_sha256(planned_task)
-        if planned_task.plan_approval_required:
-            preflight = self.task_preflight(planned_task.created_by, task_id)
-            if not preflight.execution_ready:
-                return
-        if not self.store.claim_task(task_id):
+        try:
+            require_active_actor(self, planned_task.created_by)
+            if planned_task.plan_approval_required:
+                preflight = self.task_preflight(planned_task.created_by, task_id)
+                if not preflight.execution_ready:
+                    return
+        except IdentityError as exc:
+            # Revoked account authority is terminal for this attempt, including
+            # revocation before claim. Do not start the runner or leave PLANNED.
+            if planned_task.execution_status is TaskExecutionStatus.PLANNED:
+                self.store.transition_task(
+                    task_id, TaskExecutionStatus.FAILED, current_phase="failed",
+                    fields={"error_code": exc.code, "error_message": exc.code,
+                            "completed_at": _now()},
+                )
+            return
+        if not self.store.claim_task(
+            task_id, execution_owner=new_execution_owner(planned_task)
+        ):
             return
         try:
             task = self.store.get_task_unscoped(task_id)
@@ -3978,6 +4144,21 @@ class ProductService:
             if path.is_file()
         ]
 
+    def _incident_case_lock(self, task_id: str, case_id: str):
+        """Serialize one case without holding unrelated human decisions hostage.
+
+        The caller retains a strong reference while waiting/holding the lock;
+        idle cases disappear from the map. Persistent admission/CAS remains the
+        cross-process authority, not this in-process scheduling guard.
+        """
+        with self._incident_locks_guard:
+            key = (task_id, case_id)
+            lock = self._incident_case_locks.get(key)
+            if lock is None:
+                lock = threading.Lock()
+                self._incident_case_locks[key] = lock
+            return lock
+
     @reuse_incident_case_verification
     def resume_industrial_incident_case(
         self,
@@ -3988,7 +4169,7 @@ class ProductService:
         *,
         idempotency_key: str | None = None,
     ) -> IndustrialIncidentCase:
-        with self._incident_lock:
+        with self._incident_case_lock(task_id, case_id):
             return self._resume_industrial_incident_case(
                 actor_user_id,
                 task_id,
@@ -4251,7 +4432,7 @@ class ProductService:
         *,
         idempotency_key: str | None = None,
     ) -> IndustrialIncidentDecisionReceipt:
-        with self._incident_lock:
+        with self._incident_case_lock(task_id, case_id):
             return self._record_industrial_incident_decision(
                 actor_user_id,
                 task_id,

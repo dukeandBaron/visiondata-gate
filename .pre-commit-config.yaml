@@ -1,0 +1,19 @@
+repos:
+  - repo: local
+    hooks:
+      - id: locked-ruff-lint
+        name: Ruff lint (isolated locked QA tools)
+        entry: uv run --project quality --locked ruff check
+        language: system
+        types_or: [python, pyi]
+      - id: locked-ruff-format
+        name: Ruff format check (does not rewrite files)
+        entry: uv run --project quality --locked ruff format --check
+        language: system
+        types_or: [python, pyi]
+      - id: quality-lock
+        name: Quality tool lock consistency
+        entry: uv lock --project quality --check
+        language: system
+        pass_filenames: false
+        files: ^quality/(pyproject\.toml|uv\.lock|requirements\.txt)$

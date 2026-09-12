@@ -1498,6 +1498,7 @@ export function CommandCenterPage() {
           </button>
           <ActionButton icon={Plus} onClick={() => setCreateOpen(true)}>新建任务</ActionButton>
           <ActionButton icon={DatabaseZap} disabled={!selectedTaskId} onClick={()=>navigate(`/compute?task=${encodeURIComponent(selectedTaskId ?? '')}`)}>算力交接</ActionButton>
+          <ActionButton icon={GitMerge} disabled={!selectedTaskId} onClick={()=>navigate(`/learning?task=${encodeURIComponent(selectedTaskId ?? '')}`)}>数据与学习闭环</ActionButton>
         </div>
       </header>
 

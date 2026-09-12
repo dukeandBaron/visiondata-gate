@@ -1,0 +1,18 @@
+[project]
+name = "visiondata-gate-quality-tools"
+version = "0.0.0"
+description = "Isolated engineering checks, not a product distribution"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "pyright==1.1.414",
+  "pytest==9.1.1",
+  "pytest-cov==7.1.0",
+  "coverage==7.16.0",
+  "pip-audit==2.10.1",
+  "bandit==1.9.4",
+  "ruff==0.15.22",
+  "pre-commit==4.6.2",
+]
+
+[tool.uv]
+package = false

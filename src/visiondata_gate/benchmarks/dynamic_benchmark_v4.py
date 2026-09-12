@@ -620,6 +620,7 @@ __all__ = [
     "BENCHMARK_ID",
     "CLAIM_BOUNDARY",
     "DynamicBenchmarkV4ValidationError",
+    "PRODUCTION_ROUTE",
     "SCHEMA_VERSION",
     "build_dynamic_benchmark_v4_fixtures",
     "build_dynamic_benchmark_v4_report",

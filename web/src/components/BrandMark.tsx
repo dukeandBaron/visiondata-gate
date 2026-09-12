@@ -10,7 +10,7 @@ export function BrandMark({ compact = false }: { compact?: boolean }) {
       {!compact ? (
         <span className="brand-mark__copy">
           <strong>工业视觉交付站</strong>
-          <small>Industrial Data Release</small>
+          <small>Delivery &amp; Recheck</small>
         </span>
       ) : null}
     </div>

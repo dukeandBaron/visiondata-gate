@@ -1113,9 +1113,9 @@ export function ImageWorkspacePage() {
       />
       <header className="operator-commandbar">
         <div className="operator-commandbar__title">
-          <span className="operator-kicker">CURRENT WORKBOOK</span>
+          <span className="operator-kicker">当前工作簿</span>
           <strong>{activeProject?.name ?? "工业视觉工作簿"}</strong>
-          <span>{activeWorkspace?.name ?? "未选择工作空间"} · {assets.length} assets · J/K navigate</span>
+          <span>{activeWorkspace?.name ?? "未选择工作空间"} · {assets.length} 张图像 · J/K 切换</span>
         </div>
         <div className="operator-commandbar__actions">
           <button type="button" onClick={() => setTourOpen(true)}>
@@ -1201,7 +1201,7 @@ export function ImageWorkspacePage() {
       <div className="operator-grid" style={operatorGridStyle}>
         <aside className="asset-browser" aria-label="本地图像列表" data-tour-target="assets">
           <div className="asset-browser__header">
-            <strong><Files size={14} /> INPUT IMAGES</strong>
+            <strong><Files size={14} /> 项目图像</strong>
             <span>{filteredAssets.length}/{assets.length}</span>
           </div>
           <label className="asset-search">
@@ -1262,7 +1262,7 @@ export function ImageWorkspacePage() {
             ))}
           </div>
           <footer className="asset-browser__footer">
-            <HardDrive size={13} /> output/product/operator_workspace
+            <HardDrive size={13} /> 当前项目图像 · 本地副本
           </footer>
         </aside>
 
@@ -1353,7 +1353,7 @@ export function ImageWorkspacePage() {
               className={inspectorTab === "PROPERTIES" ? "is-active" : ""}
               onClick={() => setInspectorTab("PROPERTIES")}
             >
-              <SlidersHorizontal size={12} /> INSPECTOR
+              <SlidersHorizontal size={12} /> 属性与测量
             </button>
             <button
               type="button"
@@ -1363,10 +1363,10 @@ export function ImageWorkspacePage() {
               className={inspectorTab === "AGENT" ? "is-active" : ""}
               onClick={() => setInspectorTab("AGENT")}
             >
-              <Bot size={12} /> AGENT
+              <Bot size={12} /> Agent 助手
               {analysisRun ? <i className="agent-live-dot" /> : null}
             </button>
-            {dirty ? <strong className="unsaved-dot">UNSAVED</strong> : <strong>SAVED</strong>}
+            {dirty ? <strong className="unsaved-dot">未保存</strong> : <strong>已保存</strong>}
           </div>
           {inspectorTab === "AGENT" ? (
             selectedAsset ? (
@@ -1401,7 +1401,7 @@ export function ImageWorkspacePage() {
           ) : (
             <>
               <section className="inspector-section">
-                <header><FileImage size={14} /> IMAGE</header>
+                <header><FileImage size={14} /> 图像文件</header>
                 <dl className="property-list">
                   <div><dt>name</dt><dd>{selectedAsset.original_name}</dd></div>
                   <div><dt>size</dt><dd>{selectedAsset.width} × {selectedAsset.height}</dd></div>
@@ -1426,7 +1426,7 @@ export function ImageWorkspacePage() {
               </section>
 
               <section className="inspector-section">
-                <header><ShieldCheck size={14} /> DETERMINISTIC INSPECTION</header>
+                <header><ShieldCheck size={14} /> 像素测量</header>
                 <div className="inspection-metrics">
                   <article><span>Mean luma</span><strong>{selectedAsset.inspection.mean_luma.toFixed(2)}</strong></article>
                   <article><span>Contrast σ</span><strong>{selectedAsset.inspection.contrast_std.toFixed(2)}</strong></article>
@@ -1448,11 +1448,11 @@ export function ImageWorkspacePage() {
               </section>
 
               <section className="inspector-section annotation-inspector">
-                <header><Tag size={14} /> ANNOTATIONS <span>{annotations.length}</span></header>
+                <header><Tag size={14} /> 标注 <span>{annotations.length}</span></header>
                 {selectedAnnotation ? (
                   <div className="annotation-form">
                     <label>
-                      <span>Label</span>
+                      <span>标注类别</span>
                       <input
                         value={selectedAnnotation.label}
                         onChange={(event) => updateSelectedLabel(event.target.value)}

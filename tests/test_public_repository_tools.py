@@ -92,7 +92,6 @@ def test_public_export_is_allowlist_based_and_excludes_private_delivery_surfaces
         "docs/GOAI_requirements_matrix.md",
         "docs/INDUSTRIAL_AGENT_LANDSCAPE_20260825.md",
         "docs/PROJECT_STATUS.md",
-        "docs/PUBLIC_REPOSITORY_README.md",
         "docs/RC3_DELIVERY_CONTRACT.md",
     ):
         assert not _selected(internal_document)

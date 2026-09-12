@@ -75,6 +75,7 @@ import {
   pythonCanonicalSha256FromJsonValue,
 } from "./capaIntegrity";
 import { detachedJcsSha256 } from "./jcs";
+import { clearIdentitySession, getIdentityActorId, getIdentitySessionHeaders, getIdentitySessionSnapshot, subscribeIdentitySession } from "../identitySession";
 
 const requestTimeoutMs = 2_500;
 
@@ -91,8 +92,11 @@ const configuredBrowserApiBaseUrl = normalizedBase(
 const browserApiBaseUrl =
   configuredBrowserApiBaseUrl || window.location.origin;
 const reviewerBaseUrl = normalizedBase(import.meta.env.VITE_VISIONDATA_REVIEWER_BASE_URL);
-export const operatorActorUserId =
-  import.meta.env.VITE_VISIONDATA_ACTOR_USER_ID?.trim() || "usr_local_demo";
+const legacyOperatorActorUserId = import.meta.env.VITE_VISIONDATA_ACTOR_USER_ID?.trim() || "usr_local_demo";
+// Preserve the existing live export used by page labels, but never leave a
+// signed-in user's UI/requests attributed to the startup compatibility actor.
+export let operatorActorUserId = getIdentityActorId() ?? legacyOperatorActorUserId;
+subscribeIdentitySession(() => { operatorActorUserId = getIdentityActorId() ?? legacyOperatorActorUserId; });
 
 interface ApiRuntime {
   apiBaseUrl: string;
@@ -115,13 +119,16 @@ function resolveApiRuntime(): Promise<ApiRuntime> {
 }
 
 function runtimeAuthorizationHeaders(runtime: ApiRuntime): Record<string, string> {
-  if (!runtime.sessionToken) return {};
+  const account = getIdentitySessionHeaders();
+  if (!runtime.sessionToken) return account;
   return runtime.desktop
     ? {
+        ...account,
         "X-VisionData-Desktop-Token": runtime.sessionToken,
         "X-Actor-User-Id": operatorActorUserId,
       }
     : {
+        ...account,
         "X-VisionData-Session-Token": runtime.sessionToken,
         "X-Actor-User-Id": operatorActorUserId,
       };
@@ -1450,13 +1457,17 @@ export async function operatorFetch(
   init: RequestInit = {},
   timeoutMs = 30_000,
 ): Promise<Response> {
+  const identityGeneration = getIdentitySessionSnapshot().generation;
+  const accountHeaders = getIdentitySessionHeaders();
+  const requestedActor = getIdentityActorId() ?? legacyOperatorActorUserId;
   const runtime = await resolveApiRuntime();
+  if (getIdentitySessionSnapshot().generation !== identityGeneration) throw new OperatorApiError("IDENTITY_CONTEXT_CHANGED", "账户已切换；这次请求尚未发送，请在当前账户重新确认操作。", 409);
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
   const headers = new Headers(init.headers);
   if (!headers.has("Accept")) headers.set("Accept", "application/json");
   if (runtime.sessionToken) {
-    headers.set("X-Actor-User-Id", operatorActorUserId);
+    headers.set("X-Actor-User-Id", requestedActor);
     headers.set(
       runtime.desktop
         ? "X-VisionData-Desktop-Token"
@@ -1464,6 +1475,7 @@ export async function operatorFetch(
       runtime.sessionToken,
     );
   }
+  for (const [name, value] of Object.entries(accountHeaders)) headers.set(name, value);
   try {
     const response = await fetch(apiEndpoint(runtime.apiBaseUrl, path), {
       ...init,
@@ -1474,6 +1486,7 @@ export async function operatorFetch(
     });
     if (!response.ok) {
       const payload = (await response.json().catch(() => ({}))) as ApiErrorEnvelope;
+      if (response.status === 401 && getIdentitySessionSnapshot().generation === identityGeneration && getIdentityActorId() && !["/v1/identity/login", "/v1/identity/setup", "/v1/identity/register"].includes(path.split("?", 1)[0] ?? "")) clearIdentitySession();
       const incidentCommandId = response.headers.get("X-Incident-Command-Id")?.trim();
       throw new OperatorApiError(
         payload.error?.code ?? `HTTP_${response.status}`,

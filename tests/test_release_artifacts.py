@@ -7,6 +7,8 @@ import subprocess
 import sys
 from pathlib import Path, PurePosixPath
 
+import yaml
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
@@ -40,9 +42,18 @@ def test_ci_release_validators_are_independent_fail_fast_steps() -> None:
     assert "- name: Validate submission evidence" in workflow
     assert "- name: Validate reviewer website projection" in workflow
     assert "- name: Validate detached release assets" in workflow
-    assert "run: uv run python tools/check_release_consistency.py" in workflow
-    assert "run: uv run python tools/check_website_data.py" in workflow
-    assert "run: uv run python tools/check_release_assets.py" in workflow
+    steps = yaml.safe_load(workflow)["jobs"]["verify"]["steps"]
+    for script in (
+        "check_release_consistency.py",
+        "check_website_data.py",
+        "check_release_assets.py",
+    ):
+        matching = [step for step in steps if f"tools/{script}" in step.get("run", "")]
+        assert len(matching) == 1
+        assert matching[0]["run"] == (
+            'uv run --frozen --python "${{ matrix.python-version }}" '
+            f"python tools/{script}"
+        )
     assert "- name: Validate release evidence" not in workflow
 
 

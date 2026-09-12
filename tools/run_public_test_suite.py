@@ -10,6 +10,22 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_TEST_MODULES = (
+    "tests/test_identity_service.py",
+    "tests/test_identity_api.py",
+    "tests/test_identity_router.py",
+    "tests/test_identity_platform_integration.py",
+    "tests/test_identity_review_regressions.py",
+    "tests/test_data_pool.py",
+    "tests/test_data_pool_api.py",
+    "tests/test_local_model_registry.py",
+    "tests/test_vision_model_api.py",
+    "tests/test_vision_feedback.py",
+    "tests/test_vision_feedback_lifecycle.py",
+    "tests/test_vision_data_pool_bridge.py",
+    "tests/test_learning_contracts.py",
+    "tests/test_learning_dataset.py",
+    "tests/test_learning_evaluation.py",
+    "tests/test_public_platform_delivery.py",
     "tests/test_operator_exact_duplicate_capa.py",
     "tests/test_compute_handoff.py",
     "tests/test_operator_snapshot_acceptance_requirements.py",
