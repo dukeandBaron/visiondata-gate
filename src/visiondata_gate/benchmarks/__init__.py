@@ -1,6 +1,7 @@
 """Offline evaluation entrypoints.
 
-Production services must not import this namespace.  Evaluation modules may
-invoke public production APIs, but benchmark truth and fixture expectations
-remain outside the runtime request contract.
+Production decision and execution paths must not consume benchmark fixtures or
+truth. Read-only reviewer projections may import benchmark validators and
+immutable protocol constants, while fixture expectations remain outside the
+runtime request contract.
 """

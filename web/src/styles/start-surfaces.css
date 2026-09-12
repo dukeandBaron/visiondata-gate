@@ -1,0 +1,104 @@
+/* Operational start surfaces. The shared shell owns the palette and typography. */
+.start-home { min-height: 100vh; color: var(--text); background: var(--canvas, #17181a); }
+.start-home a, .start-platform a, .start-workflow a { color: var(--text); text-decoration: none; }
+.start-home a:hover, .start-platform a:hover, .start-workflow a:hover { color: var(--accent-primary); }
+.start-home button, .start-home input, .start-platform input, .start-platform select { font: inherit; }
+.start-home button { color: inherit; cursor: pointer; }
+.start-home button:disabled { cursor: not-allowed; opacity: .45; }
+.start-home :is(button, input, a, summary):focus-visible, .start-platform :is(button, input, select, a, summary):focus-visible, .start-workflow :is(a, summary):focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 3px; }
+.start-home-nav { max-width: 1360px; margin: 0 auto; padding: 22px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+.start-home-nav nav { display: flex; gap: 24px; font-size: 13px; }
+.start-home main { max-width: 1360px; margin: 0 auto; padding: 44px 40px 28px; }
+.start-heading { display: flex; justify-content: space-between; align-items: center; gap: 28px; margin-bottom: 34px; }
+.start-kicker { color: var(--muted); font-size: 12px; margin: 0 0 10px; }
+.start-heading h1 { font-size: clamp(28px, 2.3vw, 38px); font-weight: 550; line-height: 1.25; letter-spacing: -.045em; margin: 0 0 12px; }
+.start-heading p:not(.start-kicker) { font-size: 14px; color: var(--muted); margin: 0; }
+.start-connection { display: flex; align-items: flex-start; gap: 9px; font-size: 12px; white-space: nowrap; }
+.start-connection .runtime-dot { margin-top: 4px; }
+.start-connection small { display: block; font-size: 11px; color: var(--muted); margin-top: 7px; }
+.start-grid { display: grid; grid-template-columns: minmax(340px, 1.2fr) minmax(360px, 1fr); gap: 44px; align-items: start; }
+.start-projects, .start-activity { min-width: 0; }
+.start-activity { padding-left: 32px; border-left: 1px solid var(--line); }
+.start-section-heading, .start-current-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.start-section-heading :is(h2, h3) { margin: 0; font-size: 14px; font-weight: 600; }
+.start-section-heading :is(a, button) { display: inline-flex; align-items: center; gap: 5px; padding: 3px 0; background: none; border: 0; font-size: 12px; color: var(--muted); }
+.start-search { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--muted); }
+.start-search:focus-within { border-color: var(--accent-primary); }
+.start-search input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text); padding: 10px 0; font-size: 13px; }
+.start-search input::placeholder { color: var(--muted); opacity: .85; }
+.start-search button { background: none; border: 0; padding: 5px; font-size: 12px; white-space: nowrap; color: var(--muted); cursor: pointer; }
+.start-project-list { display: grid; margin-top: 15px; max-height: 510px; overflow-y: auto; }
+.start-project-list > button { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: start; gap: 13px; min-height: 88px; text-align: left; padding: 17px 12px; border: 0; border-bottom: 1px solid var(--line); border-radius: 3px; background: transparent; }
+.start-project-list > button:hover { background: var(--surface); }
+.start-project-list > button[aria-pressed="true"] { background: var(--surface); box-shadow: inset 2px 0 var(--accent-primary); }
+.start-project-list > button > svg { color: var(--muted); margin-top: 1px; }
+.start-project-list strong, .start-tasks strong, .start-orders strong { display: block; font-size: 14px; font-weight: 550; overflow-wrap: anywhere; }
+.start-project-list small { display: block; font-size: 12px; line-height: 1.6; color: var(--muted); margin-top: 6px; overflow-wrap: anywhere; }
+.start-project-list code { display: block; font-size: 10px; color: var(--muted); margin-top: 6px; overflow-wrap: anywhere; }
+.start-project-mark { display: flex; align-items: center; gap: 9px; color: var(--accent-primary); }
+.start-project-mark small { margin: 0; }
+.start-current-heading h2 { margin: 6px 0 0; font-size: 23px; font-weight: 550; letter-spacing: -.03em; overflow-wrap: anywhere; }
+.start-current-heading small { display: block; color: var(--muted); margin-top: 8px; }
+.start-home .start-icon-button { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: transparent; border: 1px solid var(--line); border-radius: 4px; flex-shrink: 0; }
+.start-home .start-primary { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--accent-primary); border-radius: 4px; padding: 11px 14px; background: var(--accent-primary); color: var(--canvas, #17181a); font-size: 13px; font-weight: 650; }
+.start-primary svg:last-child { margin-left: 10px; }
+.start-counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 24px 0; gap: 16px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.start-counts dt { font-size: 11px; color: var(--muted); }
+.start-counts dd { margin: 8px 0 0; font-size: 19px; font-variant-numeric: tabular-nums; }
+.start-note { color: var(--muted); font-size: 12px; line-height: 1.8; }
+.start-tasks, .start-orders { margin-top: 24px; }
+.start-tasks ul, .start-orders ul { list-style: none; padding: 0; margin: 0; }
+.start-tasks li, .start-orders li { border-bottom: 1px solid var(--line); }
+.start-tasks li a, .start-orders li a { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; gap: 18px; }
+.start-tasks small, .start-orders small { color: var(--muted); font-size: 11px; display: block; margin-top: 5px; }
+.start-tasks li a > svg, .start-orders li a > svg { flex-shrink: 0; color: var(--muted); }
+.start-empty { min-height: 140px; padding: 32px 12px; color: var(--muted); line-height: 1.8; font-size: 13px; }
+.start-empty strong { color: var(--text); font-weight: 550; }
+.start-empty :is(a, button) { display: inline-flex; gap: 6px; align-items: center; margin: 0 16px 0 0; padding: 6px 0; color: var(--accent-primary); border: 0; background: transparent; font-size: 13px; }
+.start-example-toggle { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; margin-top: 20px; }
+.start-example-toggle input { accent-color: var(--accent-primary); }
+.start-read-error { color: var(--amber, #d8b46c); background: var(--surface); border-left: 2px solid var(--amber, #d8b46c); padding: 12px; font-size: 12px; line-height: 1.75; }
+.start-about { border-top: 1px solid var(--line); margin-top: 38px; padding-top: 20px; max-width: 900px; color: var(--muted); font-size: 12px; line-height: 1.8; }
+.start-about summary, .start-workflow summary { cursor: pointer; color: var(--muted); padding: 4px 0; font-size: 12px; }
+.start-about p { max-width: 76ch; }
+.start-about div { display: flex; gap: 24px; }
+.start-home-footer { display: flex; justify-content: space-between; max-width: 1360px; margin: 0 auto; padding: 20px 40px 30px; color: var(--muted); font-size: 11px; }
+.start-visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+.start-platform { gap: 20px; color: var(--text); }
+.start-platform .agent-platform-header h1 { font-size: 26px; letter-spacing: -.03em; font-weight: 550; }
+.start-platform .agent-platform-header p { font-size: 13px; color: var(--muted); }
+.start-platform-actions { display: flex; align-items: center; gap: 18px; font-size: 12px; }
+.start-platform .panel { background: transparent; box-shadow: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 20px 0 0; }
+.start-platform .panel-header h2 { font-size: 17px; }
+.start-platform .agent-platform-metrics { gap: 20px; }
+.start-platform .start-platform-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.start-platform .agent-platform-metrics .metric { background: transparent; border: 0; box-shadow: none; border-radius: 0; padding: 8px 0; }
+.start-platform .agent-platform-capabilities { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+.start-platform .agent-platform-capabilities article { border: 0; border-bottom: 1px solid var(--line); padding: 12px 0; border-radius: 0; }
+.start-platform .agent-platform-capabilities p { font-size: 12px; color: var(--muted); line-height: 1.7; }
+.start-platform .agent-platform-capabilities small { color: var(--muted); }
+.start-platform .agent-platform-task-list { gap: 0; }
+.start-platform .agent-platform-task-list > button { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 14px 10px; }
+.start-platform .agent-platform-task-list > button:hover { background: var(--surface); }
+.start-platform .agent-platform-task-list > button.is-selected { background: var(--surface); box-shadow: inset 2px 0 var(--accent-primary); }
+.start-platform .agent-platform-task-list small { color: var(--muted); }
+.start-platform .agent-platform-recovery, .start-platform .agent-platform-usage { border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 20px 0 0; }
+.start-platform .agent-platform-receipt { color: var(--muted); }
+.start-task-controls { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 16px; }
+.start-task-controls .start-search { flex: 1; max-width: 640px; }
+.start-task-controls > label:last-child { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--muted); }
+.start-task-controls select { color: var(--text); background: var(--surface); border: 1px solid var(--line); padding: 9px; border-radius: 4px; }
+.start-workflow { color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.start-workflow ol { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px; padding: 12px 0 8px 22px; margin: 0; }
+.start-workflow li { padding-left: 2px; font-size: 12px; }
+.start-workflow li::marker { color: var(--muted); font-variant-numeric: tabular-nums; }
+.start-workflow li a { font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
+.start-workflow p { font-size: 12px; line-height: 1.8; }
+.start-workflow details > a { font-size: 12px; }
+@media (max-width: 1200px) {
+  .start-grid { gap: 28px; grid-template-columns: minmax(320px, 1fr) minmax(340px, 1fr); }
+  .start-activity { padding-left: 24px; }
+  .start-workflow ol { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) { .start-home *, .start-platform * { animation: none !important; scroll-behavior: auto !important; } }

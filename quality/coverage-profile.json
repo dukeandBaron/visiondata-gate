@@ -1,0 +1,100 @@
+{
+  "schema_version": "visiondata-gate.quality-coverage-profile.v1",
+  "coverage_version": "7.16.0",
+  "expected_cases": [
+    "tests.test_audit_envelope::test_audit_envelope_parser_rejects_duplicate_json_members",
+    "tests.test_audit_envelope::test_envelope_tampering_and_event_reordering_fail_closed",
+    "tests.test_audit_envelope::test_governed_audit_envelope_rebuilds_and_verifies_independently",
+    "tests.test_audit_envelope::test_hash_domains_are_fixed_and_isolated",
+    "tests.test_audit_envelope::test_rfc8785_jcs_and_domain_digest_have_frozen_golden",
+    "tests.test_audit_envelope::test_rfc8785_rejects_values_outside_ijson_number_domain[1152921504606846976]",
+    "tests.test_audit_envelope::test_rfc8785_rejects_values_outside_ijson_number_domain[inf]",
+    "tests.test_audit_envelope::test_rfc8785_rejects_values_outside_ijson_number_domain[nan]",
+    "tests.test_capa::test_child_run_closure_detects_same_code_on_new_redacted_sample",
+    "tests.test_capa::test_child_run_closure_verifies_zero_regression_and_stable_seal",
+    "tests.test_evidence_state::test_case_ledger_is_derived_from_legacy_case_without_schema_mutation",
+    "tests.test_evidence_state::test_snapshot_marks_stale_and_revoked_without_changing_support_status",
+    "tests.test_evidence_state::test_snapshot_separates_support_from_freshness_and_is_order_stable",
+    "tests.test_evidence_state::test_v2_ledger_is_case_embeddable_without_final_case_digest",
+    "tests.test_evidence_state::test_v2_ledger_records_authorization_staleness_and_scoped_revocation",
+    "tests.test_evidence_state::test_v2_not_applicable_authorization_is_unknown_not_current",
+    "tests.test_policy_agents::test_activated_rulepack_controls_actions_and_unknown_codes_fail_closed",
+    "tests.test_policy_agents::test_clean_evidence_passes_only_for_sandbox_scope",
+    "tests.test_policy_agents::test_council_discloses_shared_ai_backend_and_cross_examines",
+    "tests.test_policy_agents::test_counterfactual_rule_stability_flagged_on_rule_flip_for_finance_profile",
+    "tests.test_policy_agents::test_counterfactual_rule_stability_ignores_more_strict_fail_closed_flip",
+    "tests.test_policy_agents::test_counterfactual_tool_check_handles_dedupe_and_reorder_variants",
+    "tests.test_policy_agents::test_duplicate_finding_quarantines_and_requests_repartition",
+    "tests.test_policy_agents::test_frozen_finding_codes_have_fixed_work_order_mapping[ANNOTATION_DIMENSION_MISMATCH-RELABEL-QUARANTINE]",
+    "tests.test_policy_agents::test_frozen_finding_codes_have_fixed_work_order_mapping[COVERAGE_GAP-RECAPTURE-RECAPTURE]",
+    "tests.test_policy_agents::test_frozen_finding_codes_have_fixed_work_order_mapping[CROSS_SPLIT_EXACT_DUPLICATE-REMOVE_OR_REPARTITION-QUARANTINE]",
+    "tests.test_policy_agents::test_frozen_finding_codes_have_fixed_work_order_mapping[CROSS_SPLIT_NEAR_DUPLICATE-REMOVE_OR_REPARTITION-QUARANTINE]",
+    "tests.test_policy_agents::test_frozen_finding_codes_have_fixed_work_order_mapping[DECODE_FAILURE-RECAPTURE-RECAPTURE]",
+    "tests.test_policy_agents::test_frozen_finding_codes_have_fixed_work_order_mapping[EXACT_DUPLICATE-REMOVE_OR_REPARTITION-QUARANTINE]",
+    "tests.test_policy_agents::test_frozen_finding_codes_have_fixed_work_order_mapping[INVALID_DIMENSIONS-RECAPTURE-RECAPTURE]",
+    "tests.test_policy_agents::test_frozen_finding_codes_have_fixed_work_order_mapping[LOW_SHARPNESS-RECAPTURE-RECAPTURE]",
+    "tests.test_policy_agents::test_frozen_finding_codes_have_fixed_work_order_mapping[MISSING_ANNOTATION-RELABEL-QUARANTINE]",
+    "tests.test_policy_agents::test_frozen_finding_codes_have_fixed_work_order_mapping[OVEREXPOSED-RECAPTURE-RECAPTURE]",
+    "tests.test_policy_agents::test_frozen_finding_codes_have_fixed_work_order_mapping[UNDEREXPOSED-RECAPTURE-RECAPTURE]",
+    "tests.test_policy_agents::test_generic_profile_keeps_core_checks_only",
+    "tests.test_policy_agents::test_governance_scope_gap_with_missing_cells_is_reserve_actionable",
+    "tests.test_policy_agents::test_incomplete_trace_work_order_binds_rulepack_and_id[error-decoder unavailable]",
+    "tests.test_policy_agents::test_incomplete_trace_work_order_binds_rulepack_and_id[skipped-None]",
+    "tests.test_policy_agents::test_missing_trace_work_order_binds_rulepack_and_id",
+    "tests.test_policy_agents::test_policy_rejects_model_copy_drift_in_rulepack_binding",
+    "tests.test_policy_agents::test_quality_finding_requires_recapture",
+    "tests.test_policy_agents::test_scenario_profile_finance_counterfactual_is_strict",
+    "tests.test_policy_agents::test_scenario_profile_finance_requires_governance_metrics_for_pass",
+    "tests.test_policy_agents::test_scenario_profile_industrial_counterfactual_tolerance",
+    "tests.test_policy_agents::test_scenario_profile_tool_counterfactual_is_stable_for_same_finding_traces",
+    "tests.test_policy_agents::test_scenario_rule_profile_snapshot_is_stable_and_complete",
+    "tests.test_policy_agents::test_tool_error_forces_defer_and_investigation_work_order",
+    "tests.test_policy_agents::test_unsupported_high_severity_evidence_defers"
+  ],
+  "floors": {
+    "src/visiondata_gate/audit_envelope.py": {
+      "lines": [
+        286,
+        413
+      ],
+      "branches": [
+        57,
+        142
+      ],
+      "excluded_lines": 0
+    },
+    "src/visiondata_gate/capa.py": {
+      "lines": [
+        337,
+        782
+      ],
+      "branches": [
+        9,
+        192
+      ],
+      "excluded_lines": 0
+    },
+    "src/visiondata_gate/evidence_state.py": {
+      "lines": [
+        121,
+        132
+      ],
+      "branches": [
+        27,
+        36
+      ],
+      "excluded_lines": 0
+    },
+    "src/visiondata_gate/policy.py": {
+      "lines": [
+        332,
+        379
+      ],
+      "branches": [
+        108,
+        156
+      ],
+      "excluded_lines": 2
+    }
+  }
+}

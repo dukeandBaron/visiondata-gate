@@ -44,8 +44,19 @@ def inspect_annotations(
     mask_fractions: list[float] = []
 
     for sample in validated_manifest.samples:
+        annotation_required = active_contract.annotations_required
+        policies = active_contract.sample_annotation_requirements
+        if policies is not None:
+            if sample.sample_id not in policies:
+                raise ValueError("sample has no explicit annotation requirement")
+            policy = policies[sample.sample_id]
+            if policy == "NOT_APPLICABLE":
+                if sample.annotation_path is not None:
+                    raise ValueError("not-applicable sample has an annotation path")
+                continue
+            annotation_required = policy == "REQUIRED"
         if sample.annotation_path is None:
-            if not active_contract.annotations_required:
+            if not annotation_required:
                 continue
             evidence = {"reason": "manifest_path_missing"}
             findings.append(

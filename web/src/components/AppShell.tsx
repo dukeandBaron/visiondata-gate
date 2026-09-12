@@ -32,6 +32,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type FormEvent,
 } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -46,7 +47,9 @@ import {
 import type { ProjectSourceKind, ScenarioProfile } from "../domain";
 import type { OperatorImageAsset, OperatorWorkOrder } from "../operatorDomain";
 import { operatorInitials, useLocalOperatorProfile } from "../localProfile";
+import { getIdentitySessionSnapshot, subscribeIdentitySession } from "../identitySession";
 import { publicReplayMode } from "../publicReplay";
+import { sidebarSections, validWorkbenchTabs, workbenchTabKey } from "../workbenchNavigation";
 import { BrandMark } from "./BrandMark";
 import { Modal } from "./ui";
 
@@ -66,8 +69,14 @@ const navigationGroups: NavigationGroup[] = [
   {
     label: "WORK",
     items: [
+      ...(!publicReplayMode ? [{ label: "Agent 平台", path: "/platform", icon: Workflow, keywords: "agent platform start 平台 工作流 首页" }, { label: "模型与 API", path: "/models", icon: Network, keywords: "model api ollama yolo 本地 模型 接口 训练" }] : []),
+      { label: "开始一项工作", path: "/start", icon: FileSearch, keywords: "task guide start 任务 指引 交付 标注 复核" },
       { label: "图像工作簿", path: "/workspace", icon: Images, keywords: "workbook canvas image annotation 图像 标注 画布" },
       { label: "工作总览", path: "/command-center", icon: LayoutDashboard, keywords: "overview inbox dashboard 总览 收件箱" },
+      { label: "试点计划", path: "/pilot", icon: FileSearch, keywords: "pilot business customer scope 试点 客户 交付 验收" },
+      ...(publicReplayMode ? [] : [{label:"算力交接",path:"/compute",icon:Network,keywords:"compute ascend cann 昇腾 NPU 算力 调度"}]),
+      ...(publicReplayMode ? [] : [{label:"数据与学习闭环",path:"/learning",icon:GitBranch,keywords:"learning feedback triage 数据 好坏 返修 训练 复验"}]),
+      ...(publicReplayMode ? [] : [{label:"数据池与返修",path:"/data-pools",icon:FolderKanban,keywords:"data pool quality repair 合格 返修 数据池 版本"}]),
       { label: "案件", path: "/cases", icon: BriefcaseBusiness, keywords: "case incident 案件 调查" },
       { label: "CAPA 工单", path: "/capa", icon: SquareKanban, keywords: "work order capa 工单 整改" },
     ],
@@ -93,17 +102,21 @@ const navigationGroups: NavigationGroup[] = [
 ];
 
 const allNavigation = navigationGroups.flatMap((group) => group.items);
+const sidebarDefinition = sidebarSections(publicReplayMode);
+const sidebarLabels: Record<string, string> = {
+  '/command-center': '检查任务', '/platform': '平台运行与恢复',
+  '/learning': 'CPU 参考学习', '/start': '使用指南', '/pilot': '试点与交付范围',
+};
 
-function routeTitle(pathname: string, publicReplayMode = false): string {
+function currentTabStorageKey(): string {
+  return workbenchTabKey(getIdentitySessionSnapshot().user?.user_id, publicReplayMode);
+}
+
+function routeTitle(pathname: string): string {
   if (pathname.startsWith("/cases/") && pathname !== "/cases") {
     return `案件 · ${pathname.split("/").filter(Boolean).at(-1)}`;
   }
-  if (publicReplayMode && pathname === "/review") return "验证档案";
-  return allNavigation.find((item) => item.path === pathname)?.label ?? "VisionData Gate";
-}
-
-function navigationLabel(item: NavigationItem, publicReplayMode: boolean): string {
-  return publicReplayMode && item.path === "/review" ? "验证档案" : item.label;
+  return allNavigation.find((item) => item.path === pathname)?.label ?? "工业视觉交付站";
 }
 
 function routeIcon(pathname: string): LucideIcon {
@@ -117,15 +130,8 @@ function tabPathname(href: string): string {
 
 function readInitialTabs(): string[] {
   try {
-    const stored = JSON.parse(
-      window.sessionStorage.getItem("visiondata:open-tabs") ?? "[]",
-    ) as unknown;
-    if (Array.isArray(stored)) {
-      const valid = stored.filter(
-        (value): value is string => typeof value === "string" && value.startsWith("/"),
-      );
-      if (valid.length) return valid.slice(-7);
-    }
+    const stored: unknown = JSON.parse(window.sessionStorage.getItem(currentTabStorageKey()) ?? "[]");
+    return validWorkbenchTabs(stored, publicReplayMode);
   } catch {
     // Session hints are disposable; malformed state must not block the workbench.
   }
@@ -554,9 +560,12 @@ export function AppShell() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
   const [openTabs, setOpenTabs] = useState<string[]>(readInitialTabs);
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const location = useLocation();
   const navigate = useNavigate();
-  const { profile } = useLocalOperatorProfile();
+  const { profile: localDisplayProfile } = useLocalOperatorProfile();
+  const account = useSyncExternalStore(subscribeIdentitySession, getIdentitySessionSnapshot, getIdentitySessionSnapshot);
+  const profile = account.user ? { ...localDisplayProfile, displayName: account.user.display_name, role: account.user.platform_role === "ADMIN" ? "平台管理员" : "项目成员" } : localDisplayProfile;
   const {
     connection,
     workspaces,
@@ -596,8 +605,14 @@ export function AppShell() {
   }, [activeTabHref, location.pathname]);
 
   useEffect(() => {
-    window.sessionStorage.setItem("visiondata:open-tabs", JSON.stringify(openTabs));
+    try { window.sessionStorage.setItem(currentTabStorageKey(), JSON.stringify(openTabs)); }
+    catch { /* Disposable page hints must not prevent real work when storage is unavailable. */ }
   }, [openTabs]);
+
+  useEffect(() => {
+    const group = sidebarDefinition.find(item => item.collapsible && item.paths.some(path => location.pathname === path || location.pathname.startsWith(`${path}/`)));
+    if (group) setExpandedSections(current => current[group.id] ? current : { ...current, [group.id]: true });
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -625,6 +640,15 @@ export function AppShell() {
     if (tabPathname(href) === location.pathname) navigate(fallback);
   };
 
+  const navigationLinks = (paths: string[]) => paths.map(path => {
+    const item = allNavigation.find(entry => entry.path === path);
+    if (!item) return null;
+    const label = sidebarLabels[path] ?? item.label;
+    return <NavLink key={path} to={path} data-nav-path={path}
+      className={({ isActive }) => isActive || location.pathname.startsWith(`${path}/`) ? 'is-active' : ''}
+      title={label} aria-label={label}><item.icon size={15} aria-hidden="true" /><span>{label}</span></NavLink>;
+  });
+
   return (
     <div className={`linear-shell${sidebarCollapsed ? " is-sidebar-collapsed" : ""}${location.pathname === "/review" ? " is-review-route" : ""}`}>
       <a className="skip-to-content" href="#main-content">跳到主要内容</a>
@@ -637,6 +661,7 @@ export function AppShell() {
             type="button"
             onClick={() => setSidebarCollapsed((value) => !value)}
             title={sidebarCollapsed ? "展开侧栏 (Ctrl+B)" : "收起侧栏 (Ctrl+B)"}
+            aria-label={sidebarCollapsed ? "展开侧栏" : "收起侧栏"}
           >
             {sidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
           </button>
@@ -647,7 +672,7 @@ export function AppShell() {
             {(activeWorkspace?.name ?? "V").slice(0, 1).toUpperCase()}
           </span>
           <label>
-            <small>WORKSPACE</small>
+            <small>工作空间</small>
             <select
               value={activeWorkspace?.workspace_id ?? ""}
               onChange={(event) => selectWorkspace(event.target.value)}
@@ -677,34 +702,23 @@ export function AppShell() {
         </button>
 
         <nav className="linear-nav" aria-label="产品页面">
-          {navigationGroups.slice(0, 2).map((group) => (
-            <section key={group.label}>
-              <small>{group.label}</small>
-              {group.items.map((item) => (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  data-nav-path={item.path}
-                  className={({ isActive }) =>
-                    isActive || location.pathname.startsWith(`${item.path}/`) ? "is-active" : ""
-                  }
-                  title={item.label}
-                >
-                  <item.icon size={15} />
-                  <span>{item.label}</span>
-                </NavLink>
-              ))}
-            </section>
-          ))}
+          {sidebarDefinition.map(group => group.collapsible
+            ? <details className="workbench-nav-group" key={group.id} open={Boolean(expandedSections[group.id])}
+                onToggle={event => { const open = event.currentTarget.open; setExpandedSections(current => current[group.id] === open ? current : { ...current, [group.id]: open }); }}>
+                <summary title={group.label}><ChevronDown size={12} aria-hidden="true" /><span>{group.label}</span></summary>
+                <div>{navigationLinks(group.paths)}</div>
+              </details>
+            : <section key={group.id} data-testid="daily-navigation"><small>{group.label}</small>{navigationLinks(group.paths)}</section>)}
         </nav>
 
         <section className="linear-projects">
           <header>
-            <span>PROJECTS</span>
+            <span>项目</span>
             <button
               type="button"
               onClick={() => setProjectDialogOpen(true)}
               title={publicReplayMode ? "公开回放禁止创建项目" : "创建空项目"}
+              aria-label="创建空项目"
               disabled={publicReplayMode}
             >
               <Plus size={14} />
@@ -725,7 +739,7 @@ export function AppShell() {
                 <span>{project.name}</span>
               </button>
             ))}
-            {!workspaceLoading && operationalProjects.length === 0 ? (
+            {!publicReplayMode && !workspaceLoading && !workspaceError && operationalProjects.length === 0 ? (
               <button type="button" className="is-empty" onClick={() => setProjectDialogOpen(true)}>
                 <Plus size={14} />
                 <span>创建第一个项目</span>
@@ -753,16 +767,11 @@ export function AppShell() {
         </section>
 
         <nav className="linear-nav linear-nav--footer" aria-label="系统页面">
-          {navigationGroups[2]!.items.map((item) => (
-            <NavLink key={item.path} to={item.path} title={navigationLabel(item, publicReplayMode)} data-nav-path={item.path}>
-              <item.icon size={15} />
-              <span>{navigationLabel(item, publicReplayMode)}</span>
-            </NavLink>
-          ))}
+          {navigationLinks(['/integrations', '/settings'])}
         </nav>
         <NavLink className="linear-user" to="/account" title="账户与会话中心">
-          <span className="linear-user__avatar">{publicReplayMode ? "PO" : operatorInitials(profile)}</span>
-          <span><strong>{publicReplayMode ? "Public Operator" : profile.displayName}</strong><small>{publicReplayMode ? "anonymous · read only" : profile.role}</small></span>
+          <span className="linear-user__avatar">{publicReplayMode ? "PR" : operatorInitials(profile)}</span>
+          <span><strong>{publicReplayMode ? "Public Reviewer" : profile.displayName}</strong><small>{publicReplayMode ? "anonymous · browser local" : profile.role}</small></span>
           <i className={`runtime-dot runtime-dot--${connection.api.toLowerCase()}`} />
         </NavLink>
       </aside>
@@ -772,7 +781,7 @@ export function AppShell() {
           <div className="linear-breadcrumbs">
             <span>{activeWorkspace?.name ?? "Workspace"}</span>
             <span>{activeProject?.name ?? "未选择项目"}</span>
-            <strong>{routeTitle(location.pathname, publicReplayMode)}</strong>
+            <strong>{routeTitle(location.pathname)}</strong>
           </div>
           <div className="linear-topbar__actions">
             {workspaceError ? <span className="linear-topbar__error">{workspaceError}</span> : null}
@@ -782,21 +791,14 @@ export function AppShell() {
                 <span>项目首页</span>
               </NavLink>
             ) : null}
-            <NavLink
+            {publicReplayMode || location.pathname === '/review' ? <NavLink
               to="/review"
               className={({ isActive }) => `linear-review-shortcut${isActive ? " is-active" : ""}`}
-              aria-label={publicReplayMode ? "打开审计复核" : "打开评审快速路径"}
+              aria-label="打开评审快速路径"
             >
               <Eye size={14} />
-              <span>
-                {publicReplayMode
-                  ? location.pathname === "/review" ? "当前复核" : "审计复核"
-                  : location.pathname === "/review" ? "当前评审路径" : "评审快速路径"}
-              </span>
-            </NavLink>
-            <button type="button" onClick={() => setPaletteOpen(true)}>
-              <Search size={14} /> 快速查找
-            </button>
+              <span>{location.pathname === "/review" ? "当前评审路径" : "评审快速路径"}</span>
+            </NavLink> : null}
             <button
               type="button"
               className="linear-api-state"
@@ -807,15 +809,15 @@ export function AppShell() {
             >
               <i className={`runtime-dot runtime-dot--${connection.api.toLowerCase()}`} />
               {connectionRefreshing ? <RefreshCw className="is-spinning" size={12} /> : null}
-              {publicReplayMode ? "Static replay" : connection.api === "CONNECTED" ? "Local API" : "API offline"}
+              {publicReplayMode ? "静态回放" : connection.api === "CONNECTED" ? "本地服务已连接" : "本地服务未连接"}
             </button>
           </div>
         </header>
 
         {publicReplayMode ? (
           <div className="public-replay-banner" role="note">
-            <span>PUBLIC SYNTHETIC REPLAY</span>
-            <strong>静态只读 · 无后端 · 无客户数据 · 无 API Key</strong>
+            <span>PUBLIC REPLAY + BROWSER LOCAL</span>
+            <strong>冻结证据只读 · 本地图像留在当前标签页 · 无后端 · 无 API Key</strong>
             <small>production_release_allowed=false</small>
           </div>
         ) : null}
@@ -850,13 +852,13 @@ export function AppShell() {
         </main>
 
         <footer className="linear-statusbar">
-          <span><ShieldCheck size={12} /> {publicReplayMode ? "PUBLIC REPLAY" : "LOCAL-FIRST"}</span>
+          <span><ShieldCheck size={12} /> {publicReplayMode ? "公开回放" : "本地工作台"}</span>
           <span className="linear-statusbar__scope">{activeWorkspace?.name ?? "no workspace"}</span>
           <span className="linear-statusbar__scope">{activeProject?.name ?? "no project"}</span>
           <span className="linear-statusbar__spacer" />
-          <span>raw outbound: 0</span>
+          <span title="这是配置边界，不是实时出站流量计数">原图外发策略：禁止</span>
           <span><i className={`runtime-dot runtime-dot--${connection.api.toLowerCase()}`} /> {publicReplayMode ? "backend disabled" : `API ${connection.api}`}</span>
-          <span>authority: human</span>
+          <span>关键操作由人确认</span>
         </footer>
       </div>
 

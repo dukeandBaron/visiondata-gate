@@ -28,7 +28,15 @@ EXPERIMENTAL_MARKERS = (
 )
 
 CURRENT_CLAIM_REQUIREMENTS: dict[str, tuple[str, ...]] = {
-    "README.md": ("_05", "_06", "NOT_ESTIMABLE", "DynamicBench-v1"),
+    # Public product entrypoints retain the semantic boundary and a link to
+    # canonical evidence. Private historical run-directory suffixes belong in
+    # those evidence documents, not in every product-facing summary.
+    "README.md": (
+        "NOT_MEASURED_PENDING_ADJUDICATION",
+        "docs/CLAIM_SCOPE.md",
+        "DynamicBench-v3",
+        "production_release_allowed=false",
+    ),
     "docs/00_OVERVIEW.md": ("_05", "_06", "NOT_ESTIMABLE", "DynamicBench-v1"),
     "docs/CLAIM_SCOPE.md": (
         "_05",
@@ -56,12 +64,17 @@ CURRENT_CLAIM_REQUIREMENTS: dict[str, tuple[str, ...]] = {
         "NOT_ESTIMABLE",
         "实际外部模型调用",
     ),
-    "docs/one_pager.md": ("_05", "_06", "NOT_ESTIMABLE", "DynamicBench-v1"),
+    "docs/one_pager.md": (
+        "NOT_MEASURED_PENDING_ADJUDICATION",
+        "REVIEWER_READINESS_MATRIX.md",
+        "DynamicBench-v3",
+        "production_release_allowed=false",
+    ),
     "docs/submission_form_copy.md": (
-        "_05",
-        "_06",
         "NOT_ESTIMABLE",
-        "DynamicBench-v1",
+        "docs/REVIEWER_READINESS_MATRIX.md",
+        "DynamicBench-v3",
+        "production_release_allowed=false",
     ),
     "01_planner/PROGRESS_BOARD.md": (
         "_05",

@@ -1,0 +1,20 @@
+{
+  "schema_version": "industrial-delivery.pilot-plan.v1",
+  "status": "DRAFT_NOT_APPROVED",
+  "customer_validation": "NOT_MEASURED",
+  "production_release_allowed": false,
+  "machine_write_permitted": false,
+  "scope": {
+    "projectAlias": "LEGACY-TEST / 合成兼容用例",
+    "buyerRole": "测试交付负责人",
+    "operatorRole": "测试复核人",
+    "workcell": "合成批次",
+    "problem": "旧版范围书迁移测试，不是客户案例。",
+    "dataScope": "合成输入，不含客户数据。",
+    "observationWindow": "仅测试窗口，纳入失败。",
+    "baselineMethod": "本用例仅验证草稿读取，不测商业效果。",
+    "acceptanceCriteria": "草稿可迁移，不生成批准。",
+    "metricIds": ["evidence_time"]
+  },
+  "measurements": [{ "id": "evidence_time", "status": "NOT_MEASURED", "baseline": null, "after": null, "evidence_ref": null }]
+}

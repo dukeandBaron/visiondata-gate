@@ -24,7 +24,15 @@ PUBLIC_PAGES_WORKFLOW = ".github/workflows/pages.yml"
 PUBLIC_CI_TEMPLATE = "tools/templates/public-ci.yml"
 PUBLIC_CI_WORKFLOW = ".github/workflows/ci.yml"
 
+# Exact, byte-reviewed synthetic inputs required by the desktop evaluation view.
+# This is not permission to export any other internal report or a modified copy.
+REVIEWED_SYNTHETIC_SHA256 = {
+    "10_reports/DYNAMICBENCH_V3_REPLANNING_20260829.json": "424be5fc8f51d55bf412b6e73c88a4943bc2d403b1e2d85817b7eb7de9e36d21",
+    "10_reports/DYNAMICBENCH_V4_PRODUCT_RUNTIME_20260829.json": "e33d238c48270b5732c6778dcaad2d4ed93cf06d9b3b0d800ca6e84a49cdb99e",
+}
+
 PUBLIC_EXACT_FILES = {
+    "docs/DATASET_REVIEW_AND_COMPUTE.md",
     ".env.example",
     ".gitattributes",
     ".gitignore",
@@ -72,6 +80,7 @@ PUBLIC_EXACT_FILES = {
 }
 
 PUBLIC_PREFIXES = (
+    "gateway/src/",
     "adapters/",
     "agentteams/",
     "desktop/",
@@ -84,6 +93,53 @@ PUBLIC_PREFIXES = (
     "tests/",
     "tools/",
     "web/",
+)
+
+PUBLIC_EXACT_FILES.update(
+    {
+        "quality/pyproject.toml",
+        "quality/uv.lock",
+        "quality/requirements.txt",
+        "quality/README.md",
+        "quality/pyright-gate.json",
+        "quality/pyright-debt.json",
+        "quality/coverage-profile.json",
+        "gateway/pom.xml",
+        "desktop/default.env.example",
+        "start_local_workbench.ps1",
+        ".pre-commit-config.yaml",
+        ".github/dependabot.yml",
+        ".github/workflows/quality.yml",
+        ".github/workflows/security.yml",
+        "docs/PRIVATE_AGENT_PLATFORM_WORKFLOW.md",
+        "docs/IDENTITY_API_CONTRACT.md",
+        "docs/DATA_POOL_API_CONTRACT.md",
+        "docs/VISION_MODEL_API_CONTRACT.md",
+        "docs/VISION_DATA_POOL_ADAPTER.md",
+        "docs/WINDOWS_INSTALLER.md",
+        "docs/LOCAL_LEARNING_LOOP.md",
+        "docs/LEARNING_API_HANDOFF.md",
+        "docs/learning_operations.md",
+        "docs/LOCAL_WORKBENCH.md",
+        "docs/AGENT_PLATFORM.md",
+        "docs/AGENT_PLATFORM_OPERATIONS.md",
+        "docs/INTERFACE_SUPPORT.md",
+        "docs/CROSS_PLATFORM_QUICKSTART.md",
+        "docs/QUALITY_LEARNING_WORKBENCH.md",
+        "docs/RELEASE_PREPARATION.md",
+        "docs/AUDIT_TRUST_BOUNDARY.md",
+        "docs/BENCHMARK_REPRODUCIBILITY.md",
+        "docs/PUBLIC_API.md",
+        "docs/EXTERNAL_REVIEW_RESPONSE.md",
+        "docs/ENGINEERING_QUALITY_IMPLEMENTATION.md",
+        "docs/QUALITY_GATES.md",
+        "docs/CLAIM_SCOPE.md",
+        "docs/PUBLICATION_BOUNDARY.md",
+        "docs/PUBLIC_REPOSITORY_README.md",
+        "docs/PLATFORM_DELIVERY_20260913.md",
+        "docs/INSTALLER_SOURCE_BINDING.json",
+        "docs/PUBLIC_CANDIDATE_VERIFICATION.md",
+    }
 )
 
 PUBLIC_EXCLUDED_FILES = {
@@ -204,6 +260,8 @@ def _selected(path: str) -> bool:
         return False
     if lowered in FORBIDDEN_NAMES:
         return False
+    if normalized in REVIEWED_SYNTHETIC_SHA256:
+        return True
     if any(lowered.startswith(prefix) for prefix in FORBIDDEN_PREFIXES):
         return False
     if Path(lowered).suffix in FORBIDDEN_SUFFIXES:
@@ -259,6 +317,9 @@ def _copy_files(destination: Path, paths: Iterable[str]) -> list[dict[str, objec
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(resolved_source, target)
         data = target.read_bytes()
+        expected = REVIEWED_SYNTHETIC_SHA256.get(relative)
+        if expected is not None and hashlib.sha256(data).hexdigest() != expected:
+            raise PublicExportError("reviewed synthetic resource digest changed")
         manifest.append(
             {
                 "path": relative,

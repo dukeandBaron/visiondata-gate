@@ -161,24 +161,24 @@ def validate_manifest() -> dict[str, Any]:
     _require_exact_keys(
         release,
         {
-            "source_verification",
-            "public_projection",
-            "production_readiness",
+            "local_candidate",
+            "official_submission",
+            "official_evaluation",
             "production_release_allowed",
         },
         "release_status",
     )
     _require(
-        release.get("source_verification") == "PASS_LOCAL_PUBLIC_SOURCE",
-        "public source verification drift",
+        release.get("local_candidate") == "PASS_LOCAL_RC3_RELEASE_CANDIDATE",
+        "historical local candidate drift",
     )
     _require(
-        release.get("public_projection") == "STATIC_REPLAY_VERIFIED",
-        "public projection status drift",
+        release.get("official_submission") == "PENDING",
+        "official submission drift",
     )
     _require(
-        release.get("production_readiness") == "NOT_EVALUATED",
-        "production readiness drift",
+        release.get("official_evaluation") == "NOT_EVALUATED",
+        "official evaluation drift",
     )
     _require(
         release.get("production_release_allowed") is False,
@@ -198,8 +198,8 @@ def validate_manifest() -> dict[str, Any]:
     _require(
         evidence_boundary
         == {
-            "baseline_tag": "v0.1.0-public-replay-r1",
-            "baseline_claim": "PASS_LOCAL_PUBLIC_REPLAY",
+            "baseline_tag": "v0.1.0-goai-rc3-r3",
+            "baseline_claim": "PASS_LOCAL_RC3_RELEASE_CANDIDATE",
             "release_artifacts_included": False,
             "public_snapshot_attestation": "NOT_ISSUED",
         },

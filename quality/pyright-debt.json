@@ -1,0 +1,17 @@
+{
+  "include": [
+    "../src/visiondata_gate/contracts.py",
+    "../src/visiondata_gate/product_models.py",
+    "../src/visiondata_gate/audit_envelope.py",
+    "../src/visiondata_gate/evidence_state.py",
+    "../src/visiondata_gate/evidence_state_contracts.py",
+    "../src/visiondata_gate/capa.py",
+    "../src/visiondata_gate/policy.py",
+    "../src/visiondata_gate/release.py"
+  ],
+  "typeCheckingMode": "basic",
+  "pythonVersion": "3.12",
+  "extraPaths": ["../src"],
+  "venvPath": "..",
+  "venv": ".venv"
+}

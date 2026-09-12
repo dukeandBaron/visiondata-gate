@@ -16,6 +16,10 @@ MAX_SCANNED_BLOB_BYTES = 16 * 1024 * 1024
 PUBLIC_BINARY_REVIEW_PATH = "docs/PUBLIC_BINARY_REVIEW.json"
 PUBLIC_MIRROR_MANIFEST_PATH = "PUBLIC_MIRROR_MANIFEST.json"
 HISTORY_PATH_UNAVAILABLE = "<git-object-without-tree-path>"
+REVIEWED_SYNTHETIC_SHA256 = {
+    "10_reports/DYNAMICBENCH_V3_REPLANNING_20260829.json": "424be5fc8f51d55bf412b6e73c88a4943bc2d403b1e2d85817b7eb7de9e36d21",
+    "10_reports/DYNAMICBENCH_V4_PRODUCT_RUNTIME_20260829.json": "e33d238c48270b5732c6778dcaad2d4ed93cf06d9b3b0d800ca6e84a49cdb99e",
+}
 PUBLIC_GENERATED_FILE_SOURCES = {
     ".github/workflows/ci.yml": "tools/templates/public-ci.yml",
     ".github/workflows/pages.yml": "tools/templates/public-pages.yml",
@@ -157,6 +161,8 @@ GENERIC_PATH_SCANNED_SUFFIXES = {
     ".yml",
 }
 PUBLIC_TEXT_SUFFIXES = GENERIC_PATH_SCANNED_SUFFIXES | {
+    ".java",
+    ".cff",
     "",
     ".bat",
     ".c",
@@ -394,10 +400,22 @@ def _path_violations(paths: Iterable[str]) -> list[dict[str, str]]:
     for path in paths:
         normalized = path.replace("\\", "/")
         lowered = normalized.casefold()
+        if (
+            lowered.startswith("10_reports/")
+            and normalized not in REVIEWED_SYNTHETIC_SHA256
+        ):
+            violations.append(
+                {"rule": "unreviewed-internal-report", "path": normalized}
+            )
+        if lowered.startswith(("gateway/target/", "gateway/runtime/")):
+            violations.append({"rule": "gateway-build-artifact", "path": normalized})
         forbidden_env = _contains_forbidden_env_path(lowered.split("/"))
         if lowered in FORBIDDEN_TRACKED_NAMES or forbidden_env:
             violations.append({"rule": "forbidden-path", "path": normalized})
-        if any(lowered.startswith(prefix) for prefix in FORBIDDEN_TRACKED_PREFIXES):
+        if (
+            any(lowered.startswith(prefix) for prefix in FORBIDDEN_TRACKED_PREFIXES)
+            and normalized not in REVIEWED_SYNTHETIC_SHA256
+        ):
             violations.append({"rule": "forbidden-prefix", "path": normalized})
         if Path(lowered).suffix in FORBIDDEN_TRACKED_SUFFIXES:
             violations.append({"rule": "forbidden-suffix", "path": normalized})
@@ -454,6 +472,9 @@ def _content_violations(
     scan_generic_paths: bool = False,
 ) -> list[dict[str, str]]:
     violations: list[dict[str, str]] = []
+    expected = REVIEWED_SYNTHETIC_SHA256.get(path)
+    if expected is not None and hashlib.sha256(data).hexdigest() != expected:
+        violations.append({"rule": "reviewed-synthetic-resource-drift", "path": path})
     for rule, pattern in SECRET_PATTERNS:
         for line in _matching_lines(data, pattern):
             unsafe_match_found = any(
