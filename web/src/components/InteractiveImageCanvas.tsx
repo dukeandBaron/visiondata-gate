@@ -778,6 +778,7 @@ export function InteractiveImageCanvas({
               type="button"
               onClick={() => onComparisonModeChange?.("OFF")}
               title="关闭孪生比对"
+              aria-label="关闭孪生比对"
             >
               <X size={15} />
             </button>
@@ -788,6 +789,7 @@ export function InteractiveImageCanvas({
             type="button"
             onClick={() => setZoom((value) => clamp(value / 1.2, 0.25, 12))}
             title="缩小"
+            aria-label="缩小"
           >
             <ZoomOut size={16} />
           </button>
@@ -796,6 +798,7 @@ export function InteractiveImageCanvas({
             className="zoom-readout"
             onClick={setActualPixels}
             title="按原始像素显示"
+            aria-label="按原始像素显示"
           >
             {Math.round(geometry.scale * 100)}%
           </button>
@@ -803,13 +806,14 @@ export function InteractiveImageCanvas({
             type="button"
             onClick={() => setZoom((value) => clamp(value * 1.2, 0.25, 12))}
             title="放大"
+            aria-label="放大"
           >
             <ZoomIn size={16} />
           </button>
-          <button type="button" onClick={resetView} title="适应窗口 (F)">
+          <button type="button" onClick={resetView} title="适应窗口 (F)" aria-label="适应窗口">
             <LocateFixed size={16} />
           </button>
-          <button type="button" onClick={resetView} title="重置视图">
+          <button type="button" onClick={resetView} title="重置视图" aria-label="重置视图">
             <RotateCcw size={15} />
           </button>
         </div>

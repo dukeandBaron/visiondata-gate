@@ -11,33 +11,45 @@ VisionData Gate welcomes fixes and reusable industrial-data governance improveme
 
 ## Local checks
 
-```powershell
+The [React workbench](docs/INTERFACE_SUPPORT.md) is the primary interactive UI.
+Use the [portable source quickstart](docs/CROSS_PLATFORM_QUICKSTART.md) without
+PowerShell, or keep the existing Windows launchers. API/contract changes must
+update their consumers and failure-path tests; do not promise feature parity for
+legacy analysis surfaces or change archived benchmark protocols.
+
+```text
 uv sync --all-extras --locked
-uv run python tools/run_public_test_suite.py
+uv run python -m pytest tests/test_policy_agents.py tests/test_evidence_state.py tests/test_audit_envelope.py
 uv run ruff check .
 uv run ruff format --check .
 
-cd web
-npm ci
-npm run typecheck
-npm run build
+npm --prefix web ci
+npm --prefix web run typecheck
+npm --prefix web run build
 ```
 
-After committing a public-mirror change, build a new allowlisted snapshot into
-an absent directory outside this checkout. The exporter runs the privacy,
-manifest and local-link gates before making the destination visible:
+Public-mirror changes must also pass:
+
+The commands above are a portable core slice, not the full authority test suite.
+The authority's release tests require their matching private/frozen artifacts;
+do not claim a public checkout reproduced them. Run additional tests for the
+specific feature changed and the public-safe quality workflow.
 
 ```powershell
-uv run python tools\export_public_repository.py `
-  --destination ..\visiondata-gate-public-audit
+python tools\check_public_repository.py --history
+python tools\check_public_pages.py
 ```
 
-The public repository's own GitHub workflows then rescan its complete public
-history, run the Python contract/API suite, and build the React Pages artifact.
-It exposes only `PUBLIC_SYNTHETIC_REPLAY`. A successful public build is not
-customer acceptance, production deployment, or official competition evaluation.
+The public repository exposes only `PUBLIC_SYNTHETIC_REPLAY`. A successful public build is not customer acceptance, production deployment, or official competition evaluation.
 
-The private release and benchmark tiers bind frozen evidence that is
-deliberately not redistributed. Their test source remains visible for audit,
-but a public clone must not synthesize missing private receipts to make those
-tiers pass.
+Changes intended for release should add an [Unreleased changelog entry](CHANGELOG.md)
+and pass the [release preparation checks](docs/RELEASE_PREPARATION.md). Existing
+quality baselines are measured scopes, not permission to waive failures or claim
+unmeasured 95% coverage. Do not move public import paths or root launch scripts
+without a compatibility plan and tests for the old entry points.
+
+The [implemented quality gates](docs/ENGINEERING_QUALITY_IMPLEMENTATION.md) use an
+independently locked `quality/` tool environment. Validate contributor hooks with
+`uv run --no-sync --with-requirements quality/requirements.txt pre-commit validate-config .pre-commit-config.yaml`.
+Installing those hooks is explicit; this change does not install them automatically.
+Type-debt and Bandit findings remain visible HOLDs, not silently ignored checks.

@@ -546,6 +546,7 @@ __all__ = [
     "EvidenceFreshnessStatusV2",
     "EvidenceSupportStatusV2",
     "SourceAuthorizationFreshnessFactsV2",
+    "SourceAuthorizationStatusV2",
     "build_case_evidence_belief_ledger_v2",
     "build_evidence_belief_snapshot_v2",
     "build_source_authorization_freshness_facts_v2",

@@ -37,7 +37,7 @@ export const integrationCatalog: IntegrationRecord[] = [
   },
   {
     id: "rest-api",
-    name: "VisionData Gate REST API",
+    name: "本地工作台 REST API",
     category: "API",
     state: "LOCAL_API_AVAILABLE",
     tone: "success",

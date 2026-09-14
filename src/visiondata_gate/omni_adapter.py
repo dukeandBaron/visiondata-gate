@@ -24,6 +24,8 @@ from typing import Any, Callable, Iterable, Literal
 import xml.etree.ElementTree as ET
 import zipfile
 
+from defusedxml import ElementTree as SafeElementTree
+from defusedxml.common import DefusedXmlException
 from PIL import Image, UnidentifiedImageError
 
 from .agent_core import AgentRuntimeSignal, AgentRuntimeSignalSink
@@ -426,7 +428,11 @@ def _parse_shared_strings(payload: bytes) -> list[str]:
     text_bytes = 0
     node_count = 0
     try:
-        events = ET.iterparse(io.BytesIO(payload), events=("end",))
+        events = SafeElementTree.iterparse(
+            io.BytesIO(payload),
+            events=("end",),
+            forbid_dtd=True,
+        )
         for _event, element in events:
             node_count += 1
             if node_count > _XLSX_MAX_XML_NODES:
@@ -448,7 +454,7 @@ def _parse_shared_strings(payload: bytes) -> list[str]:
             if len(shared_strings) > _XLSX_MAX_SHARED_STRINGS:
                 raise ValueError("metadata workbook shared string count exceeded")
             element.clear()
-    except ET.ParseError as error:
+    except (ET.ParseError, DefusedXmlException) as error:
         raise ValueError("metadata workbook shared strings XML is invalid") from error
     return shared_strings
 
@@ -464,7 +470,11 @@ def _parse_count_sheet(
     cell_count = 0
     node_count = 0
     try:
-        events = ET.iterparse(io.BytesIO(payload), events=("end",))
+        events = SafeElementTree.iterparse(
+            io.BytesIO(payload),
+            events=("end",),
+            forbid_dtd=True,
+        )
         for _event, element in events:
             node_count += 1
             if node_count > _XLSX_MAX_XML_NODES:
@@ -536,7 +546,7 @@ def _parse_count_sheet(
                 counts[output_key] = int(value)
             result[category] = counts
             element.clear()
-    except ET.ParseError as error:
+    except (ET.ParseError, DefusedXmlException) as error:
         raise ValueError("metadata workbook worksheet XML is invalid") from error
     if indexes is None:
         raise ValueError("metadata workbook is empty")

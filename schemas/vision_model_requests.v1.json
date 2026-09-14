@@ -1,0 +1,859 @@
+{
+  "schema_version": "visiondata-gate.vision-model-api-schemas.v1",
+  "requests": {
+    "RegisterVisionModel": {
+      "additionalProperties": false,
+      "properties": {
+        "request_key": {
+          "pattern": "^[A-Za-z0-9_-]{12,100}$",
+          "title": "Request Key",
+          "type": "string"
+        },
+        "reviewer_identity": {
+          "maxLength": 160,
+          "minLength": 2,
+          "title": "Reviewer Identity",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 1000,
+          "minLength": 8,
+          "title": "Note",
+          "type": "string"
+        },
+        "display_name": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Display Name",
+          "type": "string"
+        },
+        "weights_path": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Weights Path",
+          "type": "string"
+        },
+        "expected_weights_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Weights Sha256",
+          "type": "string"
+        },
+        "task_type": {
+          "enum": [
+            "detect",
+            "segment"
+          ],
+          "title": "Task Type",
+          "type": "string"
+        },
+        "license_id": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "License Id",
+          "type": "string"
+        },
+        "source_description": {
+          "maxLength": 500,
+          "minLength": 4,
+          "title": "Source Description",
+          "type": "string"
+        },
+        "operator_attests_read_authorized": {
+          "const": true,
+          "title": "Operator Attests Read Authorized",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "request_key",
+        "reviewer_identity",
+        "note",
+        "display_name",
+        "weights_path",
+        "expected_weights_sha256",
+        "task_type",
+        "license_id",
+        "source_description",
+        "operator_attests_read_authorized"
+      ],
+      "title": "RegisterVisionModel",
+      "type": "object"
+    },
+    "RegisterVisionRuntime": {
+      "additionalProperties": false,
+      "properties": {
+        "request_key": {
+          "pattern": "^[A-Za-z0-9_-]{12,100}$",
+          "title": "Request Key",
+          "type": "string"
+        },
+        "reviewer_identity": {
+          "maxLength": 160,
+          "minLength": 2,
+          "title": "Reviewer Identity",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 1000,
+          "minLength": 8,
+          "title": "Note",
+          "type": "string"
+        },
+        "display_name": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Display Name",
+          "type": "string"
+        },
+        "executable_path": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Executable Path",
+          "type": "string"
+        },
+        "expected_executable_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Executable Sha256",
+          "type": "string"
+        },
+        "operator_attests_trusted_runtime": {
+          "const": true,
+          "title": "Operator Attests Trusted Runtime",
+          "type": "boolean"
+        },
+        "operator_attests_execution_authorized": {
+          "const": true,
+          "title": "Operator Attests Execution Authorized",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "request_key",
+        "reviewer_identity",
+        "note",
+        "display_name",
+        "executable_path",
+        "expected_executable_sha256",
+        "operator_attests_trusted_runtime",
+        "operator_attests_execution_authorized"
+      ],
+      "title": "RegisterVisionRuntime",
+      "type": "object"
+    },
+    "ProbeVisionRuntime": {
+      "additionalProperties": false,
+      "properties": {
+        "request_key": {
+          "pattern": "^[A-Za-z0-9_-]{12,100}$",
+          "title": "Request Key",
+          "type": "string"
+        },
+        "reviewer_identity": {
+          "maxLength": 160,
+          "minLength": 2,
+          "title": "Reviewer Identity",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 1000,
+          "minLength": 8,
+          "title": "Note",
+          "type": "string"
+        },
+        "expected_runtime_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Runtime Sha256",
+          "type": "string"
+        },
+        "operator_attests_trusted_runtime": {
+          "const": true,
+          "title": "Operator Attests Trusted Runtime",
+          "type": "boolean"
+        },
+        "operator_attests_execution_authorized": {
+          "const": true,
+          "title": "Operator Attests Execution Authorized",
+          "type": "boolean"
+        },
+        "import_check": {
+          "default": false,
+          "title": "Import Check",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "request_key",
+        "reviewer_identity",
+        "note",
+        "expected_runtime_sha256",
+        "operator_attests_trusted_runtime",
+        "operator_attests_execution_authorized"
+      ],
+      "title": "ProbeVisionRuntime",
+      "type": "object"
+    },
+    "RegisterDetectionDataset": {
+      "additionalProperties": false,
+      "properties": {
+        "request_key": {
+          "pattern": "^[A-Za-z0-9_-]{12,100}$",
+          "title": "Request Key",
+          "type": "string"
+        },
+        "reviewer_identity": {
+          "maxLength": 160,
+          "minLength": 2,
+          "title": "Reviewer Identity",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 1000,
+          "minLength": 8,
+          "title": "Note",
+          "type": "string"
+        },
+        "source_root": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Source Root",
+          "type": "string"
+        },
+        "manifest": {
+          "additionalProperties": true,
+          "title": "Manifest",
+          "type": "object"
+        },
+        "expected_manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Manifest Sha256",
+          "type": "string"
+        },
+        "operator_attests_data_authorized": {
+          "const": true,
+          "title": "Operator Attests Data Authorized",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "request_key",
+        "reviewer_identity",
+        "note",
+        "source_root",
+        "manifest",
+        "expected_manifest_sha256",
+        "operator_attests_data_authorized"
+      ],
+      "title": "RegisterDetectionDataset",
+      "type": "object"
+    },
+    "RegisterPoolDetectionDataset": {
+      "additionalProperties": false,
+      "properties": {
+        "request_key": {
+          "pattern": "^[A-Za-z0-9_-]{12,100}$",
+          "title": "Request Key",
+          "type": "string"
+        },
+        "reviewer_identity": {
+          "maxLength": 160,
+          "minLength": 2,
+          "title": "Reviewer Identity",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 1000,
+          "minLength": 8,
+          "title": "Note",
+          "type": "string"
+        },
+        "pool_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,120}$",
+          "title": "Pool Id",
+          "type": "string"
+        },
+        "version_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,120}$",
+          "title": "Version Id",
+          "type": "string"
+        },
+        "expected_pool_receipt_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Pool Receipt Sha256",
+          "type": "string"
+        },
+        "expected_version_receipt_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Version Receipt Sha256",
+          "type": "string"
+        },
+        "class_names": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Class Names",
+          "type": "array"
+        },
+        "groups": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "maxProperties": 64,
+          "minProperties": 1,
+          "title": "Groups",
+          "type": "object"
+        },
+        "normal_sample_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 64,
+          "title": "Normal Sample Ids",
+          "type": "array"
+        },
+        "operator_attests_data_authorized": {
+          "const": true,
+          "title": "Operator Attests Data Authorized",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "request_key",
+        "reviewer_identity",
+        "note",
+        "pool_id",
+        "version_id",
+        "expected_pool_receipt_sha256",
+        "expected_version_receipt_sha256",
+        "class_names",
+        "groups",
+        "operator_attests_data_authorized"
+      ],
+      "title": "RegisterPoolDetectionDataset",
+      "type": "object"
+    },
+    "CreateVisionTrainingRun": {
+      "$defs": {
+        "VisionTrainingBudget": {
+          "additionalProperties": false,
+          "properties": {
+            "epochs": {
+              "default": 1,
+              "maximum": 5,
+              "minimum": 1,
+              "title": "Epochs",
+              "type": "integer"
+            },
+            "imgsz": {
+              "default": 64,
+              "maximum": 320,
+              "minimum": 64,
+              "multipleOf": 32,
+              "title": "Imgsz",
+              "type": "integer"
+            },
+            "batch": {
+              "default": 2,
+              "maximum": 8,
+              "minimum": 2,
+              "title": "Batch",
+              "type": "integer"
+            },
+            "seed": {
+              "default": 0,
+              "maximum": 2147483647,
+              "minimum": 0,
+              "title": "Seed",
+              "type": "integer"
+            },
+            "max_seconds": {
+              "default": 120,
+              "maximum": 600,
+              "minimum": 10,
+              "title": "Max Seconds",
+              "type": "integer"
+            },
+            "threads": {
+              "default": 2,
+              "maximum": 4,
+              "minimum": 1,
+              "title": "Threads",
+              "type": "integer"
+            }
+          },
+          "title": "VisionTrainingBudget",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "request_key": {
+          "pattern": "^[A-Za-z0-9_-]{12,100}$",
+          "title": "Request Key",
+          "type": "string"
+        },
+        "reviewer_identity": {
+          "maxLength": 160,
+          "minLength": 2,
+          "title": "Reviewer Identity",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 1000,
+          "minLength": 8,
+          "title": "Note",
+          "type": "string"
+        },
+        "runtime_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,120}$",
+          "title": "Runtime Id",
+          "type": "string"
+        },
+        "expected_runtime_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Runtime Sha256",
+          "type": "string"
+        },
+        "dataset_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,120}$",
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "expected_dataset_receipt_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Dataset Receipt Sha256",
+          "type": "string"
+        },
+        "initialization": {
+          "enum": [
+            "ARCHITECTURE_RANDOM",
+            "REGISTERED_WEIGHTS"
+          ],
+          "title": "Initialization",
+          "type": "string"
+        },
+        "initial_model_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9_-]{1,120}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Initial Model Id"
+        },
+        "expected_weights_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Weights Sha256"
+        },
+        "architecture": {
+          "const": "yolo26n",
+          "default": "yolo26n",
+          "title": "Architecture",
+          "type": "string"
+        },
+        "training": {
+          "$ref": "#/$defs/VisionTrainingBudget"
+        },
+        "operator_attests_training_authorized": {
+          "const": true,
+          "title": "Operator Attests Training Authorized",
+          "type": "boolean"
+        },
+        "operator_attests_trusted_runtime": {
+          "const": true,
+          "title": "Operator Attests Trusted Runtime",
+          "type": "boolean"
+        },
+        "operator_attests_trusted_weights": {
+          "default": false,
+          "title": "Operator Attests Trusted Weights",
+          "type": "boolean"
+        },
+        "operator_attests_pickle_load_risk": {
+          "default": false,
+          "title": "Operator Attests Pickle Load Risk",
+          "type": "boolean"
+        },
+        "ultralytics_license_acknowledged": {
+          "const": true,
+          "title": "Ultralytics License Acknowledged",
+          "type": "boolean"
+        },
+        "adaptation": {
+          "const": "OFF",
+          "default": "OFF",
+          "title": "Adaptation",
+          "type": "string"
+        },
+        "responds_to_feedback_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 64,
+          "title": "Responds To Feedback Ids",
+          "type": "array"
+        },
+        "expected_feedback_receipts": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "maxProperties": 64,
+          "title": "Expected Feedback Receipts",
+          "type": "object"
+        }
+      },
+      "required": [
+        "request_key",
+        "reviewer_identity",
+        "note",
+        "runtime_id",
+        "expected_runtime_sha256",
+        "dataset_id",
+        "expected_dataset_receipt_sha256",
+        "initialization",
+        "operator_attests_training_authorized",
+        "operator_attests_trusted_runtime",
+        "ultralytics_license_acknowledged"
+      ],
+      "title": "CreateVisionTrainingRun",
+      "type": "object"
+    },
+    "VisionRunAction": {
+      "additionalProperties": false,
+      "properties": {
+        "request_key": {
+          "pattern": "^[A-Za-z0-9_-]{12,100}$",
+          "title": "Request Key",
+          "type": "string"
+        },
+        "reviewer_identity": {
+          "maxLength": 160,
+          "minLength": 2,
+          "title": "Reviewer Identity",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 1000,
+          "minLength": 8,
+          "title": "Note",
+          "type": "string"
+        },
+        "expected_run_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Run Sha256",
+          "type": "string"
+        },
+        "operator_attests_reviewed": {
+          "const": true,
+          "title": "Operator Attests Reviewed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "request_key",
+        "reviewer_identity",
+        "note",
+        "expected_run_sha256",
+        "operator_attests_reviewed"
+      ],
+      "title": "VisionRunAction",
+      "type": "object"
+    },
+    "SelectVisionModel": {
+      "additionalProperties": false,
+      "properties": {
+        "request_key": {
+          "pattern": "^[A-Za-z0-9_-]{12,100}$",
+          "title": "Request Key",
+          "type": "string"
+        },
+        "reviewer_identity": {
+          "maxLength": 160,
+          "minLength": 2,
+          "title": "Reviewer Identity",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 1000,
+          "minLength": 8,
+          "title": "Note",
+          "type": "string"
+        },
+        "expected_run_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Run Sha256",
+          "type": "string"
+        },
+        "operator_attests_reviewed": {
+          "const": true,
+          "title": "Operator Attests Reviewed",
+          "type": "boolean"
+        },
+        "action": {
+          "enum": [
+            "APPROVE_SANDBOX",
+            "REJECT"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "expected_candidate_weights_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Candidate Weights Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "request_key",
+        "reviewer_identity",
+        "note",
+        "expected_run_sha256",
+        "operator_attests_reviewed",
+        "action",
+        "expected_candidate_weights_sha256"
+      ],
+      "title": "SelectVisionModel",
+      "type": "object"
+    },
+    "ReviewVisionFeedback": {
+      "additionalProperties": false,
+      "properties": {
+        "request_key": {
+          "pattern": "^[A-Za-z0-9_-]{12,100}$",
+          "title": "Request Key",
+          "type": "string"
+        },
+        "reviewer_identity": {
+          "maxLength": 160,
+          "minLength": 2,
+          "title": "Reviewer Identity",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 1000,
+          "minLength": 8,
+          "title": "Note",
+          "type": "string"
+        },
+        "expected_run_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Run Sha256",
+          "type": "string"
+        },
+        "operator_attests_reviewed": {
+          "const": true,
+          "title": "Operator Attests Reviewed",
+          "type": "boolean"
+        },
+        "expected_feedback_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Feedback Sha256",
+          "type": "string"
+        },
+        "classification": {
+          "enum": [
+            "MODEL_ERROR",
+            "LABEL_REVIEW_REQUIRED",
+            "HARD_SAMPLE",
+            "UNKNOWN"
+          ],
+          "title": "Classification",
+          "type": "string"
+        }
+      },
+      "required": [
+        "request_key",
+        "reviewer_identity",
+        "note",
+        "expected_run_sha256",
+        "operator_attests_reviewed",
+        "expected_feedback_sha256",
+        "classification"
+      ],
+      "title": "ReviewVisionFeedback",
+      "type": "object"
+    }
+  },
+  "detection_manifest": {
+    "$defs": {
+      "DetectionBox": {
+        "additionalProperties": false,
+        "description": "Explicit normalized center-width-height box; no mask conversion.",
+        "properties": {
+          "class_id": {
+            "maximum": 63,
+            "minimum": 0,
+            "title": "Class Id",
+            "type": "integer"
+          },
+          "x_center": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "X Center",
+            "type": "number"
+          },
+          "y_center": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Y Center",
+            "type": "number"
+          },
+          "width": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Width",
+            "type": "number"
+          },
+          "height": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "title": "Height",
+            "type": "number"
+          }
+        },
+        "required": [
+          "class_id",
+          "x_center",
+          "y_center",
+          "width",
+          "height"
+        ],
+        "title": "DetectionBox",
+        "type": "object"
+      },
+      "DetectionSample": {
+        "additionalProperties": false,
+        "properties": {
+          "sample_id": {
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Sample Id",
+            "type": "string"
+          },
+          "image_path": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Image Path",
+            "type": "string"
+          },
+          "image_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Image Sha256",
+            "type": "string"
+          },
+          "split": {
+            "enum": [
+              "train",
+              "val",
+              "test"
+            ],
+            "title": "Split",
+            "type": "string"
+          },
+          "group_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Group Id",
+            "type": "string"
+          },
+          "annotation_revision": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "title": "Annotation Revision",
+            "type": "integer"
+          },
+          "boxes": {
+            "items": {
+              "$ref": "#/$defs/DetectionBox"
+            },
+            "maxItems": 256,
+            "title": "Boxes",
+            "type": "array"
+          },
+          "reviewer_name": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Reviewer Name",
+            "type": "string"
+          },
+          "reviewed": {
+            "title": "Reviewed",
+            "type": "boolean"
+          },
+          "normal_attested": {
+            "default": false,
+            "title": "Normal Attested",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "sample_id",
+          "image_path",
+          "image_sha256",
+          "split",
+          "group_id",
+          "annotation_revision",
+          "boxes",
+          "reviewer_name",
+          "reviewed"
+        ],
+        "title": "DetectionSample",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "schema_version": {
+        "const": "visiondata-gate.detection-dataset.v1",
+        "title": "Schema Version",
+        "type": "string"
+      },
+      "class_names": {
+        "items": {
+          "type": "string"
+        },
+        "maxItems": 64,
+        "minItems": 1,
+        "title": "Class Names",
+        "type": "array"
+      },
+      "source_version": {
+        "maxLength": 160,
+        "minLength": 1,
+        "title": "Source Version",
+        "type": "string"
+      },
+      "samples": {
+        "items": {
+          "$ref": "#/$defs/DetectionSample"
+        },
+        "maxItems": 64,
+        "minItems": 3,
+        "title": "Samples",
+        "type": "array"
+      }
+    },
+    "required": [
+      "schema_version",
+      "class_names",
+      "source_version",
+      "samples"
+    ],
+    "title": "DetectionDatasetManifest",
+    "type": "object"
+  }
+}

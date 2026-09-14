@@ -4,8 +4,15 @@ import { AppShell } from "./components/AppShell";
 import { publicReplayMode } from "./publicReplay";
 
 const HomePage = lazy(() => import("./pages/HomePage").then((module) => ({ default: module.HomePage })));
+const PilotPlanPage = lazy(() => import("./pages/PilotPlanPage").then((module) => ({ default: module.PilotPlanPage })));
+const TaskGuidePage = lazy(() => import("./pages/TaskGuidePage").then((module) => ({ default: module.TaskGuidePage })));
+const ComputeHandoffPage = lazy(() => import("./pages/ComputeHandoffPage").then((module) => ({ default: module.ComputeHandoffPage })));
+const LearningLoopPage = lazy(() => import("./pages/LearningLoopPage").then((module) => ({ default: module.LearningLoopPage })));
+const ModelCenterPage = lazy(() => import("./pages/ModelCenterPage").then((module) => ({ default: module.ModelCenterPage })));
+const DataPoolsPage = lazy(() => import("./pages/DataPoolsPage").then((module) => ({ default: module.DataPoolsPage })));
 const ImageWorkspacePage = lazy(() => import("./pages/ImageWorkspacePage").then((module) => ({ default: module.ImageWorkspacePage })));
 const CommandCenterPage = lazy(() => import("./pages/CommandCenterPage").then((module) => ({ default: module.CommandCenterPage })));
+const AgentPlatformPage = lazy(() => import("./pages/AgentPlatformPage").then((module) => ({ default: module.AgentPlatformPage })));
 const CasesPage = lazy(() => import("./pages/CasesPage").then((module) => ({ default: module.CasesPage })));
 const CaseWorkbenchPage = lazy(() => import("./pages/CaseWorkbenchPage").then((module) => ({ default: module.CaseWorkbenchPage })));
 const EvidencePage = lazy(() => import("./pages/EvidencePage").then((module) => ({ default: module.EvidencePage })));
@@ -28,8 +35,11 @@ export function App() {
         <Routes>
           <Route path="/" element={<PublicLandingPage />} />
           <Route element={<AppShell />}>
+            <Route path="/start" element={<TaskGuidePage />} />
+            <Route path="/pilot" element={<PilotPlanPage />} />
             <Route path="/workspace" element={<PublicReplayPage view="workspace" />} />
             <Route path="/command-center" element={<PublicReplayPage view="command-center" />} />
+            <Route path="/platform" element={<Navigate to="/" replace />} />
             <Route path="/cases" element={<PublicReplayPage view="cases" />} />
             <Route path="/cases/:caseId" element={<PublicReplayPage view="case-detail" />} />
             <Route path="/evidence" element={<PublicReplayPage view="evidence" />} />
@@ -51,10 +61,17 @@ export function App() {
   return (
     <Suspense fallback={<div className="route-loading" role="status">正在加载工作台模块…</div>}>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={"__TAURI_INTERNALS__" in window ? <Navigate to="/platform" replace /> : <HomePage />} />
         <Route element={<AppShell />}>
+          <Route path="/start" element={<TaskGuidePage />} />
+          <Route path="/pilot" element={<PilotPlanPage />} />
+          <Route path="/compute" element={<ComputeHandoffPage />} />
+          <Route path="/learning" element={<LearningLoopPage />} />
+          <Route path="/models" element={<ModelCenterPage />} />
+          <Route path="/data-pools" element={<DataPoolsPage />} />
           <Route path="/workspace" element={<ImageWorkspacePage />} />
           <Route path="/command-center" element={<CommandCenterPage />} />
+          <Route path="/platform" element={<AgentPlatformPage />} />
           <Route path="/cases" element={<CasesPage />} />
           <Route path="/cases/:caseId" element={<CaseWorkbenchPage />} />
           <Route path="/evidence" element={<EvidencePage />} />

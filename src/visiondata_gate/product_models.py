@@ -8,6 +8,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from .contracts import OperatorAcceptanceRequirements
 from .runtime_models import ScenarioProfile
 
 
@@ -129,9 +130,9 @@ class AuthorizeLocalSourceRequest(ProductModel):
 class AuthorizeOperatorProjectSnapshotRequest(ProductModel):
     """Create a server-derived source grant from one local Operator project.
 
-    Asset and annotation digests are intentionally absent: the server reads and
-    verifies those identities from ``OperatorImageStore`` instead of trusting a
-    browser-provided aggregate.
+    Legacy callers omit reviewed digests. Explicit requirements carry expected
+    identities for optimistic review checks; the server still reads and verifies
+    the actual bytes and annotation chain rather than trusting browser claims.
     """
 
     workspace_id: str = Field(min_length=1)
@@ -148,6 +149,9 @@ class AuthorizeOperatorProjectSnapshotRequest(ProductModel):
         max_length=500,
     )
     operator_attests_authorized_use: Literal[True]
+    acceptance_requirements: OperatorAcceptanceRequirements | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
 
 
 class RevokeLocalSourceAuthorizationRequest(ProductModel):

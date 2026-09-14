@@ -1,0 +1,11 @@
+.model-center-page { padding: 28px; max-width: 1400px; margin: auto; }
+.model-center-header > span { display: flex; align-items: center; gap: 8px; color: var(--accent-secondary); font: 11px var(--font-mono); }
+.model-center-header h1 { font: 600 28px/1.4 var(--font-display); margin: 10px 0; }
+.model-center-header p,.model-center-boundary p { color: var(--muted); font-size: 13px; line-height: 1.8; }
+.model-center-tabs { display: flex; gap: 8px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); margin: 18px 0; }
+.model-center-tabs button { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); background: var(--surface); cursor: pointer; }
+.model-center-tabs button[aria-pressed=true] { color: var(--accent-secondary); border-color: var(--accent-secondary); background: var(--accent-secondary-soft); }
+.model-center-tabs > a { margin-left: auto; font-size: 12px; color: var(--muted); }
+.model-center-boundary { background: var(--surface-subtle); border-left: 3px solid var(--accent-secondary); padding: 16px 20px; margin: 22px 0; }
+.model-center-boundary strong { font-size: 14px; }.model-center-boundary a { color: var(--accent-secondary); }
+.model-center-page :is(button,a):focus-visible { outline: 2px solid var(--accent-secondary); outline-offset: 3px; }

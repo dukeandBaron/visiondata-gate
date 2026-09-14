@@ -27,6 +27,13 @@ from visiondata_gate.tools import validate_tool_contract_trace
 RULEPACK = Path(__file__).resolve().parents[1] / "rulepacks" / "industrial-v1.json"
 
 
+def test_metadata_xml_parser_rejects_doctype() -> None:
+    payload = b"<!DOCTYPE sst><sst/>"
+
+    with pytest.raises(ValueError, match="shared strings XML is invalid"):
+        omni_adapter._parse_shared_strings(payload)
+
+
 def _write_minimal_metadata(path: Path, *, category: str, total: int) -> None:
     headers = ["数据集名称", "样本总数", "good(train)", "good(test)", "NG(test)"]
     values = [category, total, 1, 1, max(total - 2, 0)]

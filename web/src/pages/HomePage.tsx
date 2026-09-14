@@ -1,381 +1,132 @@
-import {
-  Activity,
-  ArrowRight,
-  Bot,
-  Command,
-  FileCheck2,
-  FileImage,
-  GitBranch,
-  KeyRound,
-  Network,
-  PackageCheck,
-  RefreshCw,
-  ShieldCheck,
-  Sparkles,
-  SquareKanban,
-  Zap,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { ArrowRight, Check, ChevronRight, FileImage, FolderOpen, RefreshCw, Search } from "lucide-react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import type { AgentTask } from "../agentDomain";
 import { BrandMark } from "../components/BrandMark";
-import {
-  getProjectGovernanceEffectiveness,
-  listAgentTasks,
-  listOperatorImages,
-  listOperatorWorkOrders,
-} from "../data/api";
+import { listAgentTasks, listOperatorImages, listOperatorWorkOrders } from "../data/api";
+import { getIdentitySessionSnapshot, subscribeIdentitySession } from "../identitySession";
+import type { OperatorWorkOrder } from "../operatorDomain";
 import { useProduct } from "../ProductContext";
+import "../styles/start-surfaces.css";
 
-const workflow = [
-  ["01", "建立范围", "创建项目并导入自己的图片、目录或标注合同。"],
-  ["02", "像素取证", "在 Canvas 上检查、框选、量测、比对与修订。"],
-  ["03", "Agent 办事", "按需调度确定性工具，补证并交付建议与回执。"],
-  ["04", "人工闭环", "具名复核、签发 CAPA，并追踪 Child Run 与血缘。"],
-] as const;
-
-const productMap = [
-  { icon: FileImage, code: "WORK", title: "图像工作簿", detail: "真实导入、Canvas、标注账本、诊断探针", tone: "violet", route: "/workspace" },
-  { icon: Bot, code: "AGENT", title: "任务与工作总览", detail: "任务理解、工具轨迹、干预与结果交付", tone: "cyan", route: "/command-center" },
-  { icon: FileCheck2, code: "ACTION", title: "案件与 CAPA", detail: "从异常到具名工单，再到派生版本复验", tone: "coral", route: "/cases" },
-  { icon: GitBranch, code: "TRACE", title: "证据、运行与血缘", detail: "SHA、Tool Receipt、Parent / Child 演进", tone: "lime", route: "/lineage" },
-  { icon: Network, code: "SYSTEM", title: "集成与治理", detail: "Adapter SDK、授权来源、影子评测与发布门禁", tone: "amber", route: "/integrations" },
-  { icon: KeyRound, code: "IDENTITY", title: "账户、会话与设置", detail: "本地身份、桌面会话、界面与数据边界", tone: "violet", route: "/account" },
-] as const;
-
-const reviewProofPaths = [
-  { code: "Q4", icon: Bot, title: "Agent 能力链", detail: "任务理解、计划、工具、受治理记忆与结果交付", route: "/command-center", tone: "violet" },
-  { code: "Q5", icon: GitBranch, title: "任务闭环", detail: "输入、发现、人工行动、CAPA 与 Child Run 复验", route: "/capa", tone: "cyan" },
-  { code: "Q6·7", icon: FileImage, title: "真实产品体验", detail: "桌面工作簿、真实上传、Canvas 与可恢复反馈", route: "/workspace", tone: "lime" },
-  { code: "Q10·11", icon: ShieldCheck, title: "安全与人在回路", detail: "本地数据边界、具名审批与生产权限隔离", route: "/governance", tone: "coral" },
-  { code: "Q15", icon: FileCheck2, title: "解释与可执行交付", detail: "证据引用、SHA 回执与结构化工单", route: "/evidence", tone: "amber" },
-] as const;
-
-interface HomeProofState {
+interface ProjectActivity {
+  key: string;
   loading: boolean;
-  assets: number | null;
-  tasks: number | null;
-  runningTasks: number | null;
-  completedTasks: number | null;
-  humanQueue: number | null;
-  openWorkOrders: number | null;
-  governanceStatus: string;
-  latestTaskStatus: string;
-  unavailable: number;
+  images: number | null;
+  tasks: AgentTask[] | null;
+  orders: OperatorWorkOrder[] | null;
+  errors: string[];
 }
 
-const emptyHomeProof: HomeProofState = {
-  loading: false,
-  assets: null,
-  tasks: null,
-  runningTasks: null,
-  completedTasks: null,
-  humanQueue: null,
-  openWorkOrders: null,
-  governanceStatus: "NOT MEASURED",
-  latestTaskStatus: "NO TASK",
-  unavailable: 0,
+const taskLabels: Record<string, string> = {
+  CREATED: "待执行", PLANNED: "计划已生成", RUNNING: "执行中", VERIFYING: "复验中",
+  COMPLETED: "执行完成", FAILED: "执行失败", CANCELLED: "已取消", ARCHIVED: "已归档",
 };
 
-function proofValue(value: number | null, suffix = ""): string {
-  return value === null ? "UNAVAILABLE" : `${value}${suffix}`;
+function taskAction(task: AgentTask): string {
+  if (task.execution_status === "PLANNED" && task.plan_approval_required) return "待人工审批";
+  return taskLabels[task.execution_status] ?? task.execution_status;
 }
 
+/** Project start surface: no simulated live data and no writes from overview controls. */
 export function HomePage() {
   const navigate = useNavigate();
-  const { connection, projects, activeProject, activeWorkspace, selectProject, workspaceLoading } = useProduct();
-  const operationalProjects = projects.filter((project) => project.source_kind !== "synthetic_demo");
-  const [proofRefreshToken, setProofRefreshToken] = useState(0);
-  const [proof, setProof] = useState<HomeProofState>(emptyHomeProof);
+  const { connection, projects, activeProject, activeWorkspace, selectProject, workspaceLoading,
+    workspaceError, refreshWorkspaceScope, refreshConnection, connectionRefreshing } = useProduct();
+  const identity = useSyncExternalStore(subscribeIdentitySession, getIdentitySessionSnapshot, getIdentitySessionSnapshot);
+  const [query, setQuery] = useState("");
+  const [showExamples, setShowExamples] = useState(false);
+  const [showAllTasks, setShowAllTasks] = useState(false);
+  const [refreshToken, setRefreshToken] = useState(0);
+  const [activity, setActivity] = useState<ProjectActivity>();
+  const requestId = useRef(0);
+  const workspaceId = activeWorkspace?.workspace_id;
+  const projectId = activeProject?.project_id;
+  const key = [identity.generation, workspaceId, projectId, connection.api, workspaceLoading, workspaceError].join(":");
+  const currentKey = useRef(key);
+  currentKey.current = key;
+  const canRead = connection.api === "CONNECTED" && !!workspaceId && !!projectId && !workspaceLoading && !workspaceError;
+  const currentActivity = canRead && activity?.key === key ? activity : undefined;
 
   useEffect(() => {
-    let active = true;
-    const workspaceId = activeWorkspace?.workspace_id;
-    const projectId = activeProject?.project_id;
-    if (connection.api !== "CONNECTED" || !workspaceId || !projectId) {
-      setProof(emptyHomeProof);
-      return () => {
-        active = false;
-      };
-    }
-    setProof((current) => ({ ...current, loading: true }));
+    const request = ++requestId.current;
+    if (!canRead || !workspaceId || !projectId) { setActivity(undefined); return; }
+    setActivity({ key, loading: true, images: null, tasks: null, orders: null, errors: [] });
+    const scoped = <T extends { workspace_id: string; project_id?: string | null }>(items: T[]): T[] => {
+      if (!Array.isArray(items) || items.some((item) => !item || item.workspace_id !== workspaceId || item.project_id !== projectId)) {
+        throw new Error("响应项目不匹配");
+      }
+      return items;
+    };
     void Promise.allSettled([
-      listOperatorImages(workspaceId, projectId),
-      listAgentTasks(workspaceId, projectId),
-      listOperatorWorkOrders(workspaceId, projectId),
-      getProjectGovernanceEffectiveness(projectId),
-    ]).then(([assetResult, taskResult, orderResult, governanceResult]) => {
-      if (!active) return;
-      const assets = assetResult.status === "fulfilled" ? assetResult.value : undefined;
-      const tasks = taskResult.status === "fulfilled" ? taskResult.value : undefined;
-      const orders = orderResult.status === "fulfilled" ? orderResult.value : undefined;
-      const governance = governanceResult.status === "fulfilled" ? governanceResult.value : undefined;
-      setProof({
-        loading: false,
-        assets: assets?.length ?? null,
-        tasks: tasks?.length ?? null,
-        runningTasks: tasks
-          ? tasks.filter((task) => ["CREATED", "RUNNING", "VERIFYING"].includes(task.execution_status)).length
-          : null,
-        completedTasks: tasks
-          ? tasks.filter((task) => task.execution_status === "COMPLETED").length
-          : null,
-        humanQueue: tasks
-          ? tasks.filter((task) => task.execution_status === "PLANNED" && task.plan_approval_required).length
-          : null,
-        openWorkOrders: orders
-          ? orders.filter((order) => !["CLOSED", "REJECTED"].includes(order.status)).length
-          : null,
-        governanceStatus: governance?.measurement_status ?? "NOT MEASURED",
-        latestTaskStatus: tasks?.[0]?.execution_status ?? "NO TASK",
-        unavailable: [assetResult, taskResult, orderResult, governanceResult].filter((result) => result.status === "rejected").length,
+      listOperatorImages(workspaceId, projectId).then(scoped),
+      listAgentTasks(workspaceId, projectId).then(scoped),
+      listOperatorWorkOrders(workspaceId, projectId).then(scoped),
+    ]).then(([images, tasks, orders]) => {
+      if (request !== requestId.current || key !== currentKey.current) return;
+      setActivity({ key, loading: false,
+        images: images.status === "fulfilled" ? images.value.length : null,
+        tasks: tasks.status === "fulfilled" ? tasks.value : null,
+        orders: orders.status === "fulfilled" ? orders.value : null,
+        errors: [images.status === "rejected" ? "图片" : "", tasks.status === "rejected" ? "任务" : "", orders.status === "rejected" ? "工单" : ""].filter(Boolean),
       });
     });
-    return () => {
-      active = false;
-    };
-  }, [activeProject?.project_id, activeWorkspace?.workspace_id, connection.api, proofRefreshToken]);
+    return () => { requestId.current += 1; };
+  }, [canRead, workspaceId, projectId, key, refreshToken]);
 
-  const openProject = (projectId: string) => {
-    if (selectProject(projectId)) navigate("/workspace");
-  };
+  const eligibleProjects = projects.filter((project) => project.workspace_id === workspaceId && (showExamples || project.source_kind !== "synthetic_demo"));
+  const matchedProjects = eligibleProjects.filter((project) => (project.name + " " + project.description + " " + project.project_id).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
+  const tasks = currentActivity?.tasks;
+  const actionableTasks = tasks?.filter((task) => task.execution_status === "FAILED" || (task.execution_status === "PLANNED" && task.plan_approval_required));
+  const visibleTasks = (showAllTasks ? tasks : actionableTasks)?.slice(0, 6);
+  const openOrders = currentActivity?.orders?.filter((order) => !["CLOSED", "REJECTED"].includes(order.status));
+  const value = (count: number | null | undefined) => currentActivity?.loading ? "读取中" : count === null || count === undefined ? "未知" : String(count);
 
-  return (
-    <div className="product-home product-home--v2">
-      <header className="product-home__nav">
-        <BrandMark />
-        <nav aria-label="产品页面锚点">
-          <a href="#product">产品</a>
-          <a href="#proof">实时证明</a>
-          <a href="#workflow">工作闭环</a>
-          <a href="#review-proof">评审证据</a>
-        </nav>
-        <div>
-          <span className="linear-api-state">
-            <i className={`runtime-dot runtime-dot--${connection.api.toLowerCase()}`} />
-            {connection.api === "CONNECTED" ? "Local API" : "API offline"}
-          </span>
-          <button className="home-nav-account" type="button" onClick={() => navigate("/account")}>账户</button>
-          <button type="button" onClick={() => navigate("/workspace")}>打开工作台 <ArrowRight size={15} /></button>
+  return <div className="start-home">
+    <header className="start-home-nav">
+      <BrandMark />
+      <nav aria-label="首页导航"><Link to="/platform">任务总览</Link><Link to="/account">账户与团队</Link></nav>
+    </header>
+    <main>
+      <header className="start-heading" id="product">
+        <div><p className="start-kicker">{activeWorkspace?.name ?? "工业视觉交付站"}</p><h1>回到项目，继续工作。</h1><p>选择一批数据，处理未完成的检查与返修。</p></div>
+        <div className="start-connection"><span className={"runtime-dot runtime-dot--" + connection.api.toLowerCase()} />
+          <span>{connection.api === "CONNECTED" ? "工作台 API 已连接" : connection.api === "CHECKING" ? "正在检查连接" : "工作台 API 未连接"}<small>不代表工厂在线接入</small></span>
         </div>
       </header>
 
-      <main>
-        <section className="home-hero-v2" id="product">
-          <div className="home-hero-v2__copy">
-            <span className="home-hero-v2__signal"><span>🚀</span> FROM PIXEL EVIDENCE TO GOVERNED ACTION</span>
-            <h1>把像素证据<br />变成<span>可复验的行动</span></h1>
-            <p>
-              VisionData Gate 把真实数据输入、确定性检测、受控 Agent 计划、具名人工闸门与 Child Run 复验收进同一工作簿。
-              不只给出建议，而是把一段工业数据治理流程办到底。
-            </p>
-            <div className="home-hero-v2__actions">
-              <button type="button" onClick={() => navigate("/workspace")}>进入图像工作簿 <ArrowRight size={16} /></button>
-              <button type="button" onClick={() => navigate("/command-center")}><Activity size={15} /> 查看工作总览</button>
-            </div>
-            <div className="home-trust-chips" aria-label="产品原则">
-              <span>★ Local-first</span>
-              <span>✦ Evidence-bound</span>
-              <span>Human authority</span>
-              <span>Raw outbound · 0</span>
-            </div>
-
-            {connection.api === "CONNECTED" ? (
-              <div className="home-project-dock">
-                <span><i /> {activeWorkspace?.name ?? "当前工作空间"}</span>
-                {workspaceLoading ? <small>正在读取项目…</small> : null}
-                {!workspaceLoading && operationalProjects.length === 0 ? <button type="button" onClick={() => navigate("/workspace")}>+ 创建第一个空项目</button> : null}
-                {operationalProjects.slice(0, 3).map((project) => (
-                  <button type="button" key={project.project_id} className={project.project_id === activeProject?.project_id ? "is-active" : ""} onClick={() => openProject(project.project_id)}>
-                    <SquareKanban size={13} /> {project.name}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </div>
-
-          <div className="home-signal-stage" aria-label="工作闭环结构图">
-            <div className="home-stage-grid" />
-            <div className="home-stage-orbit home-stage-orbit--one" />
-            <div className="home-stage-orbit home-stage-orbit--two" />
-            <span className="home-stage-star home-stage-star--one">✦</span>
-            <span className="home-stage-star home-stage-star--two">★</span>
-            <div className="home-stage-node home-stage-node--asset"><FileImage size={15} /><span>ASSET</span><strong>real input</strong></div>
-            <div className="home-stage-node home-stage-node--tool"><Zap size={15} /><span>TOOL</span><strong>deterministic</strong></div>
-            <div className="home-stage-node home-stage-node--human"><ShieldCheck size={15} /><span>HUMAN</span><strong>authority</strong></div>
-
-            <div className="home-stage-core">
-              <header><span><i /> IMAGE WORKBOOK</span><small>LIVE CONTEXT</small></header>
-              <div className="home-stage-canvas">
-                <div className="home-stage-part"><span /><span /><span /><span /><i /></div>
-                <div className="home-stage-defect"><b>01</b><small>inspection region</small></div>
-                <span className="home-stage-axis home-stage-axis--x" />
-                <span className="home-stage-axis home-stage-axis--y" />
-              </div>
-              <footer><span>SHA bound</span><span>revision 01</span><strong>ready for action</strong></footer>
-            </div>
-
-            <div className="home-stage-trace">
-              <header><Bot size={14} /> AGENT TRACE <i /></header>
-              <p><span>01</span>读取当前资产与治理范围</p>
-              <p><span>02</span>调用确定性视觉探针</p>
-              <p className="is-highlight"><span>03</span>等待人工复核后生成工单</p>
-            </div>
-            <div className="home-stage-verdict"><span>GATE</span><strong>HUMAN REVIEW</strong><i /></div>
-          </div>
+      <div className="start-grid">
+        <section className="start-projects" aria-labelledby="start-projects-title">
+          <header className="start-section-heading"><h2 id="start-projects-title">项目</h2><Link to="/workspace">管理项目 <ChevronRight size={14} /></Link></header>
+          <label className="start-search"><Search size={16} /><span className="start-visually-hidden">搜索项目</span><input type="search" aria-label="搜索项目" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索名称、描述或项目编号" />{query ? <button type="button" onClick={() => setQuery("")}>清除</button> : null}</label>
+          {connection.api !== "CONNECTED" ? <div className="start-empty" role="status"><strong>连接后读取你的项目</strong><p>没有使用示例项目替代。请检查本机服务或登录状态。</p><button type="button" disabled={connectionRefreshing} onClick={() => void refreshConnection()}>{connectionRefreshing ? "正在检查连接…" : "重新检查连接"}</button><Link to="/account">打开账户</Link></div>
+            : workspaceLoading ? <p className="start-empty" role="status">正在读取工作空间与项目…</p>
+            : workspaceError ? <div className="start-empty" role="alert"><strong>项目列表读取失败</strong><p>当前项目数量未知。请重新读取；没有将失败显示为空列表。</p><button type="button" onClick={() => void refreshWorkspaceScope()}>重新读取项目</button></div>
+            : matchedProjects.length ? <div className="start-project-list" aria-label="可选择的项目">{matchedProjects.map((project) => <button key={project.project_id} type="button" aria-label={"选择项目 " + project.name} aria-pressed={project.project_id === projectId} onClick={() => { selectProject(project.project_id); setShowAllTasks(false); }}>
+              <FolderOpen size={18} /><span><strong>{project.name}</strong><small>{project.description || "尚未填写项目说明"}</small><code>{project.project_id}</code></span><span className="start-project-mark">{project.source_kind === "synthetic_demo" ? <small>示例</small> : null}{project.project_id === projectId ? <Check size={16} /> : <ChevronRight size={16} />}</span>
+            </button>)}</div>
+            : <div className="start-empty"><strong>{query ? "没有匹配的项目" : "还没有工作项目"}</strong><p>{query ? "试试项目名称、描述或编号，也可以清除搜索。" : "进入工作簿后，在侧栏创建项目，再导入你有权使用的数据。"}</p>{query ? <button type="button" onClick={() => setQuery("")}>清除搜索</button> : <Link to="/workspace">前往工作簿创建项目 <ArrowRight size={14} /></Link>}</div>}
+          {projects.some((project) => project.source_kind === "synthetic_demo") ? <label className="start-example-toggle"><input type="checkbox" checked={showExamples} onChange={(event) => setShowExamples(event.target.checked)} />显示示例项目（不代表真实业务数据）</label> : null}
         </section>
 
-        <section className="home-marquee" aria-label="完整产品域">
-          <span>IMAGE WORKBOOK</span><i>✦</i><span>AGENT TASKS</span><i>✦</i><span>EVIDENCE</span><i>✦</i><span>CAPA</span><i>✦</i><span>LINEAGE</span><i>✦</i><span>GOVERNANCE</span>
+        <section className="start-activity" aria-labelledby="start-current-title" id="proof" aria-busy={currentActivity?.loading ?? false}>
+          <header className="start-current-heading"><div><span className="start-kicker">当前项目</span><h2 id="start-current-title">{activeProject?.name ?? "先选择一个项目"}</h2>{activeProject?.source_kind === "synthetic_demo" ? <small>示例数据 · 非工厂运行</small> : null}</div><button type="button" className="start-icon-button" aria-label="刷新当前项目待办" disabled={!canRead || currentActivity?.loading} onClick={() => setRefreshToken((value) => value + 1)}><RefreshCw size={16} className={currentActivity?.loading ? "is-spinning" : ""} /></button></header>
+          <button type="button" className="start-primary" disabled={!canRead} onClick={() => navigate("/workspace")}><FileImage size={18} />进入图像工作簿 <ArrowRight size={16} /></button>
+          {!canRead ? <p className="start-note">连接工作台并选择项目后，读取对应图片、任务与工单。</p> : null}
+          <dl className="start-counts"><div><dt>工作簿图片</dt><dd>{value(currentActivity?.images)}</dd></div><div><dt>返回的任务</dt><dd>{value(tasks?.length)}</dd></div><div><dt>开放工单</dt><dd>{value(openOrders?.length)}</dd></div></dl>
+          {currentActivity?.errors.length ? <p className="start-read-error" role="alert">{currentActivity.errors.join("、")}读取失败 · UNKNOWN。未读取的数据保持未知，请刷新重试。</p> : null}
+          {currentActivity?.loading ? <p role="status" className="start-note">正在读取当前项目待办…</p> : null}
+          <section className="start-tasks" aria-label="项目任务待办"><header className="start-section-heading"><h3>{showAllTasks ? "最近任务" : "需要你处理"}</h3><button type="button" aria-pressed={showAllTasks} onClick={() => setShowAllTasks((current) => !current)}>{showAllTasks ? "只看待处理" : "查看最近任务"}</button></header>
+            {!currentActivity?.loading && tasks ? visibleTasks?.length ? <ul>{visibleTasks.map((task) => <li key={task.task_id}><Link to={"/command-center?task=" + encodeURIComponent(task.task_id)}><span><strong>{task.goal}</strong><small>{taskAction(task)}</small></span><ChevronRight size={15} /></Link></li>)}</ul> : <p className="start-note">{showAllTasks ? "尚无任务。请在工作簿准备并封存数据后创建检查任务。" : "当前返回的任务中，没有待计划审批或执行失败项。"}</p> : null}
+            {tasks && tasks.length >= 200 ? <p className="start-note">本页最多读取 200 项；更早的任务请前往任务页面查询。</p> : null}
+            {tasks && (showAllTasks ? tasks.length : actionableTasks?.length ?? 0) > 6 ? <Link to="/platform">查看全部已返回任务 <ArrowRight size={14} /></Link> : null}
+          </section>
+          {openOrders ? <section className="start-orders" aria-label="项目开放工单"><header className="start-section-heading"><h3>返修跟进</h3><Link to="/capa">工单队列 <ChevronRight size={14} /></Link></header>{openOrders.length ? <ul>{openOrders.slice(0, 3).map((order) => <li key={order.work_order_id}><Link to={"/capa?workOrder=" + encodeURIComponent(order.work_order_id)}><span><strong>{order.image_name}</strong><small>{order.assignee || "未指派"} · {order.status}</small></span><ChevronRight size={15} /></Link></li>)}</ul> : <p className="start-note">当前没有开放工单。</p>}</section> : null}
         </section>
+      </div>
 
-        <section className="home-live-proof" id="proof">
-          <header>
-            <div>
-              <span><Activity size={14} /> LIVE PRODUCT PROOF</span>
-              <h2>问题真实、能力真实、闭环真实</h2>
-              <p>这里不播放预设结论；数字来自当前项目的本机 API，读不到时就明确显示不可用。</p>
-            </div>
-            <button type="button" onClick={() => setProofRefreshToken((value) => value + 1)} disabled={proof.loading || connection.api !== "CONNECTED"}>
-              <RefreshCw className={proof.loading ? "is-spinning" : ""} size={14} /> {proof.loading ? "正在核对" : "刷新事实"}
-            </button>
-          </header>
-
-          <div className="home-live-proof__grid">
-            <article className="is-problem">
-              <header><span>01 / PROBLEM</span><FileImage size={17} /></header>
-              <div><small>当前真实输入</small><strong>{proofValue(proof.assets, " ASSETS")}</strong><p>{activeProject ? `${activeProject.name} · ${activeProject.source_kind}` : "选择项目后读取工作簿资产"}</p></div>
-              <ul><li><i />真实上传与本地授权范围</li><li><i />原图外发始终为 0</li></ul>
-              <button type="button" onClick={() => navigate("/workspace")}>进入像素现场 <ArrowRight size={14} /></button>
-            </article>
-
-            <article className="is-capability">
-              <header><span>02 / CAPABILITY</span><Bot size={17} /></header>
-              <div><small>受控 Agent 任务</small><strong>{proofValue(proof.tasks, " TASKS")}</strong><p>latest · {proof.latestTaskStatus}</p></div>
-              <ul><li><i />{proofValue(proof.runningTasks)} 运行中 · {proofValue(proof.humanQueue)} 待计划审批</li><li><i />Goal 2 / Goal 3 回执按真实任务展开</li></ul>
-              <button type="button" onClick={() => navigate("/command-center")}>查看计划与工具回执 <ArrowRight size={14} /></button>
-            </article>
-
-            <article className="is-loop">
-              <header><span>03 / OUTCOME</span><GitBranch size={17} /></header>
-              <div><small>可验证结果</small><strong>{proofValue(proof.completedTasks, " SEALED")}</strong><p>governance · {proof.governanceStatus}</p></div>
-              <ul><li><i />{proofValue(proof.openWorkOrders)} 开放工单</li><li><i />Parent → CAPA → Child Run 血缘</li></ul>
-              <button type="button" onClick={() => navigate("/review")}>打开只读证明路径 <ArrowRight size={14} /></button>
-            </article>
-          </div>
-
-          <footer>
-            <span><i className={`runtime-dot runtime-dot--${connection.api.toLowerCase()}`} /> {connection.api === "CONNECTED" ? "LIVE LOCAL API" : "NOT CONNECTED"}</span>
-            <span>{activeWorkspace?.name ?? "NO WORKSPACE"} / {activeProject?.name ?? "NO PROJECT"}</span>
-            <span>{proof.unavailable ? `${proof.unavailable} VIEW(S) UNAVAILABLE` : "NO SILENT FALLBACK"}</span>
-          </footer>
-        </section>
-
-        <section className="home-product-frame home-product-frame--v2" aria-label="桌面工作台结构预览">
-          <aside>
-            <div className="home-frame-logo">V</div>
-            <span><Command size={13} /> Search <kbd>⌘K</kbd></span>
-            <strong>WORK</strong>
-            <span className="is-active"><FileImage size={13} /> Image workbook</span>
-            <span><SquareKanban size={13} /> CAPA work orders</span>
-            <strong>TRACE</strong>
-            <span><GitBranch size={13} /> Evidence lineage</span>
-            <strong>SYSTEM</strong>
-            <span><Network size={13} /> Integrations</span>
-          </aside>
-          <div className="home-frame-main">
-            <header><span>Vision Lab</span><span>Project</span><b>Image workbook</b><em>LOCAL API ●</em></header>
-            <div className="home-frame-workbook home-frame-workbook--live">
-              <section>
-                <small>ASSETS · USER INPUT</small>
-                <div className="home-frame-asset is-active"><i /> Current image <span>REVIEW</span></div>
-                <div className="home-frame-asset"><i /> Asset 02 <span>READY</span></div>
-                <div className="home-frame-asset"><i /> Asset 03 <span>NEW</span></div>
-              </section>
-              <article>
-                <div className="home-frame-canvas-object"><span /><span /><span /><span /><i /></div>
-                <div className="home-frame-bbox"><b>gear-tooth-defect</b></div>
-                <span className="home-frame-probe">gradient profile · Shift drag</span>
-              </article>
-              <section>
-                <small>INSPECTOR / AGENT</small>
-                <dl><div><dt>Edge energy</dt><dd>measured</dd></div><div><dt>Annotation</dt><dd>revision bound</dd></div><div><dt>Evidence</dt><dd>SHA linked</dd></div></dl>
-                <div className="home-frame-agent"><Bot size={13} /><p>Agent 只在操作者触发后运行，并把工具回执绑定到当前工作对象。</p></div>
-              </section>
-            </div>
-          </div>
-        </section>
-
-        <section className="home-capability-map" id="architecture">
-          <header><span><Sparkles size={14} /> COMPLETE PRODUCT, NOT A SINGLE TOOL</span><h2>从工作对象到系统治理，形成完整产品面</h2><p>工作台只是核心入口；账户、集成、治理、评审与开放复用共同组成可落地工程。</p></header>
-          <div>
-            {productMap.map((item, index) => (
-              <button type="button" key={item.code} className={`is-${item.tone}${index === 0 ? " is-featured" : ""}`} onClick={() => navigate(item.route)}>
-                <span className="home-capability-map__index">0{index + 1}</span>
-                <span className="home-capability-map__icon"><item.icon size={20} /></span>
-                <small>{item.code}</small><strong>{item.title}</strong><p>{item.detail}</p><ArrowRight size={15} />
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="home-workflow-v2" id="workflow">
-          <header><span>ONE OPERATIONAL LOOP</span><h2>Agent 不只“回答”，而是承担一段流程</h2><p>陌生输入、工具失败与人工责任边界都必须留在同一条可回放路径中。</p></header>
-          <div className="home-workflow-track">
-            {workflow.map(([index, title, detail]) => <article key={index}><span>{index}</span><i /><h3>{title}</h3><p>{detail}</p></article>)}
-          </div>
-          <div className="home-workflow-outcome">
-            <span>INPUT</span><ArrowRight size={14} /><strong>证据驱动的 Agent 执行</strong><ArrowRight size={14} /><span>HUMAN GATE</span><ArrowRight size={14} /><strong>VERIFIED OUTCOME</strong>
-          </div>
-        </section>
-
-        <section className="home-review-proof" id="review-proof">
-          <header>
-            <span><FileCheck2 size={14} /> REVIEWABLE BY DESIGN</span>
-            <h2>每个产品结论，都能落到一个可操作页面</h2>
-            <p>能力声明必须回到真实工作路径、测量值与责任凭证。点击即可进入对应证据现场。</p>
-          </header>
-          <div>
-            {reviewProofPaths.map((item) => (
-              <button type="button" className={`is-${item.tone}`} key={item.code} onClick={() => navigate(item.route)}>
-                <span>{item.code}</span><item.icon size={18} /><strong>{item.title}</strong><p>{item.detail}</p><ArrowRight size={14} />
-              </button>
-            ))}
-          </div>
-          <footer>
-            <span>★ HUMAN-IN-THE-LOOP</span>
-            <span>✦ FAIL-CLOSED</span>
-            <span>✦ EVIDENCE-BOUND</span>
-            <span>PRODUCTION RELEASE · FALSE</span>
-          </footer>
-        </section>
-
-        <section className="home-open-source" id="open-source">
-          <div>
-            <span><PackageCheck size={15} /> OPEN & REUSABLE</span>
-            <h2>可以审计，也可以继续扩展</h2>
-            <p>项目代码采用 Apache-2.0；依赖以 CycloneDX 1.6 SBOM 记录；工业格式与外部工具通过 Adapter SDK 和显式合同扩展。</p>
-            <button type="button" onClick={() => navigate("/integrations")}>查看集成合同 <ArrowRight size={15} /></button>
-          </div>
-          <ul>
-            <li><strong>Apache-2.0</strong><span>代码与复用边界清晰</span></li>
-            <li><strong>CycloneDX 1.6</strong><span>依赖与许可证可审计</span></li>
-            <li><strong>Adapter SDK</strong><span>格式、工具与生态扩展面</span></li>
-            <li><strong>Local-first</strong><span>原图与工作上下文留在本机</span></li>
-          </ul>
-        </section>
-
-        <section className="home-final-cta home-final-cta--v2">
-          <span>★ READY FOR REAL WORK</span>
-          <h2>从你的数据开始，而不是从预设结论开始</h2>
-          <p>建立项目、导入数据集、进入像素现场，再让 Agent 为证据和行动服务。</p>
-          <div><button type="button" onClick={() => navigate("/workspace")}>打开 VisionData Gate <ArrowRight size={16} /></button><button type="button" onClick={() => navigate("/settings")}>配置本机环境</button></div>
-        </section>
-      </main>
-
-      <footer className="product-home__footer">
-        <span>VisionData Gate · Industrial data release workspace</span>
-        <span>Apache-2.0 · Local-first · Human authority</span>
-      </footer>
-    </div>
-  );
+      <details className="start-about" id="business-story"><summary>这张工作台如何支持项目交付</summary><p>把数据导入、标注复核、质量检查、返修版本与训练反馈留在同一项目中。Agent 组织任务，专业工具提供测量依据；整改和关键决定由具名人员确认。</p><div id="workflow"><Link to="/platform">操作指引</Link><Link to="/data-pools">数据版本</Link><Link to="/models">模型与 API</Link></div><p id="architecture">本地部署是数据边界设计；实际连接、外发与模型调用以当前配置和运行证据为准。</p><div id="review-proof"><Link to="/review">评审与证据</Link><Link to="/governance">治理边界</Link></div><p id="open-source">开放接口、依赖与许可说明可在 <Link to="/integrations">集成与扩展</Link> 查看。</p></details>
+    </main>
+    <footer className="start-home-footer"><span>工业视觉交付站</span><span>项目数据 · 具名复核 · 版本记录</span></footer>
+  </div>;
 }
