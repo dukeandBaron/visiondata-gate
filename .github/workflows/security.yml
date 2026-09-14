@@ -1,0 +1,95 @@
+name: Dependency and source security checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.11.8"
+          python-version: "3.12"
+      - name: Install separately locked security tools
+        run: uv sync --project quality --locked --python 3.12
+      - name: Extract all public registry package versions from application lock
+        run: uv run --project quality --no-sync python tools/check_engineering_quality.py export-dependencies --lock uv.lock --output "${{ github.workspace }}/output/security/application-requirements.txt"
+      - name: Audit every locked registry version, without dependency resolution
+        run: >-
+          uv run --project quality --no-sync python -m pip_audit
+          --requirement output/security/application-requirements.txt
+          --no-deps --disable-pip --vulnerability-service pypi
+          --format json --output output/security/pip-audit.json
+      - if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: locked-dependency-audit
+          path: output/security/
+          retention-days: 14
+          if-no-files-found: warn
+
+  bandit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.11.8"
+          python-version: "3.12"
+      - run: uv sync --project quality --locked --python 3.12
+      - run: python -c "from pathlib import Path; Path('output/security').mkdir(parents=True, exist_ok=True)"
+      - name: Run the complete Bandit scan and retain its real report
+        shell: bash
+        run: |
+          set +e
+          uv run --project quality --no-sync python -m bandit -r src desktop tools -f json -o output/security/bandit.json
+          bandit_status=$?
+          set -e
+          if [ "$bandit_status" -gt 1 ]; then
+            exit "$bandit_status"
+          fi
+      - name: Reject every new Low, Medium, or High finding
+        run: >-
+          uv run --project quality --no-sync python
+          tools/check_bandit_baseline.py check
+          --report output/security/bandit.json
+          --baseline quality/bandit-baseline.json
+          --bandit-version 1.9.4
+      - if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: source-static-security
+          path: output/security/bandit.json
+          retention-days: 14
+          if-no-files-found: warn
+
+  codeql:
+    name: CodeQL / ${{ matrix.language }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python, javascript-typescript]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: github/codeql-action/init@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4 commit
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+      - uses: github/codeql-action/analyze@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4 commit
+        with:
+          category: /language:${{ matrix.language }}

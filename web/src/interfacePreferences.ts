@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export type AccentPalette = "violet-cyan" | "cyan-lime" | "coral-violet";
+export type AccentPalette = "graphite" | "violet-cyan" | "cyan-lime" | "coral-violet";
 export type InterfaceDensity = "comfortable" | "compact";
 
 export interface InterfacePreferences {
@@ -9,20 +9,23 @@ export interface InterfacePreferences {
   reduceMotion: boolean;
 }
 
-const preferenceStorageKey = "visiondata:interface-preferences";
+const preferenceStorageKey = "visiondata:interface-preferences:v2";
+const legacyPreferenceStorageKey = "visiondata:interface-preferences";
 const preferenceEvent = "visiondata:interface-preferences-changed";
 
 const defaults: InterfacePreferences = {
-  accent: "violet-cyan",
+  accent: "graphite",
   density: "comfortable",
   reduceMotion: false,
 };
 
 export function readInterfacePreferences(): InterfacePreferences {
   try {
-    const parsed = JSON.parse(window.localStorage.getItem(preferenceStorageKey) ?? "{}") as Partial<InterfacePreferences>;
+    const saved = window.localStorage.getItem(preferenceStorageKey);
+    const parsed = JSON.parse(saved ?? window.localStorage.getItem(legacyPreferenceStorageKey) ?? "{}") as Partial<InterfacePreferences> | null;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return defaults;
     return {
-      accent: ["violet-cyan", "cyan-lime", "coral-violet"].includes(parsed.accent ?? "")
+      accent: saved && ["graphite", "violet-cyan", "cyan-lime", "coral-violet"].includes(parsed.accent ?? "")
         ? parsed.accent as AccentPalette
         : defaults.accent,
       density: parsed.density === "compact" ? "compact" : defaults.density,

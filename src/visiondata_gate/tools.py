@@ -387,11 +387,29 @@ def inspect_contract_governance(
     required_splits_ok = set(
         sample.split for sample in validated_manifest.samples
     ).issubset(set(active_contract.required_splits))
-    missing_annotation_path_count = 0
-    if active_contract.annotations_required:
-        missing_annotation_path_count = sum(
-            1 for sample in validated_manifest.samples if sample.annotation_path is None
+    policies = active_contract.sample_annotation_requirements
+    if policies is not None:
+        if any(
+            sample.sample_id not in policies for sample in validated_manifest.samples
+        ):
+            raise ValueError("sample has no explicit annotation requirement")
+        if any(
+            policies[sample.sample_id] == "NOT_APPLICABLE"
+            and sample.annotation_path is not None
+            for sample in validated_manifest.samples
+        ):
+            raise ValueError("not-applicable sample has an annotation path")
+    missing_samples = [
+        sample.sample_id
+        for sample in validated_manifest.samples
+        if sample.annotation_path is None
+        and (
+            policies[sample.sample_id] == "REQUIRED"
+            if policies is not None
+            else active_contract.annotations_required
         )
+    ]
+    missing_annotation_path_count = len(missing_samples)
 
     if missing_cells:
         findings.append(
@@ -473,11 +491,6 @@ def inspect_contract_governance(
         )
 
     if missing_annotation_path_count:
-        missing_samples = [
-            sample.sample_id
-            for sample in validated_manifest.samples
-            if sample.annotation_path is None
-        ]
         findings.append(
             _new_finding(
                 tool="governance_audit",
@@ -518,6 +531,14 @@ def inspect_contract_governance(
 
 
 def _trace_parameters(tool: str, contract: BatchContract) -> dict[str, Any]:
+    explicit_requirements = (
+        {
+            "acceptance_requirements_sha256": contract.acceptance_requirements_sha256,
+            "sample_annotation_requirements": contract.sample_annotation_requirements,
+        }
+        if contract.sample_annotation_requirements is not None
+        else {}
+    )
     if tool == "image_quality":
         return contract.thresholds.model_dump(mode="json")
     if tool == "duplicate_leakage":
@@ -528,6 +549,7 @@ def _trace_parameters(tool: str, contract: BatchContract) -> dict[str, Any]:
         }
     if tool == "annotation_integrity":
         return {
+            **explicit_requirements,
             "annotations_required": contract.annotations_required,
             "expected_width": contract.thresholds.expected_width,
             "expected_height": contract.thresholds.expected_height,
@@ -538,6 +560,7 @@ def _trace_parameters(tool: str, contract: BatchContract) -> dict[str, Any]:
         return contract.coverage.model_dump(mode="json")
     if tool == "governance_audit":
         return {
+            **explicit_requirements,
             "required_splits": contract.required_splits,
             "annotations_required": contract.annotations_required,
             "coverage_cells": len(

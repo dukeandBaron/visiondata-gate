@@ -24,9 +24,16 @@ export function isTauriRuntime(): boolean {
 
 export function resolveDesktopRuntimeConfig(): Promise<DesktopRuntimeConfig | undefined> {
   if (!isTauriRuntime()) return Promise.resolve(undefined);
-  desktopRuntimePromise ??= import("@tauri-apps/api/core").then(({ invoke }) =>
-    invoke<DesktopRuntimeConfig>("desktop_runtime_config"),
-  );
+  if (!desktopRuntimePromise) {
+    const request = import("@tauri-apps/api/core").then(({ invoke }) =>
+      invoke<DesktopRuntimeConfig>("desktop_runtime_config"),
+    ).catch((error: unknown) => {
+      // Share the pending/successful request; only its own failure permits a retry.
+      if (desktopRuntimePromise === request) desktopRuntimePromise = undefined;
+      throw error;
+    });
+    desktopRuntimePromise = request;
+  }
   return desktopRuntimePromise;
 }
 

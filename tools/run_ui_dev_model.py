@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlparse
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +27,35 @@ LEDGER_PATH = OUTPUT_ROOT / "usage-ledger.jsonl"
 ALLOWED_HOSTS = {"gw.opentoken.io", "cn2.gw.opentoken.io"}
 MAX_PROMPT_CHARACTERS = 180_000
 MAX_CALLS_PER_WORKTREE = 8
+
+
+class _NoRedirectHandler(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        del req, fp, code, msg, headers, newurl
+        return None
+
+
+def _validated_remote_endpoint(endpoint: str):
+    parsed = urlparse(endpoint)
+    try:
+        port = parsed.port
+    except ValueError as exc:
+        raise SystemExit(
+            "UI development endpoint is outside the fixed HTTPS allowlist"
+        ) from exc
+    if not (
+        parsed.scheme == "https"
+        and parsed.hostname in ALLOWED_HOSTS
+        and port in {None, 443}
+        and parsed.username is None
+        and parsed.password is None
+        and not parsed.query
+        and not parsed.fragment
+    ):
+        raise SystemExit(
+            "UI development endpoint is outside the fixed HTTPS allowlist"
+        )
+    return parsed
 
 
 def _read_local_environment() -> dict[str, str]:
@@ -133,9 +162,7 @@ def main() -> int:
         if native_gemini
         else f"{base_url}/v1/chat/completions"
     )
-    parsed = urlparse(endpoint)
-    if parsed.scheme != "https" or parsed.hostname not in ALLOWED_HOSTS:
-        raise SystemExit("UI development endpoint is outside the fixed HTTPS allowlist")
+    parsed = _validated_remote_endpoint(endpoint)
 
     if not args.prompt.is_file():
         raise SystemExit("prompt file does not exist")
@@ -197,7 +224,8 @@ def main() -> int:
     )
 
     try:
-        with urlopen(request, timeout=120) as response:
+        opener = build_opener(_NoRedirectHandler())
+        with opener.open(request, timeout=120) as response:
             response_payload = json.loads(response.read().decode("utf-8"))
             http_status = int(response.status)
     except HTTPError as error:

@@ -392,10 +392,13 @@ def test_recover_interrupted_never_promotes_stale_runs(tmp_path: Path) -> None:
         auto_start=False,
     )
     assert service.store.claim_task(task.task_id)
-    assert service.store.recover_interrupted() == 1
+    assert service.store.recover_interrupted() == 0
     recovered = service.get_task(actor, task.task_id)
-    assert recovered.execution_status is TaskExecutionStatus.FAILED
-    assert recovered.error_code == "interrupted"
+    assert recovered.execution_status is TaskExecutionStatus.RUNNING
+    assert recovered.error_code is None
+    assert service.task_execution_recovery(actor, task.task_id).classification == (
+        "LEGACY_UNKNOWN"
+    )
 
 
 def test_failed_task_accepts_append_only_change_request_but_not_acknowledgement(

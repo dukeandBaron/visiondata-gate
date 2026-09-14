@@ -15,6 +15,13 @@ from pathlib import Path
 from typing import Any
 
 from .evidence import canonical_json_text
+from .execution_recovery import (
+    ManagedExecutionOwner,
+    RecoverTaskExecutionRequest,
+    TaskExecutionRecoveryReceipt,
+    seal_execution_model,
+    verify_execution_model,
+)
 from .lineage import (
     TaskLineageEdge,
     seal_task_lineage_edge,
@@ -361,6 +368,36 @@ class TaskStore:
                     completed_at TEXT,
                     UNIQUE(project_id, idempotency_key)
                 );
+                CREATE TABLE IF NOT EXISTS task_execution_owners (
+                    task_id TEXT PRIMARY KEY REFERENCES agent_tasks(task_id),
+                    owner_json TEXT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS task_execution_recoveries (
+                    task_id TEXT PRIMARY KEY REFERENCES agent_tasks(task_id),
+                    replacement_task_id TEXT UNIQUE NOT NULL
+                        REFERENCES agent_tasks(task_id),
+                    receipt_json TEXT NOT NULL
+                );
+                CREATE TRIGGER IF NOT EXISTS execution_owner_no_update
+                BEFORE UPDATE ON task_execution_owners
+                BEGIN
+                    SELECT RAISE(ABORT, 'execution ownership is immutable');
+                END;
+                CREATE TRIGGER IF NOT EXISTS execution_owner_no_delete
+                BEFORE DELETE ON task_execution_owners
+                BEGIN
+                    SELECT RAISE(ABORT, 'execution ownership is immutable');
+                END;
+                CREATE TRIGGER IF NOT EXISTS execution_recovery_no_update
+                BEFORE UPDATE ON task_execution_recoveries
+                BEGIN
+                    SELECT RAISE(ABORT, 'execution recovery is immutable');
+                END;
+                CREATE TRIGGER IF NOT EXISTS execution_recovery_no_delete
+                BEFORE DELETE ON task_execution_recoveries
+                BEGIN
+                    SELECT RAISE(ABORT, 'execution recovery is immutable');
+                END;
                 CREATE TABLE IF NOT EXISTS incident_commands (
                     command_id TEXT PRIMARY KEY,
                     task_id TEXT NOT NULL REFERENCES agent_tasks(task_id),
@@ -573,7 +610,7 @@ class TaskStore:
                         f"ADD COLUMN {column} {declaration}"
                     )
             self._seed_legacy_authorization_events(connection)
-            connection.execute("PRAGMA user_version = 7")
+            connection.execute("PRAGMA user_version = 8")
 
     @staticmethod
     def _insert_source_authorization_event(
@@ -1000,10 +1037,13 @@ class TaskStore:
         return self._user(row)
 
     def create_workspace(self, request: CreateWorkspaceRequest) -> WorkspaceRecord:
+        from .identity_service import assert_active_in_connection
+
         workspace_id = _new_id("wsp")
         created_at = _now()
         try:
             with self._connection(immediate=True) as connection:
+                assert_active_in_connection(connection, request.owner_user_id)
                 connection.execute(
                     "INSERT INTO workspaces VALUES (?, ?, ?, ?)",
                     (
@@ -1028,7 +1068,10 @@ class TaskStore:
         )
 
     def list_workspaces(self, actor_user_id: str) -> list[WorkspaceRecord]:
+        from .identity_service import assert_active_in_connection
+
         with self._connection() as connection:
+            assert_active_in_connection(connection, actor_user_id)
             rows = connection.execute(
                 """
                 SELECT w.*, m.role
@@ -1044,6 +1087,9 @@ class TaskStore:
     def _require_membership(
         self, connection: sqlite3.Connection, workspace_id: str, actor_user_id: str
     ) -> None:
+        from .identity_service import assert_active_in_connection
+
+        assert_active_in_connection(connection, actor_user_id)
         row = connection.execute(
             "SELECT 1 FROM workspace_members WHERE workspace_id = ? AND user_id = ?",
             (workspace_id, actor_user_id),
@@ -1228,23 +1274,25 @@ class TaskStore:
         ).fetchall()
         task_ids = [str(row["task_id"]) for row in rows]
         if task_ids:
-            placeholders = ",".join("?" for _ in task_ids)
-            connection.execute(
-                f"""
+            connection.executemany(
+                """
                 UPDATE agent_tasks
                 SET execution_status = ?, current_phase = ?, error_code = ?,
                     error_message = ?, updated_at = ?, completed_at = ?
-                WHERE task_id IN ({placeholders})
+                WHERE task_id = ?
                 """,
-                (
-                    TaskExecutionStatus.FAILED.value,
-                    "failed_authorization",
-                    error_code,
-                    error_message[:500],
-                    timestamp,
-                    timestamp,
-                    *task_ids,
-                ),
+                [
+                    (
+                        TaskExecutionStatus.FAILED.value,
+                        "failed_authorization",
+                        error_code,
+                        error_message[:500],
+                        timestamp,
+                        timestamp,
+                        task_id,
+                    )
+                    for task_id in task_ids
+                ],
             )
         return task_ids
 
@@ -2052,22 +2100,24 @@ class TaskStore:
         project_id: str | None = None,
         limit: int = 100,
     ) -> list[TaskRecord]:
-        clauses = ["m.user_id = ?"]
-        parameters: list[Any] = [actor_user_id]
-        if workspace_id is not None:
-            clauses.append("t.workspace_id = ?")
-            parameters.append(workspace_id)
-        if project_id is not None:
-            clauses.append("t.project_id = ?")
-            parameters.append(project_id)
-        parameters.append(max(1, min(limit, 200)))
-        query = f"""
+        bounded_limit = max(1, min(limit, 200))
+        query = """
             SELECT t.* FROM agent_tasks t
             JOIN workspace_members m ON m.workspace_id = t.workspace_id
-            WHERE {" AND ".join(clauses)}
+            WHERE m.user_id = ?
+                AND (? IS NULL OR t.workspace_id = ?)
+                AND (? IS NULL OR t.project_id = ?)
             ORDER BY t.created_at DESC, t.task_id DESC
             LIMIT ?
         """
+        parameters = (
+            actor_user_id,
+            workspace_id,
+            workspace_id,
+            project_id,
+            project_id,
+            bounded_limit,
+        )
         with self._connection() as connection:
             rows = connection.execute(query, parameters).fetchall()
         return [self._task(row) for row in rows]
@@ -2128,21 +2178,39 @@ class TaskStore:
         fields: dict[str, Any] | None = None,
     ) -> TaskRecord:
         updates = dict(fields or {})
-        allowed_fields = {
-            "initial_decision",
-            "final_decision",
-            "runtime_status",
-            "artifact_root_rel",
-            "trace_rel",
-            "trace_sha256",
-            "evidence_zip_rel",
-            "evidence_sha256",
-            "error_code",
-            "error_message",
-            "started_at",
-            "completed_at",
+        field_update_statements = {
+            "initial_decision": (
+                "UPDATE agent_tasks SET initial_decision = ? WHERE task_id = ?"
+            ),
+            "final_decision": (
+                "UPDATE agent_tasks SET final_decision = ? WHERE task_id = ?"
+            ),
+            "runtime_status": (
+                "UPDATE agent_tasks SET runtime_status = ? WHERE task_id = ?"
+            ),
+            "artifact_root_rel": (
+                "UPDATE agent_tasks SET artifact_root_rel = ? WHERE task_id = ?"
+            ),
+            "trace_rel": "UPDATE agent_tasks SET trace_rel = ? WHERE task_id = ?",
+            "trace_sha256": (
+                "UPDATE agent_tasks SET trace_sha256 = ? WHERE task_id = ?"
+            ),
+            "evidence_zip_rel": (
+                "UPDATE agent_tasks SET evidence_zip_rel = ? WHERE task_id = ?"
+            ),
+            "evidence_sha256": (
+                "UPDATE agent_tasks SET evidence_sha256 = ? WHERE task_id = ?"
+            ),
+            "error_code": "UPDATE agent_tasks SET error_code = ? WHERE task_id = ?",
+            "error_message": (
+                "UPDATE agent_tasks SET error_message = ? WHERE task_id = ?"
+            ),
+            "started_at": "UPDATE agent_tasks SET started_at = ? WHERE task_id = ?",
+            "completed_at": (
+                "UPDATE agent_tasks SET completed_at = ? WHERE task_id = ?"
+            ),
         }
-        if not set(updates) <= allowed_fields:
+        if not set(updates) <= set(field_update_statements):
             raise ValueError("unsupported task update field")
         with self._connection(immediate=True) as connection:
             row = connection.execute(
@@ -2153,29 +2221,48 @@ class TaskStore:
             current = TaskExecutionStatus(str(row["execution_status"]))
             if target not in _TRANSITIONS[current]:
                 raise InvalidTransitionError(f"cannot transition {current} to {target}")
-            assignments = [
-                "execution_status = ?",
-                "current_phase = ?",
-                "updated_at = ?",
-            ]
-            values: list[Any] = [target.value, current_phase, _now()]
-            for key, value in updates.items():
-                assignments.append(f"{key} = ?")
-                values.append(value)
-            values.append(task_id)
+            if target is TaskExecutionStatus.COMPLETED:
+                from .identity_service import assert_active_in_connection
+
+                # Linearize account revocation and publication in this write
+                # transaction. FAILED/CANCELLED must remain possible after revoke.
+                assert_active_in_connection(connection, str(row["created_by"]))
+            timestamp = _now()
             connection.execute(
-                f"UPDATE agent_tasks SET {', '.join(assignments)} WHERE task_id = ?",
-                values,
+                """
+                UPDATE agent_tasks
+                SET execution_status = ?, current_phase = ?, updated_at = ?
+                WHERE task_id = ?
+                """,
+                (target.value, current_phase, timestamp, task_id),
             )
+            for key, value in updates.items():
+                connection.execute(field_update_statements[key], (value, task_id))
             updated = connection.execute(
                 "SELECT * FROM agent_tasks WHERE task_id = ?", (task_id,)
             ).fetchone()
         assert updated is not None
         return self._task(updated)
 
-    def claim_task(self, task_id: str) -> bool:
+    def claim_task(
+        self, task_id: str, *, execution_owner: ManagedExecutionOwner | None = None
+    ) -> bool:
         timestamp = _now()
         with self._connection(immediate=True) as connection:
+            if execution_owner is not None:
+                verify_execution_model(execution_owner)
+                row = connection.execute(
+                    "SELECT * FROM agent_tasks WHERE task_id = ?", (task_id,)
+                ).fetchone()
+                if row is None:
+                    raise NotFoundError("task not found")
+                if not (
+                    execution_owner.task_id == task_id
+                    and execution_owner.workspace_id == row["workspace_id"]
+                    and execution_owner.project_id == row["project_id"]
+                    and execution_owner.request_sha256 == row["request_sha256"]
+                ):
+                    raise ConflictError("execution ownership does not bind the task")
             cursor = connection.execute(
                 """
                 UPDATE agent_tasks
@@ -2199,7 +2286,180 @@ class TaskStore:
                     TaskInterventionAction.APPROVE_PLAN.value,
                 ),
             )
+            if cursor.rowcount == 1 and execution_owner is not None:
+                connection.execute(
+                    "INSERT INTO task_execution_owners VALUES (?, ?)",
+                    (
+                        task_id,
+                        canonical_json_text(execution_owner, trailing_newline=False),
+                    ),
+                )
         return cursor.rowcount == 1
+
+    def task_execution_owner(self, task_id: str) -> ManagedExecutionOwner | None:
+        with self._connection() as connection:
+            row = connection.execute(
+                "SELECT owner_json FROM task_execution_owners WHERE task_id = ?",
+                (task_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        owner = ManagedExecutionOwner.model_validate_json(row["owner_json"])
+        verify_execution_model(owner)
+        return owner
+
+    def task_execution_recovery_receipt(
+        self, actor_user_id: str, task_id: str
+    ) -> TaskExecutionRecoveryReceipt | None:
+        task = self.get_task(actor_user_id, task_id)
+        with self._connection() as connection:
+            row = connection.execute(
+                "SELECT receipt_json FROM task_execution_recoveries WHERE task_id = ?",
+                (task_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        receipt = TaskExecutionRecoveryReceipt.model_validate_json(row["receipt_json"])
+        verify_execution_model(receipt)
+        replacement = self.get_task(actor_user_id, receipt.replacement_task_id)
+        if not (
+            receipt.task_id == task_id
+            and receipt.workspace_id == task.workspace_id == replacement.workspace_id
+            and receipt.project_id == task.project_id == replacement.project_id
+            and receipt.replacement_task_id != task_id
+        ):
+            raise ValueError("task execution recovery receipt scope mismatch")
+        return receipt
+
+    def recover_owned_task_execution(
+        self,
+        actor_user_id: str,
+        task_id: str,
+        request: RecoverTaskExecutionRequest,
+        *,
+        owner_receipt_sha256: str,
+        replacement_request_sha256: str,
+    ) -> TaskExecutionRecoveryReceipt:
+        """Atomically fail an orphan and create a fresh, unapproved replacement.
+
+        The service must hold the same per-task OS execution lock throughout this
+        transaction. Recovery records are separate from CAPA child lineage.
+        """
+
+        timestamp = _now()
+        with self._connection(immediate=True) as connection:
+            row = connection.execute(
+                "SELECT * FROM agent_tasks WHERE task_id = ?", (task_id,)
+            ).fetchone()
+            if row is None:
+                raise NotFoundError("task not found")
+            self._require_membership(
+                connection, str(row["workspace_id"]), actor_user_id
+            )
+            task = self._task(row)
+            existing = connection.execute(
+                "SELECT receipt_json FROM task_execution_recoveries WHERE task_id = ?",
+                (task_id,),
+            ).fetchone()
+            if existing is not None:
+                receipt = TaskExecutionRecoveryReceipt.model_validate_json(existing[0])
+                verify_execution_model(receipt)
+                if not (
+                    receipt.original_snapshot_sha256 == request.expected_snapshot_sha256
+                    and receipt.recovered_by == actor_user_id
+                    and receipt.reviewer_identity == request.reviewer_identity
+                    and receipt.note == request.note
+                ):
+                    raise ConflictError("task already has a different recovery receipt")
+                return receipt
+            if (
+                task.execution_status
+                not in {TaskExecutionStatus.RUNNING, TaskExecutionStatus.VERIFYING}
+                or self.task_snapshot_sha256(task) != request.expected_snapshot_sha256
+            ):
+                raise ConflictError("task changed before explicit recovery")
+            owner_row = connection.execute(
+                "SELECT owner_json FROM task_execution_owners WHERE task_id = ?",
+                (task_id,),
+            ).fetchone()
+            if owner_row is None:
+                raise ConflictError("legacy execution ownership is unknown")
+            owner = ManagedExecutionOwner.model_validate_json(owner_row[0])
+            verify_execution_model(owner)
+            if not (
+                owner.receipt_sha256 == owner_receipt_sha256
+                and owner.request_sha256 == task.request_sha256
+                and owner.task_id == task_id
+            ):
+                raise ConflictError("execution ownership binding changed")
+            replacement_id = _new_id("tsk")
+            connection.execute(
+                """
+                UPDATE agent_tasks SET execution_status = 'FAILED',
+                    current_phase = 'interrupted', error_code = 'interrupted_confirmed',
+                    error_message = 'Named operator confirmed the execution owner is absent.',
+                    completed_at = ?, updated_at = ? WHERE task_id = ?
+                """,
+                (timestamp, timestamp, task_id),
+            )
+            connection.execute(
+                """
+                INSERT INTO agent_tasks (
+                    task_id, workspace_id, project_id, created_by, goal, seed,
+                    scenario_profile, source_kind, source_id, plan_approval_required,
+                    allowed_tools_json, request_sha256, execution_status,
+                    current_phase, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, 'PLANNED', 'planned', ?, ?)
+                """,
+                (
+                    replacement_id,
+                    task.workspace_id,
+                    task.project_id,
+                    actor_user_id,
+                    task.goal,
+                    task.seed,
+                    task.scenario_profile.value,
+                    task.source_kind.value,
+                    task.source_id,
+                    json.dumps(task.allowed_tools, ensure_ascii=False),
+                    replacement_request_sha256,
+                    timestamp,
+                    timestamp,
+                ),
+            )
+            failed = self._task(
+                connection.execute(
+                    "SELECT * FROM agent_tasks WHERE task_id = ?", (task_id,)
+                ).fetchone()
+            )
+            replacement = self._task(
+                connection.execute(
+                    "SELECT * FROM agent_tasks WHERE task_id = ?", (replacement_id,)
+                ).fetchone()
+            )
+            receipt = seal_execution_model(
+                TaskExecutionRecoveryReceipt,
+                task_id=task_id,
+                workspace_id=task.workspace_id,
+                project_id=task.project_id,
+                replacement_task_id=replacement_id,
+                original_snapshot_sha256=request.expected_snapshot_sha256,
+                failed_task_snapshot_sha256=self.task_snapshot_sha256(failed),
+                replacement_task_snapshot_sha256=self.task_snapshot_sha256(replacement),
+                reviewer_identity=request.reviewer_identity,
+                note=request.note,
+                recovered_by=actor_user_id,
+                recovered_at=timestamp,
+            )
+            connection.execute(
+                "INSERT INTO task_execution_recoveries VALUES (?, ?, ?)",
+                (
+                    task_id,
+                    replacement_id,
+                    canonical_json_text(receipt, trailing_newline=False),
+                ),
+            )
+        return receipt
 
     def record_intervention(
         self,
@@ -2479,25 +2739,13 @@ class TaskStore:
         return [TaskEventRecord(**dict(row)) for row in rows]
 
     def recover_interrupted(self) -> int:
-        timestamp = _now()
-        with self._connection(immediate=True) as connection:
-            cursor = connection.execute(
-                """
-                UPDATE agent_tasks SET execution_status = ?, current_phase = 'interrupted',
-                    error_code = 'interrupted',
-                    error_message = 'The local service stopped before the run completed.',
-                    completed_at = ?, updated_at = ?
-                WHERE execution_status IN (?, ?)
-                """,
-                (
-                    TaskExecutionStatus.FAILED.value,
-                    timestamp,
-                    timestamp,
-                    TaskExecutionStatus.RUNNING.value,
-                    TaskExecutionStatus.VERIFYING.value,
-                ),
-            )
-        return cursor.rowcount
+        """Compatibility no-op; startup cannot prove another runtime has stopped.
+
+        Query ProductService.task_execution_recovery and use the hash-bound named
+        recovery operation. Legacy RUNNING rows remain unknown and untouched.
+        """
+
+        return 0
 
 
 __all__ = [

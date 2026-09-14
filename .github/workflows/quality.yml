@@ -1,0 +1,94 @@
+name: Scoped engineering quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  contracts-and-coverage:
+    name: Scoped contracts / ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.12", "3.13"]
+    env:
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYRIGHT_PYTHON_GLOBAL_NODE: "on"
+      COVERAGE_FILE: output/quality/.coverage
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.11.8"
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+      - name: Install locked application test dependencies
+        run: uv sync --extra api --extra qa --locked --python "${{ matrix.python-version }}"
+      - name: Check independent tool lock
+        run: uv lock --project quality --check
+      - name: Verify tool requirements match their lock
+        run: uv export --project quality --locked --no-emit-project --format requirements-txt --output-file quality/requirements.txt --quiet
+      - name: Reject changed tool export
+        run: git diff --exit-code -- quality/requirements.txt
+      - name: Prepare local result directory
+        run: python -c "from pathlib import Path; Path('output/quality').mkdir(parents=True, exist_ok=True)"
+      - name: Blocking type gate (two strict and three basic modules)
+        run: uv run --no-sync --with-requirements quality/requirements.txt pyright --project quality/pyright-gate.json --pythonversion "${{ matrix.python-version }}"
+      - name: Public-safe fixed test slice with branch coverage
+        run: >-
+          uv run --no-sync --with-requirements quality/requirements.txt python -m pytest
+          tests/test_policy_agents.py tests/test_evidence_state.py tests/test_audit_envelope.py
+          tests/test_capa.py::test_child_run_closure_verifies_zero_regression_and_stable_seal
+          tests/test_capa.py::test_child_run_closure_detects_same_code_on_new_redacted_sample
+          -q -p no:cacheprovider
+          --cov=visiondata_gate.policy --cov=visiondata_gate.evidence_state
+          --cov=visiondata_gate.audit_envelope --cov=visiondata_gate.capa --cov-branch
+          --cov-report=json:output/quality/coverage.json
+          --cov-report=xml:output/quality/coverage.xml
+          --junitxml=output/quality/pytest.xml
+      - name: Verify exact tests and per-file line / branch non-regression
+        run: >-
+          uv run --no-sync python tools/check_engineering_quality.py coverage
+          --coverage output/quality/coverage.json --junit output/quality/pytest.xml
+          --profile quality/coverage-profile.json
+      - name: Validate quality, startup and adoption contracts
+        run: uv run --no-sync python -m pytest tests/test_engineering_quality_tools.py tests/test_engineering_workflow_config.py tests/test_cross_platform_workbench.py tests/test_adoption_docs.py -q
+      - name: Preserve check evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: quality-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: output/quality/
+          retention-days: 14
+          if-no-files-found: warn
+
+  type-debt:
+    # Explicit diagnostic lane. Its nonzero result is a visible HOLD, not hidden
+    # with continue-on-error. It is not represented as the scoped gate's PASS.
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.11.8"
+          python-version: "3.12"
+      - run: uv sync --extra api --extra qa --locked --python 3.12
+      - run: uv run --no-sync --with-requirements quality/requirements.txt pyright --project quality/pyright-debt.json

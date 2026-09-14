@@ -1,0 +1,141 @@
+{
+  "$defs": {
+    "OperatorHumanAnnotationReview": {
+      "additionalProperties": false,
+      "description": "A named operator attestation, not independent semantic ground truth.",
+      "properties": {
+        "reviewer_name": {
+          "maxLength": 120,
+          "minLength": 2,
+          "title": "Reviewer Name",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 2000,
+          "minLength": 8,
+          "title": "Note",
+          "type": "string"
+        },
+        "expected_asset_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Asset Sha256",
+          "type": "string"
+        },
+        "expected_annotation_revision": {
+          "minimum": 0,
+          "title": "Expected Annotation Revision",
+          "type": "integer"
+        },
+        "expected_annotation_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Annotation Sha256",
+          "type": "string"
+        },
+        "operator_attests_reviewed": {
+          "const": true,
+          "title": "Operator Attests Reviewed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "reviewer_name",
+        "note",
+        "expected_asset_sha256",
+        "expected_annotation_revision",
+        "expected_annotation_sha256",
+        "operator_attests_reviewed"
+      ],
+      "title": "OperatorHumanAnnotationReview",
+      "type": "object"
+    },
+    "OperatorSampleAcceptanceRequirement": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "split": {
+          "enum": [
+            "train",
+            "val",
+            "test"
+          ],
+          "title": "Split",
+          "type": "string"
+        },
+        "category": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Category",
+          "type": "string"
+        },
+        "annotation_requirement": {
+          "enum": [
+            "REQUIRED",
+            "OPTIONAL",
+            "NOT_APPLICABLE",
+            "UNKNOWN"
+          ],
+          "title": "Annotation Requirement",
+          "type": "string"
+        },
+        "human_review": {
+          "$ref": "#/$defs/OperatorHumanAnnotationReview"
+        }
+      },
+      "required": [
+        "asset_id",
+        "split",
+        "category",
+        "annotation_requirement",
+        "human_review"
+      ],
+      "title": "OperatorSampleAcceptanceRequirement",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Private input requirements; UNKNOWN is draft-only, never an approval.",
+  "properties": {
+    "schema_version": {
+      "const": "visiondata-gate.operator-acceptance-requirements.v1",
+      "default": "visiondata-gate.operator-acceptance-requirements.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "purpose_description": {
+      "maxLength": 1000,
+      "minLength": 8,
+      "title": "Purpose Description",
+      "type": "string"
+    },
+    "category_vocabulary": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 500,
+      "minItems": 1,
+      "title": "Category Vocabulary",
+      "type": "array"
+    },
+    "samples": {
+      "items": {
+        "$ref": "#/$defs/OperatorSampleAcceptanceRequirement"
+      },
+      "maxItems": 10000,
+      "minItems": 1,
+      "title": "Samples",
+      "type": "array"
+    }
+  },
+  "required": [
+    "purpose_description",
+    "category_vocabulary",
+    "samples"
+  ],
+  "title": "OperatorAcceptanceRequirements",
+  "type": "object"
+}

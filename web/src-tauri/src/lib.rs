@@ -29,16 +29,41 @@ struct DesktopRuntimeConfig {
     sample_data_root: String,
 }
 
+#[derive(Serialize)]
+struct DesktopStartupReceipt {
+    schema_version: &'static str,
+    status: &'static str,
+    gateway: &'static str,
+    gateway_port: u16,
+    fastapi_port: u16,
+    bind_scope: &'static str,
+    hmac_readiness_verified: bool,
+    production_release_allowed: bool,
+    machine_write_permitted: bool,
+}
+
 struct DesktopState {
     runtime: DesktopRuntimeConfig,
-    port: u16,
-    child: Mutex<Option<Child>>,
+    gateway_port: u16,
+    fastapi_child: Mutex<Option<Child>>,
+    gateway_child: Mutex<Option<Child>>,
 }
 
 fn required_windows_dir(name: &str) -> Result<PathBuf, String> {
     env::var_os(name)
         .map(PathBuf::from)
         .ok_or_else(|| format!("{name} is unavailable"))
+}
+
+fn windows_process_path(path: PathBuf) -> PathBuf {
+    let value = path.to_string_lossy();
+    if let Some(stripped) = value.strip_prefix("\\\\?\\UNC\\") {
+        return PathBuf::from(format!("\\\\{stripped}"));
+    }
+    if let Some(stripped) = value.strip_prefix("\\\\?\\") {
+        return PathBuf::from(stripped);
+    }
+    path
 }
 
 fn reserve_loopback_port() -> Result<u16, String> {
@@ -48,6 +73,17 @@ fn reserve_loopback_port() -> Result<u16, String> {
         .local_addr()
         .map(|address| address.port())
         .map_err(|error| format!("failed to read the loopback port: {error}"))
+}
+
+fn reserve_service_ports() -> Result<(u16, u16), String> {
+    let fastapi_port = reserve_loopback_port()?;
+    for _ in 0..8 {
+        let gateway_port = reserve_loopback_port()?;
+        if gateway_port != fastapi_port {
+            return Ok((fastapi_port, gateway_port));
+        }
+    }
+    Err("failed to reserve distinct local service ports".to_string())
 }
 
 fn backend_executable(app: &tauri::App) -> Result<PathBuf, String> {
@@ -61,19 +97,79 @@ fn backend_executable(app: &tauri::App) -> Result<PathBuf, String> {
         return Ok(bundled);
     }
 
-    let development = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("..")
-        .join("..")
-        .join("desktop")
-        .join("dist")
-        .join("visiondata-gate-backend")
-        .join("visiondata-gate-backend.exe");
-    if development.is_file() {
-        return development
-            .canonicalize()
-            .map_err(|error| format!("failed to resolve the development sidecar: {error}"));
+    #[cfg(debug_assertions)]
+    {
+        let development = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join("..")
+            .join("desktop")
+            .join("dist")
+            .join("visiondata-gate-backend")
+            .join("visiondata-gate-backend.exe");
+        if development.is_file() {
+            return development
+                .canonicalize()
+                .map_err(|error| format!("failed to resolve the development sidecar: {error}"));
+        }
     }
     Err("the packaged FastAPI sidecar is missing".to_string())
+}
+
+fn gateway_jar(app: &tauri::App) -> Result<PathBuf, String> {
+    let bundled = app
+        .path()
+        .resource_dir()
+        .map_err(|error| format!("failed to resolve the resource directory: {error}"))?
+        .join("gateway")
+        .join("visiondata-gate-gateway.jar");
+    if bundled.is_file() {
+        return Ok(bundled);
+    }
+    #[cfg(debug_assertions)]
+    {
+        let development = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join("..")
+            .join("gateway")
+            .join("target")
+            .join("visiondata-gate-gateway.jar");
+        if development.is_file() {
+            return development.canonicalize().map_err(|error| {
+                format!("failed to resolve the development gateway JAR: {error}")
+            });
+        }
+    }
+    Err("the packaged Spring Boot gateway JAR is missing".to_string())
+}
+
+fn gateway_java(app: &tauri::App) -> Result<PathBuf, String> {
+    let bundled = app
+        .path()
+        .resource_dir()
+        .map_err(|error| format!("failed to resolve the resource directory: {error}"))?
+        .join("gateway")
+        .join("runtime")
+        .join("bin")
+        .join("java.exe");
+    if bundled.is_file() {
+        return Ok(bundled);
+    }
+    #[cfg(debug_assertions)]
+    {
+        let development = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join("..")
+            .join("gateway")
+            .join("runtime")
+            .join("bin")
+            .join("java.exe");
+        if development.is_file() {
+            return development.canonicalize().map_err(|error| {
+                format!("failed to resolve the development Java runtime: {error}")
+            });
+        }
+    }
+    Err("the packaged Java runtime is missing".to_string())
 }
 
 fn expected_startup_proof(secret: &str, challenge: &str) -> String {
@@ -221,6 +317,80 @@ fn start_backend(
     Ok(child)
 }
 
+fn start_gateway(
+    app: &tauri::App,
+    gateway_port: u16,
+    fastapi_port: u16,
+    log_file: &Path,
+) -> Result<Child, String> {
+    let java = windows_process_path(gateway_java(app)?);
+    let jar = windows_process_path(gateway_jar(app)?);
+    let stdout = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(log_file)
+        .map_err(|error| format!("failed to open the gateway log: {error}"))?;
+    let stderr = stdout
+        .try_clone()
+        .map_err(|error| format!("failed to clone the gateway log handle: {error}"))?;
+
+    Command::new(java)
+        .arg("-Dfile.encoding=UTF-8")
+        .arg("-jar")
+        .arg(jar)
+        .env("VISIONDATA_GATEWAY_PORT", gateway_port.to_string())
+        .env(
+            "VISIONDATA_FASTAPI_BASE_URL",
+            format!("http://127.0.0.1:{fastapi_port}"),
+        )
+        .stdin(Stdio::null())
+        .stdout(Stdio::from(stdout))
+        .stderr(Stdio::from(stderr))
+        .creation_flags(CREATE_NO_WINDOW)
+        .spawn()
+        .map_err(|error| format!("failed to start the Spring Boot gateway: {error}"))
+}
+
+fn write_startup_receipt(
+    log_root: &Path,
+    gateway_port: u16,
+    fastapi_port: u16,
+) -> Result<(), String> {
+    let receipt = DesktopStartupReceipt {
+        schema_version: "visiondata-gate.desktop-startup.v1",
+        status: "READY",
+        gateway: "SPRING_BOOT_WEBFLUX",
+        gateway_port,
+        fastapi_port,
+        bind_scope: "LOOPBACK_ONLY",
+        hmac_readiness_verified: true,
+        production_release_allowed: false,
+        machine_write_permitted: false,
+    };
+    let mut serialized = serde_json::to_vec_pretty(&receipt)
+        .map_err(|error| format!("failed to serialize the startup receipt: {error}"))?;
+    serialized.push(b'\n');
+    fs::write(log_root.join("desktop-startup.json"), serialized)
+        .map_err(|error| format!("failed to write the startup receipt: {error}"))
+}
+
+fn schedule_smoke_exit(app: &tauri::App) {
+    let Ok(raw_delay) = env::var("VISIONDATA_DESKTOP_SMOKE_EXIT_AFTER_READY_MS") else {
+        return;
+    };
+    let Ok(delay_ms) = raw_delay.parse::<u64>() else {
+        return;
+    };
+    if !(250..=10_000).contains(&delay_ms) {
+        return;
+    }
+    let app_handle = app.handle().clone();
+    thread::spawn(move || {
+        thread::sleep(Duration::from_millis(delay_ms));
+        app_handle.exit(0);
+    });
+}
+
 fn request_graceful_shutdown(port: u16, token: &str) {
     let address = SocketAddr::from(([127, 0, 0, 1], port));
     let Ok(mut stream) = TcpStream::connect_timeout(&address, Duration::from_millis(350)) else {
@@ -233,16 +403,15 @@ fn request_graceful_shutdown(port: u16, token: &str) {
     let _ = stream.flush();
 }
 
-fn stop_backend(state: &DesktopState) {
-    let Ok(mut guard) = state.child.lock() else {
+fn stop_child(slot: &Mutex<Option<Child>>, grace: Duration) {
+    let Ok(mut guard) = slot.lock() else {
         return;
     };
     let Some(mut child) = guard.take() else {
         return;
     };
 
-    request_graceful_shutdown(state.port, &state.runtime.session_token);
-    let deadline = Instant::now() + Duration::from_secs(4);
+    let deadline = Instant::now() + grace;
     while Instant::now() < deadline {
         match child.try_wait() {
             Ok(Some(_)) => return,
@@ -252,6 +421,12 @@ fn stop_backend(state: &DesktopState) {
     }
     let _ = child.kill();
     let _ = child.wait();
+}
+
+fn stop_services(state: &DesktopState) {
+    request_graceful_shutdown(state.gateway_port, &state.runtime.session_token);
+    stop_child(&state.fastapi_child, Duration::from_secs(4));
+    stop_child(&state.gateway_child, Duration::from_secs(1));
 }
 
 #[tauri::command]
@@ -297,32 +472,59 @@ pub fn run() {
             fs::create_dir_all(&config_root)?;
             copy_initial_config_template(&resource_dir, &config_file)?;
 
-            let port = reserve_loopback_port()?;
+            let (fastapi_port, gateway_port) = reserve_service_ports()?;
             let token = format!("{}{}", Uuid::new_v4().simple(), Uuid::new_v4().simple());
             let startup_secret = format!("{}{}", Uuid::new_v4().simple(), Uuid::new_v4().simple());
-            let log_file = log_root.join("backend.log");
+            let fastapi_log_file = log_root.join("fastapi.log");
+            let gateway_log_file = log_root.join("gateway.log");
             let sample_data_root = resource_dir.join("sample_data");
             let runtime = DesktopRuntimeConfig {
-                api_base_url: format!("http://127.0.0.1:{port}"),
+                api_base_url: format!("http://127.0.0.1:{gateway_port}"),
                 session_token: token.clone(),
                 data_root: product_root.to_string_lossy().into_owned(),
                 config_file: config_file.to_string_lossy().into_owned(),
                 sample_data_root: sample_data_root.to_string_lossy().into_owned(),
             };
-            let child = start_backend(
+            let mut fastapi_child = start_backend(
                 app,
-                port,
+                fastapi_port,
                 &token,
                 &startup_secret,
                 &product_root,
                 &config_file,
-                &log_file,
+                &fastapi_log_file,
             )?;
+            let mut gateway_child =
+                match start_gateway(app, gateway_port, fastapi_port, &gateway_log_file) {
+                    Ok(child) => child,
+                    Err(error) => {
+                        let _ = fastapi_child.kill();
+                        let _ = fastapi_child.wait();
+                        return Err(error.into());
+                    }
+                };
+            if let Err(error) = wait_for_backend(&mut gateway_child, gateway_port, &startup_secret)
+            {
+                let _ = gateway_child.kill();
+                let _ = gateway_child.wait();
+                let _ = fastapi_child.kill();
+                let _ = fastapi_child.wait();
+                return Err(error.into());
+            }
+            if let Err(error) = write_startup_receipt(&log_root, gateway_port, fastapi_port) {
+                let _ = gateway_child.kill();
+                let _ = gateway_child.wait();
+                let _ = fastapi_child.kill();
+                let _ = fastapi_child.wait();
+                return Err(error.into());
+            }
             app.manage(DesktopState {
                 runtime,
-                port,
-                child: Mutex::new(Some(child)),
+                gateway_port,
+                fastapi_child: Mutex::new(Some(fastapi_child)),
+                gateway_child: Mutex::new(Some(gateway_child)),
             });
+            schedule_smoke_exit(app);
             Ok(())
         });
 
@@ -332,7 +534,7 @@ pub fn run() {
         .run(|app_handle, event| {
             if matches!(event, RunEvent::ExitRequested { .. } | RunEvent::Exit) {
                 if let Some(state) = app_handle.try_state::<DesktopState>() {
-                    stop_backend(&state);
+                    stop_services(&state);
                 }
             }
         });

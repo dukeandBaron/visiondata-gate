@@ -1,5 +1,4 @@
 import {
-  ArrowRight,
   BadgeCheck,
   Braces,
   BriefcaseBusiness,
@@ -11,15 +10,14 @@ import {
   KeyRound,
   LockKeyhole,
   Network,
-  RefreshCw,
   ScanSearch,
   UserRoundX,
   Workflow,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { BrowserLocalImageLab } from "../components/BrowserLocalImageLab";
 import { InspectionCanvas } from "../components/visuals";
 import {
-  ActionButton,
   ClaimBoundary,
   DetailRow,
   Digest,
@@ -58,9 +56,9 @@ const viewCopy: Record<
   { eyebrow: string; title: string; description: string }
 > = {
   workspace: {
-    eyebrow: "PUBLIC EVIDENCE LAB",
-    title: "合成视觉取证工作簿",
-    description: "使用固定合成测量展示图像、阈值、异常区域与责任边界；不加载用户文件。",
+    eyebrow: "BROWSER-LOCAL EVIDENCE LAB",
+    title: "真实图片本地取证工作簿",
+    description: "用户图片只在当前标签页解码和测量；冻结合成回放继续作为独立参考证据。",
   },
   "command-center": {
     eyebrow: "PUBLIC CONTROL PLANE",
@@ -109,8 +107,8 @@ const viewCopy: Record<
   },
   review: {
     eyebrow: "PUBLIC REVIEW PACK",
-    title: "产品证据索引",
-    description: "每项能力只链接可公开材料与合成回放，不把页面文案当成运行回执。",
+    title: "评审证据索引",
+    description: "评分项只链接可公开材料与合成回放，不把页面文案当成测试回执。",
   },
   account: {
     eyebrow: "PUBLIC SESSION",
@@ -137,114 +135,6 @@ function PublicManifestGate({
         <FileDown size={14} /> 下载公开回放清单
       </a>
     </div>
-  );
-}
-
-function manifestState(
-  items: Array<{ id: string; state: string }>,
-  id: string,
-): string {
-  return items.find((item) => item.id === id)?.state ?? "NOT_RECORDED";
-}
-
-function SyntheticClosureComparison({
-  manifest,
-}: {
-  manifest: PublicReplayManifest;
-}) {
-  const humanState = manifestState(manifest.lineage, "human");
-  const derivedState = manifestState(manifest.lineage, "derived");
-  const outcomeState = manifestState(manifest.lineage, "outcome");
-  const budget = manifest.worker_selection.budget;
-
-  return (
-    <section className="public-closure-comparison" aria-label="合成案件整改前后对照">
-      <header>
-        <span>SYNTHETIC BEFORE / CONTROL / CHILD</span>
-        <div>
-          <strong>异常不是终点：保留 Parent，经过人工闸门，再由 Child 同合同复验</strong>
-          <small>以下状态全部来自当前已验公开清单；没有公开的整改后测量值不会被页面补画。</small>
-        </div>
-      </header>
-      <div className="public-closure-comparison__track">
-        <article data-stage="parent">
-          <header><span>01</span><small>BEFORE · SYNTHETIC PARENT</small></header>
-          <strong>{manifest.case.initial_disposition}</strong>
-          <ul>
-            {manifest.triggering_evidence.map((item) => (
-              <li key={item.id}>
-                <span>{item.signal}</span>
-                <code>{item.measurement}</code>
-                <small>threshold {item.threshold}</small>
-              </li>
-            ))}
-          </ul>
-        </article>
-        <div className="public-closure-comparison__control">
-          <ArrowRight size={18} />
-          <small>CONTROLLED CAPA</small>
-          <strong>{humanState} → {derivedState}</strong>
-          <span>{budget.selected}/{budget.maximum} evidence-selected Workers</span>
-        </div>
-        <article data-stage="child">
-          <header><span>02</span><small>AFTER · SYNTHETIC CHILD</small></header>
-          <strong>{manifest.case.child_disposition}</strong>
-          <p>同合同复验只改变合成案件状态，不建立工厂根因，也不产生生产放行。</p>
-          <code>{outcomeState}</code>
-          <small>POST-REPAIR MEASUREMENTS · NOT PUBLISHED IN THIS MANIFEST</small>
-        </article>
-      </div>
-    </section>
-  );
-}
-
-function RecoveryReceipt({ manifest }: { manifest: PublicReplayManifest }) {
-  const toolState = manifestState(manifest.phases, "tool");
-  const judgeState = manifestState(manifest.phases, "judge");
-  const childState = manifestState(manifest.lineage, "child");
-
-  return (
-    <section className="public-recovery-receipt" aria-label="失败关闭与复验状态链">
-      <header>
-        <div>
-          <span>FAIL-CLOSED / RECHECK RECEIPT</span>
-          <strong>能确认的是状态链；不能确认的故障事实继续留空</strong>
-        </div>
-        <StatusBadge tone="info">SHA-BOUND</StatusBadge>
-      </header>
-      <div className="public-recovery-receipt__rail">
-        <article><small>TOOL</small><strong>{toolState}</strong><p>公开清单确认确定性工具阶段。</p></article>
-        <article><small>JUDGE</small><strong>{judgeState}</strong><p>异常先失败关闭，再进入复验。</p></article>
-        <article><small>CHILD</small><strong>{childState}</strong><p>只对冻结合成分母有效。</p></article>
-      </div>
-      <div className="public-recovery-receipt__footer">
-        <Digest label="Public manifest SHA-256" value={manifest.manifest_sha256} />
-        <p><b>TOOL_FAULT_RECEIPT · NOT INCLUDED</b> 本公开清单没有独立工具故障回执，因此这里只证明失败关闭与复验状态，不宣称工具故障恢复率。</p>
-      </div>
-    </section>
-  );
-}
-
-function ReviewBoundaryLedger({ manifest }: { manifest: PublicReplayManifest }) {
-  return (
-    <section className="public-review-boundary" aria-label="评审事实与缺口">
-      <article>
-        <small>PRIVATE_OFFLINE_VALIDATION</small>
-        <strong>私有工业数据不进入公开 Pages</strong>
-        <p>本页只说明本地验证路径；客户验收与真实工厂效果不在公开清单内。</p>
-      </article>
-      <article data-tone="hold">
-        <small>NO_FACTORY_TRUTH</small>
-        <strong>{manifest.missing_evidence.length} 项外部证据仍缺失</strong>
-        <ul>{manifest.missing_evidence.map((item) => <li key={item}>{item}</li>)}</ul>
-      </article>
-      <article>
-        <small>PUBLIC RECEIPT</small>
-        <strong>{manifest.evidence_boundary.baseline_tag}</strong>
-        <code>{manifest.manifest_sha256}</code>
-        <p>production_release_allowed=false</p>
-      </article>
-    </section>
   );
 }
 
@@ -313,28 +203,35 @@ function CommandCenter({ manifest }: { manifest: PublicReplayManifest }) {
 function Workspace({ manifest }: { manifest: PublicReplayManifest }) {
   const syntheticCase = cases.find((item) => item.id === "synthetic-v3");
   return (
-    <div className="public-workspace-grid">
-      <Panel variant="raised">
-        <PanelHeader
-          eyebrow="SYNTHETIC INSTRUMENT"
-          title="固定视觉测量"
-          detail="画布使用嵌入式合成图形，不包含任何工厂或个人图像。"
-          actions={<StatusBadge tone="info">READ ONLY</StatusBadge>}
-        />
-        <InspectionCanvas caseRecord={syntheticCase} />
-      </Panel>
-      <Panel>
-        <PanelHeader eyebrow="MEASUREMENT CONTRACT" title="异常测点" detail="测量值、阈值和触发动作保持同屏。" />
-        <div className="public-evidence-list">
-          {manifest.triggering_evidence.map((item) => (
-            <article key={item.id}>
-              <ScanSearch size={17} />
-              <div><strong>{item.signal}</strong><p>{item.measurement} · threshold {item.threshold}</p><small>{item.effect}</small></div>
-            </article>
-          ))}
-        </div>
-      </Panel>
-    </div>
+    <>
+      <BrowserLocalImageLab />
+      <div className="public-reference-divider">
+        <span>SHA-BOUND REFERENCE</span>
+        <strong>以下是独立的冻结合成回放，不会读取上方用户图片</strong>
+      </div>
+      <div className="public-workspace-grid">
+        <Panel variant="raised">
+          <PanelHeader
+            eyebrow="SYNTHETIC REFERENCE"
+            title="固定视觉测量"
+            detail="画布使用嵌入式合成图形，不包含任何工厂或个人图像。"
+            actions={<StatusBadge tone="info">READ ONLY</StatusBadge>}
+          />
+          <InspectionCanvas caseRecord={syntheticCase} />
+        </Panel>
+        <Panel>
+          <PanelHeader eyebrow="MEASUREMENT CONTRACT" title="冻结异常测点" detail="测量值、阈值和触发动作来自已验 SHA 清单。" />
+          <div className="public-evidence-list">
+            {manifest.triggering_evidence.map((item) => (
+              <article key={item.id}>
+                <ScanSearch size={17} />
+                <div><strong>{item.signal}</strong><p>{item.measurement} · threshold {item.threshold}</p><small>{item.effect}</small></div>
+              </article>
+            ))}
+          </div>
+        </Panel>
+      </div>
+    </>
   );
 }
 
@@ -409,7 +306,6 @@ function Capa({ manifest }: { manifest: PublicReplayManifest }) {
           ))}
         </div>
       </Panel>
-      <SyntheticClosureComparison manifest={manifest} />
       <div className="public-locked-actions">
         <LockedAction label="批准 CAPA" reason="公开静态模式不建立操作者身份或审批绑定。" />
         <LockedAction label="执行派生整改" reason="GitHub Pages 没有私有数据卷或本地 API。" />
@@ -421,25 +317,22 @@ function Capa({ manifest }: { manifest: PublicReplayManifest }) {
 
 function Runs({ manifest }: { manifest: PublicReplayManifest }) {
   return (
-    <>
-      <div className="public-replay-grid">
-        <Panel variant="raised">
-          <PanelHeader eyebrow="PHASE TRACE" title="可观察运行事件" detail="顺序与状态来自公开清单。" />
-          <div className="public-run-timeline">
-            {manifest.phases.map((phase, index) => (
-              <article key={phase.id}><span>{index + 1}</span><div><strong>{phase.label}</strong><small>{phase.state}</small></div></article>
-            ))}
-          </div>
-        </Panel>
-        <Panel>
-          <PanelHeader eyebrow="BUDGET RECEIPT" title="选择预算" detail="没有隐藏的模型调用。" />
-          <Metric label="Selected" value={String(manifest.worker_selection.budget.selected)} detail="evidence-changing Workers" tone="warning" />
-          <Metric label="Maximum" value={String(manifest.worker_selection.budget.maximum)} detail="frozen budget" tone="info" />
-          <Metric label="Model calls" value="0" detail="deterministic replay" tone="success" />
-        </Panel>
-      </div>
-      <RecoveryReceipt manifest={manifest} />
-    </>
+    <div className="public-replay-grid">
+      <Panel variant="raised">
+        <PanelHeader eyebrow="PHASE TRACE" title="可观察运行事件" detail="顺序与状态来自公开清单。" />
+        <div className="public-run-timeline">
+          {manifest.phases.map((phase, index) => (
+            <article key={phase.id}><span>{index + 1}</span><div><strong>{phase.label}</strong><small>{phase.state}</small></div></article>
+          ))}
+        </div>
+      </Panel>
+      <Panel>
+        <PanelHeader eyebrow="BUDGET RECEIPT" title="选择预算" detail="没有隐藏的模型调用。" />
+        <Metric label="Selected" value={String(manifest.worker_selection.budget.selected)} detail="evidence-changing Workers" tone="warning" />
+        <Metric label="Maximum" value={String(manifest.worker_selection.budget.maximum)} detail="frozen budget" tone="info" />
+        <Metric label="Model calls" value="0" detail="deterministic replay" tone="success" />
+      </Panel>
+    </div>
   );
 }
 
@@ -480,16 +373,16 @@ function Governance({ manifest }: { manifest: PublicReplayManifest }) {
           {controls.map(([label, value]) => <DetailRow key={label} label={label} value={String(value).toUpperCase()} />)}
         </Panel>
         <Panel>
-          <PanelHeader eyebrow="RELEASE STATE" title="源码、静态投影与生产状态分离" detail="网页部署成功不改变生产授权状态。" />
-          <DetailRow label="Source verification" value={manifest.release_status.source_verification} />
-          <DetailRow label="Public projection" value={manifest.release_status.public_projection} />
+          <PanelHeader eyebrow="RELEASE STATE" title="本地与官方状态分离" detail="网页部署成功不改变比赛或生产状态。" />
+          <DetailRow label="Frozen RC3 baseline" value={manifest.release_status.local_candidate} />
           <DetailRow label="Public attestation" value={manifest.evidence_boundary.public_snapshot_attestation} />
-          <DetailRow label="Production readiness" value={manifest.release_status.production_readiness} />
+          <DetailRow label="Official submission" value={manifest.release_status.official_submission} />
+          <DetailRow label="Official evaluation" value={manifest.release_status.official_evaluation} />
           <DetailRow label="Production release" value="FALSE" />
         </Panel>
       </div>
       <ClaimBoundary title="专业判断边界" tone="danger">
-        VisionData Gate 只提供证据组织、受控编排和门禁建议，不替代质量负责人、客户机构或主管部门的最终判断，也不直接控制生产设备。
+        本工作站只提供证据组织、受控编排和门禁建议，不替代质量负责人、客户机构或主管部门的最终判断，也不直接控制生产设备。
       </ClaimBoundary>
     </>
   );
@@ -497,26 +390,23 @@ function Governance({ manifest }: { manifest: PublicReplayManifest }) {
 
 function Review({ manifest }: { manifest: PublicReplayManifest }) {
   const rows = [
-    ["行业问题", "公开场景与适用边界", "README / architecture"],
-    ["Agent 行为", "选中/拒绝 Worker、预算、触发证据", "Public replay manifest"],
-    ["闭环血缘", "Parent / Human / Derived / Child", "Lineage view"],
-    ["失败恢复", "缺失事实保持 HOLD，不制造 PASS", "Governance view"],
-    ["安全边界", "无客户数据、无密钥、无设备写入", "Compliance"],
+    ["问题真实", "公开行业来源与场景边界", "README / INDUSTRY_SCENARIO_VALUE"],
+    ["能力真实", "选中/拒绝 Worker、预算、触发证据", "Public replay manifest"],
+    ["闭环结构可核验", "Parent / Human / Derived / Child", "Lineage view"],
+    ["异常稳定", "缺失事实保持 HOLD，不制造 PASS", "Governance view"],
+    ["安全合规", "无客户数据、无密钥、无人机写", "Publication boundary"],
     ["开放复用", "Apache-2.0、SBOM、格式合同", "Repository docs"],
   ];
   return (
-    <>
-      <Panel variant="raised">
-        <PanelHeader eyebrow="PRODUCT EVIDENCE INDEX" title="能力声明 → 可核验证据" detail="链接材料仍需使用者独立核验。" />
-        <div className="public-review-table">
-          {rows.map(([question, evidence, source]) => (
-            <article key={question}><strong>{question}</strong><span>{evidence}</span><code>{source}</code></article>
-          ))}
-        </div>
-        <Digest label="Public manifest SHA-256" value={manifest.manifest_sha256} />
-      </Panel>
-      <ReviewBoundaryLedger manifest={manifest} />
-    </>
+    <Panel variant="raised">
+      <PanelHeader eyebrow="GOAI REVIEW INDEX" title="评审问题 → 客观证明物" detail="链接材料仍需评委独立核验。" />
+      <div className="public-review-table">
+        {rows.map(([question, evidence, source]) => (
+          <article key={question}><strong>{question}</strong><span>{evidence}</span><code>{source}</code></article>
+        ))}
+      </div>
+      <Digest label="Public manifest SHA-256" value={manifest.manifest_sha256} />
+    </Panel>
   );
 }
 
@@ -582,16 +472,8 @@ export function PublicReplayPage({ view }: { view: PublicReplayView }) {
 
   if (state.status === "FAILED") {
     return (
-      <div className="page-stack public-replay-page">
-        <div className="public-replay-failure" role="alert">
-          <EmptyState icon={CircleOff} title="公开回放失败关闭" description={`清单缺失或完整性失败：${state.reason}。页面不会使用嵌入数字补位。`} />
-          <ActionButton variant="secondary" icon={RefreshCw} onClick={state.retry}>
-            重新加载并核验公开清单
-          </ActionButton>
-        </div>
-        <ClaimBoundary title="失败关闭仍然生效" tone="danger">
-          重试只会重新读取同一静态清单；在 JCS SHA-256 验证完成前，案件、Worker、CAPA 与 Child 结果保持不可见。
-        </ClaimBoundary>
+      <div className="page-stack">
+        <EmptyState icon={CircleOff} title="公开回放失败关闭" description={`清单缺失或完整性失败：${state.reason}。页面不会使用嵌入数字补位。`} />
       </div>
     );
   }

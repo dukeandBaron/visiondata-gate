@@ -1,12 +1,12 @@
 # Third-party notices
 
-VisionData Gate is licensed under Apache-2.0. Its source distribution does
+VisionData Gate is licensed under Apache-2.0. Its source submission ZIP does
 not vendor the Python distributions listed below, model weights, or external
 datasets. The packages are resolved by `uv.lock` and installed separately by
 the user's package manager. Each installed distribution remains governed by
 its own license and carries its authoritative license files.
 
-This notice records the 63 locked third-party packages in the current environment.
+This notice records the 64 locked third-party packages in the current environment.
 The machine-readable inventory is `docs/SBOM.cdx.json`; metadata provenance,
 manual-resolution evidence, and exact versions are recorded in
 `docs/THIRD_PARTY_LICENSE_INVENTORY.generated.md`.
@@ -109,11 +109,12 @@ below.
 
 ## PSF-2.0
 
+- defusedxml 0.7.1
 - typing-extensions 4.16.0
 
 ## Exact-version manual resolutions
 
-Thirteen dependency records did not expose a single unambiguous SPDX expression
+Fourteen dependency records did not expose a single unambiguous SPDX expression
 through cross-platform Core Metadata. Their wheel license files were reviewed
 for the locked version; an upgrade deliberately returns the component to
 `REVIEW_REQUIRED` until the new distribution is checked.
@@ -122,6 +123,7 @@ for the locked version; an upgrade deliberately returns the component to
 |---|---|---|
 | altair 6.2.2 | BSD-3-Clause | `648332da6631555f71f18305b96e9a2c409e73d73613b6c96587cdc0a449e054` |
 | colorama 0.4.6 | BSD-3-Clause | `cac35c02686e5d04a5a7140bfb3b36e73aed496656e891102e428886d7930318` |
+| defusedxml 0.7.1 | PSF-2.0 | `b80ce9da8c42a1f91079627fbbe2bf27210ae108a0ffe5f077d5b08e076c24c8` |
 | itsdangerous 2.2.0 | BSD-3-Clause | `63af09891b6be8ad1a4252ed43af0f4efba7fc948e228367bed7f3c5ae0b09d7` |
 | jinja2 3.1.6 | BSD-3-Clause | `3b49dcee4105eb37bac10faf1be260408fe85d252b8e9df2e0979fc1e094437b` |
 | macholib 1.16.4 | MIT | `47082ab2bc0184123ec9f10fdf80c70723ee68f07d44382e17615c2a6ba70b09` |

@@ -1,617 +1,180 @@
-import {
-  ArrowRight,
-  Bot,
-  Braces,
-  Cable,
-  CheckCircle2,
-  Database,
-  FileCheck2,
-  HardDrive,
-  KeyRound,
-  Layers3,
-  Link2,
-  LoaderCircle,
-  PackageOpen,
-  PlugZap,
-  RadioTower,
-  RefreshCw,
-  Search,
-  ShieldCheck,
-  Sparkles,
-  Workflow,
-  Wrench,
-  type LucideIcon,
-} from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import type {
-  AgentRuntimeCapabilities,
-  HostedAgentTeamsReceipt,
-  LocalTaskSource,
-  SourceAuthorizationEvent,
-} from "../agentDomain";
-import { ClaimBoundary, EvidenceSourceBadge, StatusBadge } from "../components/ui";
-import {
-  authorizeLocalTaskSource,
-  getAgentRuntimeCapabilities,
-  getHostedAgentTeamsHealthStatus,
-  listLocalTaskSources,
-  listSourceAuthorizationEvents,
-  probeHostedAgentTeams,
-  revokeLocalTaskSource,
-  type HostedAgentTeamsHealthStatus,
-} from "../data/api";
+import { ArrowRight, CheckCircle2, Database, FileCheck2, HardDrive, LoaderCircle, Network, RadioTower, RefreshCw, Search, ShieldCheck } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
+import { Link } from "react-router-dom";
+import type { AgentRuntimeCapabilities, HostedAgentTeamsReceipt, LocalTaskSource, SourceAuthorizationEvent } from "../agentDomain";
+import { authorizeLocalTaskSource, getAgentRuntimeCapabilities, getHostedAgentTeamsHealthStatus, listLocalTaskSources, listSourceAuthorizationEvents, probeHostedAgentTeams, revokeLocalTaskSource, type HostedAgentTeamsHealthStatus } from "../data/api";
 import { integrationCatalog } from "../data/integrationCatalog";
-import type { IntegrationRecord } from "../domain";
+import { getIdentitySessionSnapshot, subscribeIdentitySession } from "../identitySession";
 import { useProduct } from "../ProductContext";
+import "../styles/control-surfaces.css";
 
-const categories = ["ALL", "ANNOTATION", "DATA", "API", "FORMAT", "AGENT", "MODEL"] as const;
-type HubMode = "WORKFLOWS" | "SKILLS" | "CONNECTORS";
-
-interface WorkflowMember {
-  icon: LucideIcon;
-  title: string;
-  detail: string;
-}
-
-interface WorkflowGroup {
-  id: "DATA" | "API" | "AGENT" | "GOVERNANCE";
-  eyebrow: string;
-  title: string;
-  description: string;
-  icon: LucideIcon;
-  tone: "cyan" | "violet" | "coral" | "lime";
-  targetId?: string;
-  route?: string;
-  members: WorkflowMember[];
-}
-
-const workflowGroups: WorkflowGroup[] = [
-  {
-    id: "DATA",
-    eyebrow: "DATA INTAKE",
-    title: "数据接入工作流",
-    description: "从授权目录进入可追溯数据上下文。",
-    icon: Database,
-    tone: "cyan",
-    targetId: "local-source",
-    members: [
-      { icon: HardDrive, title: "授权来源", detail: "只读范围与权利回执" },
-      { icon: PackageOpen, title: "格式适配", detail: "manifest / observation" },
-      { icon: CheckCircle2, title: "完整性收据", detail: "SHA 与事件链" },
-    ],
-  },
-  {
-    id: "API",
-    eyebrow: "SERVICE PLANE",
-    title: "API 服务协同",
-    description: "把项目、任务、证据和工单接入同一服务面。",
-    icon: PlugZap,
-    tone: "violet",
-    targetId: "rest-api",
-    members: [
-      { icon: Braces, title: "REST 合同", detail: "本地 /v1 API" },
-      { icon: Layers3, title: "任务与证据", detail: "Task / Finding / Receipt" },
-      { icon: Link2, title: "CAPA 与血缘", detail: "受控动作与演进" },
-    ],
-  },
-  {
-    id: "AGENT",
-    eyebrow: "AGENT RUNTIME",
-    title: "Agent 运行专家组",
-    description: "模型只负责理解与协同，工具回执负责确定性。",
-    icon: Bot,
-    tone: "coral",
-    targetId: "agentteams",
-    members: [
-      { icon: Workflow, title: "AgentTeams", detail: "托管传输合同" },
-      { icon: Wrench, title: "确定性工具", detail: "ToolTrace 与原子回执" },
-      { icon: KeyRound, title: "模型 Profile", detail: "服务端凭证边界" },
-    ],
-  },
-  {
-    id: "GOVERNANCE",
-    eyebrow: "GOVERNED DELIVERY",
-    title: "治理与交付闭环",
-    description: "所有高责任动作在人工闸门前停止。",
-    icon: ShieldCheck,
-    tone: "lime",
-    route: "/governance",
-    members: [
-      { icon: FileCheck2, title: "授权账本", detail: "append-only events" },
-      { icon: RefreshCw, title: "影子评测", detail: "同合同复验" },
-      { icon: ShieldCheck, title: "发布门禁", detail: "fail closed" },
-    ],
-  },
-];
-
-function stateLabel(state: IntegrationRecord["state"]): string {
-  return state.replaceAll("_", " ");
-}
-
-function hubStateLabel(state: IntegrationRecord["state"]): string {
-  const labels: Record<string, string> = {
-    LOCAL_CONTRACT_VERIFIED: "本地可用",
-    CONTRACT_READY_NOT_CONNECTED: "合同就绪",
-    LOCAL_API_AVAILABLE: "服务可用",
-    ADAPTER_SDK_AVAILABLE: "可扩展",
-    MAPPED_NOT_CONNECTED: "待连接",
-    NOT_TESTED: "未测试",
-  };
-  return labels[state] ?? stateLabel(state);
-}
-
-function shortDigest(value: string | null | undefined): string {
-  if (!value) return "—";
-  return `${value.slice(0, 10)}…${value.slice(-8)}`;
-}
-
-function iconForCategory(category: IntegrationRecord["category"]): LucideIcon {
-  if (category === "API") return PlugZap;
-  if (category === "DATA") return Database;
-  if (category === "FORMAT") return PackageOpen;
-  if (category === "AGENT" || category === "MODEL") return Bot;
-  return Cable;
-}
+const stateLabels: Record<string, string> = {
+  LOCAL_CONTRACT_VERIFIED: "本地合同已验证", CONTRACT_READY_NOT_CONNECTED: "合同就绪 · 未连接",
+  LOCAL_API_AVAILABLE: "本地 API 合同", ADAPTER_SDK_AVAILABLE: "可开发扩展", MAPPED_NOT_CONNECTED: "未连接", NOT_TESTED: "未测试",
+};
+const emptyForm = { displayName: "", rootPath: "", sourceArchiveSha256: "", purpose: "", rightsBasis: "", attested: false };
+function shortDigest(value: string | null | undefined) { return value ? `${value.slice(0, 12)}…${value.slice(-8)}` : "未提供"; }
 
 export function IntegrationsPage() {
-  const navigate = useNavigate();
   const { activeWorkspace, connection } = useProduct();
-  const [hubMode, setHubMode] = useState<HubMode>("WORKFLOWS");
-  const [category, setCategory] = useState<(typeof categories)[number]>("ALL");
+  const identity = useSyncExternalStore(subscribeIdentitySession, getIdentitySessionSnapshot, getIdentitySessionSnapshot);
+  const workspaceId = activeWorkspace?.workspace_id;
+  const scope = `${workspaceId ?? ""}:${identity.generation}:${connection.api}`;
+  const scopeRef = useRef(scope);
+  scopeRef.current = scope;
+  const requestGeneration = useRef(0);
+  const mutationInFlight = useRef(false);
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState(integrationCatalog[0]?.id ?? "");
+  const [selectedId, setSelectedId] = useState("");
   const [sources, setSources] = useState<LocalTaskSource[]>([]);
+  const [verifiedScope, setVerifiedScope] = useState("");
+  const [sourceState, setSourceState] = useState<"LOADING" | "VERIFIED" | "UNKNOWN">("UNKNOWN");
+  const [sourceError, setSourceError] = useState<string>();
+  const [sourceEvents, setSourceEvents] = useState<Record<string, SourceAuthorizationEvent[]>>({});
+  const [eventError, setEventError] = useState<string>();
   const [runtimeCapabilities, setRuntimeCapabilities] = useState<AgentRuntimeCapabilities>();
   const [hostedHealthStatus, setHostedHealthStatus] = useState<HostedAgentTeamsHealthStatus>();
+  const [capabilityError, setCapabilityError] = useState<string>();
   const [hostedProbeReceipt, setHostedProbeReceipt] = useState<HostedAgentTeamsReceipt>();
   const [hostedProbeLoading, setHostedProbeLoading] = useState(false);
   const [hostedProbeError, setHostedProbeError] = useState<string>();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>();
   const [refreshToken, setRefreshToken] = useState(0);
+  const [sourceForm, setSourceForm] = useState(emptyForm);
   const [sourceSubmitting, setSourceSubmitting] = useState(false);
   const [sourceFeedback, setSourceFeedback] = useState<string>();
-  const [sourceEvents, setSourceEvents] = useState<Record<string, SourceAuthorizationEvent[]>>({});
+  const [writeError, setWriteError] = useState<string>();
   const [revokingSourceId, setRevokingSourceId] = useState("");
   const [revokeReason, setRevokeReason] = useState("");
   const [revoking, setRevoking] = useState(false);
-  const [sourceForm, setSourceForm] = useState({
-    displayName: "",
-    rootPath: "",
-    sourceArchiveSha256: "",
-    purpose: "",
-    rightsBasis: "",
-    attested: false,
-  });
-  const hostedProbeGenerationRef = useRef(0);
+  const sourceVerified = sourceState === "VERIFIED" && verifiedScope === scope;
+  const currentSources = sourceVerified ? sources : [];
+  const activeSourceCount = currentSources.filter(source => source.status === "active").length;
+  const canRead = Boolean(workspaceId) && connection.api === "CONNECTED";
+  const canWrite = canRead && sourceVerified && !sourceSubmitting && !revoking && !writeError;
 
   useEffect(() => {
-    hostedProbeGenerationRef.current += 1;
-    setHostedProbeReceipt(undefined);
-    setHostedProbeError(undefined);
-    setHostedProbeLoading(false);
-  }, [activeWorkspace?.workspace_id]);
+    setSourceForm(emptyForm); setSourceFeedback(undefined); setWriteError(undefined);
+    setRevokingSourceId(""); setRevokeReason("");
+  }, [workspaceId, identity.generation]);
 
   useEffect(() => {
     let active = true;
-    const workspaceId = activeWorkspace?.workspace_id;
-    setSources([]);
-    setSourceEvents({});
-    setRuntimeCapabilities(undefined);
-    setHostedHealthStatus(undefined);
-    setError(undefined);
-    setLoading(false);
-    if (!workspaceId || connection.api !== "CONNECTED") return () => {
-      active = false;
-    };
-    setLoading(true);
-    void Promise.allSettled([
-      listLocalTaskSources(workspaceId),
-      getAgentRuntimeCapabilities(),
-      getHostedAgentTeamsHealthStatus(),
-    ]).then(([sourceResult, capabilityResult, hostedHealthResult]) => {
-      if (!active) return;
+    const generation = ++requestGeneration.current;
+    const current = () => active && generation === requestGeneration.current && scopeRef.current === scope;
+    setSources([]); setVerifiedScope(""); setSourceEvents({}); setEventError(undefined);
+    setSourceError(undefined); setRuntimeCapabilities(undefined); setHostedHealthStatus(undefined);
+    setCapabilityError(undefined); setHostedProbeReceipt(undefined); setHostedProbeError(undefined);
+    setHostedProbeLoading(false);
+    if (!workspaceId || connection.api !== "CONNECTED") {
+      setSourceState("UNKNOWN");
+      return () => { active = false; };
+    }
+    setSourceState("LOADING");
+    void Promise.allSettled([listLocalTaskSources(workspaceId), getAgentRuntimeCapabilities(), getHostedAgentTeamsHealthStatus()]).then(([sourceResult, capabilityResult, healthResult]) => {
+      if (!current()) return;
       if (sourceResult.status === "fulfilled") {
-        setSources(sourceResult.value);
-        void Promise.all(
-          sourceResult.value.map(async (source) => [
-            source.source_id,
-            await listSourceAuthorizationEvents(source.source_id),
-          ] as const),
-        ).then((entries) => {
-          if (active) setSourceEvents(Object.fromEntries(entries));
-        }).catch((caught) => {
-          if (active) setError((current) => current ?? (caught instanceof Error ? caught.message : "来源事件账本不可用"));
-        });
-      } else {
-        setError(sourceResult.reason instanceof Error ? sourceResult.reason.message : "数据源接口不可用");
-      }
+        setSources(sourceResult.value); setVerifiedScope(scope); setSourceState("VERIFIED");
+        void Promise.all(sourceResult.value.map(async source => [source.source_id, await listSourceAuthorizationEvents(source.source_id)] as const)).then(entries => {
+          if (current()) setSourceEvents(Object.fromEntries(entries));
+        }).catch(() => { if (current()) setEventError("授权事件尚未完整读取。重新读取来源可重试，不会重复登记或撤销。"); });
+      } else { setSourceState("UNKNOWN"); setSourceError("无法读取来源清单。请检查本地服务与工作空间权限，再重新读取。"); }
       if (capabilityResult.status === "fulfilled") setRuntimeCapabilities(capabilityResult.value);
-      else setError((current) => current ?? (capabilityResult.reason instanceof Error ? capabilityResult.reason.message : "Runtime 能力接口不可用"));
-      if (hostedHealthResult.status === "fulfilled") setHostedHealthStatus(hostedHealthResult.value);
-      else setError((current) => current ?? (hostedHealthResult.reason instanceof Error ? hostedHealthResult.reason.message : "Hosted AgentTeams 本地健康状态不可用"));
-      setLoading(false);
+      if (healthResult.status === "fulfilled") setHostedHealthStatus(healthResult.value);
+      if (capabilityResult.status === "rejected" || healthResult.status === "rejected") setCapabilityError("部分扩展配置未核实，不影响已成功读取的来源。");
     });
-    return () => {
-      active = false;
-    };
-  }, [activeWorkspace?.workspace_id, connection.api, refreshToken]);
+    return () => { active = false; };
+  }, [scope, workspaceId, connection.api, refreshToken]);
 
-  const resolvedIntegrations = useMemo<IntegrationRecord[]>(() => integrationCatalog.map((item) => {
-    if (item.id === "rest-api") {
-      return connection.api === "CONNECTED"
-        ? item
-        : { ...item, state: "MAPPED_NOT_CONNECTED", tone: "danger", source: "NOT_CONNECTED", boundary: "当前浏览器未连接本地 API；所有写操作保持不可用。" };
-    }
-    if (item.id === "local-source") {
-      const activeCount = sources.filter((source) => source.status === "active").length;
-      return {
-        ...item,
-        capability: `${item.capability} · 当前工作空间 active=${activeCount}`,
-        tone: activeCount ? "success" : "warning",
-      };
-    }
-    if (item.id === "external-models" && runtimeCapabilities) {
-      const available = runtimeCapabilities.model_profiles.filter((profile) => profile.availability === "AVAILABLE").length;
-      return { ...item, capability: `${item.capability} · server profiles available=${available}/${runtimeCapabilities.model_profiles.length}` };
-    }
-    if (item.id === "agentteams") {
-      if (hostedProbeReceipt) {
-        return {
-          ...item,
-          tone: hostedProbeReceipt.status === "PASS" ? "success" : hostedProbeReceipt.status === "FAIL" ? "danger" : "warning",
-          source: "LIVE_API",
-          capability: `${item.capability} · ${hostedProbeReceipt.operation_status}`,
-          boundary: hostedProbeReceipt.boundary,
-        };
-      }
-      if (hostedHealthStatus === "NOT_CONFIGURED") {
-        return {
-          ...item,
-          tone: "locked",
-          capability: `${item.capability} · NOT_CONFIGURED`,
-          boundary: "服务端未配置 Hosted AgentTeams；页面不会发起远程网络请求。",
-        };
-      }
-      if (hostedHealthStatus === "CONFIGURED_NOT_PROBED") {
-        return {
-          ...item,
-          tone: "warning",
-          capability: `${item.capability} · CONFIGURED_NOT_PROBED`,
-          boundary: "仅确认服务端配置存在；尚未执行用户触发的远程只读探测。",
-        };
-      }
-    }
-    return item;
-  }), [connection.api, hostedHealthStatus, hostedProbeReceipt, runtimeCapabilities, sources]);
+  const visible = useMemo(() => integrationCatalog.filter(item => !query.trim() || `${item.name} ${item.category} ${item.protocol} ${item.capability}`.toLowerCase().includes(query.trim().toLowerCase())), [query]);
+  const selected = integrationCatalog.find(item => item.id === selectedId);
+  const hostedObservedStatus = hostedProbeReceipt?.operation_status
+    ?? (hostedHealthStatus === "NOT_CONFIGURED" ? "NOT_CONFIGURED · 未配置" : hostedHealthStatus ?? "状态未核实");
+  const reload = () => setRefreshToken(value => value + 1);
 
-  const modeCategories = useMemo(() => {
-    if (hubMode === "SKILLS") return ["ALL", "ANNOTATION", "DATA", "FORMAT", "AGENT"] as const;
-    if (hubMode === "CONNECTORS") return ["ALL", "ANNOTATION", "API", "AGENT", "MODEL"] as const;
-    return categories;
-  }, [hubMode]);
-
-  const visible = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    return resolvedIntegrations.filter((item) => {
-      const modeMatch = hubMode === "WORKFLOWS"
-        || (hubMode === "SKILLS" && ["ANNOTATION", "DATA", "FORMAT", "AGENT"].includes(item.category))
-        || (hubMode === "CONNECTORS" && ["ANNOTATION", "API", "AGENT", "MODEL"].includes(item.category));
-      const categoryMatch = category === "ALL" || item.category === category;
-      const searchMatch = !normalizedQuery || [item.name, item.category, item.protocol, item.capability]
-        .some((value) => value.toLowerCase().includes(normalizedQuery));
-      return modeMatch && categoryMatch && searchMatch;
-    });
-  }, [category, hubMode, query, resolvedIntegrations]);
-
-  const selected = resolvedIntegrations.find((item) => item.id === selectedId) ?? resolvedIntegrations[0];
-  const activeSourceCount = sources.filter((source) => source.status === "active").length;
-  const availableModelCount = runtimeCapabilities?.model_profiles.filter((profile) => profile.availability === "AVAILABLE").length ?? 0;
-  const hostedObservedStatus = hostedProbeReceipt?.operation_status ?? hostedHealthStatus ?? "STATUS_UNAVAILABLE";
-
-  const changeHubMode = (mode: HubMode) => {
-    setHubMode(mode);
-    setCategory("ALL");
-  };
-
-  const openIntegration = (id: string, scroll = true) => {
-    setSelectedId(id);
-    if (scroll) window.setTimeout(() => document.getElementById("integration-hub-inspector")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
-  };
-
-  const openWorkflow = (group: WorkflowGroup) => {
-    if (group.route) {
-      navigate(group.route);
-      return;
-    }
-    if (group.targetId) openIntegration(group.targetId);
-  };
-
-  const workflowStatus = (id: WorkflowGroup["id"]): string => {
-    if (id === "DATA") return activeSourceCount ? `${activeSourceCount} ACTIVE` : "待授权";
-    if (id === "API") return connection.api;
-    if (id === "AGENT") return hostedObservedStatus;
-    return "HUMAN GATE";
-  };
-
-  const authorizeSource = async (event: FormEvent<HTMLFormElement>) => {
+  async function authorizeSource(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const workspaceId = activeWorkspace?.workspace_id;
-    if (!workspaceId || sourceSubmitting || !sourceForm.attested) return;
-    setSourceSubmitting(true);
-    setError(undefined);
-    setSourceFeedback(undefined);
+    if (!workspaceId || !canWrite || !sourceForm.attested || mutationInFlight.current) return;
+    if (!/^[0-9a-f]{64}$/.test(sourceForm.sourceArchiveSha256)) { setSourceFeedback("发布归档摘要需要 64 位小写 SHA-256。"); return; }
+    const requestScope = scope; const generation = requestGeneration.current;
+    mutationInFlight.current = true; setSourceSubmitting(true); setSourceFeedback(undefined);
     try {
-      if (!/^[0-9a-f]{64}$/.test(sourceForm.sourceArchiveSha256)) {
-        throw new Error("Source Archive 必须是 64 位小写 SHA-256");
-      }
-      const created = await authorizeLocalTaskSource({
-        workspaceId,
-        displayName: sourceForm.displayName,
-        rootPath: sourceForm.rootPath,
-        sourceArchiveSha256: sourceForm.sourceArchiveSha256,
-        purpose: sourceForm.purpose,
-        rightsBasis: sourceForm.rightsBasis,
-      });
-      setSources((current) => [created, ...current.filter((item) => item.source_id !== created.source_id)]);
-      setSourceFeedback(`只读来源 ${created.source_id} 已登记；服务端响应未向页面返回原始路径。`);
-      setSourceForm((current) => ({ ...current, displayName: "", rootPath: "", sourceArchiveSha256: "", purpose: "", rightsBasis: "", attested: false }));
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "本地来源登记失败");
-    } finally {
-      setSourceSubmitting(false);
-    }
-  };
+      const created = await authorizeLocalTaskSource({ workspaceId, displayName: sourceForm.displayName, rootPath: sourceForm.rootPath, sourceArchiveSha256: sourceForm.sourceArchiveSha256, purpose: sourceForm.purpose, rightsBasis: sourceForm.rightsBasis });
+      if (scopeRef.current !== requestScope || generation !== requestGeneration.current) return;
+      setSources(items => [created, ...items.filter(item => item.source_id !== created.source_id)]);
+      setSourceFeedback(`已登记“${created.display_name}”。原始路径不会回显到来源回执中。`); setSourceForm(emptyForm);
+    } catch {
+      if (scopeRef.current === requestScope && generation === requestGeneration.current) setWriteError("登记结果未核实，已停止重复提交。请重新读取来源，按名称与归档摘要核对；在确认服务端结果前不要重复登记。");
+    } finally { mutationInFlight.current = false; setSourceSubmitting(false); }
+  }
 
-  const revokeSource = async (source: LocalTaskSource) => {
-    if (revoking || revokeReason.trim().length < 8) return;
-    setRevoking(true);
-    setError(undefined);
-    setSourceFeedback(undefined);
+  async function revokeSource(source: LocalTaskSource) {
+    if (!canWrite || revokeReason.trim().length < 8 || mutationInFlight.current) return;
+    const requestScope = scope; const generation = requestGeneration.current;
+    mutationInFlight.current = true; setRevoking(true); setSourceFeedback(undefined);
     try {
-      const event = await revokeLocalTaskSource({
-        sourceId: source.source_id,
-        reason: revokeReason.trim(),
-        expectedLatestEventSha256: source.latest_authorization_event_sha256,
-      });
-      setSources((current) => current.map((item) => item.source_id === source.source_id
-        ? {
-            ...item,
-            status: "revoked",
-            authorization_event_count: item.authorization_event_count + 1,
-            latest_authorization_event_type: "REVOKED",
-            latest_authorization_event_sha256: event.event_sha256,
-          }
-        : item));
-      setSourceEvents((current) => ({
-        ...current,
-        [source.source_id]: [...(current[source.source_id] ?? []), event],
-      }));
-      setSourceFeedback(`来源 ${source.source_id} 已撤销；${event.fail_closed_task_ids.length} 个未开始任务被失败关闭。源字节仍由操作者管理，系统未删除文件。`);
-      setRevokingSourceId("");
-      setRevokeReason("");
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "来源撤销失败");
-    } finally {
-      setRevoking(false);
-    }
-  };
+      const event = await revokeLocalTaskSource({ sourceId: source.source_id, reason: revokeReason.trim(), expectedLatestEventSha256: source.latest_authorization_event_sha256 });
+      if (scopeRef.current !== requestScope || generation !== requestGeneration.current) return;
+      setSources(items => items.map(item => item.source_id === source.source_id ? { ...item, status: "revoked", authorization_event_count: item.authorization_event_count + 1, latest_authorization_event_sha256: event.event_sha256 } : item));
+      setSourceEvents(items => ({ ...items, [source.source_id]: [...(items[source.source_id] ?? []), event] }));
+      setSourceFeedback(`已撤销“${source.display_name}”，${event.fail_closed_task_ids.length} 个未开始任务已关闭。原始文件未删除。`); setRevokingSourceId(""); setRevokeReason("");
+    } catch {
+      if (scopeRef.current === requestScope && generation === requestGeneration.current) setWriteError("撤销结果未核实，已停止重复提交。请重新读取来源与授权事件，确认服务端的最终状态。");
+    } finally { mutationInFlight.current = false; setRevoking(false); }
+  }
 
-  const probeHostedTransport = async () => {
-    const workspaceId = activeWorkspace?.workspace_id;
-    if (
-      !workspaceId ||
-      connection.api !== "CONNECTED" ||
-      hostedHealthStatus !== "CONFIGURED_NOT_PROBED" ||
-      hostedProbeLoading
-    ) return;
-    const generation = ++hostedProbeGenerationRef.current;
-    setHostedProbeLoading(true);
-    setHostedProbeReceipt(undefined);
-    setHostedProbeError(undefined);
+  async function probeHostedTransport() {
+    if (!workspaceId || !canRead || hostedHealthStatus !== "CONFIGURED_NOT_PROBED" || hostedProbeLoading) return;
+    const requestScope = scope; const generation = requestGeneration.current;
+    setHostedProbeLoading(true); setHostedProbeReceipt(undefined); setHostedProbeError(undefined);
     try {
       const receipt = await probeHostedAgentTeams(workspaceId);
-      if (generation !== hostedProbeGenerationRef.current) return;
-      setHostedProbeReceipt(receipt);
-    } catch (caught) {
-      if (generation !== hostedProbeGenerationRef.current) return;
-      setHostedProbeError(caught instanceof Error ? caught.message : "Hosted AgentTeams 只读探测失败关闭");
-    } finally {
-      if (generation === hostedProbeGenerationRef.current) setHostedProbeLoading(false);
-    }
-  };
+      if (scopeRef.current === requestScope && generation === requestGeneration.current) setHostedProbeReceipt(receipt);
+    } catch {
+      if (scopeRef.current === requestScope && generation === requestGeneration.current) setHostedProbeError("远程只读探测未成功。未提交任何任务，请核对配置后重试。");
+    } finally { if (scopeRef.current === requestScope && generation === requestGeneration.current) setHostedProbeLoading(false); }
+  }
 
-  return (
-    <div className="integration-hub-page">
-      <section className="integration-hub-toolbar">
-        <nav aria-label="集成中心视图">
-          <button type="button" className={hubMode === "WORKFLOWS" ? "is-active" : ""} onClick={() => changeHubMode("WORKFLOWS")}><Sparkles size={16} /> 工作流</button>
-          <button type="button" className={hubMode === "SKILLS" ? "is-active" : ""} onClick={() => changeHubMode("SKILLS")}><Wrench size={16} /> 适配技能</button>
-          <button type="button" className={hubMode === "CONNECTORS" ? "is-active" : ""} onClick={() => changeHubMode("CONNECTORS")}><Link2 size={16} /> 连接器</button>
-        </nav>
-        <label><Search size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索 API、数据、格式或运行时" /></label>
-        <button type="button" className="integration-hub-toolbar__sources" onClick={() => openIntegration("local-source")}><HardDrive size={15} /> 我的来源 <span>{activeSourceCount}</span></button>
-        <button type="button" className="integration-hub-toolbar__refresh" onClick={() => setRefreshToken((value) => value + 1)} disabled={loading || connection.api !== "CONNECTED"} title="刷新真实状态">{loading ? <LoaderCircle className="is-spinning" size={15} /> : <RefreshCw size={15} />}</button>
-      </section>
+  return <div className="control-surface integration-controls">
+    <header className="control-heading"><div><span className="control-kicker">{activeWorkspace?.name ?? "尚未选择工作空间"}</span><h1>数据来源与集成</h1><p>管理授权目录；模型和任务在各自工作区中操作。</p></div><Database size={23} aria-hidden="true" /></header>
+    <div className="control-entry-row"><Link to="/workspace"><HardDrive size={17} /><span><strong>导入图片与数据集</strong><small>在图像工作簿上传、标注</small></span><ArrowRight size={15} /></Link><Link to="/models" aria-label="管理模型与 API"><Network size={17} /><span><strong>管理模型与 API</strong><small>本机模型、密钥与训练</small></span><ArrowRight size={15} /></Link><Link to="/command-center"><ShieldCheck size={17} /><span><strong>打开检查任务</strong><small>计划、工具回执与人工审批</small></span><ArrowRight size={15} /></Link></div>
 
-      <header className="integration-hub-heading">
-        <div><span>INTEGRATION SKILL HUB</span><h1>{hubMode === "WORKFLOWS" ? "精选工作流程" : hubMode === "SKILLS" ? "适配技能目录" : "连接器目录"}</h1><p>{hubMode === "WORKFLOWS" ? "按工业数据真正流转的顺序组织能力，不再让协议名和状态字段主导页面。" : hubMode === "SKILLS" ? "查看可在本机复用、扩展或组合的适配能力。" : "查看外部系统与运行时的真实连接边界。"}</p></div>
-        <div className="integration-hub-heading__status"><span><i className={`runtime-dot runtime-dot--${connection.api.toLowerCase()}`} /> API {connection.api}</span><span>{activeSourceCount} AUTHORIZED SOURCE</span><span>EXTERNAL VERIFIED · 0</span></div>
-      </header>
+    <section className="control-section" id="sources" aria-labelledby="sources-title">
+      <header className="control-section-actions"><div><h2 id="sources-title">已授权来源</h2><p>{sourceVerified ? `${currentSources.length} 个来源 · ${activeSourceCount} 个有效授权` : "状态未确认时，不显示来源数量。"}</p></div><button type="button" className="control-button" disabled={!canRead || sourceState === "LOADING" || sourceSubmitting || revoking} onClick={reload}><RefreshCw size={14} className={sourceState === "LOADING" ? "is-spinning" : undefined} />重新读取来源</button></header>
+      {sourceState === "LOADING" && canRead ? <p className="control-feedback" role="status">正在核验来源与授权状态…</p> : !sourceVerified ? <div className="control-feedback is-error" role="alert"><strong>来源清单未核实</strong><p>{sourceError ?? (!workspaceId ? "先选择工作空间，才能读取和登记来源。" : "本地 API 未连接。请在顶部重新检测服务，再读取来源。")}</p><small>UNKNOWN · 不等同于零来源</small></div> : currentSources.length === 0 ? <div className="control-empty"><HardDrive size={24} aria-hidden="true" /><h3>当前工作空间还没有授权来源。</h3><p>普通图片或数据集请先在工作簿导入。符合受控发布结构的目录可在下方登记。</p><Link to="/workspace">去工作簿导入</Link></div> : <div className="control-source-list">{currentSources.map(source => <article key={source.source_id}>
+        <header><div><strong>{source.display_name}</strong><small>{source.adapter_kind}</small></div><span className={source.status === "active" ? "control-state is-active" : "control-state"}>{source.status === "active" ? "已授权" : source.status === "revoked" ? "已撤销" : source.status}</span></header>
+        <dl className="control-facts"><div><dt>归档摘要</dt><dd><code title={source.source_archive_sha256}>{shortDigest(source.source_archive_sha256)}</code></dd></div><div><dt>登记时间</dt><dd>{new Date(source.created_at).toLocaleString()}</dd></div></dl>
+        <details className="control-disclosure"><summary>来源 ID、完整摘要与授权历史</summary><code>{source.source_id}</code><code>{source.source_archive_sha256}</code><p>事件 {source.authorization_event_count} 条 · 最近事件 {shortDigest(source.latest_authorization_event_sha256)}</p>{sourceEvents[source.source_id] ? (sourceEvents[source.source_id] ?? []).map(event => <p key={event.event_id}><strong>#{event.sequence} {event.event_type}</strong> · {event.reason}<small>{event.actor_id} · {shortDigest(event.event_sha256)}</small></p>) : <p>事件历史尚未核实。</p>}</details>
+        {source.status === "active" ? revokingSourceId === source.source_id ? <div className="control-revoke"><label>撤销原因（至少 8 字）<textarea aria-label="撤销原因" value={revokeReason} minLength={8} maxLength={1000} onChange={event => setRevokeReason(event.target.value)} disabled={revoking} /></label><p>撤销此来源的后续使用权限，不删除原始文件。受影响的未开始任务会停止。</p><div className="control-form-actions"><button type="button" onClick={() => { setRevokingSourceId(""); setRevokeReason(""); }} disabled={revoking}>保留授权</button><button type="button" className="is-danger" onClick={() => void revokeSource(source)} disabled={!canWrite || revokeReason.trim().length < 8}>{revoking ? "正在撤销…" : "永久撤销此授权"}</button></div></div> : <button type="button" className="control-text-button" disabled={!canWrite} onClick={() => setRevokingSourceId(source.source_id)}>撤销来源授权</button> : null}
+      </article>)}</div>}
+      {eventError ? <p className="control-feedback is-error" role="alert">{eventError}</p> : null}
+      {sourceFeedback ? <p className="control-feedback" role="status">{sourceFeedback}</p> : null}
+      {writeError ? <p className="control-feedback is-error" role="alert">{writeError}</p> : null}
+      <details className="control-disclosure control-register"><summary><HardDrive size={16} /> 登记受控发布目录</summary><p>此入口适配 Omni-AD 受控发布目录（omni_ad_30_release），不是任意文件夹上传。原图留在服务端本地，登记仅授权只读使用。</p>
+        <form className="control-source-form" onSubmit={event => void authorizeSource(event)}>
+          <fieldset disabled={!canWrite}><legend>来源与使用授权</legend>
+            <div className="control-form-grid"><label>显示名称<input required minLength={2} maxLength={120} value={sourceForm.displayName} onChange={event => setSourceForm(value => ({ ...value, displayName: event.target.value }))} /></label><label>服务端绝对目录<input required value={sourceForm.rootPath} onChange={event => setSourceForm(value => ({ ...value, rootPath: event.target.value }))} placeholder="填写已有受控发布目录" /></label></div>
+            <label>发布归档 SHA-256<input required pattern="[0-9a-f]{64}" spellCheck={false} value={sourceForm.sourceArchiveSha256} onChange={event => setSourceForm(value => ({ ...value, sourceArchiveSha256: event.target.value.trim() }))} /><small>填写来源发布方提供或本地计算的完整归档摘要；不会替你编造摘要。</small></label>
+            <div className="control-form-grid"><label>使用目的<textarea required minLength={8} maxLength={1000} rows={3} value={sourceForm.purpose} onChange={event => setSourceForm(value => ({ ...value, purpose: event.target.value }))} /></label><label>权利依据<textarea required minLength={8} maxLength={1000} rows={3} value={sourceForm.rightsBasis} onChange={event => setSourceForm(value => ({ ...value, rightsBasis: event.target.value }))} /></label></div>
+            <label className="control-checkbox"><input type="checkbox" checked={sourceForm.attested} onChange={event => setSourceForm(value => ({ ...value, attested: event.target.checked }))} />我确认有权用于本地只读治理，不允许原图再分发。</label>
+            <button type="submit" className="control-button is-primary" disabled={!canWrite || !sourceForm.attested}>{sourceSubmitting ? <LoaderCircle className="is-spinning" size={14} /> : <CheckCircle2 size={14} />}{sourceSubmitting ? "正在画像并登记…" : "登记只读来源"}</button>
+          </fieldset>
+          {!canWrite ? <p className="control-muted">{writeError ? "请先核对上一次写入结果，当前不接受重复提交。" : sourceSubmitting || revoking ? "等待当前操作返回结果。" : "需先成功读取当前工作空间来源，并保持本地 API 连接。"}</p> : null}
+        </form>
+      </details>
+    </section>
 
-      {error ? <ClaimBoundary title="部分接口不可用" tone="warning">{error}</ClaimBoundary> : null}
-
-      {hubMode === "WORKFLOWS" ? (
-        <section className="integration-workflow-grid" aria-label="精选集成工作流程">
-          {workflowGroups.map((group) => (
-            <article className={`integration-workflow-card is-${group.tone}`} key={group.id}>
-              <div className="integration-workflow-card__backdrop"><span>✦</span><i /><i /><i /></div>
-              <header><span className="integration-workflow-card__icon"><group.icon size={19} /></span><div><small>{group.eyebrow}</small><h2>{group.title}</h2></div><em>{workflowStatus(group.id)}</em></header>
-              <p>{group.description}</p>
-              <div className="integration-workflow-members">
-                {group.members.map((member) => (
-                  <div key={member.title}><span><member.icon size={15} /></span><div><strong>{member.title}</strong><small>{member.detail}</small></div></div>
-                ))}
-              </div>
-              <button type="button" onClick={() => openWorkflow(group)}>进入流程 <ArrowRight size={15} /></button>
-            </article>
-          ))}
-        </section>
-      ) : null}
-
-      <section className="integration-hub-catalog">
-        <header>
-          <div><span>{hubMode === "WORKFLOWS" ? "INTEGRATION UNITS" : hubMode}</span><h2>{hubMode === "WORKFLOWS" ? "集成单元" : hubMode === "SKILLS" ? "适配技能" : "连接器"}</h2></div>
-          <div><StatusBadge tone="info" compact>{visible.length} ITEMS</StatusBadge><span>状态来自本机合同与实时探测</span></div>
-        </header>
-        <div className="integration-hub-filters" aria-label="集成类别筛选">
-          {modeCategories.map((value) => <button type="button" key={value} className={category === value ? "is-active" : ""} onClick={() => setCategory(value)}>{value === "ALL" ? "全部" : value}</button>)}
-        </div>
-
-        {visible.length ? (
-          <div className="integration-hub-grid">
-            {visible.map((integration, index) => {
-              const Icon = iconForCategory(integration.category);
-              return (
-                <article key={integration.id} className={`integration-hub-card${selected?.id === integration.id ? " is-selected" : ""}`}>
-                  <span className="integration-hub-card__number">{String(index + 1).padStart(2, "0")}</span>
-                  <header><span className={`integration-hub-card__icon is-${integration.tone}`}><Icon size={19} /></span><div><small>{integration.category}</small><h3>{integration.name}</h3></div><i className={`is-${integration.tone}`} /></header>
-                  <p>{integration.capability}</p>
-                  <div className="integration-hub-card__tags"><span>{integration.protocol.split(" · ")[0]}</span><span>{integration.id === "agentteams" ? hostedObservedStatus : hubStateLabel(integration.state)}</span></div>
-                  <footer><EvidenceSourceBadge source={integration.source} /><button type="button" onClick={() => openIntegration(integration.id)}>查看合同与状态 <ArrowRight size={14} /></button></footer>
-                </article>
-              );
-            })}
-          </div>
-        ) : <div className="integration-hub-empty"><Search size={22} /><strong>没有匹配的能力</strong><p>调整搜索词或分类筛选。</p></div>}
-      </section>
-
-      {selected ? (
-        <section className="integration-hub-inspector" id="integration-hub-inspector">
-          <header>
-            <span className={`integration-hub-inspector__icon is-${selected.tone}`}>{(() => { const Icon = iconForCategory(selected.category); return <Icon size={23} />; })()}</span>
-            <div><small>SELECTED CONTRACT · {selected.category}</small><h2>{selected.name}</h2><p>合同能力与当前连接观察保持分离。</p></div>
-            {loading ? <LoaderCircle className="is-spinning" size={17} /> : <StatusBadge tone={selected.tone}>{selected.id === "agentteams" ? hostedObservedStatus : stateLabel(selected.state)}</StatusBadge>}
-          </header>
-          <div className="integration-hub-contract-grid">
-            <div><span>PROTOCOL</span><strong>{selected.protocol}</strong></div>
-            <div><span>CAPABILITY</span><strong>{selected.capability}</strong></div>
-            <div><span>BOUNDARY</span><strong>{selected.boundary}</strong></div>
-            <div><span>OBSERVATION</span><strong>{selected.id === "local-source" ? `${sources.length} total / ${activeSourceCount} active` : selected.id === "external-models" && runtimeCapabilities ? `${availableModelCount}/${runtimeCapabilities.model_profiles.length} profiles available` : selected.id === "agentteams" ? hostedObservedStatus : `API ${connection.api}`}</strong></div>
-          </div>
-
-          {selected.id === "local-source" ? (
-            <div className="integration-hub-source-area">
-              <details className="integration-hub-config">
-                <summary><span><HardDrive size={17} /></span><div><strong>登记新的只读来源</strong><small>展开后填写路径、用途、权利依据与 Source Archive SHA-256。</small></div><ArrowRight size={14} /></summary>
-                <form className="integration-source-form" onSubmit={(event) => void authorizeSource(event)}>
-                  <header><strong>登记服务端本地只读目录</strong><span>路径仅提交给本机 API；公开回执只保留路径摘要。</span></header>
-                  <div><label><span>显示名称</span><input required minLength={2} value={sourceForm.displayName} onChange={(event) => setSourceForm((current) => ({ ...current, displayName: event.target.value }))} /></label><label><span>服务端绝对目录</span><input required value={sourceForm.rootPath} onChange={(event) => setSourceForm((current) => ({ ...current, rootPath: event.target.value }))} placeholder="例如：受控数据根目录下的 omni-release" /></label></div>
-                  <label><span>Source Archive SHA-256</span><input required pattern="[0-9a-f]{64}" spellCheck={false} value={sourceForm.sourceArchiveSha256} onChange={(event) => setSourceForm((current) => ({ ...current, sourceArchiveSha256: event.target.value.trim() }))} /></label>
-                  <div><label><span>使用目的</span><textarea required minLength={8} value={sourceForm.purpose} onChange={(event) => setSourceForm((current) => ({ ...current, purpose: event.target.value }))} /></label><label><span>权利依据</span><textarea required minLength={8} value={sourceForm.rightsBasis} onChange={(event) => setSourceForm((current) => ({ ...current, rightsBasis: event.target.value }))} /></label></div>
-                  <label className="integration-source-attestation"><input type="checkbox" checked={sourceForm.attested} onChange={(event) => setSourceForm((current) => ({ ...current, attested: event.target.checked }))} /><span>我确认有权将该目录用于本地只读治理；不允许原图再分发。</span></label>
-                  {sourceFeedback ? <p className="integration-source-feedback">{sourceFeedback}</p> : null}
-                  <button type="submit" disabled={!sourceForm.attested || sourceSubmitting || connection.api !== "CONNECTED" || !activeWorkspace}>{sourceSubmitting ? <LoaderCircle className="is-spinning" size={13} /> : <CheckCircle2 size={13} />}{sourceSubmitting ? "正在画像并登记…" : "登记只读来源"}</button>
-                </form>
-              </details>
-
-              <details className="integration-hub-config">
-                <summary><span><FileCheck2 size={17} /></span><div><strong>来源授权与事件账本</strong><small>{sources.length ? `${sources.length} 个来源回执，${activeSourceCount} 个保持 active。` : "当前工作空间尚无来源回执。"}</small></div><ArrowRight size={14} /></summary>
-                <section className="integration-source-ledger">
-                  {sources.length === 0 ? <p>当前工作空间尚无来源回执。</p> : sources.map((source) => (
-                    <article key={source.source_id}>
-                      <div className="integration-source-ledger__summary"><div><small>{source.adapter_kind}</small><strong>{source.display_name}</strong><code>{source.source_id} · {shortDigest(source.source_archive_sha256)}</code></div><StatusBadge tone={source.status === "active" ? "success" : source.status === "revoked" ? "danger" : "warning"} compact>{source.status.toUpperCase()}</StatusBadge></div>
-                      <dl><div><dt>events</dt><dd>{source.authorization_event_count}</dd></div><div><dt>latest event</dt><dd>{shortDigest(source.latest_authorization_event_sha256)}</dd></div><div><dt>assets copied</dt><dd>{String(source.source_assets_copied_into_product)}</dd></div><div><dt>created</dt><dd>{new Date(source.created_at).toLocaleString()}</dd></div></dl>
-                      <details><summary>查看 append-only 事件历史</summary>{(sourceEvents[source.source_id] ?? []).map((event) => <p key={event.event_id}><strong>#{event.sequence} {event.event_type}</strong><span>{event.reason}</span><code>{shortDigest(event.event_sha256)} · {event.actor_id}</code></p>)}</details>
-                      {source.status === "active" ? revokingSourceId === source.source_id ? <div className="integration-source-revoke"><textarea value={revokeReason} minLength={8} maxLength={1000} onChange={(event) => setRevokeReason(event.target.value)} placeholder="填写至少 8 个字符的永久撤销原因" autoFocus /><div><button type="button" onClick={() => { setRevokingSourceId(""); setRevokeReason(""); }} disabled={revoking}>保留授权</button><button type="button" className="is-danger" onClick={() => void revokeSource(source)} disabled={revoking || revokeReason.trim().length < 8}>{revoking ? "正在撤销…" : "永久撤销此授权"}</button></div></div> : <button type="button" className="integration-source-revoke-trigger" onClick={() => { setRevokingSourceId(source.source_id); setRevokeReason(""); }}>撤销来源授权</button> : null}
-                    </article>
-                  ))}
-                </section>
-              </details>
-            </div>
-          ) : null}
-
-          {selected.id === "agentteams" ? (
-            <section className="hosted-transport-console" aria-label="Hosted AgentTeams 受控传输">
-              <header>
-                <span><RadioTower size={18} /></span>
-                <div>
-                  <small>HOSTED TRANSPORT CUSTODY</small>
-                  <strong>先看本地配置，再由操作者触发只读探测</strong>
-                  <p>打开页面不会连接 Hosted AgentTeams，也不会提交 Task。</p>
-                </div>
-                <StatusBadge
-                  tone={hostedProbeReceipt?.status === "PASS" ? "success" : hostedHealthStatus === "NOT_CONFIGURED" ? "locked" : "warning"}
-                  compact
-                >
-                  {hostedObservedStatus}
-                </StatusBadge>
-              </header>
-
-              <div className="hosted-transport-rail" aria-label="Hosted AgentTeams 操作边界">
-                <article className="is-observed"><span>01</span><div><strong>本地健康读取</strong><small>{hostedHealthStatus ?? "STATUS_UNAVAILABLE"}</small></div></article>
-                <i />
-                <article className={hostedProbeReceipt ? "is-observed" : ""}><span>02</span><div><strong>远程只读探测</strong><small>{hostedProbeReceipt ? hostedProbeReceipt.operation_status : "仅在点击后发生"}</small></div></article>
-                <i />
-                <article><span>03</span><div><strong>Task 提交</strong><small>仅在任务工作台具名批准</small></div></article>
-              </div>
-
-              <div className="hosted-transport-action">
-                <div>
-                  <strong>{hostedHealthStatus === "NOT_CONFIGURED" ? "Hosted transport 未配置" : "执行新的远程只读证据尝试"}</strong>
-                  <p>{hostedHealthStatus === "NOT_CONFIGURED" ? "服务端已失败关闭；没有远程网络请求可执行。" : "只读取 controller / team / worker 状态；不会注册项目或委派工作。"}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => void probeHostedTransport()}
-                  disabled={hostedHealthStatus !== "CONFIGURED_NOT_PROBED" || hostedProbeLoading || !activeWorkspace || connection.api !== "CONNECTED"}
-                >
-                  {hostedProbeLoading ? <LoaderCircle className="is-spinning" size={14} /> : <RadioTower size={14} />}
-                  {hostedProbeLoading ? "正在只读探测…" : hostedProbeReceipt ? "重新执行只读探测" : "执行只读探测"}
-                </button>
-              </div>
-
-              {hostedProbeError ? <div className="hosted-transport-error" role="alert"><ShieldCheck size={15} /><span><strong>PROBE FAILED CLOSED</strong>{hostedProbeError}</span></div> : null}
-
-              {hostedProbeReceipt ? (
-                <article className="hosted-transport-receipt">
-                  <header>
-                    <div><small>IMMUTABLE PROBE RECEIPT</small><strong>{hostedProbeReceipt.operation_status}</strong></div>
-                    <StatusBadge tone={hostedProbeReceipt.status === "PASS" ? "success" : hostedProbeReceipt.status === "FAIL" ? "danger" : "warning"} compact>{hostedProbeReceipt.status}</StatusBadge>
-                  </header>
-                  <dl>
-                    <div><dt>operation</dt><dd>{hostedProbeReceipt.operation}</dd></div>
-                    <div><dt>mode</dt><dd>{hostedProbeReceipt.mode}</dd></div>
-                    <div><dt>controller</dt><dd>{String(hostedProbeReceipt.controller_connected)}</dd></div>
-                    <div><dt>workers ready</dt><dd>{String(hostedProbeReceipt.workers_ready)}</dd></div>
-                    <div><dt>remote execution</dt><dd>{String(hostedProbeReceipt.remote_task_execution_observed)}</dd></div>
-                    <div><dt>hosted verified</dt><dd>{String(hostedProbeReceipt.hosted_runtime_verified)}</dd></div>
-                  </dl>
-                  <div className="hosted-transport-receipt__digest"><span>RECEIPT SHA-256</span><code>{hostedProbeReceipt.receipt_sha256}</code></div>
-                  <p>{hostedProbeReceipt.boundary}</p>
-                </article>
-              ) : (
-                <div className="hosted-transport-empty">
-                  <ShieldCheck size={16} />
-                  <span><strong>没有远程探测回执</strong><small>页面不会把 CONFIGURED 当作 CONNECTED，也不会自动补造 Hosted 证据。</small></span>
-                </div>
-              )}
-            </section>
-          ) : null}
-        </section>
-      ) : null}
-
-      <section className="integration-domain-section">
-        <header><div><span>IMPLEMENTED SURFACE</span><h2>真实接口域</h2></div><p>这些是已经存在的产品服务域，不代表外部系统身份已连接。</p></header>
-        <div className="integration-domain-grid">
-          {["Workspace / Project", "Data Source", "Task / Evidence", "Incident", "CAPA", "Annotation"].map((domain, index) => <article key={domain}><span>{String(index + 1).padStart(2, "0")}</span><strong>{domain}</strong><i /></article>)}
-        </div>
-      </section>
-
-      <ClaimBoundary title="生态兼容边界" tone="warning">
-        CVAT/FiftyOne 为 contract_ready_not_connected。Labelme、COCO、YOLO、MLflow、DVC 等只能通过 Adapter SDK 继续扩展，当前不能写成已逐一集成。
-      </ClaimBoundary>
-    </div>
-  );
+    <details className="control-disclosure control-catalog"><summary><FileCheck2 size={16} /> 扩展合同目录</summary><p>这里说明可复用的接口和连接边界。浏览合同不会配置服务、运行 Agent 或提交任务。</p>
+      {capabilityError ? <p className="control-feedback is-error">{capabilityError}</p> : null}
+      <label className="control-search"><Search size={15} /><span className="sr-only">搜索扩展合同</span><input aria-label="搜索扩展合同" value={query} onChange={event => setQuery(event.target.value)} placeholder="搜索格式、接口或服务" /></label>
+      <div className="control-catalog-list">{visible.map(item => <button type="button" key={item.id} aria-label={`查看合同与状态 · ${item.name}`} aria-pressed={selectedId === item.id} onClick={() => setSelectedId(item.id)}><span><strong>{item.name}</strong><small>{item.capability}</small></span><span>{stateLabels[item.state] ?? item.state}</span><ArrowRight size={14} /></button>)}</div>
+      {visible.length === 0 ? <p>没有匹配的合同，请调整搜索词。</p> : null}
+      {selected ? <section className="control-contract" id="integration-hub-inspector" aria-label="所选扩展合同"><h3>{selected.name}</h3><dl className="control-facts"><div><dt>协议</dt><dd>{selected.protocol}</dd></div><div><dt>能力</dt><dd>{selected.capability}</dd></div><div><dt>边界</dt><dd>{selected.boundary}</dd></div></dl>
+        {selected.id === "external-models" ? <><p>{runtimeCapabilities ? `本地登记 ${runtimeCapabilities.model_profiles.length} 个运行配置；登记不代表已连接。` : "运行配置尚未核实。"}</p><Link to="/models">打开实际模型配置</Link></> : null}
+        {selected.id === "local-source" ? <a href="#sources">返回授权来源</a> : null}
+        {selected.id === "rest-api" ? <><p>当前本地 API：{connection.api}</p><Link to="/platform">查看平台运行能力</Link></> : null}
+        {selected.id === "agentteams" ? <section className="control-hosted" aria-label="Hosted AgentTeams 受控传输"><small>HOSTED TRANSPORT CUSTODY</small><h4>可选 Hosted AgentTeams</h4><p>本地检查任务不依赖此连接。当前状态：{hostedObservedStatus}</p><p>打开页面只读取本地配置；点击后才连接远程服务进行只读探测，不提交任务。</p><button type="button" className="control-button" onClick={() => void probeHostedTransport()} disabled={hostedHealthStatus !== "CONFIGURED_NOT_PROBED" || hostedProbeLoading || !canRead}><RadioTower size={15} />{hostedProbeLoading ? "正在只读探测…" : "执行只读探测"}</button>{hostedHealthStatus !== "CONFIGURED_NOT_PROBED" ? <p className="control-muted">需由管理员先配置 Hosted 服务；当前没有可执行的远程探测。</p> : null}{hostedProbeError ? <p className="control-feedback is-error" role="alert">{hostedProbeError}</p> : null}{hostedProbeReceipt ? <div className="control-feedback" role="status"><strong>{hostedProbeReceipt.status} · {hostedProbeReceipt.operation_status}</strong><p>{hostedProbeReceipt.boundary}</p><dl className="control-facts"><div><dt>托管运行时已验证</dt><dd>{String(hostedProbeReceipt.hosted_runtime_verified)}</dd></div><div><dt>操作 / 模式</dt><dd>{hostedProbeReceipt.operation} / {hostedProbeReceipt.mode}</dd></div><div><dt>Controller 连接</dt><dd>{String(hostedProbeReceipt.controller_connected)}</dd></div><div><dt>Worker 就绪</dt><dd>{String(hostedProbeReceipt.workers_ready)}</dd></div><div><dt>远程执行观察</dt><dd>{String(hostedProbeReceipt.remote_task_execution_observed)}</dd></div></dl><code>{hostedProbeReceipt.receipt_sha256}</code></div> : null}</section> : null}
+      </section> : null}
+      <p className="control-muted">CVAT / FiftyOne 当前为合同就绪、未连接。其他格式的 Adapter SDK 能力不等于已完成外部集成。</p>
+    </details>
+  </div>;
 }

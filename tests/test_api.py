@@ -337,18 +337,20 @@ def test_account_bootstrap_api_is_disabled_by_default_without_breaking_service(
     paths = client.get("/openapi.json").json()["paths"]
 
     assert "/v1/users" not in paths
-    assert "post" not in paths["/v1/workspaces"]
+    # The real-account create operation is discoverable, but cannot be used
+    # until identity setup; publishing an OpenAPI method grants no authority.
+    assert "post" in paths["/v1/workspaces"]
     missing_user_route = client.post("/v1/users", json={"display_name": "Blocked"})
     assert missing_user_route.status_code == 404
     ErrorEnvelope.model_validate(missing_user_route.json())
     assert client.get("/v1/users").status_code == 404
-    method_not_allowed = client.post(
+    setup_required = client.post(
         "/v1/workspaces",
         json={"name": "Blocked", "owner_user_id": "usr_unknown"},
     )
-    assert method_not_allowed.status_code == 405
-    assert method_not_allowed.json()["error"]["code"] == "method_not_allowed"
-    ErrorEnvelope.model_validate(method_not_allowed.json())
+    assert setup_required.status_code == 404
+    assert setup_required.json()["error"]["code"] == "not_found"
+    ErrorEnvelope.model_validate(setup_required.json())
 
     user, workspace, project = service.ensure_default_tenant()
     assert workspace.owner_user_id == user.user_id

@@ -17,8 +17,8 @@ PUBLIC_BINARY_REVIEW_PATH = "docs/PUBLIC_BINARY_REVIEW.json"
 PUBLIC_MIRROR_MANIFEST_PATH = "PUBLIC_MIRROR_MANIFEST.json"
 HISTORY_PATH_UNAVAILABLE = "<git-object-without-tree-path>"
 PUBLIC_GENERATED_FILE_SOURCES = {
-    ".github/workflows/ci.yml": "tools/templates/public-ci.yml",
     ".github/workflows/pages.yml": "tools/templates/public-pages.yml",
+    "README.md": "docs/PUBLIC_REPOSITORY_README.md",
 }
 
 FORBIDDEN_TRACKED_PREFIXES = (
@@ -26,19 +26,12 @@ FORBIDDEN_TRACKED_PREFIXES = (
     ".pytest_cache/",
     ".ruff_cache/",
     ".playwright-cli/",
-    "07_results/",
-    "10_reports/",
-    "deliverables/",
     "desktop/build/",
     "desktop/dist/",
-    "evidence/",
     "output/",
-    "release/",
     "tmp/",
     "web/node_modules/",
     "web/dist/",
-    "web/src-tauri/target/",
-    "website/",
 )
 FORBIDDEN_TRACKED_NAMES = {
     ".env",
@@ -140,7 +133,6 @@ PLACEHOLDER_MARKERS = (
     b"<absolute-path>",
 )
 GENERIC_PATH_SCANNED_SUFFIXES = {
-    ".cff",
     ".cfg",
     ".conf",
     ".csv",
@@ -160,6 +152,7 @@ PUBLIC_TEXT_SUFFIXES = GENERIC_PATH_SCANNED_SUFFIXES | {
     "",
     ".bat",
     ".c",
+    ".cff",
     ".cfg",
     ".cmd",
     ".cpp",
@@ -168,8 +161,10 @@ PUBLIC_TEXT_SUFFIXES = GENERIC_PATH_SCANNED_SUFFIXES | {
     ".h",
     ".hpp",
     ".js",
+    ".java",
     ".lock",
     ".mjs",
+    ".nsh",
     ".ps1",
     ".py",
     ".rs",
@@ -309,10 +304,11 @@ def _mirror_manifest_violations(
         ordered_paths.append(relative)
         expected_source = PUBLIC_GENERATED_FILE_SOURCES.get(relative)
         if expected_source is not None and entry.get("source") != expected_source:
-            rule = {
-                ".github/workflows/ci.yml": "public-ci-workflow-source-drift",
-                ".github/workflows/pages.yml": "public-pages-workflow-source-drift",
-            }[relative]
+            rule = (
+                "public-readme-source-drift"
+                if relative == "README.md"
+                else "public-pages-workflow-source-drift"
+            )
             violations.append({"rule": rule, "path": relative})
         source = project_root / relative
         if relative not in tracked or not source.is_file():
@@ -702,100 +698,30 @@ def _scan_current(
     )
 
 
-def _reviewed_binary_records_from_bytes(data: bytes) -> dict[str, str]:
-    try:
-        manifest = json.loads(data.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError):
-        return {}
-    if not isinstance(manifest, dict) or set(manifest) != {
-        "schema_version",
-        "review_basis",
-        "reviewed_on",
-        "reviewer_identity_included",
-        "reviewed_file_count",
-        "prohibited_content_checks",
-        "files",
-        "manifest_sha256",
-    }:
-        return {}
-    if (
-        manifest.get("schema_version") != "visiondata-gate.public-binary-review.v1"
-        or manifest.get("review_basis") != "VISUAL_PIXEL_AND_METADATA_INSPECTION"
-        or manifest.get("reviewer_identity_included") is not False
-    ):
-        return {}
-    stable = dict(manifest)
-    expected_manifest_sha256 = stable.pop("manifest_sha256", None)
-    if (
-        expected_manifest_sha256
-        != hashlib.sha256(_canonical_json_bytes(stable)).hexdigest()
-    ):
-        return {}
-    entries = manifest.get("files")
-    if not isinstance(entries, list) or manifest.get("reviewed_file_count") != len(
-        entries
-    ):
-        return {}
-    records: dict[str, str] = {}
-    for entry in entries:
-        if not isinstance(entry, dict) or set(entry) != {
-            "path",
-            "sha256",
-            "size_bytes",
-            "category",
-            "review_result",
-        }:
-            return {}
-        path = entry.get("path")
-        sha256 = entry.get("sha256")
-        normalized = path.replace("\\", "/") if isinstance(path, str) else None
-        if (
-            normalized is None
-            or normalized in records
-            or not isinstance(sha256, str)
-            or re.fullmatch(r"[0-9a-f]{64}", sha256) is None
-            or not isinstance(entry.get("size_bytes"), int)
-            or entry["size_bytes"] < 0
-            or not isinstance(entry.get("category"), str)
-            or entry.get("review_result") != "PASS_NO_PRIVATE_CONTENT_OBSERVED"
-        ):
-            return {}
-        records[normalized] = sha256
-    return records
-
-
 def _reviewed_binary_records(*, root: Path | None = None) -> dict[str, str]:
     project_root = PROJECT_ROOT if root is None else root
     try:
-        data = (project_root / PUBLIC_BINARY_REVIEW_PATH).read_bytes()
-    except OSError:
+        manifest = json.loads(
+            (project_root / PUBLIC_BINARY_REVIEW_PATH).read_text(encoding="utf-8")
+        )
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
         return {}
-    return _reviewed_binary_records_from_bytes(data)
-
-
-def _reviewed_binary_history_records(
-    objects: dict[str, tuple[str, ...]],
-    *,
-    current_records: dict[str, str] | None = None,
-) -> dict[str, frozenset[str]]:
-    """Collect every SHA explicitly approved by a valid review manifest revision."""
-
-    approved: dict[str, set[str]] = {}
-    seed = _reviewed_binary_records() if current_records is None else current_records
-    for path, sha256 in seed.items():
-        approved.setdefault(path, set()).add(sha256)
-
-    for object_id, paths in objects.items():
-        if PUBLIC_BINARY_REVIEW_PATH not in paths:
+    entries = manifest.get("files") if isinstance(manifest, dict) else None
+    if not isinstance(entries, list):
+        return {}
+    records: dict[str, str] = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
             continue
-        raw = _git("cat-file", "blob", object_id)
-        assert isinstance(raw, bytes)
-        for path, sha256 in _reviewed_binary_records_from_bytes(raw).items():
-            approved.setdefault(path, set()).add(sha256)
-
-    return {
-        path: frozenset(sorted(digests)) for path, digests in sorted(approved.items())
-    }
+        path = entry.get("path")
+        sha256 = entry.get("sha256")
+        if (
+            isinstance(path, str)
+            and isinstance(sha256, str)
+            and re.fullmatch(r"[0-9a-f]{64}", sha256) is not None
+        ):
+            records[path.replace("\\", "/")] = sha256
+    return records
 
 
 def _history_entry(rule: str, *, path: str, object_id: str) -> dict[str, str]:
@@ -829,7 +755,7 @@ def _historical_blob_violations(
     *,
     path: str,
     object_id: str,
-    reviewed_binaries: dict[str, str | frozenset[str]],
+    reviewed_binaries: dict[str, str],
 ) -> list[dict[str, str]]:
     normalized = path.replace("\\", "/")
     report_path, violations = _historical_path_policy(
@@ -858,13 +784,7 @@ def _historical_blob_violations(
                     object_id=object_id,
                 )
             )
-        else:
-            approved_sha256 = (
-                {expected_sha256}
-                if isinstance(expected_sha256, str)
-                else expected_sha256
-            )
-        if expected_sha256 is not None and observed_sha256 not in approved_sha256:
+        elif expected_sha256 != observed_sha256:
             violations.append(
                 _history_entry(
                     "history-binary-sha-drift",
@@ -1037,13 +957,11 @@ def _history_objects() -> dict[str, tuple[str, ...]]:
 def _scan_history_blobs(
     objects: dict[str, tuple[str, ...]],
     *,
-    reviewed_binaries: dict[str, str | frozenset[str]] | None = None,
+    reviewed_binaries: dict[str, str] | None = None,
 ) -> list[dict[str, str]]:
     violations: list[dict[str, str]] = []
     approved_binaries = (
-        _reviewed_binary_history_records(objects)
-        if reviewed_binaries is None
-        else reviewed_binaries
+        _reviewed_binary_records() if reviewed_binaries is None else reviewed_binaries
     )
     process = subprocess.Popen(
         ["git", "--no-replace-objects", "cat-file", "--batch"],

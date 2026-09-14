@@ -1,0 +1,119 @@
+/* Desktop operational layer. Graphite changes surfaces, never evidence meaning. */
+html[data-runtime-mode="local-workbench"] { color-scheme: dark; }
+html[data-accent="graphite"] body { background: var(--bg-0); color: var(--text); }
+html[data-accent="graphite"] :where(button, input, select, textarea) { font: inherit; }
+html[data-accent="graphite"] :where(button, a, summary, input, select, textarea):focus-visible {
+  outline: 2px solid var(--accent-primary); outline-offset: 3px;
+}
+html[data-accent="graphite"] :where(h1, h2, h3) { text-wrap: balance; }
+html[data-accent="graphite"] :where(p, label, small) { text-wrap: pretty; }
+html[data-accent="graphite"] :where(select, textarea, input:not([type="checkbox"]):not([type="radio"]):not([type="range"])) {
+  color: var(--text); background-color: var(--surface-subtle); border-color: var(--line);
+}
+html[data-accent="graphite"] :where(input, textarea)::placeholder { color: var(--muted-2); opacity: 1; }
+html[data-accent="graphite"] :where(button, a, input, select, textarea, summary) {
+  transition-property: background-color, color, border-color, opacity;
+  transition-duration: 140ms;
+}
+html[data-accent="graphite"] button:disabled { cursor: not-allowed; }
+html[data-accent="graphite"] :where(.panel, .system-hub-hero, .system-hub-card, .metric, .identity-card) {
+  background-image: none; box-shadow: none;
+}
+html[data-accent="graphite"] :where(.system-hub-hero, .system-hub-card)::before,
+html[data-accent="graphite"] :where(.system-hub-hero, .system-hub-card)::after { display: none; }
+html[data-accent="graphite"] :where(.runtime-dot, .agent-live-dot) { animation: none; box-shadow: none; }
+
+html[data-accent="graphite"] .linear-shell { background: var(--bg-0); color: var(--text); --sidebar-width: 224px; grid-template-columns: 224px minmax(0, 1fr); }
+html[data-accent="graphite"] .linear-shell.is-sidebar-collapsed { grid-template-columns: 54px minmax(0, 1fr); }
+html[data-accent="graphite"] .linear-sidebar { background: var(--bg-1); border-color: var(--line); }
+html[data-accent="graphite"] :where(.linear-main, .linear-content, .linear-statusbar) { background: var(--bg-0); }
+html[data-accent="graphite"] :where(.linear-topbar, .linear-tabs) { background: var(--bg-1); border-color: var(--line); box-shadow: none; }
+html[data-accent="graphite"] :where(.linear-breadcrumbs, .linear-topbar__actions, .linear-statusbar) { color: var(--muted); }
+html[data-accent="graphite"] .linear-statusbar { border-color: var(--line); font-family: var(--font-sans); font-size: 11px; }
+html[data-accent="graphite"] .linear-statusbar > span:first-child { color: var(--muted); }
+html[data-accent="graphite"] :where(.linear-workspace-switcher, .linear-search-trigger, .linear-user) {
+  background: transparent; border-color: var(--line); box-shadow: none;
+}
+html[data-accent="graphite"] :where(.linear-workspace-switcher__glyph, .linear-user__avatar) {
+  background: var(--bg-4); border-color: var(--line); color: var(--text);
+}
+html[data-accent="graphite"] .linear-search-trigger { margin-bottom: 12px; min-height: 34px; }
+html[data-accent="graphite"] .linear-search-trigger kbd { color: var(--muted); background: var(--surface); border-color: var(--line); }
+html[data-accent="graphite"] .linear-nav a { min-height: 34px; color: var(--muted); font-size: 13px; border-radius: 5px; }
+html[data-accent="graphite"] .linear-nav a:is(:hover, .is-active, .active) { color: var(--text-strong); background: var(--surface-raised); }
+html[data-accent="graphite"] .linear-nav a:is(.is-active, .active)::before { background: var(--accent-primary); width: 2px; }
+html[data-accent="graphite"] .linear-nav a:is(.is-active, .active) svg { color: var(--accent-primary); }
+html[data-accent="graphite"] .linear-nav section > small,
+html[data-accent="graphite"] .linear-projects header > span { font: 500 11px var(--font-sans); color: var(--muted-2); letter-spacing: .02em; }
+.workbench-nav-group { margin: 3px 0; }
+.workbench-nav-group summary {
+  display: flex; align-items: center; gap: 7px; min-height: 31px; padding: 4px 11px;
+  color: var(--muted); cursor: pointer; font: 500 12px var(--font-sans); list-style: none;
+}
+.workbench-nav-group summary::-webkit-details-marker { display: none; }
+.workbench-nav-group summary svg { transform: rotate(-90deg); flex-shrink: 0; }
+.workbench-nav-group[open] summary svg { transform: rotate(0); }
+.workbench-nav-group summary:hover { color: var(--text); background: var(--surface); border-radius: 5px; }
+.workbench-nav-group > div { display: grid; gap: 2px; padding: 2px 0 6px; }
+.linear-shell.is-sidebar-collapsed .workbench-nav-group summary { justify-content: center; padding-inline: 5px; }
+.linear-shell.is-sidebar-collapsed .workbench-nav-group summary span { display: none; }
+html[data-accent="graphite"] .linear-projects { margin-top: 14px; border-color: var(--line); }
+html[data-accent="graphite"] .linear-projects > div > button { min-height: 31px; color: var(--muted); font-size: 12px; }
+html[data-accent="graphite"] .linear-projects > div > button:is(:hover, .is-active) { color: var(--text); background: var(--surface); }
+html[data-accent="graphite"] .linear-nav--footer { padding-top: 10px; border-top: 1px solid var(--line); }
+html[data-accent="graphite"] .linear-sidebar__header .brand-mark__glyph path { stroke: var(--accent-primary); fill: var(--accent-primary-soft); }
+html[data-accent="graphite"] .linear-tab { color: var(--muted); background: transparent; border-color: var(--line); }
+html[data-accent="graphite"] .linear-tab.is-active { color: var(--text); background: var(--bg-0); border-top-color: var(--accent-primary); }
+html[data-accent="graphite"] .linear-tab > a { font-size: 12px; color: inherit; }
+html[data-accent="graphite"] :where(.linear-api-state, .linear-review-shortcut) { background: var(--surface); color: var(--muted); border-color: var(--line); box-shadow: none; }
+html[data-accent="graphite"] :where(.modal, .modal > header, .command-search, .command-results) { background: var(--surface); border-color: var(--line); color: var(--text); }
+html[data-accent="graphite"] .command-results button:is(.is-active, :hover) { background: var(--surface-raised); }
+html[data-accent="graphite"] .command-results button strong { color: var(--text); }
+html[data-accent="graphite"] .command-results button small { color: var(--muted); }
+
+html[data-accent="graphite"] :where(.operator-workspace, .operator-commandbar, .operator-editor, .operator-inspector, .asset-browser) {
+  background-color: var(--bg-0); border-color: var(--line);
+}
+html[data-accent="graphite"] :where(.operator-commandbar, .asset-browser__header, .asset-browser__footer, .inspector-tabbar, .canvas-toolbar) {
+  background: var(--bg-1); border-color: var(--line); box-shadow: none;
+}
+html[data-accent="graphite"] :where(.operator-commandbar, .asset-browser, .operator-inspector) :is(button, a) { border-color: var(--line); }
+html[data-accent="graphite"] .operator-commandbar button.is-primary { background: var(--accent-primary-soft); color: var(--accent-primary); border-color: var(--accent-primary); }
+html[data-accent="graphite"] .operator-commandbar__actions button { font-size: 12px; }
+html[data-accent="graphite"] .operator-commandbar__title strong { font-size: 13px; }
+html[data-accent="graphite"] .operator-commandbar__title > span:last-child { color: var(--muted); font-size: 10px; }
+html[data-accent="graphite"] .operator-kicker { color: var(--muted); font-size: 10px; letter-spacing: .03em; }
+html[data-accent="graphite"] :where(.image-toolbar, .image-toolbar button, .image-toolbar__view) { background: var(--bg-1); border-color: var(--line); color: var(--text); }
+html[data-accent="graphite"] .image-toolbar button.is-active { background: var(--surface-raised); border-color: var(--accent-primary); color: var(--accent-primary); }
+html[data-accent="graphite"] :where(.asset-list > button.is-active, .inspector-tabbar button.is-active, .canvas-toolbar button.is-active) { background: var(--surface-raised); color: var(--text); border-color: var(--accent-primary); }
+html[data-accent="graphite"] :where(.inspector-section, .property-list > div, .annotation-ledger > button) { border-color: var(--line); }
+html[data-accent="graphite"] .operator-inspector-resizer { background: var(--bg-1); }
+html[data-accent="graphite"] :where(.operator-empty-canvas, .operator-empty-guide) { background-image: none; box-shadow: none; }
+html[data-accent="graphite"] :where(.inspection-metrics strong, .property-list dd, .annotation-form label) { color: var(--text); }
+html[data-accent="graphite"] :where(.model-center-header, .data-pools-header, .learning-loop-header) { background: none; box-shadow: none; }
+
+/* Legacy workbook rules are more specific than shared tokens. Scope these
+   overrides to the operating surface instead of recoloring image pixels. */
+html[data-accent="graphite"] .linear-shell .operator-workspace .operator-grid { grid-template-columns: 224px minmax(260px, 1fr) var(--operator-inspector-width, 430px); }
+html[data-accent="graphite"] .linear-shell .operator-workspace :is(.operator-inspector, .asset-browser, .operator-editor) { background: var(--bg-0); border-color: var(--line); }
+html[data-accent="graphite"] .linear-shell .operator-workspace :is(.inspector-section > header, .inspector-tabbar, .image-toolbar, .canvas-status, .asset-browser__footer) { background: var(--bg-1); color: var(--muted); border-color: var(--line); }
+html[data-accent="graphite"] .linear-shell .operator-workspace .inspector-section > header { font: 600 11px var(--font-sans); min-height: 32px; }
+html[data-accent="graphite"] .linear-shell .operator-workspace .property-list > div { min-height: 29px; border-color: var(--line); }
+html[data-accent="graphite"] .linear-shell .operator-workspace .property-list dt { color: var(--muted); font: 11px var(--font-sans); }
+html[data-accent="graphite"] .linear-shell .operator-workspace .property-list dd { color: var(--text); font-size: 11px; }
+html[data-accent="graphite"] .linear-shell .operator-workspace :is(.inspection-metrics > div, .optical-probe__metrics > div, .box-coordinates span) { background: var(--surface-subtle); border-color: var(--line); }
+html[data-accent="graphite"] .linear-shell .operator-workspace :is(.inspection-metrics small, .optical-probe__metrics small, .metric-boundary, .annotation-form label > span, .annotation-hint) { font-size: 11px; color: var(--muted); }
+html[data-accent="graphite"] .linear-shell .operator-workspace :is(.inspection-metrics strong, .optical-probe__metrics strong) { font-size: 13px; color: var(--text); }
+html[data-accent="graphite"] .linear-shell .operator-workspace .operator-dropzone { background: var(--surface-subtle); border-color: var(--line-strong); color: var(--muted); }
+html[data-accent="graphite"] .linear-shell .operator-workspace .asset-list > button.is-active { background: var(--surface-raised); border-color: var(--accent-primary); }
+html[data-accent="graphite"] .linear-shell .operator-workspace .asset-list > button { color: var(--text); }
+html[data-accent="graphite"] .linear-shell .operator-workspace .asset-slice-bar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; }
+html[data-accent="graphite"] .linear-shell .operator-workspace .asset-slice-bar button { min-width: 0; padding: 5px 3px; gap: 3px; justify-content: center; font-size: 11px; }
+html[data-accent="graphite"] .linear-shell .operator-workspace .asset-slice-bar button em { min-width: 12px; padding-inline: 2px; font-size: 9px; }
+html[data-accent="graphite"] .linear-shell .operator-workspace .image-viewport { background-color: var(--surface-subtle); background-image: repeating-conic-gradient(#252629 0% 25%, #202124 0% 50%); background-size: 16px 16px; }
+html[data-accent="graphite"] .linear-shell .operator-workspace .inspector-tabbar button.is-active { color: var(--text); border-color: var(--accent-primary); background: var(--surface); }
+html[data-accent="graphite"] .linear-shell .operator-workspace .annotation-ledger > button.is-selected { border-color: var(--accent-primary); background: var(--accent-primary-soft); }
+
+@media (prefers-reduced-motion: reduce) {
+  .linear-shell *, .linear-shell *::before, .linear-shell *::after { animation: none !important; scroll-behavior: auto !important; transition-duration: 0ms !important; }
+}

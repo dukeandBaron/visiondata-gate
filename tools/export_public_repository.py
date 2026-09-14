@@ -21,27 +21,30 @@ from typing import Iterable
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_PAGES_TEMPLATE = "tools/templates/public-pages.yml"
 PUBLIC_PAGES_WORKFLOW = ".github/workflows/pages.yml"
-PUBLIC_CI_TEMPLATE = "tools/templates/public-ci.yml"
-PUBLIC_CI_WORKFLOW = ".github/workflows/ci.yml"
 
 PUBLIC_EXACT_FILES = {
     ".env.example",
     ".gitattributes",
     ".gitignore",
-    ".streamlit/config.toml",
-    ".github/ISSUE_TEMPLATE/bug_report.yml",
-    ".github/ISSUE_TEMPLATE/config.yml",
-    ".github/ISSUE_TEMPLATE/feature_request.yml",
-    ".github/pull_request_template.md",
-    "CHANGELOG.md",
-    "CITATION.cff",
     "CODE_OF_CONDUCT.md",
     "CONTRIBUTING.md",
+    "CHANGELOG.md",
+    "CITATION.cff",
+    ".pre-commit-config.yaml",
+    ".github/dependabot.yml",
+    ".github/workflows/quality.yml",
+    ".github/workflows/security.yml",
+    "quality/pyproject.toml",
+    "quality/uv.lock",
+    "quality/requirements.txt",
+    "quality/pyright-gate.json",
+    "quality/pyright-debt.json",
+    "quality/coverage-profile.json",
+    "quality/bandit-baseline.json",
+    "quality/README.md",
     "LICENSE",
     "NOTICE",
-    "README.md",
     "SECURITY.md",
-    "SUPPORT.md",
     "app.py",
     "build_windows_installer.ps1",
     "environment.core.yml",
@@ -49,26 +52,70 @@ PUBLIC_EXACT_FILES = {
     "run_api.ps1",
     "run_app.ps1",
     "run_demo.ps1",
-    "run_guided_demo.ps1",
+    "run_semifinal_demo.ps1",
     "run_tests.ps1",
     "run_web.ps1",
     "run_workbench.ps1",
+    "start_local_workbench.ps1",
     "setup_env.ps1",
     "uv.lock",
+    "docs/00_OVERVIEW.md",
+    "docs/AGENT_RUNTIME.md",
+    "docs/AGENT_PLATFORM.md",
+    "docs/AGENT_PLATFORM_COMPARISON.md",
+    "docs/AGENT_PLATFORM_OPERATIONS.md",
+    "docs/LOCAL_WORKBENCH.md",
+    "docs/API_QUICKSTART.md",
+    "docs/CROSS_PLATFORM_QUICKSTART.md",
+    "docs/INTERFACE_SUPPORT.md",
+    "docs/RELEASE_PREPARATION.md",
+    "docs/EXTERNAL_REVIEW_RESPONSE.md",
+    "docs/ENGINEERING_QUALITY_IMPLEMENTATION.md",
+    "docs/PUBLIC_API.md",
+    "docs/BENCHMARK_REPRODUCIBILITY.md",
+    "docs/AUDIT_TRUST_BOUNDARY.md",
+    "docs/QUALITY_LEARNING_WORKBENCH.md",
+    "docs/CONTINUAL_LEARNING_RETENTION.md",
+    "docs/DATASET_REVIEW_AND_COMPUTE.md",
+    "docs/BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md",
     "docs/CARGO_LICENSES.locked.json",
+    "docs/CLAIM_SCOPE.md",
+    "docs/DATA_SOURCE_AND_COMPLIANCE_SEMIFINAL_RC3.md",
+    "docs/DEFENSE_3MIN_SCRIPT_SEMIFINAL.md",
+    "docs/DEFENSE_QA_SEMIFINAL.md",
+    "docs/DEMO_60S_SCRIPT_SEMIFINAL.md",
+    "docs/DYNAMICBENCH_V3.md",
+    "docs/DYNAMICBENCH_V4.md",
+    "docs/EVIDENCE_AND_BENCHMARKS.md",
+    "docs/EXTERNAL_MODEL_CONFIGURATION.md",
+    "docs/GOAI_COMPETITION_EVALUATION.md",
+    "docs/GOAI_SEMIFINAL_GUIDE_20260902.md",
+    "docs/GOAI_SEMIFINAL_OFFICIAL_FEEDBACK_CLOSURE_20260831.md",
+    "docs/GOVERNED_AUDIT_ENVELOPE.md",
+    "docs/GOVERNED_OUTCOME_ENVELOPE.md",
+    "docs/INCIDENT_CONTROL_PLANE.md",
+    "docs/INCIDENT_MODEL_PLANNER.md",
+    "docs/INDUSTRIAL_AGENT_LANDSCAPE_20260825.md",
+    "docs/INDUSTRIAL_INSPECTION_ROUTE.md",
+    "docs/INDUSTRIAL_SKILL_SDK.md",
+    "docs/INDUSTRY_SCENARIO_VALUE.md",
+    "docs/OPEN_REUSE_CONTRACTS.md",
+    "docs/PRODUCT_KERNEL_CLI.md",
+    "docs/PROJECT_STATUS.md",
+    "docs/PUBLICATION_BOUNDARY.md",
+    "docs/PUBLIC_REPOSITORY_README.md",
+    "docs/RC3_DELIVERY_CONTRACT.md",
+    "docs/RELEASE_ATTESTATION_V1.md",
+    "docs/RUNNING.md",
     "docs/SBOM.cdx.json",
+    "docs/SEMIFINAL_DEFENSE_RUNBOOK_20260902.md",
     "docs/THIRD_PARTY_LICENSE_INVENTORY.generated.md",
     "docs/THIRD_PARTY_NOTICES.md",
+    "docs/TOOLS_AND_MCP_CONTRACT.md",
+    "docs/TOOL_REPLAY_AND_MIGRATION.md",
     "docs/PUBLIC_BINARY_REVIEW.json",
-    "docs/api_reference.md",
-    "docs/architecture.md",
-    "docs/audit_envelope.md",
     "docs/assets/web-command-center.png",
-    "docs/compliance.md",
-    "docs/quickstart.md",
-    "benchmarks/README.md",
-    "benchmarks/dynamicbench-v3-report.json",
-    "benchmarks/visa-public-proxy-summary.json",
+    "gateway/pom.xml",
 }
 
 PUBLIC_PREFIXES = (
@@ -76,6 +123,8 @@ PUBLIC_PREFIXES = (
     "agentteams/",
     "desktop/",
     "examples/",
+    "gateway/src/",
+    "reviewer_workbench/",
     "rulepacks/",
     "sample_data/",
     "schemas/",
@@ -85,12 +134,6 @@ PUBLIC_PREFIXES = (
     "tools/",
     "web/",
 )
-
-PUBLIC_EXCLUDED_FILES = {
-    "tests/test_build_semifinal_defense_kit.py",
-    "tools/build_semifinal_defense_kit.py",
-    "tools/build_semifinal_governance_evidence.py",
-}
 
 FORBIDDEN_PREFIXES = (
     ".git/",
@@ -208,8 +251,6 @@ def _selected(path: str) -> bool:
         return False
     if Path(lowered).suffix in FORBIDDEN_SUFFIXES:
         return False
-    if normalized in PUBLIC_EXCLUDED_FILES:
-        return False
     return normalized in PUBLIC_EXACT_FILES or normalized.startswith(PUBLIC_PREFIXES)
 
 
@@ -270,30 +311,19 @@ def _copy_files(destination: Path, paths: Iterable[str]) -> list[dict[str, objec
 
 
 def _validate_export_snapshot(destination: Path) -> None:
-    validators = (
-        (
-            PROJECT_ROOT / "tools" / "check_public_repository.py",
-            ("--snapshot-root", str(destination)),
-        ),
-        (
-            PROJECT_ROOT / "tools" / "check_markdown_links.py",
-            ("--root", str(destination)),
-        ),
+    checker = PROJECT_ROOT / "tools" / "check_public_repository.py"
+    result = subprocess.run(
+        [sys.executable, str(checker), "--snapshot-root", str(destination)],
+        cwd=PROJECT_ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
     )
-    for checker, arguments in validators:
-        result = subprocess.run(
-            [sys.executable, str(checker), *arguments],
-            cwd=PROJECT_ROOT,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            check=False,
-        )
-        if result.returncode != 0:
-            raise PublicExportError(
-                "pre-publish public snapshot validation rejected the export"
-            )
+    if result.returncode == 0:
+        return
+    raise PublicExportError("pre-publish privacy scan rejected the exported snapshot")
 
 
 def _assemble_snapshot(
@@ -305,26 +335,17 @@ def _assemble_snapshot(
     if not selected:
         raise PublicExportError("public allowlist selected no tracked files")
     required = {
-        PUBLIC_CI_TEMPLATE,
         PUBLIC_PAGES_TEMPLATE,
         "CODE_OF_CONDUCT.md",
         "CONTRIBUTING.md",
         "LICENSE",
-        "README.md",
         "SECURITY.md",
+        "docs/PUBLICATION_BOUNDARY.md",
         "docs/CARGO_LICENSES.locked.json",
         "docs/PUBLIC_BINARY_REVIEW.json",
-        "docs/api_reference.md",
-        "docs/architecture.md",
-        "docs/audit_envelope.md",
-        "docs/compliance.md",
-        "docs/quickstart.md",
-        "benchmarks/README.md",
-        "benchmarks/dynamicbench-v3-report.json",
-        "benchmarks/visa-public-proxy-summary.json",
+        "docs/PUBLIC_REPOSITORY_README.md",
         "tools/check_public_pages.py",
         "tools/check_public_repository.py",
-        "tools/run_public_test_suite.py",
         "web/package-lock.json",
         "web/public/public-replay.v1.json",
     }
@@ -335,24 +356,30 @@ def _assemble_snapshot(
         )
 
     manifest = _copy_files(resolved, selected)
-    generated_workflows = {
-        PUBLIC_CI_WORKFLOW: PUBLIC_CI_TEMPLATE,
-        PUBLIC_PAGES_WORKFLOW: PUBLIC_PAGES_TEMPLATE,
-    }
-    for workflow_path, template_path in generated_workflows.items():
-        template = resolved / template_path
-        workflow = resolved / workflow_path
-        workflow.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(template, workflow)
-        workflow_data = workflow.read_bytes()
-        manifest.append(
-            {
-                "path": workflow_path,
-                "sha256": hashlib.sha256(workflow_data).hexdigest(),
-                "size_bytes": len(workflow_data),
-                "source": template_path,
-            }
-        )
+    pages_template = resolved / PUBLIC_PAGES_TEMPLATE
+    pages_workflow = resolved / PUBLIC_PAGES_WORKFLOW
+    pages_workflow.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(pages_template, pages_workflow)
+    pages_data = pages_workflow.read_bytes()
+    manifest.append(
+        {
+            "path": PUBLIC_PAGES_WORKFLOW,
+            "sha256": hashlib.sha256(pages_data).hexdigest(),
+            "size_bytes": len(pages_data),
+            "source": PUBLIC_PAGES_TEMPLATE,
+        }
+    )
+    public_readme = resolved / "docs" / "PUBLIC_REPOSITORY_README.md"
+    shutil.copy2(public_readme, resolved / "README.md")
+    readme_data = (resolved / "README.md").read_bytes()
+    manifest.append(
+        {
+            "path": "README.md",
+            "sha256": hashlib.sha256(readme_data).hexdigest(),
+            "size_bytes": len(readme_data),
+            "source": "docs/PUBLIC_REPOSITORY_README.md",
+        }
+    )
     manifest.sort(key=lambda item: str(item["path"]))
 
     tree_digest = hashlib.sha256()

@@ -7,6 +7,8 @@ import subprocess
 import sys
 from pathlib import Path, PurePosixPath
 
+import yaml
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
@@ -40,9 +42,18 @@ def test_ci_release_validators_are_independent_fail_fast_steps() -> None:
     assert "- name: Validate submission evidence" in workflow
     assert "- name: Validate reviewer website projection" in workflow
     assert "- name: Validate detached release assets" in workflow
-    assert "run: uv run python tools/check_release_consistency.py" in workflow
-    assert "run: uv run python tools/check_website_data.py" in workflow
-    assert "run: uv run python tools/check_release_assets.py" in workflow
+    steps = yaml.safe_load(workflow)["jobs"]["verify"]["steps"]
+    for script in (
+        "check_release_consistency.py",
+        "check_website_data.py",
+        "check_release_assets.py",
+    ):
+        matching = [step for step in steps if f"tools/{script}" in step.get("run", "")]
+        assert len(matching) == 1
+        assert matching[0]["run"] == (
+            'uv run --frozen --python "${{ matrix.python-version }}" '
+            f"python tools/{script}"
+        )
     assert "- name: Validate release evidence" not in workflow
 
 
@@ -287,7 +298,7 @@ def test_frozen_supply_chain_outputs_match_offline_regeneration(
     assert generated_sbom.read_bytes() == frozen_sbom.read_bytes()
     assert generated_inventory.read_bytes() == frozen_inventory.read_bytes()
     assert result == {
-        "component_count": 415,
+            "component_count": 416,
         "inventory_sha256": _sha256(frozen_inventory),
         "review_required_count": 0,
         "sbom_sha256": _sha256(frozen_sbom),

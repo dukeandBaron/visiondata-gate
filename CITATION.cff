@@ -1,11 +1,14 @@
 cff-version: 1.2.0
-message: "If this software supports your work, please cite the repository and the exact release or commit used."
+message: "If you use this software, cite the specific public version or commit that you evaluated."
+type: software
 title: "VisionData Gate"
-abstract: "A local-first, evidence-governed workbench for industrial vision dataset release and human-gated remediation."
 authors:
   - name: "VisionData Gate contributors"
-version: 0.1.0
-date-released: 2026-09-03
-license: Apache-2.0
 repository-code: "https://github.com/dukeandBaron/visiondata-gate"
-url: "https://dukeandbaron.github.io/visiondata-gate/"
+url: "https://github.com/dukeandBaron/visiondata-gate"
+license: Apache-2.0
+abstract: >-
+  A local industrial-vision data review and delivery workbench combining
+  deterministic checks, versioned evidence, governed agent workflows and
+  human-controlled decisions. Synthetic benchmarks and reference-learning
+  results do not establish industrial performance or production authorization.

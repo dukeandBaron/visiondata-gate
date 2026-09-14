@@ -2,7 +2,7 @@
 
 > 本文件由 `uv.lock`、`web/package-lock.json`、`web/src-tauri/Cargo.lock`、`docs/CARGO_LICENSES.locked.json`、项目 `.venv` 中已安装的 `METADATA` 与精确版本许可证人工复核表离线生成；它是可审计的工程清单，不构成法律意见。项目授权见顶层 `LICENSE` / `NOTICE`，依赖说明见 `docs/THIRD_PARTY_NOTICES.md`。
 
-- 锁定组件总数（含内部根项目）：`415`
+- 锁定组件总数（含内部根项目）：`416`
 - `REVIEW_REQUIRED`：`0`
 - 数据范围：枚举 `uv.lock`、`package-lock.json` 的全部组件，以及 `Cargo.lock` 中 Windows `x86_64-pc-windows-msvc` 目标可达组件；`.venv` 中不在 `uv.lock` 内的分发包不会进入本表。
 - Rust 许可边界：`Cargo.lock` 不携带 SPDX 许可字段；许可证据来自与该锁文件 SHA-256 绑定、剥离作者与路径的 Cargo metadata 投影。未绑定条目保持 `REVIEW_REQUIRED`。
@@ -23,6 +23,7 @@
 | transitive | charset-normalizer | 3.4.9 | pkg:pypi/charset-normalizer@3.4.9 | License: MIT | uv.lock; .venv/site-packages/charset_normalizer-3.4.9.dist-info/METADATA | OK |
 | transitive | click | 8.4.2 | pkg:pypi/click@8.4.2 | License-Expression: BSD-3-Clause | uv.lock; .venv/site-packages/click-8.4.2.dist-info/METADATA | OK |
 | transitive | colorama | 0.4.6 | pkg:pypi/colorama@0.4.6 | wheel LICENSE SHA-256 cac35c02686e5d04a5a7140bfb3b36e73aed496656e891102e428886d7930318 | uv.lock; manual-audit:colorama-0.4.6.dist-info/licenses/LICENSE.txt | OK |
+| direct | defusedxml | 0.7.1 | pkg:pypi/defusedxml@0.7.1 | wheel LICENSE SHA-256 b80ce9da8c42a1f91079627fbbe2bf27210ae108a0ffe5f077d5b08e076c24c8 | uv.lock; manual-audit:defusedxml-0.7.1.dist-info/LICENSE | OK |
 | direct | fastapi | 0.141.1 | pkg:pypi/fastapi@0.141.1 | License-Expression: MIT | uv.lock; .venv/site-packages/fastapi-0.141.1.dist-info/METADATA | OK |
 | transitive | h11 | 0.16.0 | pkg:pypi/h11@0.16.0 | License: MIT; Classifier: License :: OSI Approved :: MIT License | uv.lock; .venv/site-packages/h11-0.16.0.dist-info/METADATA | OK |
 | transitive | httpcore | 1.0.9 | pkg:pypi/httpcore@1.0.9 | License-Expression: BSD-3-Clause; Classifier: License :: OSI Approved :: BSD License | uv.lock; .venv/site-packages/httpcore-1.0.9.dist-info/METADATA | OK |

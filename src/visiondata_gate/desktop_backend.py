@@ -128,6 +128,11 @@ def main(argv: list[str] | None = None) -> int:
         logging.error("Desktop session token is missing")
         return 2
 
+    # Reviewed source files are packaged as physical hash identities for the
+    # external-runtime and stability contracts.  Never leave import-generated
+    # __pycache__ residue beside those immutable installer resources.
+    sys.dont_write_bytecode = True
+
     import uvicorn
 
     from visiondata_gate.api import app

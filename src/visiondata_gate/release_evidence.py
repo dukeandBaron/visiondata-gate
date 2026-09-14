@@ -21,6 +21,9 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 from xml.etree import ElementTree
 
+from defusedxml import ElementTree as SafeElementTree
+from defusedxml.common import DefusedXmlException
+
 from .audit_envelope import canonical_jcs_bytes
 from .evidence import sha256_file
 from .package import (
@@ -201,8 +204,8 @@ def parse_pytest_junit(path: str | Path) -> dict[str, int]:
     if size <= 0 or size > MAX_JUNIT_BYTES:
         raise ReleaseEvidenceError("JUnit file size is outside the accepted boundary")
     try:
-        root = ElementTree.parse(junit).getroot()
-    except (ElementTree.ParseError, OSError) as exc:
+        root = SafeElementTree.parse(junit, forbid_dtd=True).getroot()
+    except (ElementTree.ParseError, DefusedXmlException, OSError) as exc:
         raise ReleaseEvidenceError(f"JUnit XML is unreadable: {exc}") from exc
 
     if root.tag == "testsuite":

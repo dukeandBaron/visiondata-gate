@@ -152,6 +152,7 @@ export function CapaPage() {
   const requestedWorkOrderId = searchParams.get("workOrder")?.trim() ?? "";
   const controlledDeepLink =
     searchParams.get("layer")?.trim().toLowerCase() === "controlled" ||
+    Boolean(searchParams.get("task")?.trim()) ||
     Boolean(searchParams.get("case")?.trim());
   const { activeWorkspace, activeProject } = useProduct();
   const workspaceId = activeWorkspace?.workspace_id;
@@ -161,6 +162,7 @@ export function CapaPage() {
   });
   const workOrderRequestRef = useRef(0);
   const [workOrders, setWorkOrders] = useState<OperatorWorkOrder[]>([]);
+  const [queueReadScope, setQueueReadScope] = useState("");
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string>();
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -195,6 +197,7 @@ export function CapaPage() {
     setFocusedWorkOrderId("");
     setTransitionReceipt(undefined);
     setWorkOrders([]);
+    setQueueReadScope("");
     const projectId = activeProject?.project_id;
     if (!workspaceId || !projectId) {
       setLoading(false);
@@ -208,6 +211,7 @@ export function CapaPage() {
       );
       if (workOrderRequestRef.current === requestVersion) {
         setWorkOrders(nextWorkOrders);
+        setQueueReadScope(`${workspaceId}::${projectId}`);
         const requested = nextWorkOrders.find(
           (workOrder) => workOrder.work_order_id === requestedWorkOrderId,
         );
@@ -400,6 +404,13 @@ export function CapaPage() {
     rejected: workOrders.filter((item) => item.status === "REJECTED").length,
   }), [workOrders]);
 
+  // An empty array is authoritative only after a successful read of this scope.
+  const queueReady = Boolean(
+    workspaceId && activeProject && !loading &&
+    queueReadScope === `${workspaceId}::${activeProject.project_id}`,
+  );
+  const scopeMissing = !workspaceId || !activeProject;
+
   const closureRevisionIsNewer = Boolean(
     transitionDraft?.status === "CLOSED" &&
     closureAnnotation &&
@@ -448,20 +459,22 @@ export function CapaPage() {
 
       <div className="capa-layer-view" hidden={capaLayer !== "PIXEL"}>
       <div className="capa-live-deltas" aria-label="真实工单状态统计">
-        <span className="is-open" title="当前项目本地账本中等待人工处理的工单"><i />{counts.open} Open</span>
-        <span className="is-ack" title="当前项目本地账本中已具名认领的工单"><i />{counts.acknowledged} Acknowledged</span>
-        <span className="is-capa" title="当前项目本地账本中已进入整改流程的工单"><i />{counts.inCapa} In CAPA</span>
-        <span className="is-closed" title="当前项目本地账本中已有人工关闭依据的工单；不等同于自动质量放行"><i />{counts.closed} Closed</span>
-        <span className="is-rejected" title="当前项目本地账本中被人工驳回或判为误报的工单"><i />{counts.rejected} Rejected</span>
+        <span className="is-open" title="当前项目本地账本中等待人工处理的工单"><i />{queueReady ? counts.open : "—"} Open</span>
+        <span className="is-ack" title="当前项目本地账本中已具名认领的工单"><i />{queueReady ? counts.acknowledged : "—"} Acknowledged</span>
+        <span className="is-capa" title="当前项目本地账本中已进入整改流程的工单"><i />{queueReady ? counts.inCapa : "—"} In CAPA</span>
+        <span className="is-closed" title="当前项目本地账本中已有人工关闭依据的工单；不等同于自动质量放行"><i />{queueReady ? counts.closed : "—"} Closed</span>
+        <span className="is-rejected" title="当前项目本地账本中被人工驳回或判为误报的工单"><i />{queueReady ? counts.rejected : "—"} Rejected</span>
       </div>
 
       <Panel className="operator-work-order-panel" variant="raised">
         <PanelHeader
           eyebrow="PERSISTED LOCAL QUEUE"
           title="像素现场整改工单"
-          detail={`${workOrders.length} total · values derived from the current local ledger`}
+          detail={queueReady
+            ? `${workOrders.length} total · values derived from the current local ledger`
+            : "工单数量等待当前项目账本确认"}
         />
-        {errorMessage ? <div className="operator-work-order-error">{errorMessage}</div> : null}
+        {errorMessage ? <div className="operator-work-order-error" role="alert">{errorMessage}</div> : null}
         {focusNotice ? <div className="operator-work-order-error">{focusNotice}</div> : null}
         {transitionReceipt ? (
           <div className="operator-work-order-receipt" role="status">
@@ -479,18 +492,38 @@ export function CapaPage() {
             <LoaderCircle size={18} className="is-spinning" />正在读取本地工单账本…
           </div>
         ) : null}
-        {!loading && workOrders.length === 0 ? (
+        {!loading && scopeMissing ? (
           <div className="capa-empty-state">
             <span><ClipboardCheck size={22} /></span>
-            <strong>当前工作空间没有工单</strong>
-            <p>在图像工作簿中保存 BBox，右键该标注并完成具名人工复核后，工单会出现在这里。</p>
+            <strong>请先选择工作空间和项目</strong>
+            <p>选定项目后，才能读取对应工单与整改记录。</p>
+            <button type="button" onClick={() => navigate("/workspace")}>
+              返回图像工作簿 <ArrowRight size={15} />
+            </button>
+          </div>
+        ) : null}
+        {!loading && !scopeMissing && !queueReady && errorMessage ? (
+          <div className="capa-empty-state">
+            <span><AlertTriangle size={22} /></span>
+            <strong>工单数量暂不可确认</strong>
+            <p>本次读取未成功，不能据此判断项目没有工单。请恢复本地 API 后重新读取。</p>
+            <button type="button" onClick={() => void refresh()}>
+              重新读取工单 <RefreshCcw size={15} />
+            </button>
+          </div>
+        ) : null}
+        {queueReady && workOrders.length === 0 ? (
+          <div className="capa-empty-state">
+            <span><ClipboardCheck size={22} /></span>
+            <strong>当前项目没有像素工单</strong>
+            <p>缺陷框的人工复核工单显示在这里。重复图片等项目级问题，请先在图像工作簿冻结项目并交给 Agent，再进入受控 CAPA 案件。</p>
             <button type="button" onClick={() => navigate("/workspace")}>
               返回图像工作簿 <ArrowRight size={15} />
             </button>
           </div>
         ) : null}
         <div className="operator-work-order-list">
-          {workOrders.map((workOrder) => {
+          {(queueReady ? workOrders : []).map((workOrder) => {
             const queueBusy = Boolean(updatingId);
             const terminal = ["REJECTED", "CLOSED"].includes(workOrder.status);
             const humanReviewMissing = !workOrder.operator_attests_reviewed_evidence;
