@@ -30,7 +30,7 @@ jobs:
           --no-deps --disable-pip --vulnerability-service pypi
           --format json --output output/security/pip-audit.json
       - if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: locked-dependency-audit
           path: output/security/
@@ -66,7 +66,7 @@ jobs:
           --baseline quality/bandit-baseline.json
           --bandit-version 1.9.4
       - if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: source-static-security
           path: output/security/bandit.json
