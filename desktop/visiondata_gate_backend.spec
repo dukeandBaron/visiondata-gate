@@ -7,17 +7,16 @@ project_root = Path.cwd().resolve()
 source_root = project_root / "src"
 entrypoint = project_root / "desktop" / "backend_main.py"
 
-# Reviewer evidence is deliberately allowlisted file-by-file.  Do not replace
-# this with the whole 10_reports directory: most reports are development-only
-# material and are not runtime dependencies of the desktop sidecar.
+# Synthetic benchmark evidence is deliberately allowlisted file-by-file from
+# the public benchmarks directory. Do not package internal development reports.
 FROZEN_EVALUATION_REPORT_NAMES = (
     "DYNAMICBENCH_V3_REPLANNING_20260829.json",
     "DYNAMICBENCH_V4_PRODUCT_RUNTIME_20260829.json",
 )
 frozen_evaluation_report_datas = [
     (
-        str((project_root / "10_reports" / report_name).resolve(strict=True)),
-        "10_reports",
+        str((project_root / "benchmarks" / report_name).resolve(strict=True)),
+        "benchmarks",
     )
     for report_name in FROZEN_EVALUATION_REPORT_NAMES
 ]

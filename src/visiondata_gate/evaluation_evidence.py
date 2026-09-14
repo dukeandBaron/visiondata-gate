@@ -39,10 +39,10 @@ DYNAMICBENCH_V3_REPORT_NAME = "DYNAMICBENCH_V3_REPLANNING_20260829.json"
 DYNAMICBENCH_V4_REPORT_NAME = "DYNAMICBENCH_V4_PRODUCT_RUNTIME_20260829.json"
 _SOURCE_PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_V3_REPORT_PATH = (
-    _SOURCE_PROJECT_ROOT / "10_reports" / DYNAMICBENCH_V3_REPORT_NAME
+    _SOURCE_PROJECT_ROOT / "benchmarks" / DYNAMICBENCH_V3_REPORT_NAME
 )
 DEFAULT_V4_REPORT_PATH = (
-    _SOURCE_PROJECT_ROOT / "10_reports" / DYNAMICBENCH_V4_REPORT_NAME
+    _SOURCE_PROJECT_ROOT / "benchmarks" / DYNAMICBENCH_V4_REPORT_NAME
 )
 
 
@@ -61,7 +61,7 @@ def _runtime_report_path(report_name: str) -> Path:
         if configured_root
         else _SOURCE_PROJECT_ROOT
     )
-    return resource_root / "10_reports" / report_name
+    return resource_root / "benchmarks" / report_name
 
 
 PROJECTION_SCHEMA_VERSION = (

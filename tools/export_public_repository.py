@@ -121,6 +121,7 @@ PUBLIC_EXACT_FILES = {
 PUBLIC_PREFIXES = (
     "adapters/",
     "agentteams/",
+    "benchmarks/",
     "desktop/",
     "examples/",
     "gateway/src/",

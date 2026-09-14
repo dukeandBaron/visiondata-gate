@@ -67,6 +67,7 @@ def test_public_export_is_allowlist_based_and_excludes_private_delivery_surfaces
     assert _selected("src/visiondata_gate/api.py")
     assert _selected("web/public/public-replay.v1.json")
     assert _selected("sample_data/clear/clean-val-gear.png")
+    assert _selected("benchmarks/DYNAMICBENCH_V3_REPLANNING_20260829.json")
     assert _selected("docs/PUBLICATION_BOUNDARY.md")
     assert _selected("docs/CARGO_LICENSES.locked.json")
     for semifinal_document in (
