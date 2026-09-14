@@ -1,7 +1,7 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "00859ba92a6affa35627dd6498b4008ab1545c0d",
-  "source_tree_oid": "0a70c4d86f35fb14994bf7429d3c3d8f65c4eb5d",
+  "source_commit_oid": "4d2afce3a7b0c2d1a4157e06362542d4a164ff51",
+  "source_tree_oid": "97b202d5eec456423002e133d218c49bae123366",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
@@ -9,7 +9,7 @@
   "personal_data_included": false,
   "tracked_source_only": true,
   "file_count": 719,
-  "snapshot_sha256": "609850ed259c17df445791cbfa6aed358f5b42e44ee67a78d13132a4dc400296",
+  "snapshot_sha256": "8357bb553e4bd7b0deed5ddf5dad3ba8c725ab32a1927df79bf94baccb20216b",
   "files": [
     {
       "path": ".env.example",
@@ -28,7 +28,7 @@
     },
     {
       "path": ".github/workflows/pages.yml",
-      "sha256": "1bd64ef451d3f26198cac947af0823e34fed9a480d310944dc36cd0492ef8d86",
+      "sha256": "710c5e78e6d788bfbf09c8b91238edab35f198269edea9c62f12a3c243be6487",
       "size_bytes": 2312,
       "source": "tools/templates/public-pages.yml"
     },
@@ -2805,7 +2805,7 @@
     },
     {
       "path": "tools/templates/public-pages.yml",
-      "sha256": "1bd64ef451d3f26198cac947af0823e34fed9a480d310944dc36cd0492ef8d86",
+      "sha256": "710c5e78e6d788bfbf09c8b91238edab35f198269edea9c62f12a3c243be6487",
       "size_bytes": 2312
     },
     {
