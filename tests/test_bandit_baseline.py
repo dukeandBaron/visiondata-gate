@@ -122,6 +122,30 @@ def test_baseline_detects_manifest_tampering() -> None:
         )
 
 
+def test_same_rule_and_count_cannot_hide_replaced_code() -> None:
+    baseline = bandit_baseline.build_baseline(
+        _report(_finding()), bandit_version="1.9.4"
+    )
+    changed = _finding()
+    changed["code"] = "6 try:\n7     run_new_command()\n"
+    with pytest.raises(bandit_baseline.BaselineError, match="NEW_BANDIT_FINDINGS"):
+        bandit_baseline.compare_report_to_baseline(
+            _report(changed), baseline, bandit_version="1.9.4"
+        )
+
+
+def test_code_fingerprint_ignores_report_line_numbers_only() -> None:
+    baseline = bandit_baseline.build_baseline(
+        _report(_finding()), bandit_version="1.9.4"
+    )
+    shifted = _finding(line_number=107)
+    shifted["code"] = "106 try:\n107     pass\n"
+    result = bandit_baseline.compare_report_to_baseline(
+        _report(shifted), baseline, bandit_version="1.9.4"
+    )
+    assert result["status"] == "PASS_NO_NEW_BANDIT_FINDINGS"
+
+
 def test_cli_writes_normalized_auditable_baseline(tmp_path: Path) -> None:
     report = tmp_path / "bandit.json"
     baseline = tmp_path / "baseline.json"
