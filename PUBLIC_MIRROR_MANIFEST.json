@@ -1,7 +1,7 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "6693745ca13ccabf1a67393983290d1e4433c506",
-  "source_tree_oid": "9fcd80cb25993ac2a8055650839421427dfe97ca",
+  "source_commit_oid": "2b957553afc9311b571b8165a8683d3caab21fca",
+  "source_tree_oid": "d11f7502587167eb3d2724cbdc59241f1b9b3286",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
@@ -9,7 +9,7 @@
   "personal_data_included": false,
   "tracked_source_only": true,
   "file_count": 717,
-  "snapshot_sha256": "89711508397c57eac2947c092fa00ebc76f8ca589fc0ea2c27bf4f2e2fb17e1a",
+  "snapshot_sha256": "aa9912f7639a790b9faa13f7612d5d53e245c6eb2aeecd152e3632d6b9677d1e",
   "files": [
     {
       "path": ".env.example",
@@ -590,13 +590,13 @@
     },
     {
       "path": "quality/README.md",
-      "sha256": "8a19390ff65ff1b36f62c7f2f501e0042a8f5c10d23cc77ef2596fc30d30e2d1",
-      "size_bytes": 3351
+      "sha256": "7012e08cf08725d4b40e0e2223ba534e696a9ef7611bf7cf957b91e531902336",
+      "size_bytes": 3582
     },
     {
       "path": "quality/bandit-baseline.json",
-      "sha256": "e0118bf5c287c6d57677e5f96fc126e6197786ce40922e00c890df7aae580c20",
-      "size_bytes": 293288
+      "sha256": "cf4bd18584cb1fa85eb85112bf00733d07ac47de5a32ed71469ad0b9d31b671f",
+      "size_bytes": 293360
     },
     {
       "path": "quality/coverage-profile.json",
@@ -1620,8 +1620,8 @@
     },
     {
       "path": "tests/test_bandit_baseline.py",
-      "sha256": "ffbf1c23eb10e47d25a72ae03594f87a4816a8bb92900c2b3390c19c79846290",
-      "size_bytes": 4272
+      "sha256": "1e5ae06a109c405ff568212f150d157381f36f1ba32d08c53703713391065bac",
+      "size_bytes": 5186
     },
     {
       "path": "tests/test_build_learning_installer.py",
@@ -2615,8 +2615,8 @@
     },
     {
       "path": "tools/check_bandit_baseline.py",
-      "sha256": "6fb6e06f9e8f326c8e266c6bb70ac97c785b772eb99ab88b3fcf1964313edacc",
-      "size_bytes": 8183
+      "sha256": "1deff428a7c26e1cc37a4fff141b9c5170ed87ff903b905fc932ea79bc8a4ab4",
+      "size_bytes": 8708
     },
     {
       "path": "tools/check_engineering_quality.py",
