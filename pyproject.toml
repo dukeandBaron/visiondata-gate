@@ -14,7 +14,7 @@ dependencies = [
   # Preserve the release-freeze dependency range. Widening needs a separate
   # compatibility run and reviewed lockfile update; newer NumPy is not ruled out.
   "defusedxml>=0.7.1,<0.8",
-  "numpy>=2.2,<2.3",
+  "numpy>=2.2,<2.6",
   "pillow>=11,<13",
   "pydantic>=2.12,<3",
   "PyYAML>=6,<7",
