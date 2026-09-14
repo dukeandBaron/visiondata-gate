@@ -39,4 +39,3 @@ test('identity refresh recovers after desktop bootstrap fails without sending a 
   assert.equal(invocations, 2);
   assert.deepEqual(requests, [{url: 'http://127.0.0.1:18080/v1/identity/status', method: 'GET'}]);
 });
-
