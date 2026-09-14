@@ -40,6 +40,9 @@ at `quality/bandit-baseline.json` contains only the 226 existing Low findings;
 its normalized findings list is SHA-256 bound. The comparison gate normalizes
 Windows and POSIX path separators, permits resolved findings to disappear, and
 rejects every new Low finding plus every current Medium or High finding.
+Finding identity also binds the source snippet, with only the report's numeric
+line prefixes removed. Replacing code cannot inherit an unrelated old warning's
+allowance merely by keeping the same rule, filename, and finding count.
 
 Reproduce the gate from the repository root:
 

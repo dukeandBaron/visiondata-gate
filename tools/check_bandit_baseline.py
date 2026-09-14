@@ -8,6 +8,7 @@ from collections import Counter
 import hashlib
 import json
 from pathlib import Path
+import re
 from typing import Any
 
 
@@ -72,6 +73,13 @@ def _normalized_results(report: dict[str, Any]) -> list[dict[str, Any]]:
 
 def _stable_fingerprint(finding: dict[str, Any]) -> str:
     identity = {field: finding[field] for field in STABLE_IDENTITY_FIELDS}
+    code = finding.get("code")
+    if not isinstance(code, str) or not code.strip():
+        raise BaselineError("BANDIT_CODE_EVIDENCE_MISSING")
+    # Remove only Bandit's numeric line prefixes; preserve actual source bytes.
+    identity["code"] = "\n".join(
+        re.sub(r"^\d+[ \t]", "", line) for line in code.splitlines()
+    )
     return hashlib.sha256(_canonical_json(identity)).hexdigest()
 
 
@@ -106,6 +114,7 @@ def build_baseline(
             "new_low_allowed": False,
             "resolved_findings_may_be_removed": True,
             "stable_identity_fields": list(STABLE_IDENTITY_FIELDS),
+            "code_fingerprint": "SOURCE_SNIPPET_EXCLUDING_REPORT_LINE_NUMBERS",
         },
         "results": results,
         "scan_roots": ["src", "desktop", "tools"],
@@ -129,6 +138,8 @@ def _validate_baseline(
         and policy.get("new_low_allowed") is False
         and policy.get("stable_identity_fields")
         == list(STABLE_IDENTITY_FIELDS)
+        and policy.get("code_fingerprint")
+        == "SOURCE_SNIPPET_EXCLUDING_REPORT_LINE_NUMBERS"
     ):
         raise BaselineError("BASELINE_POLICY_INVALID")
     results = _normalized_results(baseline)
