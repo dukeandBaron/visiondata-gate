@@ -67,3 +67,10 @@ with `upload: false`; code-scanning publication is unavailable until the
 repository feature is enabled. A successful CodeQL job therefore means analysis
 and artifact retention completed, not that findings were published to GitHub's
 Security tab or independently triaged.
+
+Dependabot currently reports `GHSA-wrw7-89jp-8q8g` against `glib 0.18.5` in
+`web/src-tauri/Cargo.lock`. `cargo tree --target all -i glib@0.18.5` traces it to
+Tauri 2.11.5's Linux GTK/WebKit stack; the Windows target does not compile that
+dependency. The patched `glib 0.20` line is not compatible with the current GTK
+0.18 graph, so the alert remains open pending an upstream Tauri migration. It
+must not be dismissed or described as remediated by a lockfile-only edit.

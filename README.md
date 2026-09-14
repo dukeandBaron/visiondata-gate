@@ -162,6 +162,8 @@ python ..\tools\check_public_pages.py --dist dist
 
 [工程质量门禁](docs/ENGINEERING_QUALITY_IMPLEMENTATION.md) 提供独立工具锁、限定范围类型检查、逐文件行/分支覆盖率和安全扫描。广域类型债务与静态安全告警仍明确保留，不把 scoped PASS 写成全仓或生产安全认证。
 
+当前尚有一项来自 Tauri Linux GTK 依赖链的 `glib 0.18.5` 中等级上游告警；Windows 目标不编译该依赖，Linux 桌面仍保持 HOLD。依赖链与处理边界记录在 [独立质量工具说明](quality/README.md)。
+
 ## 状态
 
 ```text
