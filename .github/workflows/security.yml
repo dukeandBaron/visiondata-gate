@@ -48,9 +48,23 @@ jobs:
           python-version: "3.12"
       - run: uv sync --project quality --locked --python 3.12
       - run: python -c "from pathlib import Path; Path('output/security').mkdir(parents=True, exist_ok=True)"
-      # Intentionally non-green while alerts need triage. No global skips,
-      # exit-zero, or disabled failure status is used to manufacture a pass.
-      - run: uv run --project quality --no-sync python -m bandit -r src desktop tools -f json -o output/security/bandit.json
+      - name: Run the complete Bandit scan and retain its real report
+        shell: bash
+        run: |
+          set +e
+          uv run --project quality --no-sync python -m bandit -r src desktop tools -f json -o output/security/bandit.json
+          bandit_status=$?
+          set -e
+          if [ "$bandit_status" -gt 1 ]; then
+            exit "$bandit_status"
+          fi
+      - name: Reject every new Low, Medium, or High finding
+        run: >-
+          uv run --project quality --no-sync python
+          tools/check_bandit_baseline.py check
+          --report output/security/bandit.json
+          --baseline quality/bandit-baseline.json
+          --bandit-version 1.9.4
       - if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:

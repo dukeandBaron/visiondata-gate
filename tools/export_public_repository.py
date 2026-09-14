@@ -40,6 +40,7 @@ PUBLIC_EXACT_FILES = {
     "quality/pyright-gate.json",
     "quality/pyright-debt.json",
     "quality/coverage-profile.json",
+    "quality/bandit-baseline.json",
     "quality/README.md",
     "LICENSE",
     "NOTICE",

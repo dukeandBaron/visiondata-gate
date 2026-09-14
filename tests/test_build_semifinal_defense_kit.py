@@ -224,6 +224,18 @@ def test_pptx_rejects_non_http_external_relationship() -> None:
     assert exc_info.value.code == "pptx_external_relationship_rejected"
 
 
+def test_pptx_rejects_relationship_doctype() -> None:
+    relationships = (
+        b'<!DOCTYPE Relationships><Relationships '
+        b'xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>'
+    )
+
+    with pytest.raises(defense_kit.DefenseKitError) as exc_info:
+        defense_kit._validate_external_relationships(relationships)
+
+    assert exc_info.value.code == "pptx_relationships_invalid"
+
+
 def test_build_is_deterministic_and_publishes_verified_outputs(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

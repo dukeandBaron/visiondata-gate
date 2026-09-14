@@ -33,11 +33,31 @@ non-regression floor, not 95% coverage or adequate coverage of all CAPA/release
 execution. The wider release coverage baseline is local-only because its tests
 depend on artifacts excluded from the public repository.
 
-Security scans retain their real exit status. The initial complete Bandit scan
-has unresolved alerts and remains HOLD; there is no blanket `nosec` or
-`--exit-zero`. Known-vulnerability lookup sends public locked package identifiers,
-not source, images, private registry URLs or credentials. A registry or scanner
-failure is not an all-clear.
+Security scans remain fail-closed. Bandit `1.9.4` scans all Python under `src`,
+`desktop`, and `tools`, writes the complete JSON report, and does not use
+`--exit-zero`, a global rule skip, or `continue-on-error`. The reviewed baseline
+at `quality/bandit-baseline.json` contains only the 226 existing Low findings;
+its normalized findings list is SHA-256 bound. The comparison gate normalizes
+Windows and POSIX path separators, permits resolved findings to disappear, and
+rejects every new Low finding plus every current Medium or High finding.
+
+Reproduce the gate from the repository root:
+
+```text
+uv sync --project quality --locked --python 3.12
+uv run --project quality --no-sync python -m bandit -r src desktop tools -f json -o output/security/bandit.json
+uv run --project quality --no-sync python tools/check_bandit_baseline.py check --report output/security/bandit.json --baseline quality/bandit-baseline.json --bandit-version 1.9.4
+```
+
+Bandit returns `1` while reviewed Low findings remain; CI preserves the full
+report and delegates the final pass/fail decision to the baseline comparison.
+Scanner execution errors (`>1`), malformed reports, baseline drift, tool-version
+drift, and new findings remain blocking. A baseline change requires explicit
+review and regeneration with the `freeze` subcommand; it is never updated by CI.
+
+Known-vulnerability lookup sends public locked package identifiers, not source,
+images, private registry URLs, or credentials. A registry or scanner failure is
+not an all-clear.
 
 Hosted workflow execution, CodeQL results, pre-commit installation in a user's
 checkout, package publication and production approval remain separate actions.

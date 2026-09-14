@@ -97,6 +97,19 @@ def _is_sha256(value: object) -> bool:
     )
 
 
+def _load_model_pack_checkpoint(torch_module: Any, checkpoint: Path) -> dict[str, Any]:
+    """Load a tensor-only checkpoint on CPU; reject arbitrary pickle globals."""
+
+    loaded = torch_module.load(
+        checkpoint,
+        map_location="cpu",
+        weights_only=True,
+    )
+    if not isinstance(loaded, dict):
+        raise ValueError("MODEL_PACK_CHECKPOINT_INVALID")
+    return loaded
+
+
 def _validate_local_model_pack_roundtrip(
     pack: dict[str, Any],
     *,
@@ -1051,7 +1064,7 @@ def _worker(request_path: Path, result_path: Path) -> int:
         "industrial_acceptance": "HOLD",
         "production_release_allowed": False,
     }
-    checkpoint_roundtrip = torch.load(checkpoint, weights_only=False)
+    checkpoint_roundtrip = _load_model_pack_checkpoint(torch, checkpoint)
     validation_view, tensor_count, all_tensors_valid = (
         _build_model_pack_validation_view(
             checkpoint_roundtrip,

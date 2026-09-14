@@ -1274,23 +1274,25 @@ class TaskStore:
         ).fetchall()
         task_ids = [str(row["task_id"]) for row in rows]
         if task_ids:
-            placeholders = ",".join("?" for _ in task_ids)
-            connection.execute(
-                f"""
+            connection.executemany(
+                """
                 UPDATE agent_tasks
                 SET execution_status = ?, current_phase = ?, error_code = ?,
                     error_message = ?, updated_at = ?, completed_at = ?
-                WHERE task_id IN ({placeholders})
+                WHERE task_id = ?
                 """,
-                (
-                    TaskExecutionStatus.FAILED.value,
-                    "failed_authorization",
-                    error_code,
-                    error_message[:500],
-                    timestamp,
-                    timestamp,
-                    *task_ids,
-                ),
+                [
+                    (
+                        TaskExecutionStatus.FAILED.value,
+                        "failed_authorization",
+                        error_code,
+                        error_message[:500],
+                        timestamp,
+                        timestamp,
+                        task_id,
+                    )
+                    for task_id in task_ids
+                ],
             )
         return task_ids
 
@@ -2098,22 +2100,24 @@ class TaskStore:
         project_id: str | None = None,
         limit: int = 100,
     ) -> list[TaskRecord]:
-        clauses = ["m.user_id = ?"]
-        parameters: list[Any] = [actor_user_id]
-        if workspace_id is not None:
-            clauses.append("t.workspace_id = ?")
-            parameters.append(workspace_id)
-        if project_id is not None:
-            clauses.append("t.project_id = ?")
-            parameters.append(project_id)
-        parameters.append(max(1, min(limit, 200)))
-        query = f"""
+        bounded_limit = max(1, min(limit, 200))
+        query = """
             SELECT t.* FROM agent_tasks t
             JOIN workspace_members m ON m.workspace_id = t.workspace_id
-            WHERE {" AND ".join(clauses)}
+            WHERE m.user_id = ?
+                AND (? IS NULL OR t.workspace_id = ?)
+                AND (? IS NULL OR t.project_id = ?)
             ORDER BY t.created_at DESC, t.task_id DESC
             LIMIT ?
         """
+        parameters = (
+            actor_user_id,
+            workspace_id,
+            workspace_id,
+            project_id,
+            project_id,
+            bounded_limit,
+        )
         with self._connection() as connection:
             rows = connection.execute(query, parameters).fetchall()
         return [self._task(row) for row in rows]
@@ -2174,21 +2178,39 @@ class TaskStore:
         fields: dict[str, Any] | None = None,
     ) -> TaskRecord:
         updates = dict(fields or {})
-        allowed_fields = {
-            "initial_decision",
-            "final_decision",
-            "runtime_status",
-            "artifact_root_rel",
-            "trace_rel",
-            "trace_sha256",
-            "evidence_zip_rel",
-            "evidence_sha256",
-            "error_code",
-            "error_message",
-            "started_at",
-            "completed_at",
+        field_update_statements = {
+            "initial_decision": (
+                "UPDATE agent_tasks SET initial_decision = ? WHERE task_id = ?"
+            ),
+            "final_decision": (
+                "UPDATE agent_tasks SET final_decision = ? WHERE task_id = ?"
+            ),
+            "runtime_status": (
+                "UPDATE agent_tasks SET runtime_status = ? WHERE task_id = ?"
+            ),
+            "artifact_root_rel": (
+                "UPDATE agent_tasks SET artifact_root_rel = ? WHERE task_id = ?"
+            ),
+            "trace_rel": "UPDATE agent_tasks SET trace_rel = ? WHERE task_id = ?",
+            "trace_sha256": (
+                "UPDATE agent_tasks SET trace_sha256 = ? WHERE task_id = ?"
+            ),
+            "evidence_zip_rel": (
+                "UPDATE agent_tasks SET evidence_zip_rel = ? WHERE task_id = ?"
+            ),
+            "evidence_sha256": (
+                "UPDATE agent_tasks SET evidence_sha256 = ? WHERE task_id = ?"
+            ),
+            "error_code": "UPDATE agent_tasks SET error_code = ? WHERE task_id = ?",
+            "error_message": (
+                "UPDATE agent_tasks SET error_message = ? WHERE task_id = ?"
+            ),
+            "started_at": "UPDATE agent_tasks SET started_at = ? WHERE task_id = ?",
+            "completed_at": (
+                "UPDATE agent_tasks SET completed_at = ? WHERE task_id = ?"
+            ),
         }
-        if not set(updates) <= allowed_fields:
+        if not set(updates) <= set(field_update_statements):
             raise ValueError("unsupported task update field")
         with self._connection(immediate=True) as connection:
             row = connection.execute(
@@ -2205,20 +2227,17 @@ class TaskStore:
                 # Linearize account revocation and publication in this write
                 # transaction. FAILED/CANCELLED must remain possible after revoke.
                 assert_active_in_connection(connection, str(row["created_by"]))
-            assignments = [
-                "execution_status = ?",
-                "current_phase = ?",
-                "updated_at = ?",
-            ]
-            values: list[Any] = [target.value, current_phase, _now()]
-            for key, value in updates.items():
-                assignments.append(f"{key} = ?")
-                values.append(value)
-            values.append(task_id)
+            timestamp = _now()
             connection.execute(
-                f"UPDATE agent_tasks SET {', '.join(assignments)} WHERE task_id = ?",
-                values,
+                """
+                UPDATE agent_tasks
+                SET execution_status = ?, current_phase = ?, updated_at = ?
+                WHERE task_id = ?
+                """,
+                (target.value, current_phase, timestamp, task_id),
             )
+            for key, value in updates.items():
+                connection.execute(field_update_statements[key], (value, task_id))
             updated = connection.execute(
                 "SELECT * FROM agent_tasks WHERE task_id = ?", (task_id,)
             ).fetchone()

@@ -25,6 +25,9 @@ from pathlib import Path, PurePosixPath
 from urllib.parse import urlsplit
 from xml.etree import ElementTree
 
+from defusedxml import ElementTree as SafeElementTree
+from defusedxml.common import DefusedXmlException
+
 SCHEMA = "visiondata-gate.goai-semifinal-defense-kit.v1"
 RECEIPT_SCHEMA = "visiondata-gate.goai-semifinal-defense-kit-receipt.v1"
 FIXED_ZIP_TIME = (2026, 9, 2, 0, 0, 0)
@@ -242,8 +245,8 @@ def _privacy_scan(data: bytes, *, label: str) -> None:
 
 def _validate_external_relationships(data: bytes) -> None:
     try:
-        root = ElementTree.fromstring(data)
-    except ElementTree.ParseError as exc:
+        root = SafeElementTree.fromstring(data, forbid_dtd=True)
+    except (ElementTree.ParseError, DefusedXmlException) as exc:
         raise DefenseKitError("pptx_relationships_invalid") from exc
     for relationship in root.iter(RELATIONSHIP_TAG):
         if relationship.get("TargetMode", "").casefold() != "external":

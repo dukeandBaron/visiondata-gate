@@ -40,7 +40,8 @@ SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 BUILD_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{5,119}$")
 VERSION_PATTERN = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][A-Za-z0-9.-]+)?$")
 WINDOWS_ABSOLUTE = re.compile(r"(?i)^(?:[a-z]:[\\/]|\\\\)")
-PRIVATE_POSIX_PREFIXES = ("/home/", "/root/", "/Users/", "/mnt/", "/tmp/")
+# These values are denylist prefixes, never temporary write destinations.
+PRIVATE_POSIX_PREFIXES = ("/home/", "/root/", "/Users/", "/mnt/", "/tmp/")  # nosec B108
 FORBIDDEN_ARCHIVE_SUFFIXES = (
     ".pt",
     ".pth",

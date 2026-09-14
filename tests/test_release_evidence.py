@@ -124,6 +124,19 @@ def test_parse_pytest_junit_rejects_inconsistent_counts(tmp_path: Path) -> None:
         parse_pytest_junit(junit)
 
 
+def test_parse_pytest_junit_rejects_doctype(tmp_path: Path) -> None:
+    junit = tmp_path / "pytest.xml"
+    junit.write_text(
+        '<!DOCTYPE testsuites><testsuites>'
+        '<testsuite tests="1" failures="0" errors="0" skipped="0" />'
+        "</testsuites>",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ReleaseEvidenceError, match="JUnit XML is unreadable"):
+        parse_pytest_junit(junit)
+
+
 def test_run_full_regression_binds_exact_junit(
     tmp_path: Path,
 ) -> None:

@@ -10,6 +10,7 @@ import io
 import json
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -20,6 +21,34 @@ from visiondata_gate.contracts import BatchContract
 
 
 TERMINAL = {"COMPLETED", "FAILED", "ARCHIVED"}
+LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
+
+
+class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        del req, fp, code, msg, headers, newurl
+        return None
+
+
+def _validated_base_url(base_url: str) -> str:
+    parsed = urllib.parse.urlparse(base_url)
+    try:
+        port = parsed.port
+    except ValueError as exc:
+        raise ValueError("base URL must be a loopback HTTP API origin") from exc
+    if not (
+        parsed.scheme in {"http", "https"}
+        and parsed.hostname in LOOPBACK_HOSTS
+        and port is not None
+        and parsed.username is None
+        and parsed.password is None
+        and parsed.path in {"", "/"}
+        and not parsed.params
+        and not parsed.query
+        and not parsed.fragment
+    ):
+        raise ValueError("base URL must be a loopback HTTP API origin")
+    return base_url.rstrip("/")
 
 
 def _request(
@@ -31,6 +60,7 @@ def _request(
     idempotency_key: str | None = None,
     method: str | None = None,
 ) -> tuple[int, dict[str, str], bytes]:
+    base_url = _validated_base_url(base_url)
     headers = {"Accept": "application/json"}
     if actor:
         headers["X-Actor-User-Id"] = actor
@@ -47,7 +77,8 @@ def _request(
         method=method,
     )
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        opener = urllib.request.build_opener(_NoRedirectHandler())
+        with opener.open(request, timeout=30) as response:
             return response.status, dict(response.headers.items()), response.read()
     except urllib.error.HTTPError as error:
         return error.code, dict(error.headers.items()), error.read()

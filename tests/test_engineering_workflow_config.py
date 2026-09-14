@@ -52,6 +52,8 @@ def test_security_jobs_fail_independently_and_pin_real_action_commits():
     assert "${{ github.workspace }}/output/security/" in runs(jobs["dependency-audit"])
     assert "-m bandit -r src desktop tools" in runs(jobs["bandit"])
     assert "--exit-zero" not in runs(jobs["bandit"])
+    assert "check_bandit_baseline.py check" in runs(jobs["bandit"])
+    assert "quality/bandit-baseline.json" in runs(jobs["bandit"])
     assert jobs["codeql"]["permissions"]["security-events"] == "write"
     for job in jobs.values():
         assert all("continue-on-error" not in step for step in job["steps"])
@@ -96,6 +98,7 @@ def test_public_export_includes_only_reviewed_quality_files_not_qa_environment()
         "quality/pyright-gate.json",
         "quality/pyright-debt.json",
         "quality/coverage-profile.json",
+        "quality/bandit-baseline.json",
         "quality/README.md",
     }
     assert required <= PUBLIC_EXACT_FILES

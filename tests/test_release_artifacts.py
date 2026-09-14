@@ -298,7 +298,7 @@ def test_frozen_supply_chain_outputs_match_offline_regeneration(
     assert generated_sbom.read_bytes() == frozen_sbom.read_bytes()
     assert generated_inventory.read_bytes() == frozen_inventory.read_bytes()
     assert result == {
-        "component_count": 415,
+            "component_count": 416,
         "inventory_sha256": _sha256(frozen_inventory),
         "review_required_count": 0,
         "sbom_sha256": _sha256(frozen_sbom),

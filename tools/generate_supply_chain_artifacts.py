@@ -52,6 +52,11 @@ _FROZEN_LICENSE_RESOLUTIONS = {
         "evidence": "wheel LICENSE SHA-256 cac35c02686e5d04a5a7140bfb3b36e73aed496656e891102e428886d7930318",
         "source": "manual-audit:colorama-0.4.6.dist-info/licenses/LICENSE.txt",
     },
+    ("defusedxml", "0.7.1"): {
+        "expression": "PSF-2.0",
+        "evidence": "wheel LICENSE SHA-256 b80ce9da8c42a1f91079627fbbe2bf27210ae108a0ffe5f077d5b08e076c24c8",
+        "source": "manual-audit:defusedxml-0.7.1.dist-info/LICENSE",
+    },
     ("itsdangerous", "2.2.0"): {
         "expression": "BSD-3-Clause",
         "evidence": "wheel LICENSE SHA-256 63af09891b6be8ad1a4252ed43af0f4efba7fc948e228367bed7f3c5ae0b09d7",

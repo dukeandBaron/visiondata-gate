@@ -73,17 +73,22 @@ def build_agent_platform(
     # One SELECT yields a consistent total and bounded task slice.
     with service.store._connection() as connection:
         service.store._require_membership(connection, workspace_id, actor)
-        params = [workspace_id]
-        clause = "workspace_id = ?"
-        if project_id is not None:
-            clause += " AND project_id = ?"
-            params.append(project_id)
-        rows = connection.execute(
-            "SELECT task_id, goal, execution_status, final_decision, updated_at, "
-            f"COUNT(*) OVER() AS matching_count FROM agent_tasks WHERE {clause} "
-            "ORDER BY created_at DESC, task_id DESC LIMIT 200",
-            params,
-        ).fetchall()
+        if project_id is None:
+            rows = connection.execute(
+                "SELECT task_id, goal, execution_status, final_decision, updated_at, "
+                "COUNT(*) OVER() AS matching_count FROM agent_tasks "
+                "WHERE workspace_id = ? "
+                "ORDER BY created_at DESC, task_id DESC LIMIT 200",
+                (workspace_id,),
+            ).fetchall()
+        else:
+            rows = connection.execute(
+                "SELECT task_id, goal, execution_status, final_decision, updated_at, "
+                "COUNT(*) OVER() AS matching_count FROM agent_tasks "
+                "WHERE workspace_id = ? AND project_id = ? "
+                "ORDER BY created_at DESC, task_id DESC LIMIT 200",
+                (workspace_id, project_id),
+            ).fetchall()
     profiles = service.list_provider_profiles(actor, workspace_id)
     names = {
         "image_quality": "图像质量",

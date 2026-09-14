@@ -16,6 +16,8 @@ import tomllib
 from typing import cast
 from xml.etree import ElementTree
 
+from defusedxml import ElementTree as SafeElementTree
+
 
 MAX_BYTES = 8 * 1024 * 1024
 SCHEMA = "visiondata-gate.quality-coverage-profile.v1"
@@ -155,7 +157,7 @@ def _check_junit(path: Path, expected: set[str]) -> None:
     text = _read(path)
     if re.search(r"<!\s*(?:DOCTYPE|ENTITY)\b", text, flags=re.IGNORECASE):
         raise QualityGateError("XML DOCTYPE and ENTITY declarations are forbidden")
-    root = ElementTree.fromstring(text)
+    root = SafeElementTree.fromstring(text, forbid_dtd=True)
     if root.tag not in {"testsuites", "testsuite"}:
         raise QualityGateError("JUnit root is unsupported")
     suites = list(root.iter("testsuite"))

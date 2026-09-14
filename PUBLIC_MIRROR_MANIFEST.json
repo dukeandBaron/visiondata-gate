@@ -1,15 +1,15 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "70fe06dea90b93fb27d7a2a47cd1ba06b5053fc0",
-  "source_tree_oid": "fba57a04f4f73d9b1dba99942fe19ee7c7e19eb9",
+  "source_commit_oid": "19afcece10fae6359203d4a077d3f8c427a878d9",
+  "source_tree_oid": "e223e84d63e3e6ec2c4d05d555153b03774dbb61",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
   "customer_data_included": false,
   "personal_data_included": false,
   "tracked_source_only": true,
-  "file_count": 709,
-  "snapshot_sha256": "1e9905b136ff11046dda817f44838ba4c0cf93f8e5f8b397b9711f33d7d7f439",
+  "file_count": 713,
+  "snapshot_sha256": "40b3a473d83f4d201279fa54e9058dfab3bbdcb648d694ce8bd4db8c8a2e9914",
   "files": [
     {
       "path": ".env.example",
@@ -39,8 +39,8 @@
     },
     {
       "path": ".github/workflows/security.yml",
-      "sha256": "b0bd812b1bc23708c67de628867b86d88f359069a892dc9ed7eee3b8d365b368",
-      "size_bytes": 3231
+      "sha256": "19e939014bf16731942cb792ac740be0e72e60990199100183652a3510503c2f",
+      "size_bytes": 3640
     },
     {
       "path": ".gitignore",
@@ -395,8 +395,8 @@
     },
     {
       "path": "docs/SBOM.cdx.json",
-      "sha256": "52f5c01a7b41d1ff7d9ddefa0831dc8a86db59cad7b4ad672980868ed9e28af3",
-      "size_bytes": 489292
+      "sha256": "4574a9f165c03eeac3bd5da5c121b8521afe8a5bdf30df289e51782bc8c733ae",
+      "size_bytes": 490178
     },
     {
       "path": "docs/SEMIFINAL_DEFENSE_RUNBOOK_20260902.md",
@@ -405,13 +405,13 @@
     },
     {
       "path": "docs/THIRD_PARTY_LICENSE_INVENTORY.generated.md",
-      "sha256": "9f073e0d4b8e0cbfb479822901dcd8ccd81014ef68e010554abc9490d0375b6d",
-      "size_bytes": 76047
+      "sha256": "492d60276b13b6ebf50afc2ad6e31eecf97f62903a86ce9d91c75b579cd73fbc",
+      "size_bytes": 76260
     },
     {
       "path": "docs/THIRD_PARTY_NOTICES.md",
-      "sha256": "7fe4b5f1b306d4aa49d94cd15e187678573d59af5aad419ad84b76d091d9d51a",
-      "size_bytes": 5008
+      "sha256": "d3d35b51f7e42ed8687c68b3ffe951efbc0f12ada90eff94ad18679808873514",
+      "size_bytes": 5127
     },
     {
       "path": "docs/TOOLS_AND_MCP_CONTRACT.md",
@@ -565,13 +565,18 @@
     },
     {
       "path": "pyproject.toml",
-      "sha256": "2f61dfc18e5205783ecdddb728f1f139b6f5e432268a3ebccbcd16f810e9dada",
-      "size_bytes": 1825
+      "sha256": "118d568c4474c7386dc9fda7a3025aad9c933fe176f7dad6eafebf2982ef36bc",
+      "size_bytes": 1853
     },
     {
       "path": "quality/README.md",
-      "sha256": "e17d9fcd4a2afdec942a29fc8c57cc899909ee22f17d09597f3a4adac8b4ef6b",
-      "size_bytes": 2176
+      "sha256": "8a19390ff65ff1b36f62c7f2f501e0042a8f5c10d23cc77ef2596fc30d30e2d1",
+      "size_bytes": 3351
+    },
+    {
+      "path": "quality/bandit-baseline.json",
+      "sha256": "e0118bf5c287c6d57677e5f96fc126e6197786ce40922e00c890df7aae580c20",
+      "size_bytes": 293288
     },
     {
       "path": "quality/coverage-profile.json",
@@ -800,8 +805,8 @@
     },
     {
       "path": "src/visiondata_gate/agent_platform.py",
-      "sha256": "c0f1328ef723e76c9501f7abaa25c26af602904c9d5808d6ad755e30b4f3f4ea",
-      "size_bytes": 5455
+      "sha256": "97901199a9cf8a1d41b8f03a13c3042787853ea0eed1578d3b53f00386ec72f5",
+      "size_bytes": 5768
     },
     {
       "path": "src/visiondata_gate/agent_runtime.py",
@@ -1235,8 +1240,8 @@
     },
     {
       "path": "src/visiondata_gate/omni_adapter.py",
-      "sha256": "9ed8283e60eb8dd57fd30ee25239998be86a637429adbde1aa073177900150be",
-      "size_bytes": 109489
+      "sha256": "5f528b8095f43ac3bedc9e1a82c67fe827d3136ab42656d303a560cd8b08f405",
+      "size_bytes": 109793
     },
     {
       "path": "src/visiondata_gate/operator_snapshot.py",
@@ -1345,8 +1350,8 @@
     },
     {
       "path": "src/visiondata_gate/release_evidence.py",
-      "sha256": "19fb1cedf124360036d05705a19caff81372b74ef50335a3bba6b4d5505aa9dd",
-      "size_bytes": 20846
+      "sha256": "6156f9e978eb10a26546ff3dfb1f4dceb0ccf96ce98324abc93779cc20afd12f",
+      "size_bytes": 20993
     },
     {
       "path": "src/visiondata_gate/repair.py",
@@ -1415,8 +1420,8 @@
     },
     {
       "path": "src/visiondata_gate/task_store.py",
-      "sha256": "06519b4f796ab124f3cf85e36041abc84df240a63aa0f9e4f96219fba928fd81",
-      "size_bytes": 113510
+      "sha256": "016d6ec3ef4980049d20dfb3d9aec9d4d721594c6d7519691889f6d19bbc52d0",
+      "size_bytes": 114463
     },
     {
       "path": "src/visiondata_gate/tool_fault_evaluation.py",
@@ -1594,14 +1599,19 @@
       "size_bytes": 3096
     },
     {
+      "path": "tests/test_bandit_baseline.py",
+      "sha256": "ffbf1c23eb10e47d25a72ae03594f87a4816a8bb92900c2b3390c19c79846290",
+      "size_bytes": 4272
+    },
+    {
       "path": "tests/test_build_learning_installer.py",
       "sha256": "58d289ce75ce2c6511b34396476cb05262a91c423eb0277d962816aed5871e96",
       "size_bytes": 19945
     },
     {
       "path": "tests/test_build_semifinal_defense_kit.py",
-      "sha256": "db2cf4a354dc1d2407e896f02ed4b42fa8a41ac8898b09b3d742649d3c476698",
-      "size_bytes": 11553
+      "sha256": "75113e1484b85e570a353ffefdaf022aa9e270150f8cadaf9aa4f4490f9dae96",
+      "size_bytes": 11968
     },
     {
       "path": "tests/test_build_windows_internal_candidate.py",
@@ -1700,8 +1710,8 @@
     },
     {
       "path": "tests/test_engineering_workflow_config.py",
-      "sha256": "9cc640f6a65b83d8abf93457538edf38a203631e7a9ed72d2b1bee01a811f322",
-      "size_bytes": 4802
+      "sha256": "22a0884425ef025ea089b6ccc834b5dab8baf13d959fc4d095cf0eada806bd7c",
+      "size_bytes": 4976
     },
     {
       "path": "tests/test_evaluation_contracts.py",
@@ -2060,8 +2070,8 @@
     },
     {
       "path": "tests/test_omni_adapter.py",
-      "sha256": "895f5dcc60196a9c0e12233830006da7edc8f5828127ccd985e8bbf6baddb983",
-      "size_bytes": 26083
+      "sha256": "ecfbbf5b00e1ed72e11adb0dd57bffa7f8fc43ce9ccef4c6a8d7eba31e225990",
+      "size_bytes": 26307
     },
     {
       "path": "tests/test_operator_snapshot_acceptance_requirements.py",
@@ -2195,8 +2205,8 @@
     },
     {
       "path": "tests/test_release_artifacts.py",
-      "sha256": "08fca35aa91fde741b6d6a017f0c74f0567b2667b3211930c0533aa2131e146b",
-      "size_bytes": 11260
+      "sha256": "9eb96e029221af06f64c27f1b03a7cfb7b274926716a8191f4b01aad2530a70c",
+      "size_bytes": 11264
     },
     {
       "path": "tests/test_release_attestation.py",
@@ -2205,8 +2215,8 @@
     },
     {
       "path": "tests/test_release_evidence.py",
-      "sha256": "b6d8e6f76ff33b8e5ddf0ca24138c4b5b8f7e0fb4d2be3d3c347fff7d1b8ebd2",
-      "size_bytes": 8760
+      "sha256": "f7ee5152de6a48bef8577bda1b5e5539d882d2825e12c274ca805054bc859d08",
+      "size_bytes": 9174
     },
     {
       "path": "tests/test_repair_evaluation.py",
@@ -2257,6 +2267,11 @@
       "path": "tests/test_sample_data.py",
       "sha256": "129d49dcf2faf6cbbcb9297ef74456d69b4b4e821439410e1e1d94498b173ef3",
       "size_bytes": 1690
+    },
+    {
+      "path": "tests/test_security_medium_regressions.py",
+      "sha256": "f3bf31becd7f464d580de3ba3ee6e10561b6bd58330266c9ca8c592a25b5f595",
+      "size_bytes": 1899
     },
     {
       "path": "tests/test_semifinal_demo.py",
@@ -2495,8 +2510,8 @@
     },
     {
       "path": "tools/api_smoke.py",
-      "sha256": "cb470a64fc62d8ceadd9948484868e82db97bb297b62833c88680aa09c94e411",
-      "size_bytes": 11749
+      "sha256": "59bced5b09fb38f4be745b6f202e0d03fef5a05aa07708c9ab8c4117c8f80ee6",
+      "size_bytes": 12805
     },
     {
       "path": "tools/audit_submission_package.py",
@@ -2550,8 +2565,8 @@
     },
     {
       "path": "tools/build_semifinal_defense_kit.py",
-      "sha256": "cf5b9529c7fbf31995b170b2d890f2b487dafaaa01355423385b07c0410d95a0",
-      "size_bytes": 38090
+      "sha256": "e0f950b2db290f0bb6a61e9291dc993fbc668d1a844e3a4c79eec2a0aaaa7de8",
+      "size_bytes": 38239
     },
     {
       "path": "tools/build_semifinal_governance_evidence.py",
@@ -2575,13 +2590,18 @@
     },
     {
       "path": "tools/build_windows_internal_candidate.py",
-      "sha256": "03ccfc7d9e80afd458e5f80edf886983cb0fda0954b56b9a9b03b8261a2af91e",
-      "size_bytes": 24192
+      "sha256": "4837b28e2957a40f91973033b65c874b3da59101c696a3fd18432d950407150f",
+      "size_bytes": 24280
+    },
+    {
+      "path": "tools/check_bandit_baseline.py",
+      "sha256": "6fb6e06f9e8f326c8e266c6bb70ac97c785b772eb99ab88b3fcf1964313edacc",
+      "size_bytes": 8183
     },
     {
       "path": "tools/check_engineering_quality.py",
-      "sha256": "622fb348cfe1df794949741d1a137ea2ffde94cd4f47344940855735f8ec65cd",
-      "size_bytes": 11271
+      "sha256": "57a16c26268d297a263818060f62194dd4a99949fd2c774b587e4481f3895d82",
+      "size_bytes": 11347
     },
     {
       "path": "tools/check_public_pages.py",
@@ -2615,8 +2635,8 @@
     },
     {
       "path": "tools/export_public_repository.py",
-      "sha256": "558ce3ef1bf69489c15823dfeed7bb592790e612dd8333ab5e4e635ba958a2df",
-      "size_bytes": 14601
+      "sha256": "f8628da04525a617271579f5a73b27de244e6624523433641dddce702b835ca0",
+      "size_bytes": 14637
     },
     {
       "path": "tools/generate_cargo_license_snapshot.py",
@@ -2625,8 +2645,8 @@
     },
     {
       "path": "tools/generate_supply_chain_artifacts.py",
-      "sha256": "3f226c441996245b8b4522505eca347ca672d77c04508c3b67c6fc724de91721",
-      "size_bytes": 40573
+      "sha256": "415e032669c67b6b268677640f7c5f57187a1148fc146d10febcdc9199ad5db4",
+      "size_bytes": 40823
     },
     {
       "path": "tools/import_local_env.ps1",
@@ -2710,13 +2730,13 @@
     },
     {
       "path": "tools/run_ui_dev_model.py",
-      "sha256": "d1f1b3a7eb8e81c3db25175689c7c768d7977903baac0afbfd8c37c4be8c8e39",
-      "size_bytes": 10868
+      "sha256": "f8182eb22026b558c34d79996a324ee939abc908d2631ec9245cba3832de24c5",
+      "size_bytes": 11651
     },
     {
       "path": "tools/run_visa_yolo26_normality.py",
-      "sha256": "34dda69ae316aa01a421363aaa2cb39291cb6f4a8464fc4a76d8789d6884a068",
-      "size_bytes": 66126
+      "sha256": "23e186cb4f01cb316366bf2a6acfe9d997abfc0965ef33f01002d385733c2570",
+      "size_bytes": 66528
     },
     {
       "path": "tools/smoke_extracted_platform.py",
@@ -2780,8 +2800,8 @@
     },
     {
       "path": "uv.lock",
-      "sha256": "bd66ed683a498a1e391733b1bf7c29b1649251dc9540dd4c8aec3766d61c6395",
-      "size_bytes": 151144
+      "sha256": "c06b9809992b2bcae7134b9c21742acfee8bf3f69b601a64c501ae241166d286",
+      "size_bytes": 151932
     },
     {
       "path": "web/.env.example",
