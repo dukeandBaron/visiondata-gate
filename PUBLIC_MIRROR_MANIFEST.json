@@ -1,7 +1,7 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "d693b7dbe1960515468630804b4c462a91fc9e21",
-  "source_tree_oid": "2148d3540cef8ca79427a411c9ac88b45c5c9fbc",
+  "source_commit_oid": "00859ba92a6affa35627dd6498b4008ab1545c0d",
+  "source_tree_oid": "0a70c4d86f35fb14994bf7429d3c3d8f65c4eb5d",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
@@ -9,7 +9,7 @@
   "personal_data_included": false,
   "tracked_source_only": true,
   "file_count": 719,
-  "snapshot_sha256": "81b28c4984de7fe6f150ed128238a7cf0439b6d995a7ba7df4554b5e56141590",
+  "snapshot_sha256": "609850ed259c17df445791cbfa6aed358f5b42e44ee67a78d13132a4dc400296",
   "files": [
     {
       "path": ".env.example",
@@ -34,13 +34,13 @@
     },
     {
       "path": ".github/workflows/quality.yml",
-      "sha256": "b473f97692ff6fd5c917564bbd8a90b6b56f9cd3dbd9499a8c2b1fa0560210a8",
+      "sha256": "02479bd2d1e89c9bc1595c863fdfcdde53b71b72d944e20d02b8d006a0ccccc8",
       "size_bytes": 4526
     },
     {
       "path": ".github/workflows/security.yml",
-      "sha256": "76dd9e330d6d3b12768bb99cd07840663d8c904ca1afcdb1aeaf4aa536174b79",
-      "size_bytes": 4221
+      "sha256": "4c095f4fd10f392a458a13f28373305dd5df2f06c3af1bba57d90c05ffadcca7",
+      "size_bytes": 4230
     },
     {
       "path": ".gitignore",
@@ -84,8 +84,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "ae28ddee6df09706a301eea0ce8591e4001a02681118cfb4bc50ecb1f2e64bc5",
-      "size_bytes": 12100,
+      "sha256": "93db64eb90394111ecdb16a4749538c2094ba11d25b19aabf1cec2eabad3d957",
+      "size_bytes": 12340,
       "source": "docs/PUBLIC_REPOSITORY_README.md"
     },
     {
@@ -380,8 +380,8 @@
     },
     {
       "path": "docs/PUBLIC_REPOSITORY_README.md",
-      "sha256": "ae28ddee6df09706a301eea0ce8591e4001a02681118cfb4bc50ecb1f2e64bc5",
-      "size_bytes": 12100
+      "sha256": "93db64eb90394111ecdb16a4749538c2094ba11d25b19aabf1cec2eabad3d957",
+      "size_bytes": 12340
     },
     {
       "path": "docs/QUALITY_LEARNING_WORKBENCH.md",
@@ -590,8 +590,8 @@
     },
     {
       "path": "quality/README.md",
-      "sha256": "d1315b9d279cd616c2b81579ff610525945169dcfe037cab82ab7eeac8606389",
-      "size_bytes": 3703
+      "sha256": "9dd0a1c2d1b5545fb90977c09f45b2e4a3ab1546370535d6022755e9512f4b36",
+      "size_bytes": 4174
     },
     {
       "path": "quality/bandit-baseline.json",
@@ -2850,12 +2850,12 @@
     },
     {
       "path": "web/package-lock.json",
-      "sha256": "df90aa9414ae92d99a0bbf3911d3804a4ae9e839d44071169b93195c3d251e95",
-      "size_bytes": 50711
+      "sha256": "c687f47b7f7e2b689ee5bd75e6023113d39eb67f3f419b00eada55062e2ca7d2",
+      "size_bytes": 50665
     },
     {
       "path": "web/package.json",
-      "sha256": "7ab52697a89f0dcb4789c476af5ec7a1a46d8347dbc00d5025e924a62057b1ce",
+      "sha256": "5c3966094edbd3e956cde6cd4c52e657ffaa10172fd7529de3503dbc656b2b96",
       "size_bytes": 846
     },
     {
