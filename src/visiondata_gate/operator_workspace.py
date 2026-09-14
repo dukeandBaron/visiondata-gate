@@ -46,6 +46,14 @@ def _now() -> str:
     return datetime.now(UTC).isoformat(timespec="milliseconds")
 
 
+def _summary_items(items: list[str] | tuple[str, ...], *, limit: int = 6) -> str:
+    """Bound presentation only; authoritative evidence is never truncated."""
+    preview = ", ".join(items[:limit])
+    if len(items) > limit:
+        preview += f" …（另 {len(items) - limit} 项，完整内容见绑定证据）"
+    return preview
+
+
 class OperatorWorkspaceError(RuntimeError):
     """Typed, user-safe error raised by the local operator workspace."""
 
@@ -1358,14 +1366,13 @@ class OperatorImageStore:
             and item.source_sha256 == asset.source_sha256
         )
         duplicate_duration = (time.perf_counter() - tool_started) * 1000.0
-        duplicate_digest = hashlib.sha256(
-            canonical_jcs_bytes(
-                {
-                    "asset_sha256": asset.source_sha256,
-                    "duplicate_asset_ids": duplicates,
-                }
-            )
-        ).hexdigest()
+        duplicate_evidence = canonical_jcs_bytes(
+            {"asset_sha256": asset.source_sha256, "duplicate_asset_ids": duplicates}
+        )
+        duplicate_digest = hashlib.sha256(duplicate_evidence).hexdigest()
+        evidence_path = asset_root / "analysis_evidence" / f"{duplicate_digest}.json"
+        if not evidence_path.exists():
+            _atomic_write(evidence_path, duplicate_evidence, replace=False)
         duplicate_ref = f"duplicate-ledger:sha256:{duplicate_digest}"
 
         tool_started = time.perf_counter()
@@ -1471,7 +1478,7 @@ class OperatorImageStore:
                 title="复核人工标注并决定是否签发工单",
                 summary=(
                     f"当前保存版本含 {len(annotation_state.annotations)} 个人工标注："
-                    f"{', '.join(labels)}。Agent 不把人工标签冒充模型识别结果。"
+                    f"{_summary_items(labels)}。Agent 不把人工标签冒充模型识别结果。"
                 ),
                 next_action="核对标注几何与类别后，可在 BBox 上右键创建 CAPA 草稿。",
                 evidence_refs=[annotation_ref, policy_ref],
@@ -1539,7 +1546,7 @@ class OperatorImageStore:
                 action="lookup_duplicate_ledger",
                 status="WARNING" if duplicates else "COMPLETED",
                 summary=(
-                    f"找到 {len(duplicates)} 个同 SHA-256 资产：{', '.join(duplicates)}。"
+                    f"找到 {len(duplicates)} 个同 SHA-256 资产：{_summary_items(duplicates)}。"
                     if duplicates
                     else "本地账本未找到其他同 SHA-256 资产。"
                 ),

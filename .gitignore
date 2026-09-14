@@ -14,6 +14,9 @@ web/*.tsbuildinfo
 web/src-tauri/target/
 desktop/build/
 desktop/dist/
+.build-tools/
+gateway/target/
+gateway/runtime/
 !examples/incident_model_replay.fixture.json
 04_data/generated/
 06_experiments/*
@@ -41,14 +44,6 @@ deliverables/_qa/
 !deliverables/GOAI_VisionDataGate_Semifinal_Defense_RC4_20260902.pdf
 !deliverables/VisionDataGate_GOAI_Semifinal_60s_RC4_20260902.mp4
 !deliverables/VisionDataGate_GOAI_Semifinal_60s_RC4_20260902.receipt.json
-!deliverables/semifinal_rc4_frames/
-deliverables/semifinal_rc4_frames/*
-!deliverables/semifinal_rc4_frames/01-public-home.png
-!deliverables/semifinal_rc4_frames/02-command-center.png
-!deliverables/semifinal_rc4_frames/03-case-workbench.png
-!deliverables/semifinal_rc4_frames/04-capa-lineage.png
-!deliverables/semifinal_rc4_frames/05-runs-recheck.png
-!deliverables/semifinal_rc4_frames/06-governance-boundary.png
 !deliverables/_qa/
 deliverables/_qa/*
 !deliverables/_qa/semifinal_rc3_video_contact_sheet_20260831.png
@@ -63,14 +58,13 @@ deliverables/_qa/*
 !schemas/*.json
 !rulepacks/*.json
 !10_reports/*.json
-!benchmarks/*.json
 !docs/CARGO_LICENSES.locked.json
 !docs/PUBLIC_BINARY_REVIEW.json
 !docs/SBOM.cdx.json
-!docs/evidence/visa_public_proxy_summary.v1.json
 !skills/manifest.json
 !tests/fixtures/runtime_workbench/legacy_cases/*.json
 !tests/fixtures/legacy_memory_v1_golden.json
+!tests/fixtures/commercial_pilot_v1.draft.json
 !evidence/submission/vdg-20260831-rc3/evidence_index.json
 !evidence/submission/vdg-20260831-rc3/goal3/*.json
 !web/package.json
@@ -83,3 +77,6 @@ deliverables/_qa/*
 !web/src-tauri/capabilities/default.json
 !tools/tool_lock.json
 !PUBLIC_MIRROR_MANIFEST.json
+!quality/pyright-gate.json
+!quality/pyright-debt.json
+!quality/coverage-profile.json

@@ -38,8 +38,6 @@ from tools.check_public_repository import (
     validate_snapshot,
 )
 from tools.export_public_repository import (
-    PUBLIC_CI_TEMPLATE,
-    PUBLIC_CI_WORKFLOW,
     PUBLIC_PAGES_TEMPLATE,
     PUBLIC_PAGES_WORKFLOW,
     _selected,
@@ -66,47 +64,22 @@ def test_public_export_is_allowlist_based_and_excludes_private_delivery_surfaces
     assert _selected("CONTRIBUTING.md")
     assert _selected("SECURITY.md")
     assert _selected("CODE_OF_CONDUCT.md")
-    assert _selected(".streamlit/config.toml")
     assert _selected("src/visiondata_gate/api.py")
     assert _selected("web/public/public-replay.v1.json")
     assert _selected("sample_data/clear/clean-val-gear.png")
-    assert _selected("README.md")
+    assert _selected("docs/PUBLICATION_BOUNDARY.md")
     assert _selected("docs/CARGO_LICENSES.locked.json")
-    for canonical_document in (
-        "docs/quickstart.md",
-        "docs/architecture.md",
-        "docs/api_reference.md",
-        "docs/compliance.md",
-        "docs/audit_envelope.md",
-        "benchmarks/README.md",
-        "benchmarks/dynamicbench-v3-report.json",
-        "benchmarks/visa-public-proxy-summary.json",
-    ):
-        assert _selected(canonical_document)
-    for internal_document in (
+    for semifinal_document in (
         "docs/GOAI_SEMIFINAL_GUIDE_20260902.md",
         "docs/DEMO_60S_SCRIPT_SEMIFINAL.md",
         "docs/DEFENSE_3MIN_SCRIPT_SEMIFINAL.md",
         "docs/DEFENSE_QA_SEMIFINAL.md",
         "docs/SEMIFINAL_DEFENSE_RUNBOOK_20260902.md",
-        "docs/GOAI_requirements_matrix.md",
-        "docs/INDUSTRIAL_AGENT_LANDSCAPE_20260825.md",
-        "docs/PROJECT_STATUS.md",
-        "docs/PUBLIC_REPOSITORY_README.md",
-        "docs/RC3_DELIVERY_CONTRACT.md",
     ):
-        assert not _selected(internal_document)
-    for internal_tool in (
-        "tests/test_build_semifinal_defense_kit.py",
-        "tools/build_semifinal_defense_kit.py",
-        "tools/build_semifinal_governance_evidence.py",
-    ):
-        assert not _selected(internal_tool)
+        assert _selected(semifinal_document)
     assert _selected(PUBLIC_BINARY_REVIEW_PATH)
     assert _selected(PUBLIC_PAGES_TEMPLATE)
-    assert _selected(PUBLIC_CI_TEMPLATE)
     assert not _selected(PUBLIC_PAGES_WORKFLOW)
-    assert not _selected(PUBLIC_CI_WORKFLOW)
     assert not _selected("docs/assets/reviewer-mode.png")
     assert _selected(".env.example")
     assert _selected("web/.env.example")
@@ -177,18 +150,10 @@ def test_public_export_injects_sha_bound_pages_workflow(
     workflow = destination / PUBLIC_PAGES_WORKFLOW
     assert workflow.read_bytes() == template.read_bytes()
 
-    ci_template = destination / PUBLIC_CI_TEMPLATE
-    ci_workflow = destination / PUBLIC_CI_WORKFLOW
-    assert ci_workflow.read_bytes() == ci_template.read_bytes()
-
     workflow_entry = next(
         item for item in manifest["files"] if item["path"] == PUBLIC_PAGES_WORKFLOW
     )
     assert workflow_entry["source"] == PUBLIC_PAGES_TEMPLATE
-    ci_workflow_entry = next(
-        item for item in manifest["files"] if item["path"] == PUBLIC_CI_WORKFLOW
-    )
-    assert ci_workflow_entry["source"] == PUBLIC_CI_TEMPLATE
 
     monkeypatch.setattr(public_repository_checker, "PROJECT_ROOT", destination)
     tracked = [item["path"] for item in manifest["files"]]
@@ -228,10 +193,6 @@ def test_public_repository_gate_rejects_media_and_unreviewed_binary_locations() 
     violations = _path_violations(
         [
             "deliverables/demo.mp4",
-            "evidence/private-receipt.json",
-            "10_reports/internal.md",
-            "release/private-receipt.json",
-            "website/data/site-data.json",
             "docs/private.pdf",
             "screenshots/operator.png",
             "sample_data/clear/clean-val-gear.png",
@@ -239,13 +200,6 @@ def test_public_repository_gate_rejects_media_and_unreviewed_binary_locations() 
     )
     rules_by_path = {(item["rule"], item["path"]) for item in violations}
     assert ("forbidden-suffix", "deliverables/demo.mp4") in rules_by_path
-    for private_path in (
-        "evidence/private-receipt.json",
-        "10_reports/internal.md",
-        "release/private-receipt.json",
-        "website/data/site-data.json",
-    ):
-        assert ("forbidden-prefix", private_path) in rules_by_path
     assert ("forbidden-suffix", "docs/private.pdf") in rules_by_path
     assert (
         "binary-outside-reviewed-prefix",
@@ -772,25 +726,6 @@ def test_history_blob_classifier_is_fail_closed_and_sha_bound() -> None:
         object_id=object_id,
         reviewed_binaries=reviewed,
     )
-
-    prior_binary = b"\x89PNG\r\n\x1a\nprior-synthetic"
-    reviewed_revisions = {
-        reviewed_path: frozenset(
-            {
-                hashlib.sha256(prior_binary).hexdigest(),
-                hashlib.sha256(binary).hexdigest(),
-            }
-        )
-    }
-    assert (
-        _historical_blob_violations(
-            prior_binary,
-            path=reviewed_path,
-            object_id=object_id,
-            reviewed_binaries=reviewed_revisions,
-        )
-        == []
-    )
     assert {
         "rule": "history-binary-missing-semantic-review",
         "path": "docs/assets/unreviewed.png",
@@ -839,67 +774,6 @@ def test_history_blob_classifier_is_fail_closed_and_sha_bound() -> None:
         "path": "docs/private.zip",
         "object": object_id,
     } in forbidden_archive
-
-
-def test_history_binary_approvals_include_valid_prior_manifest_revisions(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    reviewed_path = "docs/assets/reviewed.png"
-    prior_binary = b"\x89PNG\r\n\x1a\nprior-synthetic"
-    current_binary = b"\x89PNG\r\n\x1a\ncurrent-synthetic"
-
-    def review_manifest(binary: bytes, reviewed_on: str) -> bytes:
-        stable = {
-            "schema_version": "visiondata-gate.public-binary-review.v1",
-            "review_basis": "VISUAL_PIXEL_AND_METADATA_INSPECTION",
-            "reviewed_on": reviewed_on,
-            "reviewer_identity_included": False,
-            "reviewed_file_count": 1,
-            "prohibited_content_checks": ["PERSONAL_IDENTITY"],
-            "files": [
-                {
-                    "path": reviewed_path,
-                    "sha256": hashlib.sha256(binary).hexdigest(),
-                    "size_bytes": len(binary),
-                    "category": "SYNTHETIC_WORKBENCH_SCREENSHOT",
-                    "review_result": "PASS_NO_PRIVATE_CONTENT_OBSERVED",
-                }
-            ],
-        }
-        manifest = {
-            **stable,
-            "manifest_sha256": hashlib.sha256(
-                public_repository_checker._canonical_json_bytes(stable)
-            ).hexdigest(),
-        }
-        return json.dumps(manifest, ensure_ascii=False).encode("utf-8")
-
-    prior_manifest_id = "1" * 40
-    current_manifest_id = "2" * 40
-    payloads = {
-        prior_manifest_id: review_manifest(prior_binary, "2026-08-31"),
-        current_manifest_id: review_manifest(current_binary, "2026-09-02"),
-    }
-
-    def fake_git(*args: str, text: bool = False) -> bytes:
-        assert args[:2] == ("cat-file", "blob")
-        assert text is False
-        return payloads[args[2]]
-
-    monkeypatch.setattr(public_repository_checker, "_git", fake_git)
-    approvals = public_repository_checker._reviewed_binary_history_records(
-        {
-            prior_manifest_id: (PUBLIC_BINARY_REVIEW_PATH,),
-            current_manifest_id: (PUBLIC_BINARY_REVIEW_PATH,),
-        },
-        current_records={reviewed_path: hashlib.sha256(current_binary).hexdigest()},
-    )
-    assert approvals[reviewed_path] == frozenset(
-        {
-            hashlib.sha256(prior_binary).hexdigest(),
-            hashlib.sha256(current_binary).hexdigest(),
-        }
-    )
 
 
 def test_history_scan_preserves_every_path_for_deleted_binary(

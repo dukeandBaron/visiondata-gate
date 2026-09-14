@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="VisionData Gate 只读 Reviewer Workbench：案件、视觉证据、责任项、血缘与受控执行回执。"
+    />
+    <title>VisionData Gate · Reviewer Workbench</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%235790ff' d='M32 4 8 13v18c0 15 9.8 24.5 24 29 14.2-4.5 24-14 24-29V13L32 4Z'/%3E%3Cpath fill='none' stroke='%23fff' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' d='m20 32 8 8 17-18'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <svg class="icon-sprite" aria-hidden="true">
+      <symbol id="i-shield" viewBox="0 0 24 24">
+        <path d="M12 3 4.5 6v5.8c0 4.8 3.1 7.8 7.5 9.2 4.4-1.4 7.5-4.4 7.5-9.2V6L12 3Z" />
+        <path d="m8.8 12 2 2 4.6-4.8" />
+      </symbol>
+      <symbol id="i-folder" viewBox="0 0 24 24">
+        <path d="M3.5 6.5h6l2 2h9v9.7a1.8 1.8 0 0 1-1.8 1.8H5.3a1.8 1.8 0 0 1-1.8-1.8V6.5Z" />
+      </symbol>
+      <symbol id="i-case" viewBox="0 0 24 24">
+        <rect x="3.5" y="6.5" width="17" height="13" rx="2" />
+        <path d="M9 6.5V4h6v2.5M3.5 12h17M10 12v2h4v-2" />
+      </symbol>
+      <symbol id="i-image" viewBox="0 0 24 24">
+        <rect x="3.5" y="4" width="17" height="16" rx="2" />
+        <circle cx="8.2" cy="8.7" r="1.5" />
+        <path d="m5.5 17 4.2-4.2 2.8 2.7 2.2-2.2 3.8 3.7" />
+      </symbol>
+      <symbol id="i-file" viewBox="0 0 24 24">
+        <path d="M6 3.5h8l4 4V20H6V3.5Z" />
+        <path d="M14 3.5V8h4M9 12h6M9 15.5h6" />
+      </symbol>
+      <symbol id="i-trace" viewBox="0 0 24 24">
+        <circle cx="6" cy="6" r="2" />
+        <circle cx="18" cy="12" r="2" />
+        <circle cx="6" cy="18" r="2" />
+        <path d="M8 6h3a3 3 0 0 1 3 3v0a3 3 0 0 0 3 3h-3a3 3 0 0 0-3 3v0a3 3 0 0 1-3 3" />
+      </symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24">
+        <rect x="4.5" y="10" width="15" height="10" rx="2" />
+        <path d="M8 10V7.5a4 4 0 0 1 8 0V10M12 14v2.5" />
+      </symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24">
+        <path d="m9 6 6 6-6 6" />
+      </symbol>
+      <symbol id="i-branch" viewBox="0 0 24 24">
+        <circle cx="7" cy="5" r="2" />
+        <circle cx="17" cy="19" r="2" />
+        <circle cx="7" cy="19" r="2" />
+        <path d="M7 7v10M9 9h3a5 5 0 0 1 5 5v3" />
+      </symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24">
+        <path d="M3.5 12s3-5.5 8.5-5.5 8.5 5.5 8.5 5.5-3 5.5-8.5 5.5S3.5 12 3.5 12Z" />
+        <circle cx="12" cy="12" r="2.5" />
+      </symbol>
+      <symbol id="i-panel" viewBox="0 0 24 24">
+        <rect x="3.5" y="4" width="17" height="16" rx="2" />
+        <path d="M9 4v16M9 10h11" />
+      </symbol>
+    </svg>
+
+    <div class="app-shell" id="reviewerApp">
+      <header class="topbar">
+        <div class="window-brand" aria-label="VisionData Gate">
+          <span class="window-controls" aria-hidden="true">
+            <i></i><i></i><i></i>
+          </span>
+          <span class="brand-mark"><svg><use href="#i-shield"></use></svg></span>
+          <span class="brand-copy">
+            <strong>VisionData Gate</strong>
+            <small>Reviewer Workbench</small>
+          </span>
+        </div>
+
+        <div class="case-context" aria-live="polite">
+          <span class="context-kicker">当前案件</span>
+          <strong id="topCaseTitle">加载冻结证据…</strong>
+          <span class="context-separator" aria-hidden="true"></span>
+          <span class="case-anchor" id="topCaseAnchor">Audit anchor · NOT_EXPOSED</span>
+        </div>
+
+        <div class="top-actions">
+          <span class="top-chip policy-chip">
+            <svg><use href="#i-lock"></use></svg>
+            <span>Policy</span>
+            <strong>FAIL-CLOSED</strong>
+          </span>
+          <span class="top-chip approver-chip">
+            <span class="avatar">—</span>
+            <span>审批人</span>
+            <strong id="approverLabel">NOT_SUPPLIED</strong>
+          </span>
+          <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" title="切换为 Dark 主题">
+            <span aria-hidden="true">◐</span>
+            <strong id="themeLabel">Dark</strong>
+          </button>
+          <button class="icon-button" type="button" disabled title="Reviewer 模式不允许写操作">
+            <svg><use href="#i-lock"></use></svg>
+            <span class="sr-only">Reviewer 模式只读</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="main-stage">
+        <nav class="mobile-panel-tabs" aria-label="工作台面板">
+          <button type="button" data-mobile-panel="explorer">
+            <svg><use href="#i-folder"></use></svg><span>案件</span>
+          </button>
+          <button class="is-active" type="button" data-mobile-panel="workspace">
+            <svg><use href="#i-panel"></use></svg><span>证据</span>
+          </button>
+          <button type="button" data-mobile-panel="trace">
+            <svg><use href="#i-trace"></use></svg><span>Trace</span>
+          </button>
+        </nav>
+
+        <div class="workbench">
+          <aside class="panel explorer-panel" data-panel="explorer" aria-label="案件与资产树">
+            <div class="panel-title-row">
+              <div>
+                <span class="eyebrow">EXPLORER</span>
+                <h1>案件与资产</h1>
+              </div>
+              <span class="readonly-tag">READ ONLY</span>
+            </div>
+
+            <div class="explorer-scroll">
+              <section class="tree-section">
+                <div class="section-label">
+                  <span>案件批次</span><span id="caseCount">—</span>
+                </div>
+                <div class="case-list" id="caseList"></div>
+              </section>
+
+              <section class="tree-section">
+                <div class="section-label"><span>冻结证据资产</span></div>
+                <div class="asset-tree">
+                  <button class="tree-row tree-root is-expanded" type="button" data-focus-panel="workspace">
+                    <svg><use href="#i-folder"></use></svg>
+                    <span>reviewer_evidence/</span>
+                    <small>local</small>
+                  </button>
+                  <div class="tree-children">
+                    <button class="tree-row" type="button" data-focus-view="visual">
+                      <svg><use href="#i-image"></use></svg>
+                      <span>Synthetic-v3 / visual_fixture</span>
+                    </button>
+                    <button class="tree-row" type="button" data-evidence-tab="findings">
+                      <svg><use href="#i-file"></use></svg>
+                      <span>findings_summary.json</span>
+                    </button>
+                    <button class="tree-row" type="button" data-evidence-tab="orders">
+                      <svg><use href="#i-file"></use></svg>
+                      <span>responsibility_queue.json</span>
+                    </button>
+                    <button class="tree-row" type="button" data-evidence-tab="lineage">
+                      <svg><use href="#i-branch"></use></svg>
+                      <span>parent_child_lineage</span>
+                    </button>
+                    <button class="tree-row" type="button" data-focus-panel="trace">
+                      <svg><use href="#i-trace"></use></svg>
+                      <span>governed_trace</span>
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              <section class="boundary-card" aria-label="证据边界">
+                <div class="boundary-card-head">
+                  <svg><use href="#i-shield"></use></svg>
+                  <span>证据边界</span>
+                </div>
+                <p id="caseBoundary">加载中…</p>
+                <dl>
+                  <div><dt>Production</dt><dd>false</dd></div>
+                  <div><dt>Authority</dt><dd>human_only</dd></div>
+                  <div><dt>Image namespace</dt><dd>Synthetic-v3</dd></div>
+                </dl>
+              </section>
+            </div>
+          </aside>
+
+          <section class="panel workspace-panel is-mobile-active" data-panel="workspace" aria-label="核心证据工作区">
+            <div class="workspace-toolbar">
+              <div class="workspace-path">
+                <span>reviewer_evidence</span><svg><use href="#i-chevron"></use></svg>
+                <strong id="workspaceCasePath">case</strong>
+              </div>
+              <div class="workspace-health">
+                <span class="status-dot"></span>
+                <span id="snapshotSource">正在读取 snapshot…</span>
+              </div>
+            </div>
+
+            <div class="dual-stage">
+              <section class="stage-card visual-stage" id="visualStage" aria-labelledby="visualTitle">
+                <div class="stage-header">
+                  <div>
+                    <span class="eyebrow">SYNTHETIC VISUAL FIXTURE</span>
+                    <h2 id="visualTitle">Before / After 图像检查器</h2>
+                  </div>
+                  <div class="segmented-control" aria-label="图像查看模式">
+                    <button class="is-active" type="button" data-image-mode="before">Before</button>
+                    <button type="button" data-image-mode="after">After</button>
+                    <button type="button" data-image-mode="split">Split</button>
+                  </div>
+                </div>
+
+                <div class="image-workspace" data-image-view="before">
+                  <figure class="image-frame before-frame" data-image-slot="before">
+                    <img
+                      id="beforeImage"
+                      src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+                      data-endpoint="/api/reviewer/assets/before"
+                      alt="Synthetic-v3 Before 证据槽位"
+                    />
+                    <figcaption><span>BEFORE</span><small id="beforeAssetState">API asset</small></figcaption>
+                    <span class="measurement-pin" id="measurementPin">Laplacian 1.8585</span>
+                  </figure>
+                  <figure class="image-frame after-frame" data-image-slot="after">
+                    <img
+                      id="afterImage"
+                      src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+                      data-endpoint="/api/reviewer/assets/after"
+                      alt="Synthetic-v3 After 证据槽位"
+                    />
+                    <figcaption><span>AFTER</span><small id="afterAssetState">API asset</small></figcaption>
+                  </figure>
+                </div>
+
+                <div class="visual-evidence-note">
+                  <svg><use href="#i-eye"></use></svg>
+                  <div>
+                    <strong>Synthetic-v3 合成工程证据</strong>
+                    <p id="imageProvenance">
+                      Before 已证实测量：Laplacian 1.8585 &lt; 阈值 18。After 槽位不在 fallback 中声明 PASS。
+                    </p>
+                  </div>
+                </div>
+
+                <div class="measurement-strip">
+                  <div>
+                    <span>算法</span>
+                    <strong id="algorithmValue">Laplacian sharpness</strong>
+                  </div>
+                  <div>
+                    <span>Observed</span>
+                    <strong class="danger-text" id="observedValue">1.8585</strong>
+                  </div>
+                  <div>
+                    <span>Threshold</span>
+                    <strong id="thresholdValue">18</strong>
+                  </div>
+                  <div>
+                    <span>边界</span>
+                    <strong id="visualBoundaryValue">synthetic only</strong>
+                  </div>
+                </div>
+
+                <details class="raw-measurement">
+                  <summary>
+                    <span>原始测量帧</span>
+                    <small>synthetic_visual · readonly</small>
+                  </summary>
+                  <dl>
+                    <div><dt>sample_id</dt><dd id="rawSampleId">NOT_EXPOSED</dd></div>
+                    <div><dt>finding_code</dt><dd id="rawFindingCode">LOW_SHARPNESS</dd></div>
+                    <div><dt>algorithm</dt><dd id="rawAlgorithm">Laplacian sharpness</dd></div>
+                    <div><dt>observed / minimum</dt><dd id="rawObservedMinimum">1.8585 / 18</dd></div>
+                    <div><dt>mean_luma</dt><dd id="rawMeanLuma">NOT_EXPOSED</dd></div>
+                    <div><dt>result</dt><dd id="rawResult">LOW_SHARPNESS</dd></div>
+                    <div><dt>before.sha256</dt><dd id="rawBeforeSha">NOT_EXPOSED</dd></div>
+                    <div><dt>after.sha256</dt><dd id="rawAfterSha">NOT_EXPOSED</dd></div>
+                    <div><dt>evidence_class</dt><dd id="rawEvidenceClass">synthetic_injected_truth</dd></div>
+                  </dl>
+                  <p id="rawBoundary">Synthetic-v3 only. Not a factory image or effect claim.</p>
+                </details>
+              </section>
+
+              <section class="stage-card evidence-stage" aria-labelledby="evidenceTitle">
+                <div class="stage-header evidence-header">
+                  <div>
+                    <span class="eyebrow">CASE EVIDENCE</span>
+                    <h2 id="evidenceTitle">责任项与血缘</h2>
+                  </div>
+                  <span class="case-status" id="caseStatus">—</span>
+                </div>
+
+                <div class="evidence-tabs" role="tablist" aria-label="案件证据视图">
+                  <button class="is-active" type="button" role="tab" aria-selected="true" data-evidence-view-button="findings">Findings</button>
+                  <button type="button" role="tab" aria-selected="false" data-evidence-view-button="orders">工单</button>
+                  <button type="button" role="tab" aria-selected="false" data-evidence-view-button="lineage">Lineage</button>
+                </div>
+
+                <div class="evidence-body">
+                  <section class="evidence-view is-active" data-evidence-view="findings">
+                    <div class="finding-list" id="findingList"></div>
+                    <article class="finding-detail" id="findingDetail" aria-live="polite"></article>
+                  </section>
+
+                  <section class="evidence-view" data-evidence-view="orders">
+                    <div class="order-summary" id="orderSummary"></div>
+                  </section>
+
+                  <section class="evidence-view" data-evidence-view="lineage">
+                    <div class="lineage-canvas" id="lineageCanvas"></div>
+                    <article class="lineage-detail" id="lineageDetail" aria-live="polite"></article>
+                  </section>
+                </div>
+
+                <div class="human-gate">
+                  <div>
+                    <span>HUMAN DECISION BAR</span>
+                    <strong>Reviewer 模式不执行审批或派生</strong>
+                  </div>
+                  <div class="human-gate-actions">
+                    <button type="button" disabled>批准 CAPA</button>
+                    <button type="button" disabled>触发 Child Run</button>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <aside class="panel trace-panel" data-panel="trace" aria-label="受控 Agent Trace">
+            <div class="panel-title-row trace-title-row">
+              <div>
+                <span class="eyebrow">GOVERNED AGENT TRACE</span>
+                <h2>执行回执</h2>
+              </div>
+              <span class="trace-live"><i></i>REPLAY</span>
+            </div>
+
+            <div class="trace-scroll">
+              <section class="phase-section">
+                <div class="section-label"><span>Phase Stepper</span><span id="phaseProgress">—</span></div>
+                <ol class="phase-stepper" id="phaseStepper"></ol>
+              </section>
+
+              <section class="trace-section">
+                <div class="section-label"><span>受控决策与工具回执</span></div>
+                <p class="trace-boundary">展示结构化决策摘要与工具证据；不展示或伪造模型私有思维链。</p>
+                <div class="trace-accordion" id="traceAccordion"></div>
+              </section>
+
+              <section class="provider-card" aria-labelledby="providerTitle">
+                <div class="provider-card-head">
+                  <div>
+                    <span class="eyebrow">EXTERNAL MODEL PROVIDER</span>
+                    <h3 id="providerTitle">OpenAI-compatible · 开发组状态</h3>
+                  </div>
+                  <span class="provider-status" id="providerStatus">NOT_CONFIGURED</span>
+                </div>
+                <dl>
+                  <div><dt>base_host</dt><dd id="providerHost">https://gw.opentoken.io</dd></div>
+                  <div><dt>mode</dt><dd id="providerMode">openai-compatible</dd></div>
+                  <div><dt>key_configured</dt><dd id="providerKeyConfigured">false</dd></div>
+                  <div><dt>connection_status</dt><dd id="providerConnection">NOT_CONFIGURED</dd></div>
+                </dl>
+                <p>Key 仅由用户在本机运行环境配置；Workbench 不接收、不展示、不存储 Key。</p>
+              </section>
+
+              <section class="governance-terminal">
+                <div class="terminal-head">
+                  <span>policy_judge</span><span>readonly</span>
+                </div>
+                <code id="policyTerminal">production=false<br />decision_authority=human_only<br />mode=reviewer_readonly</code>
+              </section>
+            </div>
+          </aside>
+        </div>
+      </main>
+
+      <footer class="governance-bar">
+        <span><svg><use href="#i-lock"></use></svg>权限：只读 / 本地</span>
+        <span id="footerRelease"><i class="footer-dot hold"></i>Release：HOLD</span>
+        <span><i class="footer-dot"></i>Production：false</span>
+        <span><i class="footer-dot info"></i>Image：Synthetic-v3</span>
+        <span class="governance-spacer"></span>
+        <span id="footerSnapshot">Snapshot：loading</span>
+      </footer>
+    </div>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>

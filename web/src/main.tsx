@@ -5,15 +5,18 @@ import { App } from "./App";
 import { ProductProvider } from "./ProductContext";
 import { initializeInterfacePreferences } from "./interfacePreferences";
 import { publicReplayMode } from "./publicReplay";
+import { IdentityProvider, useIdentity } from "./IdentityContext";
+import { IdentityAccessScreen } from "./components/IdentityAccessScreen";
 import "./styles/tokens.css";
 import "./styles/index.css";
 import "./styles/hosted-agentteams.css";
 import "./styles/evaluation-evidence.css";
 import "./styles/semifinal-manifest.css";
 import "./styles/public-facade.css";
+import "./styles/workbench-interface.css";
 
 const root = document.getElementById("root");
-if (!root) throw new Error("VisionData Gate root element is missing");
+if (!root) throw new Error("Workbench root element is missing");
 
 document.documentElement.dataset.runtimeMode = publicReplayMode
   ? "public-replay"
@@ -25,12 +28,16 @@ const Router =
     : BrowserRouter;
 initializeInterfacePreferences();
 
+function LocalProduct() {
+  const identity = useIdentity();
+  if (identity.status !== "authenticated") return <IdentityAccessScreen />;
+  return <ProductProvider key={`${identity.user?.user_id ?? "none"}:${identity.generation}`}><App /></ProductProvider>;
+}
+
 createRoot(root).render(
   <StrictMode>
     <Router>
-      <ProductProvider>
-        <App />
-      </ProductProvider>
+      {publicReplayMode ? <ProductProvider><App /></ProductProvider> : <IdentityProvider><LocalProduct /></IdentityProvider>}
     </Router>
   </StrictMode>,
 );

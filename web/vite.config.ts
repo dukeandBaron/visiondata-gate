@@ -90,6 +90,18 @@ export default defineConfig(({ mode }) => {
       alias: publicReplay
         ? [
             {
+              find: /^\.\/IdentityContext$/,
+              replacement: configSourcePath("./src/public/PublicIdentityContext.tsx"),
+            },
+            {
+              find: /^\.\.\/identitySession$/,
+              replacement: configSourcePath("./src/public/PublicIdentitySession.ts"),
+            },
+            {
+              find: /^\.\/components\/IdentityAccessScreen$/,
+              replacement: configSourcePath("./src/public/PublicIdentityAccessScreen.tsx"),
+            },
+            {
               find: /^\.\/App$/,
               replacement: configSourcePath("./src/public/PublicApp.tsx"),
             },

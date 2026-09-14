@@ -1,0 +1,98 @@
+{
+  "$defs": {
+    "ComputeResources": {
+      "additionalProperties": false,
+      "properties": {
+        "runtime_image": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9./:_-]{0,220}@sha256:[0-9a-f]{64}$",
+          "title": "Runtime Image",
+          "type": "string"
+        },
+        "cann_version": {
+          "pattern": "^[A-Za-z0-9.+_-]{1,40}$",
+          "title": "Cann Version",
+          "type": "string"
+        },
+        "npu_count": {
+          "maximum": 64,
+          "minimum": 1,
+          "title": "Npu Count",
+          "type": "integer"
+        },
+        "cpu_cores": {
+          "maximum": 256,
+          "minimum": 1,
+          "title": "Cpu Cores",
+          "type": "integer"
+        },
+        "memory_gib": {
+          "maximum": 4096,
+          "minimum": 1,
+          "title": "Memory Gib",
+          "type": "integer"
+        },
+        "max_wall_seconds": {
+          "maximum": 86400,
+          "minimum": 60,
+          "title": "Max Wall Seconds",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "runtime_image",
+        "cann_version",
+        "npu_count",
+        "cpu_cores",
+        "memory_gib",
+        "max_wall_seconds"
+      ],
+      "title": "ComputeResources",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "request_key": {
+      "pattern": "^[A-Za-z0-9_-]{12,100}$",
+      "title": "Request Key",
+      "type": "string"
+    },
+    "expected_preflight_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Expected Preflight Sha256",
+      "type": "string"
+    },
+    "review_note": {
+      "maxLength": 2000,
+      "minLength": 8,
+      "title": "Review Note",
+      "type": "string"
+    },
+    "operator_attests_reviewed": {
+      "const": true,
+      "title": "Operator Attests Reviewed",
+      "type": "boolean"
+    },
+    "workload": {
+      "enum": [
+        "TRAINING",
+        "EVALUATION"
+      ],
+      "title": "Workload",
+      "type": "string"
+    },
+    "resources": {
+      "$ref": "#/$defs/ComputeResources"
+    }
+  },
+  "required": [
+    "request_key",
+    "expected_preflight_sha256",
+    "review_note",
+    "operator_attests_reviewed",
+    "workload",
+    "resources"
+  ],
+  "title": "ComputeHandoffRequest",
+  "type": "object"
+}

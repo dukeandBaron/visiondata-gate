@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { detachedJcsSha256 } from "./data/jcs";
 
 export const publicReplayMode =
@@ -11,14 +11,14 @@ export interface PublicReplayManifest {
   schema_version: "visiondata-gate.public-replay.v1";
   source_mode: "PUBLIC_SYNTHETIC_REPLAY";
   release_status: {
-    source_verification: "PASS_LOCAL_PUBLIC_SOURCE";
-    public_projection: "STATIC_REPLAY_VERIFIED";
-    production_readiness: "NOT_EVALUATED";
+    local_candidate: string;
+    official_submission: "PENDING";
+    official_evaluation: "NOT_EVALUATED";
     production_release_allowed: false;
   };
   evidence_boundary: {
-    baseline_tag: "v0.1.0-public-replay-r1";
-    baseline_claim: "PASS_LOCAL_PUBLIC_REPLAY";
+    baseline_tag: "v0.1.0-goai-rc3-r3";
+    baseline_claim: "PASS_LOCAL_RC3_RELEASE_CANDIDATE";
     release_artifacts_included: false;
     public_snapshot_attestation: "NOT_ISSUED";
   };
@@ -78,10 +78,6 @@ type PublicReplayManifestState =
   | { status: "VERIFIED"; manifest: PublicReplayManifest }
   | { status: "FAILED"; reason: string };
 
-type PublicReplayManifestResult = PublicReplayManifestState & {
-  retry: () => void;
-};
-
 function hasExactKeys(
   value: unknown,
   expected: readonly string[],
@@ -115,15 +111,15 @@ function isPublicReplayManifest(value: unknown): value is PublicReplayManifest {
   return (
     manifest.schema_version === "visiondata-gate.public-replay.v1" &&
     manifest.source_mode === "PUBLIC_SYNTHETIC_REPLAY" &&
-    manifest.evidence_boundary?.baseline_tag === "v0.1.0-public-replay-r1" &&
+    manifest.evidence_boundary?.baseline_tag === "v0.1.0-goai-rc3-r3" &&
     manifest.evidence_boundary?.baseline_claim ===
-      "PASS_LOCAL_PUBLIC_REPLAY" &&
+      "PASS_LOCAL_RC3_RELEASE_CANDIDATE" &&
     manifest.evidence_boundary?.release_artifacts_included === false &&
     manifest.evidence_boundary?.public_snapshot_attestation === "NOT_ISSUED" &&
     hasExactKeys(manifest.release_status, [
-      "source_verification",
-      "public_projection",
-      "production_readiness",
+      "local_candidate",
+      "official_submission",
+      "official_evaluation",
       "production_release_allowed",
     ]) &&
     hasExactKeys(manifest.evidence_boundary, [
@@ -159,19 +155,14 @@ function isPublicReplayManifest(value: unknown): value is PublicReplayManifest {
   );
 }
 
-export function usePublicReplayManifest(): PublicReplayManifestResult {
+export function usePublicReplayManifest(): PublicReplayManifestState {
   const [state, setState] = useState<PublicReplayManifestState>({
     status: "LOADING",
   });
-  const [attempt, setAttempt] = useState(0);
-  const retry = useCallback(() => {
-    setAttempt((current) => current + 1);
-  }, []);
 
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
-    setState({ status: "LOADING" });
     void fetch(publicReplayManifestUrl, {
       cache: "no-store",
       credentials: "omit",
@@ -207,7 +198,7 @@ export function usePublicReplayManifest(): PublicReplayManifestResult {
       active = false;
       controller.abort();
     };
-  }, [attempt]);
+  }, []);
 
-  return { ...state, retry };
+  return state;
 }

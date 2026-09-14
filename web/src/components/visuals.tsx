@@ -40,7 +40,7 @@ export function CaseTree({ activeCaseId = "rc3-omni-05" }: { activeCaseId?: stri
       <div className="case-tree" aria-label="案件资产树">
         <div className="tree-row tree-row--root">
           <FolderOpen size={16} aria-hidden="true" />
-          <strong>VisionData Gate</strong>
+          <strong>工业视觉交付站</strong>
         </div>
         <div className="tree-branch">
           <div className="tree-row">
@@ -78,7 +78,7 @@ export function CaseTree({ activeCaseId = "rc3-omni-05" }: { activeCaseId?: stri
     <div className="case-tree" aria-label="案件资产树">
       <div className="tree-row tree-row--root">
         <FolderOpen size={16} aria-hidden="true" />
-        <strong>VisionData Gate</strong>
+        <strong>工业视觉交付站</strong>
       </div>
       <div className="tree-branch">
         <div className="tree-row">

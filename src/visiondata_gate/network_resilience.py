@@ -24,6 +24,7 @@ import urllib.request
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .evidence import canonical_json_bytes, sha256_bytes
+from .network_deadline import AttemptDeadline, open_response, resolve_addresses
 
 
 _RETRYABLE_STATUS = {408, 425, 429, 500, 502, 503, 504}
@@ -117,20 +118,6 @@ class HTTPTransportError(RuntimeError):
         self.receipt = receipt
 
 
-class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
-    def redirect_request(
-        self,
-        req: urllib.request.Request,
-        fp: Any,
-        code: int,
-        msg: str,
-        headers: Any,
-        newurl: str,
-    ) -> None:
-        del req, fp, code, msg, headers, newurl
-        return None
-
-
 class CircuitBreaker:
     """Thread-safe closed/open/half-open state machine."""
 
@@ -196,7 +183,7 @@ def _is_forbidden_remote_ip(address: str) -> bool:
 
 def _endpoint_metadata(
     endpoint: str, policy: HTTPClientPolicy
-) -> tuple[str, Literal["local", "remote"], str]:
+) -> tuple[str, str, int, str, str]:
     parsed = urllib.parse.urlsplit(endpoint)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
         raise ValueError("endpoint must be an absolute http(s) URL")
@@ -207,18 +194,23 @@ def _endpoint_metadata(
     host = (parsed.hostname or "").casefold().rstrip(".")
     if host not in set(policy.allowed_hosts):
         raise PermissionError("endpoint host is not allowlisted")
+    port = f":{parsed.port}" if parsed.port is not None else ""
+    endpoint_id = f"{parsed.scheme}://{host}{port}{parsed.path or '/'}"
+    origin = f"{parsed.scheme}://{host}{port}"
+    return (
+        endpoint_id,
+        host,
+        parsed.port
+        if parsed.port is not None
+        else (443 if parsed.scheme == "https" else 80),
+        parsed.scheme,
+        origin,
+    )
 
-    try:
-        addresses = {
-            item[4][0]
-            for item in socket.getaddrinfo(
-                host,
-                parsed.port or (443 if parsed.scheme == "https" else 80),
-                type=socket.SOCK_STREAM,
-            )
-        }
-    except socket.gaierror as error:
-        raise ConnectionError("endpoint DNS resolution failed") from error
+
+def _validate_addresses(
+    addresses: set[str], scheme: str, policy: HTTPClientPolicy
+) -> Literal["local", "remote"]:
     local = bool(addresses) and all(
         ipaddress.ip_address(item).is_loopback for item in addresses
     )
@@ -227,17 +219,14 @@ def _endpoint_metadata(
             raise PermissionError("loopback endpoints are disabled by policy")
         scope: Literal["local", "remote"] = "local"
     else:
-        if parsed.scheme != "https":
+        if scheme != "https":
             raise PermissionError("remote endpoints require HTTPS")
         if any(_is_forbidden_remote_ip(item) for item in addresses):
             raise PermissionError(
                 "remote endpoint resolved to a forbidden address range"
             )
         scope = "remote"
-    port = f":{parsed.port}" if parsed.port is not None else ""
-    endpoint_id = f"{parsed.scheme}://{host}{port}{parsed.path or '/'}"
-    origin = f"{parsed.scheme}://{host}{port}"
-    return endpoint_id, scope, origin
+    return scope
 
 
 def _request_digest(method: str, endpoint_id: str, body: bytes | None) -> str:
@@ -265,10 +254,8 @@ class ResilientJSONClient:
         self.policy = policy
         self._sleep = sleeper
         self._clock = clock
-        self._opener = urllib.request.build_opener(
-            urllib.request.ProxyHandler({}), _NoRedirectHandler()
-        )
         self._breakers: dict[str, CircuitBreaker] = {}
+        self._validated_scopes: dict[str, Literal["local", "remote"]] = {}
         self._breakers_lock = threading.Lock()
 
     def _breaker(self, origin: str) -> CircuitBreaker:
@@ -289,7 +276,17 @@ class ResilientJSONClient:
         payload: Mapping[str, Any] | None = None,
         headers: Mapping[str, str] | None = None,
     ) -> HTTPJSONResult:
-        endpoint_id, scope, origin = _endpoint_metadata(endpoint, self.policy)
+        endpoint_id, host, port, scheme, origin = _endpoint_metadata(
+            endpoint, self.policy
+        )
+        scope: Literal["local", "remote"] = (
+            "local" if host in {"localhost", "127.0.0.1", "::1"} else "remote"
+        )
+        # A circuit-open request performs no DNS/I/O. Preserve the most recent
+        # verified origin classification instead of reclassifying aliases by name.
+        # Actual attempts still resolve and validate every address afresh below.
+        with self._breakers_lock:
+            scope = self._validated_scopes.get(origin, scope)
         body = canonical_json_bytes(dict(payload)) if payload is not None else None
         request_sha256 = _request_digest(method, endpoint_id, body)
         request_id = request_sha256[:32]
@@ -350,21 +347,34 @@ class ResilientJSONClient:
                 "invalid_response",
             ]
             try:
-                with self._opener.open(
-                    request, timeout=self.policy.timeout_seconds
-                ) as response:
-                    http_status = int(response.status)
-                    raw = response.read(self.policy.max_response_bytes + 1)
-                    if len(raw) > self.policy.max_response_bytes:
-                        raise ValueError("response exceeds size limit")
-                    content_type = response.headers.get_content_type()
-                    if content_type != "application/json":
-                        raise ValueError(
-                            "response content type is not application/json"
-                        )
-                    parsed = json.loads(raw.decode("utf-8"))
-                    if not isinstance(parsed, dict):
-                        raise ValueError("JSON response must be one object")
+                with AttemptDeadline(self.policy.timeout_seconds) as deadline:
+                    addresses = resolve_addresses(host, port, deadline)
+                    scope = _validate_addresses(
+                        {item[4][0] for item in addresses}, scheme, self.policy
+                    )
+                    with self._breakers_lock:
+                        self._validated_scopes[origin] = scope
+                    with open_response(
+                        request,
+                        host=host,
+                        port=port,
+                        secure=scheme == "https",
+                        addresses=addresses,
+                        deadline=deadline,
+                    ) as response:
+                        http_status = int(response.status)
+                        raw = response.read(self.policy.max_response_bytes + 1)
+                        deadline.remaining()
+                        if len(raw) > self.policy.max_response_bytes:
+                            raise ValueError("response exceeds size limit")
+                        content_type = response.headers.get_content_type()
+                        if content_type != "application/json":
+                            raise ValueError(
+                                "response content type is not application/json"
+                            )
+                        parsed = json.loads(raw.decode("utf-8"))
+                        if not isinstance(parsed, dict):
+                            raise ValueError("JSON response must be one object")
                 response_sha256 = sha256_bytes(raw)
                 attempt_status = "success"
                 duration_ms = (self._clock() - started) * 1000

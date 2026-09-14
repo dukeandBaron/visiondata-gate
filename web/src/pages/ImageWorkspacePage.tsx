@@ -38,6 +38,9 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { BusinessTaskContext } from "../components/BusinessTaskContext";
+import { SnapshotAcceptanceDialog } from "../components/SnapshotAcceptanceDialog";
+import { snapshotTaskUrl, workbookAssetSearch } from "../businessTaskNavigation";
 import { useProduct } from "../ProductContext";
 import { InteractiveImageCanvas } from "../components/InteractiveImageCanvas";
 import {
@@ -50,7 +53,6 @@ import {
 } from "../components/OperatorAgentPanel";
 import { OperatorWorkspaceTour } from "../components/OperatorWorkspaceTour";
 import {
-  authorizeOperatorProjectSnapshot,
   createOperatorAnalysisRun,
   createOperatorCopilotTurn,
   createOperatorWorkOrder,
@@ -117,7 +119,7 @@ function messageForError(error: unknown): string {
   if (error instanceof DOMException && error.name === "AbortError") {
     return "本地 API 响应超时，请检查服务状态。";
   }
-  return "无法连接本地图片工作区。请先启动 VisionData Gate API。";
+  return "无法连接本地图片工作区。请先启动本地工作台 API。";
 }
 
 interface DropZoneProps {
@@ -236,6 +238,7 @@ export function ImageWorkspacePage() {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [snapshotting, setSnapshotting] = useState(false);
+  const [acceptanceScope, setAcceptanceScope] = useState<{workspaceId: string; projectId: string; projectName: string; assets: OperatorImageAsset[]} | null>(null);
   const [dirty, setDirty] = useState(false);
   const [query, setQuery] = useState("");
   const [assetSlice, setAssetSlice] = useState<AssetSlice>("ALL");
@@ -447,7 +450,7 @@ export function ImageWorkspacePage() {
     if (filteredAssets.some((asset) => asset.asset_id === selectedAssetId)) return;
     const nextAssetId = filteredAssets[0]?.asset_id;
     changeSelectedAsset(nextAssetId);
-    setSearchParams(nextAssetId ? { asset: nextAssetId } : {}, { replace: true });
+    setSearchParams((current) => workbookAssetSearch(current, nextAssetId), { replace: true });
   }, [
     changeSelectedAsset,
     dirty,
@@ -650,7 +653,7 @@ export function ImageWorkspacePage() {
     if (assetId === selectedAssetId) return;
     if (dirty && !window.confirm("当前标注尚未保存。放弃修改并切换图片吗？")) return;
     changeSelectedAsset(assetId);
-    setSearchParams({ asset: assetId }, { replace: true });
+    setSearchParams((current) => workbookAssetSearch(current, assetId), { replace: true });
     setNotice(undefined);
   };
 
@@ -681,7 +684,7 @@ export function ImageWorkspacePage() {
       const first = result.assets[0];
       if (first) {
         changeSelectedAsset(first.asset_id);
-        setSearchParams({ asset: first.asset_id }, { replace: true });
+        setSearchParams((current) => workbookAssetSearch(current, first.asset_id), { replace: true });
       }
       setNotice(
         `已导入 ${result.uploaded_count} 张图片到 ${activeWorkspace?.name ?? "当前工作空间"}；未自动运行 Agent。`,
@@ -722,7 +725,7 @@ export function ImageWorkspacePage() {
     const first = result.assets[0];
     if (first && !dirtyRef.current) {
       changeSelectedAsset(first.asset_id);
-      setSearchParams({ asset: first.asset_id }, { replace: true });
+      setSearchParams((current) => workbookAssetSearch(current, first.asset_id), { replace: true });
     }
     setError(undefined);
     const rejected = result.rejectedImageCount > 0
@@ -894,20 +897,7 @@ export function ImageWorkspacePage() {
         activeWorkspaceIdRef.current !== handoffWorkspaceId
         || activeProjectIdRef.current !== handoffProjectId
       ) return;
-      const source = await authorizeOperatorProjectSnapshot({
-        workspaceId: handoffWorkspaceId,
-        projectId: handoffProjectId,
-        displayName: `${activeProject.name} · 工作簿受控快照`,
-      });
-      if (
-        activeWorkspaceIdRef.current !== handoffWorkspaceId
-        || activeProjectIdRef.current !== handoffProjectId
-      ) return;
-      const binding = typeof source.data_profile.operator_snapshot_receipt_sha256 === "string"
-        ? source.data_profile.operator_snapshot_receipt_sha256
-        : source.source_archive_sha256;
-      setNotice(`项目快照 ${source.source_id} 已封存 · binding ${shortDigest(binding)}；正在交给 Agent Task 工作台。`);
-      navigate(`/command-center?create=1&source=${encodeURIComponent(source.source_id)}`);
+      setAcceptanceScope({workspaceId:handoffWorkspaceId,projectId:handoffProjectId,projectName:activeProject.name,assets:[...assets]});
     } catch (caught) {
       if (
         activeWorkspaceIdRef.current === handoffWorkspaceId
@@ -1104,6 +1094,15 @@ export function ImageWorkspacePage() {
 
   return (
     <div className="operator-workspace">
+      {acceptanceScope && acceptanceScope.workspaceId===workspaceId && acceptanceScope.projectId===activeProject?.project_id ? <SnapshotAcceptanceDialog
+        {...acceptanceScope}
+        onClose={()=>setAcceptanceScope(null)}
+        onCreated={(source)=>{
+          if(activeWorkspaceIdRef.current!==acceptanceScope.workspaceId || activeProjectIdRef.current!==acceptanceScope.projectId)return;
+          setAcceptanceScope(null);
+          navigate(snapshotTaskUrl(source.source_id,searchParams.get("purpose")));
+        }}
+      /> : null}
       <input
         ref={inputRef}
         className="sr-only"
@@ -1114,9 +1113,9 @@ export function ImageWorkspacePage() {
       />
       <header className="operator-commandbar">
         <div className="operator-commandbar__title">
-          <span className="operator-kicker">CURRENT WORKBOOK</span>
+          <span className="operator-kicker">当前工作簿</span>
           <strong>{activeProject?.name ?? "工业视觉工作簿"}</strong>
-          <span>{activeWorkspace?.name ?? "未选择工作空间"} · {assets.length} assets · J/K navigate</span>
+          <span>{activeWorkspace?.name ?? "未选择工作空间"} · {assets.length} 张图像 · J/K 切换</span>
         </div>
         <div className="operator-commandbar__actions">
           <button type="button" onClick={() => setTourOpen(true)}>
@@ -1166,6 +1165,20 @@ export function ImageWorkspacePage() {
         </div>
       </header>
 
+      <BusinessTaskContext
+        purpose={searchParams.get("purpose")}
+        surface="workbook"
+        onNavigate={(href) => {
+          if (dirty && !window.confirm("当前标注尚未保存。放弃修改并离开工作簿吗？")) return;
+          navigate(href);
+        }}
+        onClear={() => setSearchParams((current) => {
+          const next = new URLSearchParams(current);
+          next.delete("purpose");
+          return next;
+        }, { replace: true })}
+      />
+
       {error ? (
         <div className="operator-message is-error" role="alert">
           <AlertTriangle size={16} />
@@ -1188,7 +1201,7 @@ export function ImageWorkspacePage() {
       <div className="operator-grid" style={operatorGridStyle}>
         <aside className="asset-browser" aria-label="本地图像列表" data-tour-target="assets">
           <div className="asset-browser__header">
-            <strong><Files size={14} /> INPUT IMAGES</strong>
+            <strong><Files size={14} /> 项目图像</strong>
             <span>{filteredAssets.length}/{assets.length}</span>
           </div>
           <label className="asset-search">
@@ -1249,7 +1262,7 @@ export function ImageWorkspacePage() {
             ))}
           </div>
           <footer className="asset-browser__footer">
-            <HardDrive size={13} /> output/product/operator_workspace
+            <HardDrive size={13} /> 当前项目图像 · 本地副本
           </footer>
         </aside>
 
@@ -1340,7 +1353,7 @@ export function ImageWorkspacePage() {
               className={inspectorTab === "PROPERTIES" ? "is-active" : ""}
               onClick={() => setInspectorTab("PROPERTIES")}
             >
-              <SlidersHorizontal size={12} /> INSPECTOR
+              <SlidersHorizontal size={12} /> 属性与测量
             </button>
             <button
               type="button"
@@ -1350,10 +1363,10 @@ export function ImageWorkspacePage() {
               className={inspectorTab === "AGENT" ? "is-active" : ""}
               onClick={() => setInspectorTab("AGENT")}
             >
-              <Bot size={12} /> AGENT
+              <Bot size={12} /> Agent 助手
               {analysisRun ? <i className="agent-live-dot" /> : null}
             </button>
-            {dirty ? <strong className="unsaved-dot">UNSAVED</strong> : <strong>SAVED</strong>}
+            {dirty ? <strong className="unsaved-dot">未保存</strong> : <strong>已保存</strong>}
           </div>
           {inspectorTab === "AGENT" ? (
             selectedAsset ? (
@@ -1373,7 +1386,10 @@ export function ImageWorkspacePage() {
                 onRun={() => void runAgentAnalysis()}
                 onAsk={(question) => void askCopilot(question)}
                 onCreateWorkOrder={() => openWorkOrderReview(selectedAnnotationId)}
-                onOpenCapa={() => navigate("/capa")}
+                onHandoffProject={() => void handoffProjectToAgent()}
+                handoffPending={snapshotting}
+                handoffDisabled={saving || uploading || !workspaceId || !activeProject || assets.length === 0}
+                onOpenCapa={() => navigate(analysisRun?.recommendation.code === "DUPLICATE_REVIEW" ? "/capa?layer=controlled" : "/capa")}
                 onOpenEvidence={() => navigate("/evidence")}
                 onOpenTaskWorkbench={() => navigate("/command-center")}
               />
@@ -1385,7 +1401,7 @@ export function ImageWorkspacePage() {
           ) : (
             <>
               <section className="inspector-section">
-                <header><FileImage size={14} /> IMAGE</header>
+                <header><FileImage size={14} /> 图像文件</header>
                 <dl className="property-list">
                   <div><dt>name</dt><dd>{selectedAsset.original_name}</dd></div>
                   <div><dt>size</dt><dd>{selectedAsset.width} × {selectedAsset.height}</dd></div>
@@ -1410,7 +1426,7 @@ export function ImageWorkspacePage() {
               </section>
 
               <section className="inspector-section">
-                <header><ShieldCheck size={14} /> DETERMINISTIC INSPECTION</header>
+                <header><ShieldCheck size={14} /> 像素测量</header>
                 <div className="inspection-metrics">
                   <article><span>Mean luma</span><strong>{selectedAsset.inspection.mean_luma.toFixed(2)}</strong></article>
                   <article><span>Contrast σ</span><strong>{selectedAsset.inspection.contrast_std.toFixed(2)}</strong></article>
@@ -1432,11 +1448,11 @@ export function ImageWorkspacePage() {
               </section>
 
               <section className="inspector-section annotation-inspector">
-                <header><Tag size={14} /> ANNOTATIONS <span>{annotations.length}</span></header>
+                <header><Tag size={14} /> 标注 <span>{annotations.length}</span></header>
                 {selectedAnnotation ? (
                   <div className="annotation-form">
                     <label>
-                      <span>Label</span>
+                      <span>标注类别</span>
                       <input
                         value={selectedAnnotation.label}
                         onChange={(event) => updateSelectedLabel(event.target.value)}

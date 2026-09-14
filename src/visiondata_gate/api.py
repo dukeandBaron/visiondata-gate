@@ -2,6 +2,7 @@
 
 import hashlib
 import hmac
+import ipaddress
 import os
 import secrets
 from contextlib import asynccontextmanager
@@ -24,8 +25,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.concurrency import run_in_threadpool
 
 from .acceptance import AcceptanceScorecard
+from .identity_service import IdentityError, IdentityService
+from .compute_handoff import (
+    ComputeHandoffError, ComputeHandoffRequest, compute_preflight,
+    prepare_compute_handoff, read_compute_handoffs, export_compute_handoff,
+)
+from .agent_platform import AgentPlatformReport, build_agent_platform
 from .annotation_roundtrip import (
     AnnotationExportRecord,
     AnnotationImportPackage,
@@ -52,6 +60,12 @@ from .evaluation_evidence import (
     scoped_evaluation_evidence_scope,
 )
 from .evidence import canonical_json_bytes
+from .execution_recovery import (
+    RecoverTaskExecutionRequest,
+    TaskExecutionRecoveryProjection,
+    TaskExecutionRecoveryReceipt,
+)
+from .model_usage import TaskModelUsageReport, build_task_model_usage
 from .incident_commands import (
     IncidentCommandKind,
     IncidentCommandReceipt,
@@ -65,12 +79,6 @@ from .incident_model_planner import incident_model_planner_from_environment
 from .incident_runtime_profile import (
     IncidentRuntimeCapabilities,
     IncidentRuntimeProfileBinding,
-)
-from .private_industrial_validation import (
-    PrivateIndustrialValidationSource,
-    PrivateIndustrialValidationSummary,
-    global_industrial_validation_scope,
-    scoped_industrial_validation_scope,
 )
 from .governed_context import AssembledIncidentContext
 from .governed_outcome import GovernedOutcomeEnvelope
@@ -273,7 +281,6 @@ def create_app(
     enable_account_bootstrap: bool = False,
     ensure_demo_tenant: bool = True,
     evaluation_evidence_source: DynamicBenchEvaluationEvidenceSource | None = None,
-    industrial_validation_source: PrivateIndustrialValidationSource | None = None,
 ) -> FastAPI:
     (
         session_token,
@@ -331,11 +338,10 @@ def create_app(
         lifespan=lifespan,
     )
     app.state.product_service = product_service
+    identity_service = IdentityService(product_service)
+    app.state.identity_service = identity_service
     app.state.evaluation_evidence_source = (
         evaluation_evidence_source or DynamicBenchEvaluationEvidenceSource()
-    )
-    app.state.industrial_validation_source = (
-        industrial_validation_source or PrivateIndustrialValidationSource()
     )
     app.state.operator_image_store = OperatorImageStore(
         product_service.product_root / "operator_workspace"
@@ -361,6 +367,7 @@ def create_app(
         allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allow_headers=[
             "Accept",
+            "Authorization",
             "Content-Type",
             "Idempotency-Key",
             "X-Actor-User-Id",
@@ -369,7 +376,12 @@ def create_app(
             "X-VisionData-Session-Token",
         ],
         expose_headers=[
+            "Retry-After",
+            "WWW-Authenticate",
             "ETag",
+            "X-Agent-Platform-SHA256",
+            "X-Model-Usage-SHA256",
+            "X-Execution-Recovery-SHA256",
             "X-Content-SHA256",
             "X-Evidence-SHA256",
             "X-Trace-SHA256",
@@ -389,17 +401,37 @@ def create_app(
         ],
     )
 
-    @app.middleware("http")
-    async def require_bound_local_session(request: Request, call_next) -> Response:
-        public_system_routes = {"/v1/health"}
-        if desktop_startup_secret:
-            public_system_routes.add("/v1/desktop/readiness")
-        protected = (
-            request.method != "OPTIONS"
-            and request.url.path.startswith("/v1/")
-            and request.url.path not in public_system_routes
+    def require_numeric_loopback(request: Request) -> None:
+        peer = request.client.host if request.client else ""
+        try:
+            local = ipaddress.ip_address(peer).is_loopback
+        except ValueError:
+            local = False
+        forwarded = any(
+            key.lower() == "forwarded" or key.lower().startswith("x-forwarded-")
+            for key in request.headers
         )
-        if not protected:
+        if not local or forwarded:
+            raise IdentityError("identity_forbidden", 403)
+
+    def require_startup_capability(request: Request) -> str:
+        require_numeric_loopback(request)
+        generic = request.headers.get("X-VisionData-Session-Token", "")
+        desktop = request.headers.get("X-VisionData-Desktop-Token", "")
+        supplied = generic or desktop
+        if generic and desktop and generic != desktop:
+            supplied = ""
+        if not session_token or not secrets.compare_digest(
+            supplied.encode("utf-8"), session_token.encode("utf-8")
+        ):
+            raise IdentityError("identity_forbidden", 403)
+        return session_actor
+
+    async def guard_local_session(request: Request, call_next) -> Response:
+        public_system_routes = {("GET", "/v1/health")}
+        if desktop_startup_secret:
+            public_system_routes.add(("GET", "/v1/desktop/readiness"))
+        if request.method == "OPTIONS" or not request.url.path.startswith("/v1/"):
             return await call_next(request)
         if request.method in unsafe_browser_methods:
             origin = request.headers.get("Origin", "").strip()
@@ -412,6 +444,40 @@ def create_app(
                     "Cross-site browser requests cannot use local session authority.",
                     status.HTTP_403_FORBIDDEN,
                 )
+        if (request.method, request.url.path) in public_system_routes:
+            return await call_next(request)
+        public_identity_routes = {
+            ("GET", "/v1/identity/status"),
+            ("POST", "/v1/identity/setup"),
+            ("POST", "/v1/identity/register"),
+            ("POST", "/v1/identity/login"),
+        }
+        if (request.method, request.url.path) in public_identity_routes:
+            return await call_next(request)
+        identity_enabled = (await run_in_threadpool(identity_service.status))["identity_required"]
+        if not identity_enabled and not enable_account_bootstrap and (
+            request.method, request.url.path
+        ) == ("POST", "/v1/workspaces"):
+            return _error_response("not_found", "workspace creation is not enabled", 404)
+        # Native shutdown is a process capability, never a business principal.
+        if identity_enabled and desktop_session_token and (
+            request.method, request.url.path
+        ) == ("POST", "/v1/desktop/shutdown"):
+            require_startup_capability(request)
+            return await call_next(request)
+        if identity_enabled or request.url.path.startswith("/v1/identity/"):
+            authorization = request.headers.getlist("Authorization")
+            if len(authorization) != 1:
+                raise IdentityError("identity_authentication_failed", 401)
+            scheme, separator, token = authorization[0].partition(" ")
+            if not separator or scheme.lower() != "bearer":
+                raise IdentityError("identity_authentication_failed", 401)
+            principal = await run_in_threadpool(identity_service.authenticate, token)
+            actor_header = request.headers.get("X-Actor-User-Id")
+            if actor_header is not None and actor_header != principal["user_id"]:
+                raise IdentityError("identity_forbidden", 403)
+            request.state.identity_principal = principal
+            return await call_next(request)
         if session_token:
             generic = request.headers.get("X-VisionData-Session-Token", "")
             desktop = request.headers.get("X-VisionData-Desktop-Token", "")
@@ -431,6 +497,42 @@ def create_app(
                 status.HTTP_503_SERVICE_UNAVAILABLE,
             )
         return await call_next(request)
+
+    def identity_error_response(exc: IdentityError) -> JSONResponse:
+        response = _error_response(exc.code, exc.code, exc.status_code)
+        if exc.status_code == 401:
+            response.headers["WWW-Authenticate"] = "Bearer"
+        if exc.retry_after:
+            response.headers["Retry-After"] = str(exc.retry_after)
+        return response
+
+    @app.exception_handler(IdentityError)
+    def identity_error(_request: Request, exc: IdentityError) -> JSONResponse:
+        return identity_error_response(exc)
+
+    @app.middleware("http")
+    async def require_bound_local_session(request: Request, call_next) -> Response:
+        try:
+            response = await guard_local_session(request, call_next)
+        except IdentityError as exc:
+            response = identity_error_response(exc)
+        if request.url.path.startswith("/v1/"):
+            if request.url.path.startswith("/v1/identity/") or getattr(
+                request.state, "identity_principal", None
+            ) is not None:
+                response.headers["Cache-Control"] = "private, no-store"
+            else:
+                response.headers.setdefault("Cache-Control", "private, no-store")
+            response.headers["X-Content-Type-Options"] = "nosniff"
+            # Early authentication errors sit outside CORSMiddleware. Match its
+            # exact allowlist so an allowed UI can read errors without wildcards.
+            origin = request.headers.get("Origin", "")
+            if origin in configured_origins:
+                response.headers.setdefault("Access-Control-Allow-Origin", origin)
+                response.headers.setdefault("Access-Control-Expose-Headers", "Retry-After, WWW-Authenticate")
+                if "origin" not in response.headers.get("Vary", "").lower():
+                    response.headers.add_vary_header("Origin")
+        return response
 
     if desktop_session_token:
         if desktop_startup_secret:
@@ -485,6 +587,9 @@ def create_app(
     def service_dep(request: Request) -> ProductService:
         return request.app.state.product_service
 
+    def identity_dep(request: Request) -> IdentityService:
+        return request.app.state.identity_service
+
     def operator_store_dep(request: Request) -> OperatorImageStore:
         return request.app.state.operator_image_store
 
@@ -493,28 +598,29 @@ def create_app(
     ) -> DynamicBenchEvaluationEvidenceSource:
         return request.app.state.evaluation_evidence_source
 
-    def industrial_validation_source_dep(
-        request: Request,
-    ) -> PrivateIndustrialValidationSource:
-        return request.app.state.industrial_validation_source
-
     Service = Annotated[ProductService, Depends(service_dep)]
     OperatorStore = Annotated[OperatorImageStore, Depends(operator_store_dep)]
     EvaluationEvidenceSource = Annotated[
         DynamicBenchEvaluationEvidenceSource,
         Depends(evaluation_evidence_source_dep),
     ]
-    IndustrialValidationSource = Annotated[
-        PrivateIndustrialValidationSource,
-        Depends(industrial_validation_source_dep),
-    ]
 
     def authenticated_actor(
+        request: Request,
         actor_header: Annotated[
             str | None,
             Header(alias="X-Actor-User-Id", max_length=256),
         ] = None,
     ) -> str:
+        if identity_service.status()["identity_required"]:
+            principal = getattr(request.state, "identity_principal", None)
+            if not isinstance(principal, dict) or not principal.get("user_id"):
+                raise IdentityError("identity_authentication_failed", 401)
+            actor = principal["user_id"]
+            if actor_header is not None and actor_header != actor:
+                raise IdentityError("identity_forbidden", 403)
+            identity_service.get_user(actor)
+            return actor
         if session_token:
             if actor_header is not None and not secrets.compare_digest(
                 actor_header, session_actor
@@ -629,7 +735,7 @@ def create_app(
     def health(product: Service) -> HealthResponse:
         authentication = (
             "session_token_bound_principal"
-            if session_token
+            if session_token or identity_service.status()["identity_required"]
             else (
                 "test_actor_header_bypass"
                 if insecure_test_actor_bypass
@@ -688,24 +794,6 @@ def create_app(
         bind_evaluation_projection_headers(response, projection)
         return projection
 
-    @app.get(
-        "/v1/review/evaluation-evidence/industrial-validation",
-        response_model=PrivateIndustrialValidationSummary,
-        tags=["review", "evaluation", "governance"],
-        description=(
-            "Read-only reviewer projection that keeps current-environment RC5 VisA "
-            "public-proxy evidence, historical Omni offline validation, and "
-            "unmeasured factory shadow metrics in separate evidence tracks."
-        ),
-    )
-    def get_global_industrial_validation_evidence(
-        source: IndustrialValidationSource,
-        response: Response,
-    ) -> PrivateIndustrialValidationSummary:
-        projection = source.project(scope=global_industrial_validation_scope())
-        _bind_sha256_response(response, projection.projection_sha256)
-        return projection
-
     def require_visible_workspace(
         actor: str, workspace_id: str, product: ProductService
     ) -> None:
@@ -726,6 +814,64 @@ def create_app(
         project = product.get_project(actor, project_id)
         if project.workspace_id != workspace_id:
             raise NotFoundError("project not found in workspace")
+
+    @app.get(
+        "/v1/workspaces/{workspace_id}/agent-platform",
+        response_model=AgentPlatformReport,
+        tags=["agent-platform"],
+    )
+    def get_agent_platform(
+        workspace_id: str, response: Response, actor: Actor, product: Service,
+        project_id: str | None = None,
+    ) -> AgentPlatformReport:
+        report = build_agent_platform(product, actor, workspace_id, project_id)
+        response.headers["ETag"] = f'"{report.receipt_sha256}"'
+        response.headers["X-Agent-Platform-SHA256"] = report.receipt_sha256
+        response.headers["Cache-Control"] = "private, no-store"
+        return report
+
+    @app.get(
+        "/v1/tasks/{task_id}/model-usage",
+        response_model=TaskModelUsageReport,
+        tags=["agent-platform"],
+    )
+    def get_task_model_usage(
+        task_id: str, response: Response, actor: Actor, product: Service,
+    ) -> TaskModelUsageReport:
+        report = build_task_model_usage(product, actor, task_id)
+        response.headers["ETag"] = f'"{report.receipt_sha256}"'
+        response.headers["X-Model-Usage-SHA256"] = report.receipt_sha256
+        response.headers["Cache-Control"] = "private, no-store"
+        return report
+
+    @app.get(
+        "/v1/tasks/{task_id}/execution-recovery",
+        response_model=TaskExecutionRecoveryProjection,
+        tags=["agent-platform"],
+    )
+    def get_execution_recovery(
+        task_id: str, response: Response, actor: Actor, product: Service,
+    ) -> TaskExecutionRecoveryProjection:
+        report = product.task_execution_recovery(actor, task_id)
+        response.headers["ETag"] = f'"{report.receipt_sha256}"'
+        response.headers["X-Execution-Recovery-SHA256"] = report.receipt_sha256
+        response.headers["Cache-Control"] = "private, no-store"
+        return report
+
+    @app.post(
+        "/v1/tasks/{task_id}/execution-recovery",
+        response_model=TaskExecutionRecoveryReceipt,
+        tags=["agent-platform"],
+    )
+    def recover_task_execution(
+        task_id: str, payload: RecoverTaskExecutionRequest,
+        response: Response, actor: Actor, product: Service,
+    ) -> TaskExecutionRecoveryReceipt:
+        receipt = product.recover_task_execution(actor, task_id, payload)
+        response.headers["ETag"] = f'"{receipt.receipt_sha256}"'
+        response.headers["X-Execution-Recovery-SHA256"] = receipt.receipt_sha256
+        response.headers["Cache-Control"] = "private, no-store"
+        return receipt
 
     @app.post(
         "/v1/workspaces/{workspace_id}/hosted-agentteams/probes",
@@ -1195,25 +1341,29 @@ def create_app(
             tags=["accounts"],
         )
         def create_user(payload: CreateUserRequest, product: Service) -> UserRecord:
+            if identity_service.status()["identity_required"]:
+                raise IdentityError("identity_forbidden", 403)
             return product.create_user(payload)
 
         @app.get("/v1/users", response_model=list[UserRecord], tags=["accounts"])
         def list_users(actor: Actor, product: Service) -> list[UserRecord]:
             return [user for user in product.list_users() if user.user_id == actor]
 
-        @app.post(
-            "/v1/workspaces",
-            response_model=WorkspaceRecord,
-            status_code=status.HTTP_201_CREATED,
-            responses={404: _NOT_FOUND_RESPONSE},
-            tags=["workspaces"],
-        )
-        def create_workspace(
-            payload: CreateWorkspaceRequest, actor: Actor, product: Service
-        ) -> WorkspaceRecord:
-            if actor != payload.owner_user_id:
-                raise NotFoundError("workspace owner not found")
-            return product.create_workspace(payload)
+    @app.post(
+        "/v1/workspaces",
+        response_model=WorkspaceRecord,
+        status_code=status.HTTP_201_CREATED,
+        responses={404: _NOT_FOUND_RESPONSE},
+        tags=["workspaces"],
+    )
+    def create_workspace(
+        payload: CreateWorkspaceRequest, actor: Actor, product: Service
+    ) -> WorkspaceRecord:
+        if not enable_account_bootstrap and not identity_service.status()["identity_required"]:
+            raise NotFoundError("workspace creation is not enabled")
+        if actor != payload.owner_user_id:
+            raise NotFoundError("workspace owner not found")
+        return product.create_workspace(payload)
 
     @app.get(
         "/v1/workspaces",
@@ -1276,35 +1426,6 @@ def create_app(
             )
         )
         bind_evaluation_projection_headers(response, projection)
-        return projection
-
-    @app.get(
-        "/v1/workspaces/{workspace_id}/evaluation-evidence/industrial-validation",
-        response_model=PrivateIndustrialValidationSummary,
-        responses={404: _NOT_FOUND_RESPONSE},
-        tags=["workspaces", "projects", "evaluation", "governance"],
-        description=(
-            "Return the global bounded industrial-validation evidence as a read-only "
-            "workspace or project reference; the association is not project-derived."
-        ),
-    )
-    def get_scoped_industrial_validation_evidence(
-        workspace_id: str,
-        actor: Actor,
-        product: Service,
-        source: IndustrialValidationSource,
-        response: Response,
-        project_id: Annotated[str | None, Query(min_length=1)] = None,
-    ) -> PrivateIndustrialValidationSummary:
-        require_visible_workspace(actor, workspace_id, product)
-        require_project_in_workspace(actor, workspace_id, project_id, product)
-        projection = source.project(
-            scope=scoped_industrial_validation_scope(
-                workspace_id=workspace_id,
-                project_id=project_id,
-            )
-        )
-        _bind_sha256_response(response, projection.projection_sha256)
         return projection
 
     @app.get(
@@ -2454,6 +2575,38 @@ def create_app(
         product: Service,
     ) -> list[ShadowEvaluationManifestV2]:
         return product.list_shadow_evaluation_manifests_v2(actor, task_id)
+
+    @app.exception_handler(ComputeHandoffError)
+    def compute_handoff_error(_request: Request, exc: ComputeHandoffError) -> JSONResponse:
+        return _error_response(exc.code, str(exc), status.HTTP_409_CONFLICT)
+
+    @app.get("/v1/tasks/{task_id}/compute-preflight", tags=["compute"])
+    def read_compute_preflight(task_id: str, actor: Actor, product: Service, response: Response):
+        result = compute_preflight(product, actor, task_id)
+        response.headers["ETag"] = f'"{result["receipt_sha256"]}"'
+        return result
+
+    @app.post("/v1/tasks/{task_id}/compute-handoffs", tags=["compute"], status_code=201)
+    def create_compute_handoff(task_id: str, payload: ComputeHandoffRequest, actor: Actor, product: Service):
+        return prepare_compute_handoff(product, actor, task_id, payload)
+
+    @app.get("/v1/tasks/{task_id}/compute-handoffs", tags=["compute"])
+    def list_compute_handoffs(task_id: str, actor: Actor, product: Service):
+        return read_compute_handoffs(product, actor, task_id)
+
+    @app.get("/v1/tasks/{task_id}/compute-handoffs/{handoff_id}/export", tags=["compute"])
+    def download_compute_handoff(task_id: str, handoff_id: str, actor: Actor, product: Service):
+        return export_compute_handoff(product, actor, task_id, handoff_id)
+
+    from .learning_api import install_learning_routes
+    from .identity_api import install_identity_routes
+    from .vision_model_api import install_vision_model_routes
+    from .data_pool_api import install_data_pool_routes
+
+    install_learning_routes(app, authenticated_actor, service_dep)
+    install_identity_routes(app, authenticated_actor, identity_dep, require_startup_capability)
+    install_vision_model_routes(app, authenticated_actor, service_dep)
+    install_data_pool_routes(app, authenticated_actor, service_dep)
 
     return app
 

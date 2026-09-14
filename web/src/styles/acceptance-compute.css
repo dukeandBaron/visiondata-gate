@@ -1,0 +1,41 @@
+.acceptance-overlay { position: fixed; inset: 0; z-index: 160; background: #02040bc9; display: grid; place-items: center; padding: 24px; }
+.acceptance-dialog { width: min(1080px, 100%); max-height: 92vh; overflow: auto; background: var(--surface); color: var(--text); border: 1px solid var(--line-strong); border-radius: 12px; padding: 25px; box-shadow: var(--shadow-raised); }
+.acceptance-dialog header, .acceptance-dialog footer, .acceptance-pagination { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.acceptance-dialog h2 { margin: 8px 0; font-size: 24px; }
+.acceptance-dialog p, .acceptance-dialog small { color: var(--muted); line-height: 1.75; font-size: 12px; }
+.acceptance-dialog fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.acceptance-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 16px 0; }
+.acceptance-fields label { display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.acceptance-dialog :is(textarea,input:not([type=checkbox]),select) { padding: 9px 11px; border: 1px solid var(--line-strong); border-radius: 5px; color: var(--text); background: var(--surface-subtle); font: inherit; }
+.acceptance-dialog textarea { resize: vertical; min-height: 70px; }
+.acceptance-dialog button { display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--surface-raised); color: var(--text); cursor: pointer; }
+.acceptance-dialog button:disabled { opacity: .5; cursor: not-allowed; }
+.acceptance-dialog footer { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 18px; }
+.acceptance-dialog footer button { border-color: var(--accent-secondary); }
+.acceptance-table { overflow: auto; max-height: 270px; border: 1px solid var(--line); }
+.acceptance-table table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
+.acceptance-table :is(th,td) { padding: 10px; border-bottom: 1px solid var(--line); }
+.acceptance-table th { color: var(--muted); background: var(--surface-raised); position: sticky; top: 0; }
+.acceptance-table small { display: block; }
+.acceptance-pagination { justify-content: flex-end; margin-top: 10px; font-size: 12px; }
+.acceptance-attestation { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.7; }
+.acceptance-attestation input { margin-top: 4px; }
+.acceptance-dialog .acceptance-error { color: var(--red); }
+.acceptance-dialog :is(button,input,textarea,select):focus-visible { outline: 2px solid var(--accent-secondary); outline-offset: 3px; }
+.compute-page { max-width: 1150px; margin: auto; padding: 32px 28px 60px; color: var(--text); }
+.compute-page h1 { font-size: 32px; margin: 12px 0; }
+.compute-page header > span { display: inline-flex; gap: 10px; color: var(--accent-secondary); font-size: 13px; }
+.compute-page p { color: var(--muted); line-height: 1.85; }
+.compute-page :is(input:not([type=checkbox]),textarea,select) { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--line-strong); border-radius: 5px; padding: 10px; min-width: 0; }
+.compute-page button { display: inline-flex; align-items: center; gap: 8px; color: var(--text); background: var(--surface-raised); border: 1px solid var(--line-strong); border-radius: 6px; padding: 10px 14px; cursor: pointer; }
+.compute-page button:disabled,.compute-page fieldset:disabled { opacity: .55; }
+.compute-page fieldset { border: 1px solid var(--line); padding: 20px; margin: 25px 0; border-radius: 8px; }
+.compute-page form button { margin-top: 18px; border-color: var(--accent-secondary); }
+.compute-scope { display: flex; align-items: flex-end; gap: 16px; margin: 28px 0; }
+.compute-scope label { display: flex; flex: 1; flex-direction: column; gap: 8px; }
+.compute-preflight { background: var(--surface-subtle); border-left: 3px solid var(--amber); padding: 20px; }
+.compute-preflight h2 { margin: 0; font-size: 20px; }.compute-preflight li { margin: 10px 0; }
+.compute-preflight a { color: var(--accent-secondary); }.compute-preflight details { margin-top: 15px; }.compute-preflight pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }
+.compute-records article { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); padding: 18px 0; gap: 16px; }
+.compute-records small { display: block; color: var(--amber); margin-top: 8px; }.compute-page .acceptance-error { color: var(--red); }
+.compute-page :is(button,input,textarea,select,summary):focus-visible { outline: 2px solid var(--accent-secondary); outline-offset: 3px; }

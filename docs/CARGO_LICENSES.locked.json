@@ -1,6 +1,6 @@
 {
   "author_fields_included": false,
-  "cargo_lock_sha256": "aabee9491c98407bfe9c8c3872c4f49fbe150259e36d80e20676ec9d9c862b34",
+  "cargo_lock_sha256": "33b25e0f34106e254d180a4a105148cbac884de37561697a26198a497b5b1882",
   "package_count": 264,
   "packages": [
     {
@@ -4618,6 +4618,11 @@
           "name": "serde",
           "source": "registry+https://github.com/rust-lang/crates.io-index",
           "version": "1.0.229"
+        },
+        {
+          "name": "serde_json",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "version": "1.0.151"
         },
         {
           "name": "sha2",
