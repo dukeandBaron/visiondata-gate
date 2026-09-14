@@ -1,7 +1,7 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "22bcfb34b8d2ef6673e49d7667b1033bd104d122",
-  "source_tree_oid": "ced39deb819a58498f4a11c7fec3bfe915a606ec",
+  "source_commit_oid": "d693b7dbe1960515468630804b4c462a91fc9e21",
+  "source_tree_oid": "2148d3540cef8ca79427a411c9ac88b45c5c9fbc",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
@@ -9,7 +9,7 @@
   "personal_data_included": false,
   "tracked_source_only": true,
   "file_count": 719,
-  "snapshot_sha256": "1e107ca92e55dd615428869c0fd6e29f60b29d2be2791f51a4b0364407d3a0b5",
+  "snapshot_sha256": "81b28c4984de7fe6f150ed128238a7cf0439b6d995a7ba7df4554b5e56141590",
   "files": [
     {
       "path": ".env.example",
@@ -2460,8 +2460,8 @@
     },
     {
       "path": "tests/web_identity_connection_retry.test.mjs",
-      "sha256": "049a9c49e7377a0556b5f431c4f769343166eb69e70766674a1cae6a1683b32f",
-      "size_bytes": 2219
+      "sha256": "07d03d35497390122e2686b32e8a270d362de81966c7ea5eea493939bbe1f87c",
+      "size_bytes": 2218
     },
     {
       "path": "tests/web_identity_live.browser.mjs",
