@@ -25,6 +25,20 @@ def test_model_reproducibility_drivers_are_frozen_source_inputs(builder):
     }.issubset(set(builder.REQUIRED_INPUTS))
 
 
+def test_public_main_freeze_does_not_require_internal_reports(builder):
+    assert all(
+        not name.startswith("10_reports/") for name in builder.REQUIRED_INPUTS
+    )
+    assert {
+        "benchmarks/DYNAMICBENCH_V3_REPLANNING_20260829.json",
+        "benchmarks/DYNAMICBENCH_V4_PRODUCT_RUNTIME_20260829.json",
+    }.issubset(set(builder.REQUIRED_INPUTS))
+    assert all(
+        "10_reports" not in reason
+        for reason in builder.EXCLUDED_SOURCE_SUBTREES.values()
+    )
+
+
 @pytest.fixture
 def builder():
     spec = importlib.util.spec_from_file_location("learning_installer_builder", TOOL)

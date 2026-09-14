@@ -152,7 +152,7 @@ def test_desktop_dynamicbench_source_uses_the_bound_resource_root(
     tmp_path: Path, monkeypatch
 ) -> None:
     resource_root = tmp_path / "packaged-resources"
-    reports_root = resource_root / "10_reports"
+    reports_root = resource_root / "benchmarks"
     reports_root.mkdir(parents=True)
     packaged_v3 = reports_root / DYNAMICBENCH_V3_REPORT_NAME
     packaged_v4 = reports_root / DYNAMICBENCH_V4_REPORT_NAME
@@ -198,10 +198,11 @@ def test_pyinstaller_spec_allowlists_only_the_two_runtime_reports() -> None:
     )
     assert "*frozen_evaluation_report_datas" in source
     assert ".resolve(strict=True)" in source
-    assert '(str(project_root / "10_reports"), "10_reports")' not in source
+    assert 'project_root / "10_reports"' not in source
+    assert 'project_root / "benchmarks"' in source
     assert {
         path.name
-        for path in (PROJECT_ROOT / "10_reports").glob("DYNAMICBENCH_*.json")
+        for path in (PROJECT_ROOT / "benchmarks").glob("DYNAMICBENCH_*.json")
         if path.name in source
     } == set(report_names)
 

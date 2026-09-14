@@ -82,8 +82,8 @@ REQUIRED_INPUTS = (
     "web/src-tauri/build.rs",
     "web/src-tauri/nsis-hooks.nsh",
     "web/src-tauri/tauri.conf.json",
-    "10_reports/DYNAMICBENCH_V3_REPLANNING_20260829.json",
-    "10_reports/DYNAMICBENCH_V4_PRODUCT_RUNTIME_20260829.json",
+    "benchmarks/DYNAMICBENCH_V3_REPLANNING_20260829.json",
+    "benchmarks/DYNAMICBENCH_V4_PRODUCT_RUNTIME_20260829.json",
     "tools/build_learning_installer.py",
     "tools/smoke_packaged_learning.py",
     "tools/run_learning_demo.py",
@@ -121,7 +121,7 @@ EXPLICIT_ADDITIONS = {
     "schemas/vision_model_requests.v1.json",
 }
 EXCLUDED_SOURCE_SUBTREES = {
-    "examples/reproducibility/": "Explicitly excluded parallel public benchmark fixtures; not required by this learning or installed runtime. The two frozen 10_reports inputs remain required."
+    "examples/reproducibility/": "Explicitly excluded parallel public benchmark fixtures; not required by this learning or installed runtime."
 }
 IGNORE_DIRS = {
     "__pycache__",
