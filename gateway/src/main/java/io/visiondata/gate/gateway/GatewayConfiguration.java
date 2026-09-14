@@ -6,9 +6,25 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.cors.reactive.CorsUtils;
+import org.springframework.web.server.WebFilter;
 
 @Configuration
 public class GatewayConfiguration {
+
+    @Bean
+    WebFilter upstreamCorsPreflight(FastApiProxyHandler proxy) {
+        // Annotated WebFlux routes otherwise consume OPTIONS before proxy().
+        // FastAPI owns the exact origin/method/header allowlist for this API.
+        return (exchange, chain) -> {
+            String path = exchange.getRequest().getPath().value();
+            if ((path.equals("/v1") || path.startsWith("/v1/"))
+                    && CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+                return proxy.proxy(exchange);
+            }
+            return chain.filter(exchange);
+        };
+    }
 
     @Bean
     URI fastApiBaseUri(

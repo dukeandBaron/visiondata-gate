@@ -61,3 +61,9 @@ not an all-clear.
 
 Hosted workflow execution, CodeQL results, pre-commit installation in a user's
 checkout, package publication and production approval remain separate actions.
+
+This private repository currently preserves CodeQL SARIF as a workflow artifact
+with `upload: false`; code-scanning publication is unavailable until the
+repository feature is enabled. A successful CodeQL job therefore means analysis
+and artifact retention completed, not that findings were published to GitHub's
+Security tab or independently triaged.

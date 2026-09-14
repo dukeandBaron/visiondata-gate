@@ -29,7 +29,9 @@ class FastApiProxyHandlerTest {
                 WebClient.builder().build(),
                 upstreamUri
         );
-        client = WebTestClient.bindToController(handler).build();
+        client = WebTestClient.bindToController(handler)
+                .webFilter(new GatewayConfiguration().upstreamCorsPreflight(handler))
+                .build();
     }
 
     @AfterEach
@@ -37,6 +39,37 @@ class FastApiProxyHandlerTest {
         if (upstream != null) {
             upstream.shutdown();
         }
+    }
+
+    @Test
+    void forwardsDesktopPreflightToUpstreamCorsPolicy() throws Exception {
+        upstream.enqueue(new MockResponse().setResponseCode(200)
+                .addHeader("Access-Control-Allow-Origin", "http://tauri.localhost")
+                .addHeader("Access-Control-Allow-Methods", "GET, POST")
+                .addHeader("Access-Control-Allow-Headers", "x-visiondata-desktop-token"));
+        client.options().uri("http://127.0.0.1:18080/v1/identity/status")
+                .header("Origin", "http://tauri.localhost")
+                .header("Access-Control-Request-Method", "GET")
+                .header("Access-Control-Request-Headers", "x-visiondata-desktop-token")
+                .exchange().expectStatus().isOk()
+                .expectHeader().valueEquals("Access-Control-Allow-Origin", "http://tauri.localhost")
+                .expectHeader().valueEquals("X-VisionData-Gateway", "spring-webflux");
+        RecordedRequest request = upstream.takeRequest(1, TimeUnit.SECONDS);
+        assertThat(request).isNotNull();
+        assertThat(request.getMethod()).isEqualTo("OPTIONS");
+        assertThat(request.getHeader("Origin")).isEqualTo("http://tauri.localhost");
+    }
+
+    @Test
+    void preservesUpstreamPreflightDenial() throws Exception {
+        upstream.enqueue(new MockResponse().setResponseCode(400).setBody("Disallowed CORS origin"));
+        client.options().uri("http://127.0.0.1:18080/v1/identity/login")
+                .header("Origin", "https://untrusted.example")
+                .header("Access-Control-Request-Method", "POST")
+                .exchange().expectStatus().isBadRequest()
+                .expectHeader().doesNotExist("Access-Control-Allow-Origin")
+                .expectHeader().valueEquals("X-VisionData-Gateway", "spring-webflux");
+        assertThat(upstream.takeRequest(1, TimeUnit.SECONDS)).isNotNull();
     }
 
     @Test

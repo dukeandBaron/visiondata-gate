@@ -79,6 +79,7 @@ jobs:
     timeout-minutes: 25
     permissions:
       contents: read
+      actions: read
       security-events: write
     strategy:
       fail-fast: false
@@ -93,3 +94,15 @@ jobs:
       - uses: github/codeql-action/analyze@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4 commit
         with:
           category: /language:${{ matrix.language }}
+          output: output/codeql
+          # This private repository currently has no code-scanning API entitlement.
+          # Keep the analysis and SARIF artifact real without manufacturing an upload.
+          upload: false
+      - name: Preserve SARIF even when code-scanning publication is unavailable
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: codeql-${{ matrix.language }}
+          path: output/codeql/
+          retention-days: 14
+          if-no-files-found: warn

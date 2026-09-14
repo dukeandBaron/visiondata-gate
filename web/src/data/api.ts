@@ -107,14 +107,20 @@ interface ApiRuntime {
 let apiRuntimePromise: Promise<ApiRuntime> | undefined;
 
 function resolveApiRuntime(): Promise<ApiRuntime> {
-  apiRuntimePromise ??= resolveDesktopRuntimeConfig().then((desktop) => {
+  if (!apiRuntimePromise) {
+    const request = resolveDesktopRuntimeConfig().then((desktop) => {
     const browser = desktop ? undefined : resolveBrowserSessionBootstrap();
     return {
       apiBaseUrl: desktop?.apiBaseUrl ?? browserApiBaseUrl,
       sessionToken: desktop?.sessionToken ?? browser?.sessionToken,
       desktop: desktop !== undefined,
     };
-  });
+    }).catch((error: unknown) => {
+      if (apiRuntimePromise === request) apiRuntimePromise = undefined;
+      throw error;
+    });
+    apiRuntimePromise = request;
+  }
   return apiRuntimePromise;
 }
 

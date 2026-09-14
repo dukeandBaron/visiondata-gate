@@ -55,6 +55,11 @@ def test_security_jobs_fail_independently_and_pin_real_action_commits():
     assert "check_bandit_baseline.py check" in runs(jobs["bandit"])
     assert "quality/bandit-baseline.json" in runs(jobs["bandit"])
     assert jobs["codeql"]["permissions"]["security-events"] == "write"
+    assert jobs["codeql"]["permissions"]["actions"] == "read"
+    analysis = next(s for s in jobs["codeql"]["steps"] if 'codeql-action/analyze@' in s.get('uses', ''))
+    assert analysis['with']['output'] == 'output/codeql'
+    assert analysis['with']['upload'] is False
+    assert any('upload-artifact@' in s.get('uses', '') and s.get('with', {}).get('path') == 'output/codeql/' for s in jobs['codeql']['steps'])
     for job in jobs.values():
         assert all("continue-on-error" not in step for step in job["steps"])
         for step in job["steps"]:
