@@ -1,15 +1,15 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "6693745ca13ccabf1a67393983290d1e4433c506",
-  "source_tree_oid": "9fcd80cb25993ac2a8055650839421427dfe97ca",
+  "source_commit_oid": "22bcfb34b8d2ef6673e49d7667b1033bd104d122",
+  "source_tree_oid": "ced39deb819a58498f4a11c7fec3bfe915a606ec",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
   "customer_data_included": false,
   "personal_data_included": false,
   "tracked_source_only": true,
-  "file_count": 717,
-  "snapshot_sha256": "89711508397c57eac2947c092fa00ebc76f8ca589fc0ea2c27bf4f2e2fb17e1a",
+  "file_count": 719,
+  "snapshot_sha256": "1e107ca92e55dd615428869c0fd6e29f60b29d2be2791f51a4b0364407d3a0b5",
   "files": [
     {
       "path": ".env.example",
@@ -39,8 +39,8 @@
     },
     {
       "path": ".github/workflows/security.yml",
-      "sha256": "19e939014bf16731942cb792ac740be0e72e60990199100183652a3510503c2f",
-      "size_bytes": 3640
+      "sha256": "76dd9e330d6d3b12768bb99cd07840663d8c904ca1afcdb1aeaf4aa536174b79",
+      "size_bytes": 4221
     },
     {
       "path": ".gitignore",
@@ -84,8 +84,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "619570f6b6f1591cd2d6c255ce4eee8bd825114360a059dbc85c68a02c52712b",
-      "size_bytes": 10210,
+      "sha256": "ae28ddee6df09706a301eea0ce8591e4001a02681118cfb4bc50ecb1f2e64bc5",
+      "size_bytes": 12100,
       "source": "docs/PUBLIC_REPOSITORY_README.md"
     },
     {
@@ -380,8 +380,8 @@
     },
     {
       "path": "docs/PUBLIC_REPOSITORY_README.md",
-      "sha256": "619570f6b6f1591cd2d6c255ce4eee8bd825114360a059dbc85c68a02c52712b",
-      "size_bytes": 10210
+      "sha256": "ae28ddee6df09706a301eea0ce8591e4001a02681118cfb4bc50ecb1f2e64bc5",
+      "size_bytes": 12100
     },
     {
       "path": "docs/QUALITY_LEARNING_WORKBENCH.md",
@@ -560,8 +560,8 @@
     },
     {
       "path": "gateway/src/main/java/io/visiondata/gate/gateway/GatewayConfiguration.java",
-      "sha256": "a23161573ace4bd0c1ce84c5c7e26aea743718382c708319a191e114aa425d86",
-      "size_bytes": 2419
+      "sha256": "63d605d968f35a8cb73b2c860a3c8ff9a1d6fec55d1b137068875e507f3bd2b2",
+      "size_bytes": 3124
     },
     {
       "path": "gateway/src/main/java/io/visiondata/gate/gateway/VisionDataGatewayApplication.java",
@@ -575,8 +575,8 @@
     },
     {
       "path": "gateway/src/test/java/io/visiondata/gate/gateway/FastApiProxyHandlerTest.java",
-      "sha256": "9f1bfb87fb89948e967a30349a94a14624b60b60e10f9462c6390b5df96716da",
-      "size_bytes": 5101
+      "sha256": "8f9e5685cee50ce202961043e95dbf46111f935fd6ccce61ea344bef5f5f3ae4",
+      "size_bytes": 7075
     },
     {
       "path": "gateway/src/test/java/io/visiondata/gate/gateway/VisionDataGatewayApplicationTest.java",
@@ -590,8 +590,8 @@
     },
     {
       "path": "quality/README.md",
-      "sha256": "8a19390ff65ff1b36f62c7f2f501e0042a8f5c10d23cc77ef2596fc30d30e2d1",
-      "size_bytes": 3351
+      "sha256": "d1315b9d279cd616c2b81579ff610525945169dcfe037cab82ab7eeac8606389",
+      "size_bytes": 3703
     },
     {
       "path": "quality/bandit-baseline.json",
@@ -865,8 +865,8 @@
     },
     {
       "path": "src/visiondata_gate/api.py",
-      "sha256": "8d05f4f3406a9b339f296391afdee06042322fc1ac2485d7cae2b3e33d40f965",
-      "size_bytes": 97877
+      "sha256": "017e378636fa72290ea96e14643470a6c0a7fd0f9480f9ae35c0ad6e7fe583e7",
+      "size_bytes": 98650
     },
     {
       "path": "src/visiondata_gate/approved_experience.py",
@@ -1730,8 +1730,8 @@
     },
     {
       "path": "tests/test_engineering_workflow_config.py",
-      "sha256": "22a0884425ef025ea089b6ccc834b5dab8baf13d959fc4d095cf0eada806bd7c",
-      "size_bytes": 4976
+      "sha256": "f052d6a59b967f004385e4daf4463585a5bb826f8346440409e4f7da48e722dd",
+      "size_bytes": 5390
     },
     {
       "path": "tests/test_evaluation_contracts.py",
@@ -1832,6 +1832,11 @@
       "path": "tests/test_identity_desktop_lifecycle.py",
       "sha256": "6485cba3d1915a2f25b672afa73fb8bcb158a340b72eec56d3fe61c655b61e9f",
       "size_bytes": 2386
+    },
+    {
+      "path": "tests/test_identity_native_origin.py",
+      "sha256": "c0e9045635ba777905f2a06bcbd6f8cd9666190d52de634c3600a88918961a06",
+      "size_bytes": 1832
     },
     {
       "path": "tests/test_identity_platform_integration.py",
@@ -2452,6 +2457,11 @@
       "path": "tests/web_identity.browser.mjs",
       "sha256": "66474040c054a703ea4a364ee1e9f79b6a7f022bb982c797c16da8067e2aa116",
       "size_bytes": 24425
+    },
+    {
+      "path": "tests/web_identity_connection_retry.test.mjs",
+      "sha256": "049a9c49e7377a0556b5f431c4f769343166eb69e70766674a1cae6a1683b32f",
+      "size_bytes": 2219
     },
     {
       "path": "tests/web_identity_live.browser.mjs",
@@ -3155,8 +3165,8 @@
     },
     {
       "path": "web/src/data/api.ts",
-      "sha256": "cc2fd5fb71f496b324c5484db17be4b9422a0fa1d57c2499087e47d5f9db4ff7",
-      "size_bytes": 135390
+      "sha256": "4c74489395ab2474201626d001af4c959adfcc71ee759066176970da5a70c45c",
+      "size_bytes": 135579
     },
     {
       "path": "web/src/data/capaApi.ts",
