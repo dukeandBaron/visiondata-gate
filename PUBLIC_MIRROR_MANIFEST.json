@@ -1,15 +1,15 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "0d5bcc8826faa3b74c75569ab0286b4c2342df82",
-  "source_tree_oid": "9da0a4d0a4ea220a1e54417bd06583c0c36b5078",
+  "source_commit_oid": "6693745ca13ccabf1a67393983290d1e4433c506",
+  "source_tree_oid": "9fcd80cb25993ac2a8055650839421427dfe97ca",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
   "customer_data_included": false,
   "personal_data_included": false,
   "tracked_source_only": true,
-  "file_count": 716,
-  "snapshot_sha256": "c70a5df3dd77c84dd86305901930e3d5fe1fba44cc3351242439ac6081c0ec0c",
+  "file_count": 717,
+  "snapshot_sha256": "89711508397c57eac2947c092fa00ebc76f8ca589fc0ea2c27bf4f2e2fb17e1a",
   "files": [
     {
       "path": ".env.example",
@@ -437,6 +437,11 @@
       "path": "docs/TOOL_REPLAY_AND_MIGRATION.md",
       "sha256": "5c8af34611735c7553c7e88b317f886dd8b705032718d0dea23894072281d1af",
       "size_bytes": 1524
+    },
+    {
+      "path": "docs/WINDOWS_INSTALLER.md",
+      "sha256": "2af132c028cd861354ffeca5200f70998fa00594cc37d68e42c042c90d9c5238",
+      "size_bytes": 8235
     },
     {
       "path": "docs/assets/web-command-center.png",
@@ -2195,8 +2200,8 @@
     },
     {
       "path": "tests/test_public_repository_tools.py",
-      "sha256": "5c7b80e4e25c0dd2e16ba0edd87e94a0ae94d3e63be8da947322665961c1dedb",
-      "size_bytes": 43060
+      "sha256": "ea6719b7d0238d24ef825334c32e966636f85168f5e48f43a005f5a4969ba505",
+      "size_bytes": 43110
     },
     {
       "path": "tests/test_public_runtime_benchmark.py",
@@ -2650,8 +2655,8 @@
     },
     {
       "path": "tools/export_public_repository.py",
-      "sha256": "9f135060380a78bf95648a0b1cc0690f770a89f22fa0096675badb1ab82eeb24",
-      "size_bytes": 14656
+      "sha256": "7d46cf6933fcb95968f3bbc91838b1fc34f3414c19b4922191bdaa8aff67c99e",
+      "size_bytes": 14689
     },
     {
       "path": "tools/generate_cargo_license_snapshot.py",
