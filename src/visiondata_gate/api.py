@@ -436,7 +436,21 @@ def create_app(
         if request.method in unsafe_browser_methods:
             origin = request.headers.get("Origin", "").strip()
             fetch_site = request.headers.get("Sec-Fetch-Site", "").strip().casefold()
-            if fetch_site == "cross-site" or (
+            # A packaged WebView origin is cross-site relative to the loopback API.
+            # Its exact allowed origin AND startup capability are both required.
+            native_origin = origin in {
+                "http://tauri.localhost", "https://tauri.localhost", "tauri://localhost"
+            }
+            native_capability = bool(
+                native_origin and origin in configured_origins and desktop_session_token
+                and secrets.compare_digest(
+                    request.headers.get("X-VisionData-Desktop-Token", "").encode("utf-8"),
+                    desktop_session_token.encode("utf-8"),
+                )
+            )
+            if native_capability:
+                require_numeric_loopback(request)
+            if (fetch_site == "cross-site" and not native_capability) or (
                 origin and origin not in configured_origins
             ):
                 return _error_response(
