@@ -10,7 +10,7 @@ dependencies = [
   "coverage==7.16.0",
   "pip-audit==2.10.1",
   "bandit==1.9.4",
-  "ruff==0.15.22",
+  "ruff==0.16.7",
   "pre-commit==4.6.2",
 ]
 
