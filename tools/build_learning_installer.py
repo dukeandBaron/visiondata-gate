@@ -89,6 +89,7 @@ REQUIRED_INPUTS = (
     "tools/build_learning_installer.py",
     "tools/smoke_packaged_learning.py",
     "tools/smoke_desktop_identity.mjs",
+    "tools/smoke_desktop_identity_uia.ps1",
     "tools/run_learning_demo.py",
     "tools/run_visa_yolo26_normality.py",
     "tools/summarize_visa_yolo26_stability.py",

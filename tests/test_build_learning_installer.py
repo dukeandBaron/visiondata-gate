@@ -24,6 +24,7 @@ def test_model_reproducibility_drivers_are_frozen_source_inputs(builder):
         "tools/summarize_visa_yolo26_stability.py",
         "tools/run_normality_registry_smoke.py",
         "tools/smoke_desktop_identity.mjs",
+        "tools/smoke_desktop_identity_uia.ps1",
         "docs/VISION_MODEL_API_CONTRACT.md",
         "docs/MODEL_JOB_RETENTION.md",
     }.issubset(set(builder.REQUIRED_INPUTS))

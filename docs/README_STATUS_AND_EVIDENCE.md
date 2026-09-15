@@ -2,20 +2,20 @@
 
 ## 2026-09-15 公开访问恢复
 
-唯一主仓为 [visiondata-gate](https://github.com/dukeandBaron/visiondata-gate)，[在线 Demo](https://dukeandbaron.github.io/visiondata-gate/) 已完成同仓 Pages 部署。两地址匿名 HTTP 检查均为 200；部署记录为 [34963510843](https://github.com/dukeandBaron/visiondata-gate/actions/runs/34963510843)，对应提交 `c8c81405c84bf8f4c022d2257ba549cebadca6be`。这不是完整在线后端或新安装器的验收。
+唯一主仓为 [visiondata-gate](https://github.com/dukeandBaron/visiondata-gate)，[在线 Demo](https://dukeandbaron.github.io/visiondata-gate/) 已完成同仓 Pages 部署。最新核对的成功部署记录为 [34977277083](https://github.com/dukeandBaron/visiondata-gate/actions/runs/34977277083)，对应提交 `0e677fa79ec1a0c911bdd07b5a829ec809e410d7`；本轮再次读取 Demo 得到 HTTP 200。GitHub API 返回仓库为 Public；本机对 GitHub HTML 的一次匿名 curl 被连接重置，未把该网络失败改写为 HTTP 成功。这不是完整在线后端或新安装器的验收。
 
 发布前已备份历史并修正分支/标签提交邮箱，逐提交文件树保持一致。GitHub 旧 PR/提交缓存的彻底清除不在普通推送能力范围内。以下表格是此前基线的历史记录，其 Private/历史 HOLD 状态已由本节更新。
 
-本页把产品首页中的能力与其验证范围分开。核对日期：**2026-09-15**；源码基线：`4ad0c8148c89014bb5136c192fd83e5d360eabed`。后续提交、安装器和实验应使用各自回执，不能沿用本页状态。
+本页把产品首页中的能力与其验证范围分开。核对日期：**2026-09-15**；最新 Windows 运行时代码基线：`ca1fa7b1727535014e8723e5bceb4d539272cf2b`。本页及后续发布文档可以位于更晚提交，但不会自动进入该二进制。后续安装器和实验应使用各自回执，不能沿用本页状态。
 
 ## 源码、安装器与仓库访问
 
 | 对象 | 本次核对到的状态 | 不能据此推定 |
 | --- | --- | --- |
-| GitHub 仓库 | 本次读取时为 Private；本轮不改变可见性 | 匿名用户已可访问或全部历史已获准公开 |
+| GitHub 仓库 | 唯一主仓已恢复 Public；仓库和静态 Demo 已有匿名 HTTP 200 证据 | 完整在线后端、当前最新提交已部署或所有外部缓存均已清除 |
 | 基线源码 CI | scoped Linux／Windows × Python 3.12／3.13、依赖审计、Bandit、两种语言 CodeQL 分析任务成功；type-debt 为按配置跳过 | 全仓静态类型已通过、所有漏洞均已排除 |
-| Windows 候选 | 已发布未签名的本地候选及验证摘要；具体版本见下节 | 正式生产发行、独立干净机或同版本升级验证 |
-| 完整 Git 历史隐私 | 基线仍记录 `HOLD_PENDING_AUTHORIZED_HISTORY_REWRITE`；本轮未重写或重新审计完整历史 | 当前文件扫描通过就意味着全部历史可公开 |
+| Windows 候选 | `ca1fa7b` 本地候选已完成构建、提取态、安装启动和发布版登录注册验收；具体摘要见下节 | 正式生产发行、独立干净机或同版本升级验证 |
+| 完整 Git 历史隐私 | 公开恢复提交已通过历史重写与 Pages 门禁；后续提交仍需 CI 重新核验 | 一次历史 PASS 可以永久替代后续提交的门禁 |
 | 无历史导出快照 | 需要以当前 SHA 绑定的清单独立核验 | 可绕过授权公开私域数据或完整 Git 历史 |
 | 工厂、客户与模型效果 | 工业效果／客户验收仍 HOLD；生产放行 false | 客户 ROI、产线 NG 改善、模型达到工业精度 |
 
@@ -23,17 +23,20 @@ CodeQL 分析任务成功与公开 Security 页的告警状态不是同一回事
 
 ## 最新核对的 Windows 候选
 
-[Windows local candidate · dc3a4b login fix](https://github.com/dukeandBaron/visiondata-gate/releases/tag/windows-local-dc3a4b-login-fix-20260915)，源码绑定 `dc3a4b52a69abbb3537234b813eef9cb10de697e`，早于本页 README 基线。
+最新本地候选身份为 `windows-local-ca1fa7b-20260915`，源码绑定 `ca1fa7b1727535014e8723e5bceb4d539272cf2b`。完整记录见 [Windows 候选 ca1fa7b](WINDOWS_CANDIDATE_CA1FA7B_20260915.md)。
 
-本次读取了 Release 说明、`VALIDATION_RECEIPT.json` 与 `VALIDATION_SUMMARY.json`。发布回执记录：
+本次实际重新执行并记录：
 
-- 1,111 个提取资源与构建清单匹配。
-- 实际 Tauri WebView → IPC → Spring → FastAPI 的初始化、登录、错误密码恢复、待审批注册、管理员批准、成员登录、重启登录与退出流程通过。
-- NSIS 安装／应用启动／卸载退出码均为 0，SQLite integrity 为 `ok`。
-- 未签名；独立干净机 `NOT_RUN`；该构建未重跑全量回归和包内学习流程。
-- 可选 Python／Torch／Ultralytics／权重仍为外部依赖；工厂效果、客户验收和生产放行未取得通过。
+- 冻结 350 个源码文件；安装器 SHA-256 为 `09468a0d148017717b2932fc940f17caa378e46fef88ededf582accfea6d05f0`。
+- 26 个 PyInstaller PYZ 运行模块与冻结 staged source 匹配。
+- 提取态 Spring → FastAPI 请求 `120/120`，两轮 packaged-learning 完成，未使用源码回退。
+- NSIS 安装／应用启动／卸载退出码均为 0，SQLite integrity 为 `ok`，卸载收敛完成。
+- 正式 Release 构建保持 DevTools 关闭；通过 Windows UI Automation 完成管理员初始化、错误密码恢复、待审批注册、管理员批准、成员登录、重启登录与退出。
+- 未签名；独立干净机 `NOT_RUN`；可选 Python／Torch／Ultralytics／权重仍为外部依赖；工厂效果、客户验收和生产放行未取得通过。
 
-这是对已有发布回执的核对，**不是本次 README 编辑重新执行了安装或 GUI 验收**。下载后还需核对随包 SHA-256；安装步骤和 WebView2 前提见 [Windows 安装说明](WINDOWS_INSTALLER.md)。
+内部候选 ZIP 已创建并保持 `RELEASE_HOLD`。在同一主仓真正创建对应 Release 附件前，不能把本地文件写成已经可公开下载。安装步骤和 WebView2 前提见 [Windows 安装说明](WINDOWS_INSTALLER.md)。
+
+此前 `windows-local-dc3a4b-login-fix-20260915` 仍是独立旧候选；它的回执不能替代 `ca1fa7b`，反之亦然。
 
 已记录的 `GHSA-wrw7-89jp-8q8g` 位于 Tauri 的 Linux GTK 依赖链：Windows 目标不编译该依赖，Linux 桌面验证仍保留 HOLD。当前状态以 [质量工具说明](../quality/README.md) 和安全公告为准。
 

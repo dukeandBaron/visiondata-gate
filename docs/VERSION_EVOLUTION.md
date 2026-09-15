@@ -31,7 +31,8 @@ commit、构建产物、验证分母和对应摘要。
 | RC4 prerelease `v0.4.0-goai-semifinal-rc4` | 面向复赛整理 60 秒 Demo、防守材料、静态 `PUBLIC_SYNTHETIC_REPLAY` 和边界说明 | 让评委可在不接触私域数据的情况下查看冻结合成证据 | Release notes 仍为 `official_submission=PENDING`、`official_evaluation=NOT_EVALUATED`、`production_release_allowed=false` |
 | Windows 候选 `windows-local-ce72604-20260914` | 将 React／Tauri／Spring／FastAPI 本地链打包；最终 NSIS 工件记录资源、HTTP 与两轮学习流程验证 | 证明可形成自包含 Windows 候选，而不是只有源码 | 未签名；该候选没有安装后原生 GUI、独立干净机或同版本升级验证 |
 | Windows 登录修复候选 `windows-local-dc3a4b-login-fix-20260915` | 修复 WebView CORS、桌面启动凭证与启动配置刷新；回执记录真实 Tauri WebView → IPC → Spring → FastAPI 的账户流程和 NSIS 安装／启动／卸载 | 解决“安装包登录注册卡住”的具体问题 | 仍未签名；独立干净机未运行；Torch、Ultralytics、权重和工业模型效果仍在包外／HOLD |
-| `CURRENT_SOURCE_UNRELEASED` | 在已发布候选之后继续加入产品化 README、真实合成工作簿截图、学习反馈、质量工具、依赖兼容、评审后的三阶段／五功能／双反馈规范，以及 YOLO 重复／磁盘保护和安装器旁附身份清单 | GitHub 源码可以展示当前产品主线与诚实能力边界 | 当前源码改进尚未自动生成新安装包、PyPI 发布、工厂 KPI、客户验收或官方评测结果 |
+| Windows 候选 `windows-local-ca1fa7b-20260915` | 将评审术语、YOLO 10–600 秒合同、同 split 字节/像素重复阻断、磁盘/retention、安装器旁附清单和发布版 UIA 验收工具冻结为 350 文件源码并重新打包 | 安装器完成 PYZ 源码匹配、120 次网关请求、两轮包内学习、真实安装启动和七步登录注册 GUI 验收 | 仍未签名；独立干净机和同版本覆盖升级未运行；工业模型效果、客户验收和生产放行保持 HOLD；详见 [候选记录](WINDOWS_CANDIDATE_CA1FA7B_20260915.md) |
+| `CURRENT_SOURCE_UNRELEASED` | 在该运行时代码提交之后继续更新候选证据、README、公开清单和部署状态 | GitHub 源码可以展示当前产品主线与诚实能力边界 | 文档/清单提交不会自动进入 `ca1fa7b` 二进制，也不产生 PyPI、工厂 KPI、客户验收或官方评测结果 |
 
 ## 当前架构变化如何理解
 
@@ -75,8 +76,9 @@ TTT 和自动 Mask 生成仍分别保持 `PLANNED_NOT_CONNECTED` 或
   历史已获准公开。
 
 ```text
-CURRENT_SOURCE_UNRELEASED=true
-new_windows_installer_for_current_source=NOT_BUILT
+latest_windows_runtime_source=ca1fa7b1727535014e8723e5bceb4d539272cf2b
+latest_windows_candidate=PASS_LOCAL_WINDOWS_CANDIDATE_RELEASE_HOLD
+candidate_evidence=docs/WINDOWS_CANDIDATE_CA1FA7B_20260915.md
 factory_shadow_metrics=NOT_MEASURED_PENDING_ADJUDICATION
 official_evaluation=NOT_EVALUATED
 production_release_allowed=false

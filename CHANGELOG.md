@@ -30,6 +30,11 @@ competition artifact tags are not a claim of a matching PyPI package version.
   an explicit failed-job retention policy.
 - Installer delivery folders now bind the executable to build/source manifests,
   pending validation status and a checksum list instead of copying an EXE alone.
+- A release-safe Windows UI Automation smoke validates setup, rejected-password
+  recovery, pending registration, approval, member login, restart and logout
+  without enabling DevTools in the shipped desktop. The `ca1fa7b` runtime source
+  produced a SHA-bound local Windows candidate; signing, clean-machine and
+  industrial-effectiveness gates remain open.
 
 ### Fixed
 

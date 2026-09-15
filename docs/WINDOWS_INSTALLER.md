@@ -49,6 +49,14 @@ Get-FileHash -Algorithm SHA256 -LiteralPath '.\VisionData Gate_0.1.0_x64-setup.e
 
 安装包尚未代码签名。Windows SmartScreen 可能显示未知发布者；只有从可信渠道取得且 SHA-256 与清单一致时才应继续。
 
+### 发布版登录注册验收
+
+发布版不启用 DevTools，不能把开放浏览器调试端口作为安装包验收前提。`tools/smoke_desktop_identity_uia.ps1` 只在隔离验收进程中向 WebView2 注入 `--force-renderer-accessibility`，通过 Windows UI Automation 操作真实 Tauri 窗口；它不会打开 CDP 端口，也不会改变 Agent、账户权限或生产放行边界。
+
+验收覆盖首个管理员创建、错误密码恢复、普通用户注册、管理员批准、成员登录、关闭重启后再次登录和退出。只有完整流程、后端 HMAC readiness、隔离数据库与应用正常关闭都通过时，才写出 `PASS_REAL_DESKTOP_IDENTITY_UIA`。验收仍是当前 Windows 主机上的本地结果，`clean_machine_validation` 保持 `NOT_RUN`。
+
+`tools/smoke_desktop_identity.mjs` 仅保留给明确启用 DevTools 的内部诊断构建，必须显式设置 `VDG_EXPECT_DEVTOOLS_ENABLED=true`；它不是正式发布包的默认验收入口。
+
 ## 本地数据位置
 
 ```text

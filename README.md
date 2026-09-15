@@ -142,6 +142,8 @@ uv run python tools/run_cross_platform_workbench.py
 
 [下载带版本说明与验证回执的 Windows 候选包](https://github.com/dukeandBaron/visiondata-gate/releases)。核心工作台内嵌运行组件；可选 Python／Torch／Ultralytics／权重需另行登记。安装器未签名，WebView2 为前提，干净机与升级验收按具体包记录。[安装指南](docs/WINDOWS_INSTALLER.md)
 
+最新本地候选身份为 `windows-local-ca1fa7b-20260915`，安装器 SHA-256 为 `09468a0d148017717b2932fc940f17caa378e46fef88ededf582accfea6d05f0`。它已完成构建/PYZ 绑定、提取态 120 次网关请求、两轮 packaged-learning、实际安装启动、SQLite 检查，以及不启用 DevTools 的 Tauri 登录注册 GUI 验收；独立干净机、签名和工业效果仍为 HOLD。[查看完整候选证据](docs/WINDOWS_CANDIDATE_CA1FA7B_20260915.md)
+
 <a id="architecture"></a>
 
 ## 开放、可组合的工程底座
@@ -186,6 +188,8 @@ YOLO 训练预算在 API、Schema、Web 和执行器统一为 **10–600 秒**�
 
 安装构建器将 `BUILD_MANIFEST.json`、`SOURCE_MANIFEST.json`、`DELIVERY_STATUS.json` 和 `SHA256SUMS.txt` 与安装器放在同一目录。构建完成与安装验收是不同状态。
 
+源码 `ca1fa7b1727535014e8723e5bceb4d539272cf2b` 已据此生成并验证 Windows 候选；后续 README 或发布清单提交不会自动进入该二进制。
+
 [视觉模型合同](docs/VISION_MODEL_API_CONTRACT.md) · [任务存储与保留](docs/MODEL_JOB_RETENTION.md)
 
 </details>
@@ -202,7 +206,7 @@ YOLO 训练预算在 API、Schema、Web 和执行器统一为 **10–600 秒**�
 
 ## 持续演进
 
-项目从批次质量检查，演进到案件补证与派生复验，再扩展到图像工作簿、模型反馈和桌面交付。近期重点是训练输入去重、预算一致性、任务存储保护，以及安装器与源码的交付绑定。
+项目从批次质量检查，演进到案件补证与派生复验，再扩展到图像工作簿、模型反馈和桌面交付。近期 `windows-local-ca1fa7b-20260915` 已把训练输入去重、预算一致性、任务存储保护、安装器源码绑定和发布版 UIA 登录验收收口到同一候选；证据见 [ca1fa7b Windows 候选](docs/WINDOWS_CANDIDATE_CA1FA7B_20260915.md)。
 
 软件版本、源码提交、模型版本和安装构建各自标识，不让旧结果替新版本背书。[版本演进](docs/VERSION_EVOLUTION.md) · [CHANGELOG](CHANGELOG.md) · [当前验证与交付状态](docs/README_STATUS_AND_EVIDENCE.md)
 
