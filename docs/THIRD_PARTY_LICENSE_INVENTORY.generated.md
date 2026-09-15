@@ -2,7 +2,7 @@
 
 > 本文件由 `uv.lock`、`web/package-lock.json`、`web/src-tauri/Cargo.lock`、`docs/CARGO_LICENSES.locked.json`、项目 `.venv` 中已安装的 `METADATA` 与精确版本许可证人工复核表离线生成；它是可审计的工程清单，不构成法律意见。项目授权见顶层 `LICENSE` / `NOTICE`，依赖说明见 `docs/THIRD_PARTY_NOTICES.md`。
 
-- 锁定组件总数（含内部根项目）：`416`
+- 锁定组件总数（含内部根项目）：`423`
 - `REVIEW_REQUIRED`：`0`
 - 数据范围：枚举 `uv.lock`、`package-lock.json` 的全部组件，以及 `Cargo.lock` 中 Windows `x86_64-pc-windows-msvc` 目标可达组件；`.venv` 中不在 `uv.lock` 内的分发包不会进入本表。
 - Rust 许可边界：`Cargo.lock` 不携带 SPDX 许可字段；许可证据来自与该锁文件 SHA-256 绑定、剥离作者与路径的 Cargo metadata 投影。未绑定条目保持 `REVIEW_REQUIRED`。
@@ -38,7 +38,7 @@
 | transitive | macholib | 1.16.4 | pkg:pypi/macholib@1.16.4 | wheel LICENSE SHA-256 47082ab2bc0184123ec9f10fdf80c70723ee68f07d44382e17615c2a6ba70b09 | uv.lock; manual-audit:macholib-1.16.4.dist-info/LICENSE | OK |
 | transitive | markupsafe | 3.0.3 | pkg:pypi/markupsafe@3.0.3 | License-Expression: BSD-3-Clause | uv.lock; .venv/site-packages/markupsafe-3.0.3.dist-info/METADATA | OK |
 | transitive | narwhals | 2.24.0 | pkg:pypi/narwhals@2.24.0 | License-Expression: MIT | uv.lock; .venv/site-packages/narwhals-2.24.0.dist-info/METADATA | OK |
-| direct | numpy | 2.2.6 | pkg:pypi/numpy@2.2.6 | wheel LICENSE and bundled notices SHA-256 14256cc3a2c9d32ac284da96b937feb44f72dd90bee2317ac3020166846ad99d | uv.lock; manual-audit:numpy-2.2.6.dist-info/LICENSE.txt | OK |
+| direct | numpy | 2.5.3 | pkg:pypi/numpy@2.5.3 | License-Expression: BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0 | uv.lock; .venv/site-packages/numpy-2.5.3.dist-info/METADATA | OK |
 | transitive | packaging | 26.3 | pkg:pypi/packaging@26.3 | License-Expression: Apache-2.0 OR BSD-2-Clause | uv.lock; .venv/site-packages/packaging-26.3.dist-info/METADATA | OK |
 | direct | pandas | 2.3.3 | pkg:pypi/pandas@2.3.3 | wheel LICENSE SHA-256 533eb6d0b98e5be3ddd12dce97be35dd11282f5c47cdf8d08c81756fd5d70a26 | uv.lock; manual-audit:pandas-2.3.3.dist-info/LICENSE | OK |
 | transitive | pefile | 2024.8.26 | pkg:pypi/pefile@2024.8.26 | wheel LICENSE SHA-256 b44409c067c6da52bfb54bb6624fb11a7b52157c3a13ae1400232f8196e86ad3 | uv.lock; manual-audit:pefile-2024.8.26.dist-info/LICENSE | OK |
@@ -46,8 +46,8 @@
 | transitive | pluggy | 1.6.0 | pkg:pypi/pluggy@1.6.0 | License: MIT; Classifier: License :: OSI Approved :: MIT License | uv.lock; .venv/site-packages/pluggy-1.6.0.dist-info/METADATA | OK |
 | transitive | protobuf | 7.35.1 | pkg:pypi/protobuf@7.35.1 | License: 3-Clause BSD License | uv.lock; .venv/site-packages/protobuf-7.35.1.dist-info/METADATA | OK |
 | transitive | pyarrow | 24.0.0 | pkg:pypi/pyarrow@24.0.0 | License-Expression: Apache-2.0 | uv.lock; .venv/site-packages/pyarrow-24.0.0.dist-info/METADATA | OK |
-| direct | pydantic | 2.13.4 | pkg:pypi/pydantic@2.13.4 | License-Expression: MIT | uv.lock; .venv/site-packages/pydantic-2.13.4.dist-info/METADATA | OK |
-| transitive | pydantic-core | 2.46.4 | pkg:pypi/pydantic-core@2.46.4 | License-Expression: MIT | uv.lock; .venv/site-packages/pydantic_core-2.46.4.dist-info/METADATA | OK |
+| direct | pydantic | 2.13.5 | pkg:pypi/pydantic@2.13.5 | License-Expression: MIT | uv.lock; .venv/site-packages/pydantic-2.13.5.dist-info/METADATA | OK |
+| transitive | pydantic-core | 2.46.5 | pkg:pypi/pydantic-core@2.46.5 | License-Expression: MIT | uv.lock; .venv/site-packages/pydantic_core-2.46.5.dist-info/METADATA | OK |
 | transitive | pydeck | 0.9.3 | pkg:pypi/pydeck@0.9.3 | License: Apache License 2.0 | uv.lock; .venv/site-packages/pydeck-0.9.3.dist-info/METADATA | OK |
 | transitive | pygments | 2.20.0 | pkg:pypi/pygments@2.20.0 | License-Expression: BSD-2-Clause | uv.lock; .venv/site-packages/pygments-2.20.0.dist-info/METADATA | OK |
 | direct | pyinstaller | 6.22.2 | pkg:pypi/pyinstaller@6.22.2 | wheel COPYING.txt SHA-256 dcf75fdb959db1e3b41c0f8505069d2ece781b5ec6b3d0a4d30975cfc6580245 | uv.lock; manual-audit:pyinstaller-6.22.2.dist-info/licenses/COPYING.txt | OK |
@@ -62,7 +62,7 @@
 | transitive | requests | 2.34.2 | pkg:pypi/requests@2.34.2 | License: Apache-2.0; Classifier: License :: OSI Approved :: Apache Software License | uv.lock; .venv/site-packages/requests-2.34.2.dist-info/METADATA | OK |
 | direct | rfc8785 | 0.1.4 | pkg:pypi/rfc8785@0.1.4 | Classifier: License :: OSI Approved :: Apache Software License | uv.lock; .venv/site-packages/rfc8785-0.1.4.dist-info/METADATA | OK |
 | transitive | rpds-py | 2026.6.3 | pkg:pypi/rpds-py@2026.6.3 | License-Expression: MIT | uv.lock; .venv/site-packages/rpds_py-2026.6.3.dist-info/METADATA | OK |
-| direct | ruff | 0.15.22 | pkg:pypi/ruff@0.15.22 | License-Expression: MIT | uv.lock; .venv/site-packages/ruff-0.15.22.dist-info/METADATA | OK |
+| direct | ruff | 0.16.7 | pkg:pypi/ruff@0.16.7 | License-Expression: MIT | uv.lock; .venv/site-packages/ruff-0.16.7.dist-info/METADATA | OK |
 | transitive | setuptools | 84.0.0 | pkg:pypi/setuptools@84.0.0 | License-Expression: MIT | uv.lock; .venv/site-packages/setuptools-84.0.0.dist-info/METADATA | OK |
 | transitive | six | 1.17.0 | pkg:pypi/six@1.17.0 | License: MIT; Classifier: License :: OSI Approved :: MIT License | uv.lock; .venv/site-packages/six-1.17.0.dist-info/METADATA | OK |
 | transitive | starlette | 1.3.1 | pkg:pypi/starlette@1.3.1 | License-Expression: BSD-3-Clause | uv.lock; .venv/site-packages/starlette-1.3.1.dist-info/METADATA | OK |
@@ -107,8 +107,8 @@
 | transitive | @tauri-apps/cli-win32-arm64-msvc | 2.11.4 | pkg:npm/%40tauri-apps/cli-win32-arm64-msvc@2.11.4 | web/package-lock.json License: Apache-2.0 OR MIT | web/package-lock.json; web/package-lock.json | OK |
 | transitive | @tauri-apps/cli-win32-ia32-msvc | 2.11.4 | pkg:npm/%40tauri-apps/cli-win32-ia32-msvc@2.11.4 | web/package-lock.json License: Apache-2.0 OR MIT | web/package-lock.json; web/package-lock.json | OK |
 | transitive | @tauri-apps/cli-win32-x64-msvc | 2.11.4 | pkg:npm/%40tauri-apps/cli-win32-x64-msvc@2.11.4 | web/package-lock.json License: Apache-2.0 OR MIT | web/package-lock.json; web/package-lock.json | OK |
-| direct | @types/react | 19.2.18 | pkg:npm/%40types/react@19.2.18 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
-| direct | @types/react-dom | 19.2.5 | pkg:npm/%40types/react-dom@19.2.5 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
+| direct | @types/react | 19.3.0 | pkg:npm/%40types/react@19.3.0 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
+| direct | @types/react-dom | 19.3.0 | pkg:npm/%40types/react-dom@19.3.0 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
 | transitive | @typescript/typescript-aix-ppc64 | 7.0.2 | pkg:npm/%40typescript/typescript-aix-ppc64@7.0.2 | web/package-lock.json License: Apache-2.0 | web/package-lock.json; web/package-lock.json | OK |
 | transitive | @typescript/typescript-darwin-arm64 | 7.0.2 | pkg:npm/%40typescript/typescript-darwin-arm64@7.0.2 | web/package-lock.json License: Apache-2.0 | web/package-lock.json; web/package-lock.json | OK |
 | transitive | @typescript/typescript-darwin-x64 | 7.0.2 | pkg:npm/%40typescript/typescript-darwin-x64@7.0.2 | web/package-lock.json License: Apache-2.0 | web/package-lock.json; web/package-lock.json | OK |
@@ -148,21 +148,21 @@
 | transitive | lightningcss-win32-arm64-msvc | 1.33.0 | pkg:npm/lightningcss-win32-arm64-msvc@1.33.0 | web/package-lock.json License: MPL-2.0 | web/package-lock.json; web/package-lock.json | OK |
 | transitive | lightningcss-win32-x64-msvc | 1.33.0 | pkg:npm/lightningcss-win32-x64-msvc@1.33.0 | web/package-lock.json License: MPL-2.0 | web/package-lock.json; web/package-lock.json | OK |
 | direct | lucide-react | 1.34.0 | pkg:npm/lucide-react@1.34.0 | web/package-lock.json License: ISC | web/package-lock.json; web/package-lock.json | OK |
-| transitive | nanoid | 3.3.18 | pkg:npm/nanoid@3.3.18 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
+| transitive | nanoid | 3.3.19 | pkg:npm/nanoid@3.3.19 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
 | transitive | picocolors | 1.1.1 | pkg:npm/picocolors@1.1.1 | web/package-lock.json License: ISC | web/package-lock.json; web/package-lock.json | OK |
 | transitive | picomatch | 4.0.7 | pkg:npm/picomatch@4.0.7 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
-| transitive | postcss | 8.5.26 | pkg:npm/postcss@8.5.26 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
-| direct | react | 19.2.8 | pkg:npm/react@19.2.8 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
-| direct | react-dom | 19.2.8 | pkg:npm/react-dom@19.2.8 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
-| transitive | react-router | 7.18.2 | pkg:npm/react-router@7.18.2 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
-| direct | react-router-dom | 7.18.2 | pkg:npm/react-router-dom@7.18.2 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
+| transitive | postcss | 8.5.28 | pkg:npm/postcss@8.5.28 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
+| direct | react | 19.3.0 | pkg:npm/react@19.3.0 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
+| direct | react-dom | 19.3.0 | pkg:npm/react-dom@19.3.0 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
+| transitive | react-router | 7.18.3 | pkg:npm/react-router@7.18.3 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
+| direct | react-router-dom | 7.18.3 | pkg:npm/react-router-dom@7.18.3 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
 | transitive | rolldown | 1.2.6 | pkg:npm/rolldown@1.2.6 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
-| transitive | scheduler | 0.27.0 | pkg:npm/scheduler@0.27.0 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
+| transitive | scheduler | 0.28.0 | pkg:npm/scheduler@0.28.0 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
 | transitive | set-cookie-parser | 2.7.2 | pkg:npm/set-cookie-parser@2.7.2 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
 | transitive | source-map-js | 1.2.1 | pkg:npm/source-map-js@1.2.1 | web/package-lock.json License: BSD-3-Clause | web/package-lock.json; web/package-lock.json | OK |
 | transitive | tinyglobby | 0.2.17 | pkg:npm/tinyglobby@0.2.17 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
 | direct | typescript | 7.0.2 | pkg:npm/typescript@7.0.2 | web/package-lock.json License: Apache-2.0 | web/package-lock.json; web/package-lock.json | OK |
-| direct | vite | 8.2.2 | pkg:npm/vite@8.2.2 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
+| direct | vite | 8.3.0 | pkg:npm/vite@8.3.0 | web/package-lock.json License: MIT | web/package-lock.json; web/package-lock.json | OK |
 | transitive | adler2 | 2.0.1 | pkg:cargo/adler2@2.0.1 | web/src-tauri/Cargo.lock License: 0BSD OR MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | aho-corasick | 1.1.5 | pkg:cargo/aho-corasick@1.1.5 | web/src-tauri/Cargo.lock License: Unlicense OR MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | alloc-no-stdlib | 2.0.4 | pkg:cargo/alloc-no-stdlib@2.0.4 | web/src-tauri/Cargo.lock License: BSD-3-Clause | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
@@ -175,6 +175,7 @@
 | transitive | bitflags | 1.3.2 | pkg:cargo/bitflags@1.3.2 | web/src-tauri/Cargo.lock License: MIT/Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | bitflags | 2.13.1 | pkg:cargo/bitflags@2.13.1 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | block-buffer | 0.10.4 | pkg:cargo/block-buffer@0.10.4 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
+| transitive | block-buffer | 0.12.1 | pkg:cargo/block-buffer@0.12.1 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | brotli | 8.0.4 | pkg:cargo/brotli@8.0.4 | web/src-tauri/Cargo.lock License: BSD-3-Clause AND MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | brotli-decompressor | 5.0.3 | pkg:cargo/brotli-decompressor@5.0.3 | web/src-tauri/Cargo.lock License: BSD-3-Clause/MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | bs58 | 0.5.1 | pkg:cargo/bs58@0.5.1 | web/src-tauri/Cargo.lock License: MIT/Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
@@ -188,12 +189,15 @@
 | transitive | cfb | 0.7.3 | pkg:cargo/cfb@0.7.3 | web/src-tauri/Cargo.lock License: MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | cfg-if | 1.0.4 | pkg:cargo/cfg-if@1.0.4 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | chrono | 0.4.45 | pkg:cargo/chrono@0.4.45 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
+| transitive | const-oid | 0.10.2 | pkg:cargo/const-oid@0.10.2 | web/src-tauri/Cargo.lock License: Apache-2.0 OR MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | cookie | 0.18.2 | pkg:cargo/cookie@0.18.2 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | cpufeatures | 0.2.17 | pkg:cargo/cpufeatures@0.2.17 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
+| transitive | cpufeatures | 0.3.1 | pkg:cargo/cpufeatures@0.3.1 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | crc32fast | 1.5.1 | pkg:cargo/crc32fast@1.5.1 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | crossbeam-channel | 0.5.16 | pkg:cargo/crossbeam-channel@0.5.16 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | crossbeam-utils | 0.8.22 | pkg:cargo/crossbeam-utils@0.8.22 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | crypto-common | 0.1.7 | pkg:cargo/crypto-common@0.1.7 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
+| transitive | crypto-common | 0.2.2 | pkg:cargo/crypto-common@0.2.2 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | cssparser | 0.36.0 | pkg:cargo/cssparser@0.36.0 | web/src-tauri/Cargo.lock License: MPL-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | cssparser-macros | 0.6.1 | pkg:cargo/cssparser-macros@0.6.1 | web/src-tauri/Cargo.lock License: MPL-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | ctor | 0.8.0 | pkg:cargo/ctor@0.8.0 | web/src-tauri/Cargo.lock License: Apache-2.0 OR MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
@@ -208,6 +212,7 @@
 | transitive | derive_more | 2.1.1 | pkg:cargo/derive_more@2.1.1 | web/src-tauri/Cargo.lock License: MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | derive_more-impl | 2.1.1 | pkg:cargo/derive_more-impl@2.1.1 | web/src-tauri/Cargo.lock License: MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | digest | 0.10.7 | pkg:cargo/digest@0.10.7 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
+| transitive | digest | 0.11.3 | pkg:cargo/digest@0.11.3 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | dirs | 6.0.0 | pkg:cargo/dirs@6.0.0 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | dirs-sys | 0.5.0 | pkg:cargo/dirs-sys@0.5.0 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | displaydoc | 0.2.7 | pkg:cargo/displaydoc@0.2.7 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
@@ -239,6 +244,7 @@
 | transitive | hex | 0.4.3 | pkg:cargo/hex@0.4.3 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | html5ever | 0.38.0 | pkg:cargo/html5ever@0.38.0 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | http | 1.5.0 | pkg:cargo/http@1.5.0 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
+| transitive | hybrid-array | 0.4.15 | pkg:cargo/hybrid-array@0.4.15 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | ico | 0.5.0 | pkg:cargo/ico@0.5.0 | web/src-tauri/Cargo.lock License: MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | icu_collections | 2.3.0 | pkg:cargo/icu_collections@2.3.0 | web/src-tauri/Cargo.lock License: Unicode-3.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | icu_locale_core | 2.3.0 | pkg:cargo/icu_locale_core@2.3.0 | web/src-tauri/Cargo.lock License: Unicode-3.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
@@ -324,6 +330,7 @@
 | transitive | serialize-to-javascript-impl | 0.1.2 | pkg:cargo/serialize-to-javascript-impl@0.1.2 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | servo_arc | 0.4.3 | pkg:cargo/servo_arc@0.4.3 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | sha2 | 0.10.9 | pkg:cargo/sha2@0.10.9 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
+| transitive | sha2 | 0.11.0 | pkg:cargo/sha2@0.11.0 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | shlex | 2.0.1 | pkg:cargo/shlex@2.0.1 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | simd-adler32 | 0.3.10 | pkg:cargo/simd-adler32@0.3.10 | web/src-tauri/Cargo.lock License: MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | siphasher | 1.0.3 | pkg:cargo/siphasher@1.0.3 | web/src-tauri/Cargo.lock License: MIT/Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
@@ -342,7 +349,7 @@
 | transitive | tauri-build | 2.6.3 | pkg:cargo/tauri-build@2.6.3 | web/src-tauri/Cargo.lock License: Apache-2.0 OR MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | tauri-codegen | 2.6.3 | pkg:cargo/tauri-codegen@2.6.3 | web/src-tauri/Cargo.lock License: Apache-2.0 OR MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | tauri-macros | 2.6.3 | pkg:cargo/tauri-macros@2.6.3 | web/src-tauri/Cargo.lock License: Apache-2.0 OR MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
-| transitive | tauri-plugin-single-instance | 2.4.3 | pkg:cargo/tauri-plugin-single-instance@2.4.3 | web/src-tauri/Cargo.lock License: Apache-2.0 OR MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
+| transitive | tauri-plugin-single-instance | 2.4.4 | pkg:cargo/tauri-plugin-single-instance@2.4.4 | web/src-tauri/Cargo.lock License: Apache-2.0 OR MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | tauri-runtime | 2.11.3 | pkg:cargo/tauri-runtime@2.11.3 | web/src-tauri/Cargo.lock License: Apache-2.0 OR MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | tauri-runtime-wry | 2.11.4 | pkg:cargo/tauri-runtime-wry@2.11.4 | web/src-tauri/Cargo.lock License: Apache-2.0 OR MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | tauri-utils | 2.9.3 | pkg:cargo/tauri-utils@2.9.3 | web/src-tauri/Cargo.lock License: Apache-2.0 OR MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
@@ -381,7 +388,7 @@
 | transitive | url | 2.5.8 | pkg:cargo/url@2.5.8 | web/src-tauri/Cargo.lock License: MIT OR Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | urlpattern | 0.3.0 | pkg:cargo/urlpattern@0.3.0 | web/src-tauri/Cargo.lock License: MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | utf8_iter | 1.0.4 | pkg:cargo/utf8_iter@1.0.4 | web/src-tauri/Cargo.lock License: Apache-2.0 OR MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
-| transitive | uuid | 1.26.0 | pkg:cargo/uuid@1.26.0 | web/src-tauri/Cargo.lock License: Apache-2.0 OR MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
+| transitive | uuid | 1.26.1 | pkg:cargo/uuid@1.26.1 | web/src-tauri/Cargo.lock License: Apache-2.0 OR MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | version_check | 0.9.5 | pkg:cargo/version_check@0.9.5 | web/src-tauri/Cargo.lock License: MIT/Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | workspace-root | visiondata-gate-desktop | 0.1.0 | pkg:cargo/visiondata-gate-desktop@0.1.0 | web/src-tauri/Cargo.lock License: Apache-2.0 | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |
 | transitive | vswhom | 0.1.0 | pkg:cargo/vswhom@0.1.0 | web/src-tauri/Cargo.lock License: MIT | web/src-tauri/Cargo.lock; web/src-tauri/Cargo.lock | OK |

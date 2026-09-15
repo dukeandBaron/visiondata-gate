@@ -14,6 +14,7 @@ from typing import Any, Iterable
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 MAX_SCANNED_BLOB_BYTES = 16 * 1024 * 1024
 PUBLIC_BINARY_REVIEW_PATH = "docs/PUBLIC_BINARY_REVIEW.json"
+PUBLIC_BINARY_HISTORY_REVIEW_PATH = "docs/PUBLIC_BINARY_HISTORY_REVIEW.json"
 PUBLIC_MIRROR_MANIFEST_PATH = "PUBLIC_MIRROR_MANIFEST.json"
 HISTORY_PATH_UNAVAILABLE = "<git-object-without-tree-path>"
 PUBLIC_GENERATED_FILE_SOURCES = {
@@ -417,10 +418,21 @@ def _is_github_noreply_email(value: bytes) -> bool:
     normalized = value.strip().lower()
     return (
         re.fullmatch(
-            rb"[a-z0-9][a-z0-9+._-]*@users\.noreply\.github\.com",
+            rb"(?:[a-z0-9][a-z0-9+._-]*|[0-9]+\+[a-z0-9._-]+\[bot\])"
+            rb"@users\.noreply\.github\.com",
             normalized,
         )
         is not None
+        or normalized == b"noreply" + b"@github.com"
+    )
+
+
+def _is_exact_dependabot_signoff(path: str, line: bytes, email: bytes) -> bool:
+    return (
+        path == "commit-message"
+        and email.strip().lower() == b"support" + b"@github.com"
+        and line.strip().lower()
+        == b"signed-off-by: dependabot[bot] <support" + b"@github.com>"
     )
 
 
@@ -481,7 +493,9 @@ def _content_violations(
         for line in _matching_lines(data, pattern):
             matches = list(pattern.finditer(line))
             if rule == "private-email" and not any(
-                not _is_safe_public_email(match.group(0)) for match in matches
+                not _is_safe_public_email(match.group(0))
+                and not _is_exact_dependabot_signoff(path, line, match.group(0))
+                for match in matches
             ):
                 continue
             if rule in {
@@ -655,12 +669,81 @@ def _binary_review_violations(
     return violations
 
 
+def _binary_history_review_violations(
+    *, root: Path | None = None
+) -> list[dict[str, str]]:
+    project_root = PROJECT_ROOT if root is None else root
+    path = project_root / PUBLIC_BINARY_HISTORY_REVIEW_PATH
+    try:
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return [{"rule": "binary-history-review-manifest-invalid", "path": PUBLIC_BINARY_HISTORY_REVIEW_PATH}]
+    expected_fields = {
+        "schema_version",
+        "review_basis",
+        "reviewed_on",
+        "reviewer_identity_included",
+        "reviewed_version_count",
+        "prohibited_content_checks",
+        "files",
+        "manifest_sha256",
+    }
+    if not isinstance(manifest, dict) or set(manifest) != expected_fields:
+        return [{"rule": "binary-history-review-field-drift", "path": PUBLIC_BINARY_HISTORY_REVIEW_PATH}]
+    violations: list[dict[str, str]] = []
+    if (
+        manifest.get("schema_version")
+        != "visiondata-gate.public-binary-history-review.v1"
+        or manifest.get("review_basis")
+        != "VISUAL_PIXEL_AND_METADATA_INSPECTION"
+        or manifest.get("reviewer_identity_included") is not False
+    ):
+        violations.append({"rule": "binary-history-review-boundary-drift", "path": PUBLIC_BINARY_HISTORY_REVIEW_PATH})
+    stable = dict(manifest)
+    expected_sha256 = stable.pop("manifest_sha256", None)
+    if expected_sha256 != hashlib.sha256(_canonical_json_bytes(stable)).hexdigest():
+        violations.append({"rule": "binary-history-review-sha-drift", "path": PUBLIC_BINARY_HISTORY_REVIEW_PATH})
+    entries = manifest.get("files")
+    if not isinstance(entries, list) or manifest.get("reviewed_version_count") != len(entries):
+        violations.append({"rule": "binary-history-review-count-drift", "path": PUBLIC_BINARY_HISTORY_REVIEW_PATH})
+        return violations
+    seen: set[tuple[str, str]] = set()
+    for entry in entries:
+        if not isinstance(entry, dict) or set(entry) != {
+            "path", "sha256", "size_bytes", "width", "height", "category", "review_result"
+        }:
+            violations.append({"rule": "binary-history-review-entry-drift", "path": PUBLIC_BINARY_HISTORY_REVIEW_PATH})
+            continue
+        identity = (entry.get("path"), entry.get("sha256"))
+        if (
+            not isinstance(identity[0], str)
+            or not isinstance(identity[1], str)
+            or re.fullmatch(r"[0-9a-f]{64}", identity[1]) is None
+            or identity in seen
+        ):
+            violations.append({"rule": "binary-history-review-identity-invalid", "path": PUBLIC_BINARY_HISTORY_REVIEW_PATH})
+            continue
+        seen.add(identity)
+        if (
+            type(entry.get("size_bytes")) is not int
+            or entry["size_bytes"] <= 0
+            or type(entry.get("width")) is not int
+            or entry["width"] <= 0
+            or type(entry.get("height")) is not int
+            or entry["height"] <= 0
+            or entry.get("review_result") != "PASS_NO_PRIVATE_CONTENT_OBSERVED"
+        ):
+            violations.append({"rule": "binary-history-review-result-invalid", "path": identity[0]})
+    return violations
+
+
 def _scan_current(
     paths: list[str], *, root: Path | None = None
 ) -> tuple[list[dict[str, str]], str]:
     project_root = PROJECT_ROOT if root is None else root
     violations = _path_violations(paths)
     violations.extend(_binary_review_violations(paths, root=project_root))
+    violations.extend(_binary_history_review_violations(root=project_root))
     digest = hashlib.sha256()
     for relative in paths:
         report_path, path_findings = _report_path_and_findings(
@@ -698,29 +781,28 @@ def _scan_current(
     )
 
 
-def _reviewed_binary_records(*, root: Path | None = None) -> dict[str, str]:
+def _reviewed_binary_records(*, root: Path | None = None) -> dict[str, set[str]]:
     project_root = PROJECT_ROOT if root is None else root
-    try:
-        manifest = json.loads(
-            (project_root / PUBLIC_BINARY_REVIEW_PATH).read_text(encoding="utf-8")
-        )
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
-        return {}
-    entries = manifest.get("files") if isinstance(manifest, dict) else None
-    if not isinstance(entries, list):
-        return {}
-    records: dict[str, str] = {}
-    for entry in entries:
-        if not isinstance(entry, dict):
+    records: dict[str, set[str]] = {}
+    for review_path in (PUBLIC_BINARY_REVIEW_PATH, PUBLIC_BINARY_HISTORY_REVIEW_PATH):
+        try:
+            manifest = json.loads((project_root / review_path).read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
             continue
-        path = entry.get("path")
-        sha256 = entry.get("sha256")
-        if (
-            isinstance(path, str)
-            and isinstance(sha256, str)
-            and re.fullmatch(r"[0-9a-f]{64}", sha256) is not None
-        ):
-            records[path.replace("\\", "/")] = sha256
+        entries = manifest.get("files") if isinstance(manifest, dict) else None
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            path = entry.get("path")
+            sha256 = entry.get("sha256")
+            if (
+                isinstance(path, str)
+                and isinstance(sha256, str)
+                and re.fullmatch(r"[0-9a-f]{64}", sha256) is not None
+            ):
+                records.setdefault(path.replace("\\", "/"), set()).add(sha256)
     return records
 
 
@@ -755,7 +837,7 @@ def _historical_blob_violations(
     *,
     path: str,
     object_id: str,
-    reviewed_binaries: dict[str, str],
+    reviewed_binaries: dict[str, str | set[str]],
 ) -> list[dict[str, str]]:
     normalized = path.replace("\\", "/")
     report_path, violations = _historical_path_policy(
@@ -775,7 +857,8 @@ def _historical_blob_violations(
     suffix = Path(normalized).suffix.casefold()
     if suffix in REVIEWED_BINARY_SUFFIXES:
         observed_sha256 = hashlib.sha256(data).hexdigest()
-        expected_sha256 = reviewed_binaries.get(normalized)
+        expected = reviewed_binaries.get(normalized)
+        expected_sha256 = {expected} if isinstance(expected, str) else expected
         if expected_sha256 is None:
             violations.append(
                 _history_entry(
@@ -784,7 +867,7 @@ def _historical_blob_violations(
                     object_id=object_id,
                 )
             )
-        elif expected_sha256 != observed_sha256:
+        elif observed_sha256 not in expected_sha256:
             violations.append(
                 _history_entry(
                     "history-binary-sha-drift",
@@ -957,7 +1040,7 @@ def _history_objects() -> dict[str, tuple[str, ...]]:
 def _scan_history_blobs(
     objects: dict[str, tuple[str, ...]],
     *,
-    reviewed_binaries: dict[str, str] | None = None,
+    reviewed_binaries: dict[str, str | set[str]] | None = None,
 ) -> list[dict[str, str]]:
     violations: list[dict[str, str]] = []
     approved_binaries = (

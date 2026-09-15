@@ -1,0 +1,45 @@
+{
+  "schema_version": "visiondata-gate.public-binary-history-review.v1",
+  "review_basis": "VISUAL_PIXEL_AND_METADATA_INSPECTION",
+  "reviewed_on": "2026-09-15",
+  "reviewer_identity_included": false,
+  "reviewed_version_count": 3,
+  "prohibited_content_checks": [
+    "PERSONAL_IDENTITY",
+    "CREDENTIAL_OR_SECRET",
+    "PRIVATE_LOCAL_PATH",
+    "CUSTOMER_OR_FACTORY_DATA",
+    "NON_SYNTHETIC_INDUSTRIAL_IMAGE",
+    "PNG_EXIF_OR_TEXT_METADATA"
+  ],
+  "files": [
+    {
+      "path": "docs/assets/web-command-center.png",
+      "sha256": "8e7103711ecfc49c3886bfa0b037a765fa7706bdcce76dd698846fba843b58f3",
+      "size_bytes": 351111,
+      "width": 1440,
+      "height": 900,
+      "category": "SYNTHETIC_WORKBENCH_SCREENSHOT_HISTORY",
+      "review_result": "PASS_NO_PRIVATE_CONTENT_OBSERVED"
+    },
+    {
+      "path": "docs/assets/web-command-center.png",
+      "sha256": "bd1cd59d93625ae4042f036bf035796fd27508a1163bf61386e747ef6328736f",
+      "size_bytes": 378120,
+      "width": 1440,
+      "height": 1000,
+      "category": "SYNTHETIC_WORKBENCH_SCREENSHOT_HISTORY",
+      "review_result": "PASS_NO_PRIVATE_CONTENT_OBSERVED"
+    },
+    {
+      "path": "docs/assets/web-command-center.png",
+      "sha256": "6f17984aa20f026b15b096804f1149c1f98a8047de9d2f375121643b233c2203",
+      "size_bytes": 190091,
+      "width": 1440,
+      "height": 1000,
+      "category": "PUBLIC_SYNTHETIC_REPLAY_SCREENSHOT_HISTORY",
+      "review_result": "PASS_NO_PRIVATE_CONTENT_OBSERVED"
+    }
+  ],
+  "manifest_sha256": "11bc7e11b5f0fcebb00d3481fb2961ef11ce6c7304bb699d061c7cb8ea56d238"
+}
