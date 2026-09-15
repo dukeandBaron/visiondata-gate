@@ -1,7 +1,7 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "3c5164f5bb30febdb7ca6fdea0bf6425eda12381",
-  "source_tree_oid": "d1473b4b18d0f055e5d2d1d07bf3b4a04aa3e3f7",
+  "source_commit_oid": "f0922e301ac35064ec2ef336e36e6fb42031250e",
+  "source_tree_oid": "5e957bdf6de070096f37b7001926a7610cc71ef9",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
@@ -9,7 +9,7 @@
   "personal_data_included": false,
   "tracked_source_only": true,
   "file_count": 720,
-  "snapshot_sha256": "53adcdc1a9f4a7cffaa396be90100d03a26186b51deaf5de3e4480208bb707c5",
+  "snapshot_sha256": "648493eaa81517f39786bb1816faac7fdb1a4f24061ea16a1a61e8bc8cf72c18",
   "files": [
     {
       "path": ".env.example",
@@ -54,8 +54,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "598c3d07fd74830bbc480e778422f8b56d8f09bc8cb77ff22fd35d7922e4e506",
-      "size_bytes": 3174
+      "sha256": "6d2ee4537c83e7f4e3ec8d4bc4c71b657f8571edaeca0f8d612fb5508cc80176",
+      "size_bytes": 3268
     },
     {
       "path": "CITATION.cff",
@@ -84,8 +84,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "efb845a870a9d08feb1ec24ebdda6a01636dd39bd3bf83072bcaa0a106a6ff84",
-      "size_bytes": 12955,
+      "sha256": "470793622216104eae03b3f0028933446b92235083f788f3046466058622411a",
+      "size_bytes": 13058,
       "source": "docs/PUBLIC_REPOSITORY_README.md"
     },
     {
@@ -365,8 +365,8 @@
     },
     {
       "path": "docs/PUBLICATION_BOUNDARY.md",
-      "sha256": "e77fcfce37b80f5064ee303ea0271ea49314d17427593a8d4c838e1fb21a61a5",
-      "size_bytes": 5948
+      "sha256": "0d047e8561e93ce8b428f73e47b860e6e6194853f3bc9be692f58856e9c8771a",
+      "size_bytes": 6044
     },
     {
       "path": "docs/PUBLIC_API.md",
@@ -385,8 +385,8 @@
     },
     {
       "path": "docs/PUBLIC_REPOSITORY_README.md",
-      "sha256": "efb845a870a9d08feb1ec24ebdda6a01636dd39bd3bf83072bcaa0a106a6ff84",
-      "size_bytes": 12955
+      "sha256": "470793622216104eae03b3f0028933446b92235083f788f3046466058622411a",
+      "size_bytes": 13058
     },
     {
       "path": "docs/QUALITY_LEARNING_WORKBENCH.md",
