@@ -1,7 +1,7 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "84d74cbaa8606e889da33cfa0bebabf669d3a07b",
-  "source_tree_oid": "724e231725ae49164877c5c41096ac79d7c09cb0",
+  "source_commit_oid": "f8efc884995c325bf1e174b3128c4cea70c4a6ef",
+  "source_tree_oid": "ebb230b08fccb2b5581052645c1137495590edef",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
@@ -9,7 +9,7 @@
   "personal_data_included": false,
   "tracked_source_only": true,
   "file_count": 733,
-  "snapshot_sha256": "8fec4f41108de8d5794b49aae02bf1c3914b7390e23fdd68d1f6e770615ba11c",
+  "snapshot_sha256": "ba1e1b111840aa07e9cc8e23dec19a6cbefa6ff8e012db2dfffa8547e664a6c0",
   "files": [
     {
       "path": ".env.example",
@@ -84,8 +84,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "128ceb4a1e01d0df89bc413432d3907d16e1db6063bba27f9255cfe8109de4c5",
-      "size_bytes": 14125,
+      "sha256": "dcc724c08489c3c4ea516e0b618102bfcb0c31dbdba7a3f5de8d465bf3a6e87d",
+      "size_bytes": 14220,
       "source": "docs/PUBLIC_REPOSITORY_README.md"
     },
     {
@@ -395,8 +395,8 @@
     },
     {
       "path": "docs/PUBLIC_REPOSITORY_README.md",
-      "sha256": "128ceb4a1e01d0df89bc413432d3907d16e1db6063bba27f9255cfe8109de4c5",
-      "size_bytes": 14125
+      "sha256": "dcc724c08489c3c4ea516e0b618102bfcb0c31dbdba7a3f5de8d465bf3a6e87d",
+      "size_bytes": 14220
     },
     {
       "path": "docs/QUALITY_LEARNING_WORKBENCH.md",
@@ -410,8 +410,8 @@
     },
     {
       "path": "docs/README_STATUS_AND_EVIDENCE.md",
-      "sha256": "3b4acdc60c58a6c41cdae698d40971843022df5941fe1c15aa3e351b003e03e1",
-      "size_bytes": 7455
+      "sha256": "781a405ef96b0fbf9e1983aa15c783982baffff24321c62b3ef655ed2308db1c",
+      "size_bytes": 7637
     },
     {
       "path": "docs/RELEASE_ATTESTATION_V1.md",
@@ -480,8 +480,8 @@
     },
     {
       "path": "docs/WINDOWS_CANDIDATE_CA1FA7B_20260915.md",
-      "sha256": "e714d1311d8cba6e50b87631e1a3593233c27c557be5f12228bb5867ae101b12",
-      "size_bytes": 5230
+      "sha256": "f21329d3ec770c0359672a951f43aa646b7f9a1a2943ee5074bc3d0685ea7fce",
+      "size_bytes": 5676
     },
     {
       "path": "docs/WINDOWS_INSTALLER.md",
@@ -2310,8 +2310,8 @@
     },
     {
       "path": "tests/test_review_guidance_terminology.py",
-      "sha256": "79fd87aaec94fb70272b73287724dab7c918ecdf04e9bcb8c20dc65caea20185",
-      "size_bytes": 9810
+      "sha256": "de62ede659dc26af44d682c65cabb0f243b06c1e43daeebf21562768a27b7b31",
+      "size_bytes": 10148
     },
     {
       "path": "tests/test_reviewer_audit.py",
