@@ -8,8 +8,8 @@
   "customer_data_included": false,
   "personal_data_included": false,
   "tracked_source_only": true,
-  "file_count": 730,
-  "snapshot_sha256": "8f256b6aa5efc4e32b4aae7f246a61e80c57f157545fab91920963513a48cbc2",
+  "file_count": 733,
+  "snapshot_sha256": "8fec4f41108de8d5794b49aae02bf1c3914b7390e23fdd68d1f6e770615ba11c",
   "files": [
     {
       "path": ".env.example",
@@ -127,6 +127,16 @@
       "path": "app.py",
       "sha256": "cbca753086123f67b972a2fa461984460e36ad22586b73ec3283d6f827f685ea",
       "size_bytes": 202366
+    },
+    {
+      "path": "benchmarks/DYNAMICBENCH_V3_REPLANNING_20260829.json",
+      "sha256": "424be5fc8f51d55bf412b6e73c88a4943bc2d403b1e2d85817b7eb7de9e36d21",
+      "size_bytes": 72328
+    },
+    {
+      "path": "benchmarks/DYNAMICBENCH_V4_PRODUCT_RUNTIME_20260829.json",
+      "sha256": "e33d238c48270b5732c6778dcaad2d4ed93cf06d9b3b0d800ca6e84a49cdb99e",
+      "size_bytes": 11361
     },
     {
       "path": "benchmarks/README.md",
@@ -632,6 +642,11 @@
       "path": "quality/README.md",
       "sha256": "86c46c89c07ef7c85b65450f00a4bb6d85f87d4f29af4b7c71a24f1a30781ec3",
       "size_bytes": 4405
+    },
+    {
+      "path": "quality/bandit-baseline.json",
+      "sha256": "cf4bd18584cb1fa85eb85112bf00733d07ac47de5a32ed71469ad0b9d31b671f",
+      "size_bytes": 293360
     },
     {
       "path": "quality/coverage-profile.json",
