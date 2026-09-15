@@ -1,15 +1,15 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "cf2ecd395817c414a8fe6736a21e44a931855b0a",
-  "source_tree_oid": "2c9fce97e82a9e822a40cec2f4ebfa7d611bb857",
+  "source_commit_oid": "0640f2c106c4acf24dec1ca15acf0b0a913d8016",
+  "source_tree_oid": "62c823dd64ca5cb7992e9f4f71a7aa459cfd061b",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
   "customer_data_included": false,
   "personal_data_included": false,
   "tracked_source_only": true,
-  "file_count": 722,
-  "snapshot_sha256": "b6b52f81cb9edda792271055a31edbc26cfd1dca838dc9ce6b62cb6bd9606b86",
+  "file_count": 726,
+  "snapshot_sha256": "f8c1cca3d54e1fcd53b0d4bb76d2a6fd18fb95703171570afdc79c72fd866dd8",
   "files": [
     {
       "path": ".env.example",
@@ -54,8 +54,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "6d2ee4537c83e7f4e3ec8d4bc4c71b657f8571edaeca0f8d612fb5508cc80176",
-      "size_bytes": 3268
+      "sha256": "9c99791f4ac5839a78817b843c457b3e19437514d643db88caa0073ecbccfedb",
+      "size_bytes": 3818
     },
     {
       "path": "CITATION.cff",
@@ -84,8 +84,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "259afcce78ee2eae22c076e65ed87996ede86734f8b722b475e996aa625c6daa",
-      "size_bytes": 10302,
+      "sha256": "f2306a5d861d1e6e674e5da83c3aaed292aa38ffce977908a90a489e94d6730e",
+      "size_bytes": 13194,
       "source": "docs/PUBLIC_REPOSITORY_README.md"
     },
     {
@@ -165,8 +165,8 @@
     },
     {
       "path": "docs/00_OVERVIEW.md",
-      "sha256": "d6c03329648d3749c10d7480dd346191f9f70a57c5c0a379889c929e664a905b",
-      "size_bytes": 6872
+      "sha256": "90d277d4e9f13def3b7f6dfffa005000824f9efa2389dab845648579895105f0",
+      "size_bytes": 7050
     },
     {
       "path": "docs/AGENT_PLATFORM.md",
@@ -185,8 +185,8 @@
     },
     {
       "path": "docs/AGENT_RUNTIME.md",
-      "sha256": "27809a667e03f56afc573a6f865d05ad0147edcaa1e112143f0845ae25eee750",
-      "size_bytes": 7680
+      "sha256": "8c7dfabf5c66b7c3ab4e310c98b7d32b5ebc472a36578793e7261fab731fd794",
+      "size_bytes": 8699
     },
     {
       "path": "docs/API_QUICKSTART.md",
@@ -205,8 +205,8 @@
     },
     {
       "path": "docs/BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md",
-      "sha256": "6153daa07531bd0ee08d33d09a123e783042b491ce53470b2c014b855a7e0746",
-      "size_bytes": 8796
+      "sha256": "a3bde4d012f1263e6acd2e3f5833add270e6b91b3d8d9488e7fe03d7d8bcb5bb",
+      "size_bytes": 9322
     },
     {
       "path": "docs/CARGO_LICENSES.locked.json",
@@ -220,8 +220,8 @@
     },
     {
       "path": "docs/CONTINUAL_LEARNING_RETENTION.md",
-      "sha256": "05fa2edcb78d49d2936f066c811b8e0f9cda75f7fa2621da48b95bde650bb15d",
-      "size_bytes": 5131
+      "sha256": "cc181a24cfa83647b8b80b9e343bcabfe299b8462d31557f0a1ee1306e2e61f2",
+      "size_bytes": 5213
     },
     {
       "path": "docs/CROSS_PLATFORM_QUICKSTART.md",
@@ -240,18 +240,18 @@
     },
     {
       "path": "docs/DEFENSE_3MIN_SCRIPT_SEMIFINAL.md",
-      "sha256": "dcbdca843c01b30a34f0ab0edd3a4c8473d35af1042dcac08b3ac255088646c0",
-      "size_bytes": 3119
+      "sha256": "89da4abb241240f81888785d05a234c7b458ec78327f24ca0ff13b170243b3f5",
+      "size_bytes": 2390
     },
     {
       "path": "docs/DEFENSE_QA_SEMIFINAL.md",
-      "sha256": "e26134e3f4d4aa01661cb71045fef3b5bfcf1fba6d32577eb522624e7638ce40",
-      "size_bytes": 3779
+      "sha256": "9a709c39f27e036126b6d70fab1cae36063403cef0e83c6f54bdb190a080d71a",
+      "size_bytes": 5949
     },
     {
       "path": "docs/DEMO_60S_SCRIPT_SEMIFINAL.md",
-      "sha256": "f4247a7329e1aa99583d032332edf1b5ac28508bc40bc560aaff2f89ad78df74",
-      "size_bytes": 3726
+      "sha256": "afa5289126a261ce253018ea1058ebf06e920c1ada072693e8895c35db94fa05",
+      "size_bytes": 4039
     },
     {
       "path": "docs/DYNAMICBENCH_V3.md",
@@ -285,8 +285,8 @@
     },
     {
       "path": "docs/GOAI_COMPETITION_EVALUATION.md",
-      "sha256": "192cacb3b97f4e3827e0062099bef443644767fa90dbe0bb67f1b7b4c986bb86",
-      "size_bytes": 2823
+      "sha256": "463cd8a6854451022369206f4fdcda02fc8d7496c734b859174be72fafb8c83c",
+      "size_bytes": 3319
     },
     {
       "path": "docs/GOAI_SEMIFINAL_GUIDE_20260902.md",
@@ -325,8 +325,8 @@
     },
     {
       "path": "docs/INDUSTRIAL_INSPECTION_ROUTE.md",
-      "sha256": "9f97e2c7bda8e11206f31f46182cc5cf0f7b5d31842873ac9c6e563b33579904",
-      "size_bytes": 6882
+      "sha256": "4cc8d956e3c3f9a7cd2e522a9630a7da08e88c1a063f07fb89d09982a13884a2",
+      "size_bytes": 9770
     },
     {
       "path": "docs/INDUSTRIAL_SKILL_SDK.md",
@@ -385,13 +385,13 @@
     },
     {
       "path": "docs/PUBLIC_REPOSITORY_README.md",
-      "sha256": "259afcce78ee2eae22c076e65ed87996ede86734f8b722b475e996aa625c6daa",
-      "size_bytes": 10302
+      "sha256": "f2306a5d861d1e6e674e5da83c3aaed292aa38ffce977908a90a489e94d6730e",
+      "size_bytes": 13194
     },
     {
       "path": "docs/QUALITY_LEARNING_WORKBENCH.md",
-      "sha256": "4ba3d2dd929237d6d26053ae1dfcb93a49ad63cbfcdd719f86e05a43ecf6c882",
-      "size_bytes": 7825
+      "sha256": "e44123d7b65e321e521609cc893e0a349a58ec9359008721cc685b7782417ce7",
+      "size_bytes": 8898
     },
     {
       "path": "docs/RC3_DELIVERY_CONTRACT.md",
@@ -414,6 +414,11 @@
       "size_bytes": 2057
     },
     {
+      "path": "docs/REVIEW_GUIDANCE_CLOSURE_20260915.md",
+      "sha256": "4e0c51f5a0b79cc64e42b11997b44a57f14c156200790f13bc4a7fe282e0645c",
+      "size_bytes": 14186
+    },
+    {
       "path": "docs/RUNNING.md",
       "sha256": "844fc1d4824a9bdeeed024b44421ea463671b0192eef350f74ae054d1735a87d",
       "size_bytes": 12639
@@ -427,6 +432,11 @@
       "path": "docs/SEMIFINAL_DEFENSE_RUNBOOK_20260902.md",
       "sha256": "9e97f3223eb1eb97b5241ffcab40cf3cc70be59564bfa9b884f41353e179118d",
       "size_bytes": 2762
+    },
+    {
+      "path": "docs/TECHNICAL_TERMINOLOGY.md",
+      "sha256": "4ae4da26f4fe59f8cff2b53e6e904b3f20acf4a156ebd3d8eef103fe1bb31ea0",
+      "size_bytes": 13079
     },
     {
       "path": "docs/THIRD_PARTY_LICENSE_INVENTORY.generated.md",
@@ -447,6 +457,11 @@
       "path": "docs/TOOL_REPLAY_AND_MIGRATION.md",
       "sha256": "5c8af34611735c7553c7e88b317f886dd8b705032718d0dea23894072281d1af",
       "size_bytes": 1524
+    },
+    {
+      "path": "docs/VERSION_EVOLUTION.md",
+      "sha256": "a48767319b4377ce7df78f37c1eb5da1bbc4250af7d34c05f7bcc68eaa18ab45",
+      "size_bytes": 6710
     },
     {
       "path": "docs/WINDOWS_INSTALLER.md",
@@ -480,7 +495,7 @@
     },
     {
       "path": "examples/reproducibility/DYNAMICBENCH_V3_REPRO_SUBSET.json",
-      "sha256": "7977ff4c2d3704dc7fc173201a84bc78c8d3e3878e22af079f29bea4667505e8",
+      "sha256": "9ab745e01e793b2055d71a9c585a429ad9f132a78800b5f7f349bc34071fb696",
       "size_bytes": 37096
     },
     {
@@ -600,8 +615,8 @@
     },
     {
       "path": "pyproject.toml",
-      "sha256": "72184085137bea30a2761e8341fad133d5a281864c9dbebe4c0264299293fee9",
-      "size_bytes": 1853
+      "sha256": "e754a6c9f7d3b9e8f84c6ba1cf0efadcf76bc2c3159cacf4bf59fc9c54b034bc",
+      "size_bytes": 1856
     },
     {
       "path": "quality/README.md",
@@ -1165,8 +1180,8 @@
     },
     {
       "path": "src/visiondata_gate/learning_contracts.py",
-      "sha256": "8316a7d18a302eb2815652c53f6b2c9b506ac1b93b287bc4f293ca12b800259f",
-      "size_bytes": 4934
+      "sha256": "6fb09cfef2da306ed0bd65afaa8c341a47c6733803cf89e42b24189c608b544b",
+      "size_bytes": 5017
     },
     {
       "path": "src/visiondata_gate/learning_dataset.py",
@@ -1205,8 +1220,8 @@
     },
     {
       "path": "src/visiondata_gate/learning_yolo_backend.py",
-      "sha256": "a14e64235dc713294a40c8fb5a04eebe0cff7a376ece714b41b0db33d137d9eb",
-      "size_bytes": 41243
+      "sha256": "4510f23f3c41778aef791dab90fcbe840e8828ef0594995b16e995014f4b2120",
+      "size_bytes": 41245
     },
     {
       "path": "src/visiondata_gate/lineage.py",
@@ -1235,8 +1250,8 @@
     },
     {
       "path": "src/visiondata_gate/model_experiment_agent.py",
-      "sha256": "c2d9b28ed86724d1fdee8e47629fa5282c06e29528e0ec5d1f5796401b9bb30c",
-      "size_bytes": 24718
+      "sha256": "ff1f2385b1e070a352f9242dd821adf36858d505d6b91e3e1d01229123db3fd6",
+      "size_bytes": 24949
     },
     {
       "path": "src/visiondata_gate/model_stability.py",
@@ -2274,6 +2289,11 @@
       "size_bytes": 7249
     },
     {
+      "path": "tests/test_review_guidance_terminology.py",
+      "sha256": "70702326fce13957d055853552950a5a557bf488943bcc9ded33ace75009ccd0",
+      "size_bytes": 7739
+    },
+    {
       "path": "tests/test_reviewer_audit.py",
       "sha256": "88a5c4dab0b157169af0848c2fe2a1458a78209eda8e42eedc1386ccfd646618",
       "size_bytes": 10954
@@ -2680,8 +2700,8 @@
     },
     {
       "path": "tools/export_public_repository.py",
-      "sha256": "0978f9a845174e0ab27c9c4613d6a6b7ab40b9ea5d32ae7c3dee3ccc3630590e",
-      "size_bytes": 14875
+      "sha256": "923557048ab1fc50e55ab13e07868ed1c165985ced99761902704bf2a1b6bb94",
+      "size_bytes": 14993
     },
     {
       "path": "tools/generate_cargo_license_snapshot.py",
@@ -3160,8 +3180,8 @@
     },
     {
       "path": "web/src/components/VisionModelWorkbench.tsx",
-      "sha256": "0d8e082cbf971701d168e516234e855e7e727a0b108d1933fcfe13a5831dff47",
-      "size_bytes": 53788
+      "sha256": "a77e5df481120f79122fc2dc4ff0a4b4aed9ded08248e6384547fa29b38a97f0",
+      "size_bytes": 53803
     },
     {
       "path": "web/src/components/ui.tsx",
@@ -3365,8 +3385,8 @@
     },
     {
       "path": "web/src/pages/LearningLoopPage.tsx",
-      "sha256": "f37b816ce944c5837f1d79d3302de5ca8983dfbbd6a73abe9729ea53d70a1c8f",
-      "size_bytes": 48817
+      "sha256": "a48ad6835ffb6ca004d4676c1776f4224b2a85ac49019036363afff9263132eb",
+      "size_bytes": 48937
     },
     {
       "path": "web/src/pages/LineagePage.tsx",
