@@ -1,7 +1,7 @@
 {
   "author_fields_included": false,
-  "cargo_lock_sha256": "33b25e0f34106e254d180a4a105148cbac884de37561697a26198a497b5b1882",
-  "package_count": 264,
+  "cargo_lock_sha256": "0030ac135b6b699bb18d3a1ac21cdd7c88b6ac23d23d8402bfa785b25a03a5d7",
+  "package_count": 271,
   "packages": [
     {
       "dependencies": [],
@@ -128,6 +128,20 @@
       "name": "block-buffer",
       "source": "registry+https://github.com/rust-lang/crates.io-index",
       "version": "0.10.4"
+    },
+    {
+      "dependencies": [
+        {
+          "name": "hybrid-array",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "version": "0.4.15"
+        }
+      ],
+      "license_expression": "MIT OR Apache-2.0",
+      "license_file_present": false,
+      "name": "block-buffer",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.12.1"
     },
     {
       "dependencies": [
@@ -328,7 +342,7 @@
         {
           "name": "uuid",
           "source": "registry+https://github.com/rust-lang/crates.io-index",
-          "version": "1.26.0"
+          "version": "1.26.1"
         }
       ],
       "license_expression": "MIT",
@@ -370,6 +384,14 @@
       "version": "0.4.45"
     },
     {
+      "dependencies": [],
+      "license_expression": "Apache-2.0 OR MIT",
+      "license_file_present": false,
+      "name": "const-oid",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.10.2"
+    },
+    {
       "dependencies": [
         {
           "name": "time",
@@ -395,6 +417,14 @@
       "name": "cpufeatures",
       "source": "registry+https://github.com/rust-lang/crates.io-index",
       "version": "0.2.17"
+    },
+    {
+      "dependencies": [],
+      "license_expression": "MIT OR Apache-2.0",
+      "license_file_present": false,
+      "name": "cpufeatures",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.3.1"
     },
     {
       "dependencies": [
@@ -450,6 +480,20 @@
       "name": "crypto-common",
       "source": "registry+https://github.com/rust-lang/crates.io-index",
       "version": "0.1.7"
+    },
+    {
+      "dependencies": [
+        {
+          "name": "hybrid-array",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "version": "0.4.15"
+        }
+      ],
+      "license_expression": "MIT OR Apache-2.0",
+      "license_file_present": false,
+      "name": "crypto-common",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.2.2"
     },
     {
       "dependencies": [
@@ -745,6 +789,30 @@
       "name": "digest",
       "source": "registry+https://github.com/rust-lang/crates.io-index",
       "version": "0.10.7"
+    },
+    {
+      "dependencies": [
+        {
+          "name": "block-buffer",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "version": "0.12.1"
+        },
+        {
+          "name": "const-oid",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "version": "0.10.2"
+        },
+        {
+          "name": "crypto-common",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "version": "0.2.2"
+        }
+      ],
+      "license_expression": "MIT OR Apache-2.0",
+      "license_file_present": false,
+      "name": "digest",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.11.3"
     },
     {
       "dependencies": [
@@ -1190,6 +1258,20 @@
       "name": "http",
       "source": "registry+https://github.com/rust-lang/crates.io-index",
       "version": "1.5.0"
+    },
+    {
+      "dependencies": [
+        {
+          "name": "typenum",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "version": "1.20.1"
+        }
+      ],
+      "license_expression": "MIT OR Apache-2.0",
+      "license_file_present": false,
+      "name": "hybrid-array",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.4.15"
     },
     {
       "dependencies": [
@@ -2401,7 +2483,7 @@
         {
           "name": "uuid",
           "source": "registry+https://github.com/rust-lang/crates.io-index",
-          "version": "1.26.0"
+          "version": "1.26.1"
         }
       ],
       "license_expression": "MIT",
@@ -2937,6 +3019,30 @@
       "name": "sha2",
       "source": "registry+https://github.com/rust-lang/crates.io-index",
       "version": "0.10.9"
+    },
+    {
+      "dependencies": [
+        {
+          "name": "cfg-if",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "version": "1.0.4"
+        },
+        {
+          "name": "cpufeatures",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "version": "0.3.1"
+        },
+        {
+          "name": "digest",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "version": "0.11.3"
+        }
+      ],
+      "license_expression": "MIT OR Apache-2.0",
+      "license_file_present": false,
+      "name": "sha2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "0.11.0"
     },
     {
       "dependencies": [],
@@ -3536,7 +3642,7 @@
         {
           "name": "uuid",
           "source": "registry+https://github.com/rust-lang/crates.io-index",
-          "version": "1.26.0"
+          "version": "1.26.1"
         },
         {
           "name": "walkdir",
@@ -3631,7 +3737,7 @@
       "license_file_present": false,
       "name": "tauri-plugin-single-instance",
       "source": "registry+https://github.com/rust-lang/crates.io-index",
-      "version": "2.4.3"
+      "version": "2.4.4"
     },
     {
       "dependencies": [
@@ -3906,7 +4012,7 @@
         {
           "name": "uuid",
           "source": "registry+https://github.com/rust-lang/crates.io-index",
-          "version": "1.26.0"
+          "version": "1.26.1"
         },
         {
           "name": "walkdir",
@@ -4602,7 +4708,7 @@
       "license_file_present": false,
       "name": "uuid",
       "source": "registry+https://github.com/rust-lang/crates.io-index",
-      "version": "1.26.0"
+      "version": "1.26.1"
     },
     {
       "dependencies": [],
@@ -4627,7 +4733,7 @@
         {
           "name": "sha2",
           "source": "registry+https://github.com/rust-lang/crates.io-index",
-          "version": "0.10.9"
+          "version": "0.11.0"
         },
         {
           "name": "tauri",
@@ -4642,12 +4748,12 @@
         {
           "name": "tauri-plugin-single-instance",
           "source": "registry+https://github.com/rust-lang/crates.io-index",
-          "version": "2.4.3"
+          "version": "2.4.4"
         },
         {
           "name": "uuid",
           "source": "registry+https://github.com/rust-lang/crates.io-index",
-          "version": "1.26.0"
+          "version": "1.26.1"
         }
       ],
       "license_expression": "Apache-2.0",

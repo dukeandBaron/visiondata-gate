@@ -60,6 +60,7 @@ deliverables/_qa/*
 !10_reports/*.json
 !docs/CARGO_LICENSES.locked.json
 !docs/PUBLIC_BINARY_REVIEW.json
+!docs/PUBLIC_BINARY_HISTORY_REVIEW.json
 !docs/SBOM.cdx.json
 !skills/manifest.json
 !tests/fixtures/runtime_workbench/legacy_cases/*.json

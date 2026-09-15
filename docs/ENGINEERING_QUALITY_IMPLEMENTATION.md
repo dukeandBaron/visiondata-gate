@@ -25,7 +25,7 @@ Enum migration and blanket ignores were not used to manufacture a clean tree.
 ## Locked tool isolation
 
 The independent virtual project in `quality/` pins Pyright 1.1.414, pytest 9.1.1,
-pytest-cov 7.1.0, coverage 7.16.0, pip-audit 2.10.1, Bandit 1.9.4, Ruff 0.15.22 and
+pytest-cov 7.1.0, coverage 7.16.0, pip-audit 2.10.1, Bandit 1.9.4, Ruff 0.16.7 and
 pre-commit 4.6.2. Its `uv.lock` pins transitive dependencies, and its hash-bearing
 requirements export is checked against the lock in CI. No application package
 version or application `uv.lock` was changed for these tools.

@@ -50,11 +50,38 @@ def _write_public_snapshot(
     binary_review_path = snapshot / "docs" / "PUBLIC_BINARY_REVIEW.json"
     binary_review_path.parent.mkdir()
     binary_review_path.write_bytes(binary_review_data)
+    binary_history_review_stable = {
+        "schema_version": "visiondata-gate.public-binary-history-review.v1",
+        "review_basis": "VISUAL_PIXEL_AND_METADATA_INSPECTION",
+        "reviewed_on": "2026-09-15",
+        "reviewer_identity_included": False,
+        "reviewed_version_count": 0,
+        "prohibited_content_checks": [],
+        "files": [],
+    }
+    binary_history_review = {
+        **binary_history_review_stable,
+        "manifest_sha256": hashlib.sha256(
+            defense_kit._canonical_json(binary_history_review_stable)
+        ).hexdigest(),
+    }
+    binary_history_review_data = (
+        defense_kit._canonical_json(binary_history_review) + b"\n"
+    )
+    binary_history_review_path = (
+        snapshot / "docs" / "PUBLIC_BINARY_HISTORY_REVIEW.json"
+    )
+    binary_history_review_path.write_bytes(binary_history_review_data)
     entries: list[dict[str, object]] = [
         {
             "path": "LICENSE",
             "sha256": hashlib.sha256(payload).hexdigest(),
             "size_bytes": len(payload),
+        },
+        {
+            "path": "docs/PUBLIC_BINARY_HISTORY_REVIEW.json",
+            "sha256": hashlib.sha256(binary_history_review_data).hexdigest(),
+            "size_bytes": len(binary_history_review_data),
         },
         {
             "path": "docs/PUBLIC_BINARY_REVIEW.json",
@@ -179,6 +206,7 @@ def test_public_snapshot_outside_root_is_fully_hash_bound(
         "source/PUBLIC_MIRROR_MANIFEST.json",
         "source/LICENSE",
         "source/docs/PUBLIC_BINARY_REVIEW.json",
+        "source/docs/PUBLIC_BINARY_HISTORY_REVIEW.json",
     }
 
     (snapshot / "LICENSE").write_bytes(b"tamper\n")

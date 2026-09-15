@@ -80,6 +80,7 @@ def test_public_export_is_allowlist_based_and_excludes_private_delivery_surfaces
     ):
         assert _selected(semifinal_document)
     assert _selected(PUBLIC_BINARY_REVIEW_PATH)
+    assert _selected("docs/PUBLIC_BINARY_HISTORY_REVIEW.json")
     assert _selected(PUBLIC_PAGES_TEMPLATE)
     assert not _selected(PUBLIC_PAGES_WORKFLOW)
     assert not _selected("docs/assets/reviewer-mode.png")
@@ -118,6 +119,7 @@ def test_public_export_is_allowlist_based_and_excludes_private_delivery_surfaces
         "agentteams/runtime_receipt.template.json",
         "docs/CARGO_LICENSES.locked.json",
         "docs/PUBLIC_BINARY_REVIEW.json",
+        "docs/PUBLIC_BINARY_HISTORY_REVIEW.json",
         "docs/SBOM.cdx.json",
         "skills/manifest.json",
         "tools/tool_lock.json",
@@ -1179,6 +1181,85 @@ def test_pseudo_noreply_identity_and_content_are_rejected() -> None:
         object_id=object_id,
         object_kind="commit",
     )
+
+
+def test_exact_github_bot_identity_and_signoff_are_public_metadata() -> None:
+    object_id = "e" * 40
+    bot_email = b"49699333+dependabot[bot]" + b"@users.noreply.github.com"
+    github_email = b"noreply" + b"@github.com"
+    support_email = b"support" + b"@github.com"
+    commit = (
+        b"tree "
+        + b"c" * 40
+        + b"\nauthor dependabot[bot] <" + bot_email + b"> 0 +0000\n"
+        + b"committer GitHub <" + github_email + b"> 0 +0000\n\n"
+        + b"chore(deps): update synthetic fixture\n\n"
+        + b"Signed-off-by: dependabot[bot] <" + support_email + b">\n"
+    )
+    assert _revision_metadata_violations(
+        commit,
+        object_id=object_id,
+        object_kind="commit",
+    ) == []
+    assert _content_violations(
+        b"contact " + support_email + b" outside an exact bot signoff",
+        path="commit-message",
+        object_id=object_id,
+    ) == [{"rule": "private-email", "path": "commit-message", "object": object_id}]
+
+
+def test_history_binary_accepts_only_exact_reviewed_version_hashes() -> None:
+    object_id = "f" * 40
+    reviewed_path = "docs/assets/reviewed.png"
+    old = b"\x89PNG\r\n\x1a\nold synthetic"
+    current = b"\x89PNG\r\n\x1a\ncurrent synthetic"
+    reviewed = {
+        reviewed_path: {
+            hashlib.sha256(old).hexdigest(),
+            hashlib.sha256(current).hexdigest(),
+        }
+    }
+    assert _historical_blob_violations(
+        old,
+        path=reviewed_path,
+        object_id=object_id,
+        reviewed_binaries=reviewed,
+    ) == []
+    assert {
+        "rule": "history-binary-sha-drift",
+        "path": reviewed_path,
+        "object": object_id,
+    } in _historical_blob_violations(
+        old + b"unreviewed",
+        path=reviewed_path,
+        object_id=object_id,
+        reviewed_binaries=reviewed,
+    )
+
+
+def test_reviewed_binary_records_merge_current_and_historical_manifests(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    current = "a" * 64
+    historical = "b" * 64
+    path = "docs/assets/reviewed.png"
+    review_root = tmp_path / "docs"
+    review_root.mkdir()
+    (review_root / "PUBLIC_BINARY_REVIEW.json").write_text(
+        json.dumps({"files": [{"path": path, "sha256": current}]}),
+        encoding="utf-8",
+    )
+    (review_root / "PUBLIC_BINARY_HISTORY_REVIEW.json").write_text(
+        json.dumps({"files": [{"path": path, "sha256": historical}]}),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(public_repository_checker, "PROJECT_ROOT", tmp_path)
+    records = public_repository_checker._reviewed_binary_records()
+    assert records == {path: {current, historical}}
+
+
+def test_public_binary_history_review_is_hash_bound() -> None:
+    assert public_repository_checker._binary_history_review_violations() == []
 
 
 def test_git_ref_names_are_scanned_without_echoing_values(
