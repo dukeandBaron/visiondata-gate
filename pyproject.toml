@@ -14,7 +14,7 @@ dependencies = [
   # Preserve the release-freeze dependency range. Widening needs a separate
   # compatibility run and reviewed lockfile update; newer NumPy is not ruled out.
   "defusedxml>=0.7.1,<0.8",
-  "numpy>=2.2,<2.3",
+  "numpy>=2.2,<2.6",
   "pillow>=11,<13",
   "pydantic>=2.12,<3",
   "PyYAML>=6,<7",
@@ -29,7 +29,7 @@ api = [
   "python-multipart>=0.0.20,<1",
   "uvicorn>=0.40,<1",
 ]
-qa = ["httpx>=0.28,<1", "pytest>=9.0.3,<10", "ruff>=0.15,<0.16"]
+qa = ["httpx>=0.28,<1", "pytest>=9.0.3,<10", "ruff>=0.15,<0.17"]
 desktop = [
     "pyinstaller>=6.16,<7",
 ]

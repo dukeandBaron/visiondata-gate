@@ -33,6 +33,14 @@ competition artifact tags are not a claim of a matching PyPI package version.
 
 - Production decisions remain human-controlled. New-Gate feedback evidence does
   not automatically close an issue, and val/test samples do not auto-enter train.
+- Compatibility candidate updates NumPy to 2.5.3, Pydantic to 2.13.5, Ruff to
+  0.16.7, React/ReactDOM to 19.3.0, the direct Rust `sha2` dependency to 0.11.0,
+  `uuid` to 1.26.1 and `tauri-plugin-single-instance` to 2.4.4; regenerated
+  lock-bound SBOM and notices remain part of the review.
+- Public-history checks accept only exact GitHub Bot metadata and exact-SHA
+  reviewed historical screenshots. Nine pre-existing non-noreply author
+  identities keep the complete-history gate on HOLD; the Tauri Linux
+  `glib 0.18.5` advisory also remains open pending an upstream-compatible graph.
 - Source changes above are not a statement that an older release/installer or
   PyPI distribution contains them. Review, freeze and publish separately.
 

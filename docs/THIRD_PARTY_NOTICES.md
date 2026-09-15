@@ -51,7 +51,6 @@ below.
 - itsdangerous 2.2.0
 - jinja2 3.1.6
 - markupsafe 3.0.3
-- numpy 2.2.6
 - pandas 2.3.3
 - protobuf 7.35.1
 - pywin32-ctypes 0.2.3
@@ -78,19 +77,23 @@ below.
 - narwhals 2.24.0
 - pefile 2024.8.26
 - pluggy 1.6.0
-- pydantic 2.13.4
-- pydantic-core 2.46.4
+- pydantic 2.13.5
+- pydantic-core 2.46.5
 - pytest 9.1.1
 - pyyaml 6.0.3
 - pytz 2026.3.post1
 - referencing 0.37.0
 - rpds-py 2026.6.3
-- ruff 0.15.22
+- ruff 0.16.7
 - setuptools 84.0.0
 - six 1.17.0
 - toml 0.10.2
 - typing-inspection 0.4.2
 - urllib3 2.7.0
+
+## BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
+
+- numpy 2.5.3
 
 ## Mixed, file-scoped licenses
 
@@ -114,7 +117,7 @@ below.
 
 ## Exact-version manual resolutions
 
-Fourteen dependency records did not expose a single unambiguous SPDX expression
+Thirteen dependency records did not expose a single unambiguous SPDX expression
 through cross-platform Core Metadata. Their wheel license files were reviewed
 for the locked version; an upgrade deliberately returns the component to
 `REVIEW_REQUIRED` until the new distribution is checked.
@@ -127,7 +130,6 @@ for the locked version; an upgrade deliberately returns the component to
 | itsdangerous 2.2.0 | BSD-3-Clause | `63af09891b6be8ad1a4252ed43af0f4efba7fc948e228367bed7f3c5ae0b09d7` |
 | jinja2 3.1.6 | BSD-3-Clause | `3b49dcee4105eb37bac10faf1be260408fe85d252b8e9df2e0979fc1e094437b` |
 | macholib 1.16.4 | MIT | `47082ab2bc0184123ec9f10fdf80c70723ee68f07d44382e17615c2a6ba70b09` |
-| numpy 2.2.6 | BSD-3-Clause | `14256cc3a2c9d32ac284da96b937feb44f72dd90bee2317ac3020166846ad99d` |
 | pandas 2.3.3 | BSD-3-Clause | `533eb6d0b98e5be3ddd12dce97be35dd11282f5c47cdf8d08c81756fd5d70a26` |
 | pefile 2024.8.26 | MIT | `b44409c067c6da52bfb54bb6624fb11a7b52157c3a13ae1400232f8196e86ad3` |
 | pyinstaller 6.22.2 | `(GPL-2.0-or-later WITH Bootloader-exception) AND Apache-2.0 AND (GPL-2.0-or-later OR MIT)` | `dcf75fdb959db1e3b41c0f8505069d2ece781b5ec6b3d0a4d30975cfc6580245` |
@@ -136,9 +138,11 @@ for the locked version; an upgrade deliberately returns the component to
 | python-dateutil 2.9.0.post0 | Apache-2.0 OR BSD-3-Clause | `ba00f51a0d92823b5a1cde27d8b5b9d2321e67ed8da9bc163eff96d5e17e577e` |
 | watchdog 6.0.0 | Apache-2.0 | `cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30` |
 
-The NumPy wheel license file includes its bundled binary notices. VisionData
-Gate does not redistribute that wheel; users receiving it through a package
-index should retain the license files shipped with that distribution.
+NumPy 2.5.3 publishes the composite SPDX expression shown above; the SBOM keeps
+that expression without reducing it to the top-level BSD term. Its wheel also
+ships bundled notices. VisionData Gate does not redistribute that wheel; users
+receiving it through a package index should retain the distribution's license
+files.
 
 This engineering inventory is not legal advice. If the dependency set,
 distribution channel, or vendoring policy changes, regenerate the SBOM and
