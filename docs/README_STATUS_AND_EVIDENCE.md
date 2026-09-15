@@ -1,5 +1,11 @@
 # README 验证与交付状态
 
+## 2026-09-15 公开访问恢复
+
+唯一主仓为 [visiondata-gate](https://github.com/dukeandBaron/visiondata-gate)，[在线 Demo](https://dukeandbaron.github.io/visiondata-gate/) 已完成同仓 Pages 部署。两地址匿名 HTTP 检查均为 200；部署记录为 [34963510843](https://github.com/dukeandBaron/visiondata-gate/actions/runs/34963510843)，对应提交 `c8c81405c84bf8f4c022d2257ba549cebadca6be`。这不是完整在线后端或新安装器的验收。
+
+发布前已备份历史并修正分支/标签提交邮箱，逐提交文件树保持一致。GitHub 旧 PR/提交缓存的彻底清除不在普通推送能力范围内。以下表格是此前基线的历史记录，其 Private/历史 HOLD 状态已由本节更新。
+
 本页把产品首页中的能力与其验证范围分开。核对日期：**2026-09-15**；源码基线：`4ad0c8148c89014bb5136c192fd83e5d360eabed`。后续提交、安装器和实验应使用各自回执，不能沿用本页状态。
 
 ## 源码、安装器与仓库访问

@@ -23,6 +23,7 @@ PUBLIC_PAGES_TEMPLATE = "tools/templates/public-pages.yml"
 PUBLIC_PAGES_WORKFLOW = ".github/workflows/pages.yml"
 
 PUBLIC_EXACT_FILES = {
+    "docs/PROJECT_TECHNICAL_OVERVIEW.md",
     ".env.example",
     ".gitattributes",
     ".gitignore",

@@ -1,15 +1,15 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "bcbaeaba26c9feb7e85631ebc327e79f02371ce2",
-  "source_tree_oid": "f67aaaffa5b4f884bfdbed0248d8435e073aae48",
+  "source_commit_oid": "c8c81405c84bf8f4c022d2257ba549cebadca6be",
+  "source_tree_oid": "9680d62e10f454855d355a62113aa7ab41cd54d1",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
   "customer_data_included": false,
   "personal_data_included": false,
   "tracked_source_only": true,
-  "file_count": 729,
-  "snapshot_sha256": "6cda14329dafc2949545297334545ccb5a85de2a5fe17ae74e34d383d2203d7c",
+  "file_count": 730,
+  "snapshot_sha256": "fb0bed12d7b58552b6e19f073b6936e72fc431656aed70da6db459812c508132",
   "files": [
     {
       "path": ".env.example",
@@ -79,13 +79,13 @@
     },
     {
       "path": "NOTICE",
-      "sha256": "7a722134b3d3147b184da69eebf72178641ea65b6f9359631b61a5a342a11381",
-      "size_bytes": 370
+      "sha256": "242ab8936d917bc0c40998bc19e6a38a1457cd230859543c3c8ceb77f5729bec",
+      "size_bytes": 523
     },
     {
       "path": "README.md",
-      "sha256": "ab0329ea937999c6669d46279b19713653e0ec86ba177e263d4642ba1c299065",
-      "size_bytes": 14049,
+      "sha256": "c01529d236d6406952b249913f485e4b86de466a550439d2fc715d8bdc7b4f07",
+      "size_bytes": 13351,
       "source": "docs/PUBLIC_REPOSITORY_README.md"
     },
     {
@@ -369,9 +369,14 @@
       "size_bytes": 6603
     },
     {
+      "path": "docs/PROJECT_TECHNICAL_OVERVIEW.md",
+      "sha256": "f50e93e9e46a82d2623bf577e5536dee3be9340f4eb588e588d7c33d0c45822f",
+      "size_bytes": 7151
+    },
+    {
       "path": "docs/PUBLICATION_BOUNDARY.md",
-      "sha256": "0d047e8561e93ce8b428f73e47b860e6e6194853f3bc9be692f58856e9c8771a",
-      "size_bytes": 6044
+      "sha256": "b89d0a89dc78cf1695068f442459b34e090a493cf3dc393e973e019d29534e63",
+      "size_bytes": 5892
     },
     {
       "path": "docs/PUBLIC_API.md",
@@ -390,8 +395,8 @@
     },
     {
       "path": "docs/PUBLIC_REPOSITORY_README.md",
-      "sha256": "ab0329ea937999c6669d46279b19713653e0ec86ba177e263d4642ba1c299065",
-      "size_bytes": 14049
+      "sha256": "c01529d236d6406952b249913f485e4b86de466a550439d2fc715d8bdc7b4f07",
+      "size_bytes": 13351
     },
     {
       "path": "docs/QUALITY_LEARNING_WORKBENCH.md",
@@ -405,8 +410,8 @@
     },
     {
       "path": "docs/README_STATUS_AND_EVIDENCE.md",
-      "sha256": "6e8ff82708ab73a3dcbad0655d09acc26174729e63f25805ca343f759570dd43",
-      "size_bytes": 6090
+      "sha256": "2da3ebfcfd379758dccd343e08d581d98817f200c7ffed5a780018f707acede3",
+      "size_bytes": 6832
     },
     {
       "path": "docs/RELEASE_ATTESTATION_V1.md",
@@ -2710,8 +2715,8 @@
     },
     {
       "path": "tools/export_public_repository.py",
-      "sha256": "bb88ea44813b607c2aead9cfce7af5f771c04753ea4feaac26ecc3d427115ac2",
-      "size_bytes": 15069
+      "sha256": "1980562b8085e6acec7a3ed0d4a8da09e814bed4112029df209e66b83b6e64f2",
+      "size_bytes": 15111
     },
     {
       "path": "tools/generate_cargo_license_snapshot.py",
