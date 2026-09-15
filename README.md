@@ -1,194 +1,160 @@
 <p align="center">
-  <img src="web/public/favicon.svg" alt="VisionData Gate" width="76" />
+  <img src="web/public/favicon.svg" alt="VisionData Gate" width="56" />
 </p>
 
 <h1 align="center">VisionData Gate</h1>
 
-<p align="center"><strong>把工业视觉异常办到可复验</strong></p>
-
-<p align="center"><strong>GOAI 2026 赛道二「无界应用」· 第 03 队 · 官方排期 AI+其他（工业视觉应用）</strong></p>
-
-VisionData Gate 是面向工业视觉算法工程师与质量负责人的证据驱动异常处置 Agent。确定性工具先测量图像、标注、泄漏、覆盖与治理边界；Agent 只在中间证据改变下一步时动态补证；CAPA、根因和生产决定保留给具名人员，整改后由 Child Run 按同一合同独立复验。
-
-## 现在可以完成什么
-
-| 使用入口 | 当前流程 | 交付结果 |
-|---|---|---|
-| 还没有任务模型 | 导入并复核图像/标注 → 固定训练准入数据 → 建立候选模型 | 数据版本、问题清单、候选模型及评估记录 |
-| 已有模型 | 登记可信运行环境和权重摘要 → 接收新数据或人工反馈 → 生成下一轮候选 | Parent/Child 模型身份、反馈关联、选择或回退记录 |
-| 两种入口共用 | 只读测量 → 证据缺口 → Worker 补证 → 人审 → 派生版本复验 | Gate、Finding、工单、审计摘要和未清责任项 |
-
-当前本地工作台包含账户与工作区隔离、图像工作簿、数据池、Agent 任务、模型/API 管理、学习反馈和 CAPA 页面。视觉模型采用外置运行环境和权重；安装包不捆绑 Torch、Ultralytics 或模型文件。
-
-**[打开公开评审首页](https://dukeandbaron.github.io/visiondata-gate-public/)** · **[进入合成工作台](https://dukeandbaron.github.io/visiondata-gate-public/#/command-center)**
-
 <p align="center">
-  <img src="docs/assets/web-command-center.png" alt="VisionData Gate 公开合成工作台" width="1180" />
+  <strong>让每次视觉数据返修，都有可复验的下一版。</strong><br />
+  本地优先的工业视觉数据交付与迭代工作台
 </p>
 
-## 复赛快速入口
+<p align="center">
+  <a href="#quickstart">本地运行</a> ·
+  <a href="https://github.com/dukeandBaron/visiondata-gate/releases">Windows 候选包</a> ·
+  <a href="#workflow">工作流程</a> ·
+  <a href="#agent">Agent 的作用</a> ·
+  <a href="#docs">文档</a>
+</p>
 
-本次线上答辩的官方窗口为 8 分钟，其中项目陈述 3 分钟、现场 Demo 1 分钟、问答 3 分钟、评分与切换 1 分钟。当前材料使用 60 秒 Demo 路径；此前 89.9 秒 RC3 视频只作为完整历史备用，不冒充本次现场时限。
+VisionData Gate 面向**机器视觉算法工程师、方案商交付团队和数据质量负责人**，把图像与标注、质量检查、整改工单、版本复验和模型反馈放进同一个工作台。原始输入保留，整改形成新版本，关键决定由人确认。
 
-- [2026-09-02 最新复赛指南核验](docs/GOAI_SEMIFINAL_GUIDE_20260902.md)
-- [60 秒 Demo 脚本](docs/DEMO_60S_SCRIPT_SEMIFINAL.md)
-- [3 分钟项目陈述稿](docs/DEFENSE_3MIN_SCRIPT_SEMIFINAL.md)
-- [答辩 Q&A 防守卡](docs/DEFENSE_QA_SEMIFINAL.md)
-- [答辩运行手册](docs/SEMIFINAL_DEFENSE_RUNBOOK_20260902.md)
-- [数据来源与合规说明](docs/DATA_SOURCE_AND_COMPLIANCE_SEMIFINAL_RC3.md)
+<p align="center">
+  <img src="docs/assets/workbook-local-synthetic.png" alt="真实图像工作簿：左侧样本列表，中间标注画布，右侧像素量测与灰度剖面" width="100%" />
+  <br />
+  <sub>本地隔离验收截图，使用仓库内合成齿轮样本。框是人工示例标注，曲线来自像素量测，不是模型自动诊断或工厂效果证明。</sub>
+</p>
 
-官方提交与评测状态仍分别为 `PENDING` 和 `NOT_EVALUATED`；公开页面可访问不代表官网提交成功。
+## 为什么需要它
 
-## 公开网页能证明什么
+一次标注返修，难点不只是改好一个框。工程师还要回答：**改的是哪一版？哪些样本仍有问题？新版本是否重新检查过？下一轮训练用了什么数据？**
 
-GitHub Pages 运行同一套 React 多页面工作台的 `PUBLIC_SYNTHETIC_REPLAY` 模式。它不是截图：浏览器会下载冻结 JSON 清单并复算 JCS SHA-256；只有摘要一致时，页面才展示：
+VisionData Gate 连接这段工作：从图像现场定位问题，把整改交给责任人，再用新版本和复验记录完成交接。它可以嵌入已有视觉项目，不要求把整条产线或训练系统推倒重来。
 
-- selected / rejected Workers、选择原因、冻结预算与 triggering evidence；
-- 竞争假设、缺失证据和六阶段 Incident v6 状态；
-- Parent → Human Gate → Derived → Child 血缘，其中公开清单只证明 `human gate=REQUIRED`；
-- `official_submission=PENDING`、`official_evaluation=NOT_EVALUATED` 与 `production_release_allowed=false`。
+## 在工作台里可以做什么
 
-清单缺失、字段漂移或摘要不一致时，页面显示 `FAIL CLOSED`，不会使用嵌入数字补位，也不会制造 PASS。
+| 工作 | 操作 | 留下什么 |
+| --- | --- | --- |
+| 图像与标注 | 导入图像／数据集、框选、保存标注、查看像素与剖面 | 图像身份、标注修订、量测依据 |
+| 数据质检 | 检查曝光、清晰度、重复、标注风险及覆盖情况 | 有证据引用的问题与门禁结果 |
+| Agent 任务 | 查看计划、工具调用；在支持的案件路径中调查证据缺口 | 执行记录、Worker 选择原因、待确认项 |
+| 整改与数据池 | 人工复核、处理工单、派生新版本、独立复验 | 父子版本、整改结果、合格候选或待处理数据 |
+| 模型与反馈 | 配置模型/API，登记本地权重；按条件执行候选训练与反馈复核 | 模型身份、评估记录、下一轮输入关联 |
+| 团队协作 | 管理账户、注册审批、工作区和项目权限 | 可归属的操作与人工决定 |
 
-公开清单的计数固定为 `3 selected / maximum 5 / 2 rejected / 4 hypotheses / 4 external evidence gaps`，且 `public_snapshot_attestation=NOT_ISSUED`；它只证明静态清单 JCS SHA 自一致，不是后端 provenance、上游不可篡改凭证或具名审批回执。另一条 Goal3 本地持久回执是 `5 selected / budget 5 / 3 rejected / Child CONTINUE_HOLD`；两者不是同一案件或同一来源，数字、ETag、SHA 与结论不得互借。
+**候选数据不等于标签真值，检查通过不等于允许生产上线。**缺证据、工具失败或版本变化时，系统保留待处理状态，不默认放行。
 
-## 一次完整任务闭环
+<a id="quickstart"></a>
 
-```text
-授权只读来源
-→ 确定性 Evidence Gate
-→ 竞争假设与证据缺口
-→ 动态补证 Worker
-→ Frozen Policy Judge
-→ 人工闸门 REQUIRED（公开轨不证明具名审批完成）
-→ 私有派生整改
-→ Child Run 同合同复验
-→ 责任队列与 Governed Outcome Envelope
-```
+## 快速开始
 
-AI 可以调查、解释和建议；不能确立根因、批准 CAPA、控制设备或放行生产。
+### 从源码运行本地 Web
 
-## 量化结果与边界
-
-| 证据轨 | 当前结果 | 禁止外推 |
-|---|---|---|
-| 授权私域离线 Pilot | findings `49 → 33`；`6 closed / 43 open`；整改后通过率 `0/1`；转人工调查 | 客户验收、工厂部署、生产恢复 |
-| DynamicBench-v3 | Dynamic 正确终态 `8/8`，Fixed `4/8`；工具调用 `14 vs 24`；故障恢复 `2/2` | 工厂准确率、客户 ROI |
-| 独立复杂冲突配对子集 | Dynamic 误放行 `0/4`，Fixed `4/4` | 与 v3 分母合并 |
-| VisA capsules Normality 开发代理 | 三种子 Image AUROC 均值 `0.657823`；正常图像 FPR `0.277778`；Pixel F1 `0.090093` | 工业模型达标、工厂误放行率；三种子不等于三轮动态调优 |
-| 工厂级误放行/误拦截 | `NOT_MEASURED_PENDING_ADJUDICATION` | 在没有独立双人/QMS 真值时填写百分比 |
-
-详细分母和协议见 [官方反馈闭环](docs/GOAI_SEMIFINAL_OFFICIAL_FEEDBACK_CLOSURE_20260831.md)、[行业场景价值](docs/INDUSTRY_SCENARIO_VALUE.md) 与 [DynamicBench-v3](docs/DYNAMICBENCH_V3.md)。
-
-v3 的输入、期望终态和两种策略均由作者定义，外部模型调用为 0；ReAct/LangGraph 对照尚未执行，不能把固定流水线当作这些外部 Agent。参数、原始记录与最小复现见 [基准复现及自评偏差](docs/BENCHMARK_REPRODUCIBILITY.md)。
-
-固定 prompt-injection v2 集观察到攻击拦截 `12/12`、良性放行 `6/6`、良性误伤 `0/6`；被阻断攻击的远端模型调用为 0。复现命令为 `uv run visiondata-gate prompt-injection-eval --output output/prompt-injection-review.json`，请使用新的输出文件。上述固定集不证明未知、自适应或多模态攻击的普适防护。
-
-## 公开边界
-
-- 只读静态回放；无 Python 后端、账户、API Key 输入或生产写操作；
-- 不包含客户/工厂原图、私域 mask、真实类别名、设备帧、本机数据库、调试日志、API Key、DPAPI 密文、个人提交历史或私有运行回执；
-- 公开二进制逐文件绑定 SHA-256，并经过当前树、完整历史与 Pages 构建三道隐私扫描；
-- AI 不替代质量负责人、客户机构或主管部门的最终判断；
-- 公共镜像使用独立 Git 历史，不包含私有 Release ZIP、PPTX、PDF、视频或完整私有 Git 历史。
-
-完整规则见 [GitHub 与 GitHub Pages 公开边界](docs/PUBLICATION_BOUNDARY.md)。
-
-摘要完整性不等于可信时间或身份签名。若全部本地材料、锚点和验证程序都可被同一方替换，单机 SHA 链不能独立证明旧历史曾存在。参见 [审计信任边界](docs/AUDIT_TRUST_BOUNDARY.md)。
-
-## 本地开发
-
-### Windows 安装候选
-
-[GitHub Releases](https://github.com/dukeandBaron/visiondata-gate/releases) 提供按源码提交和 SHA-256 绑定的 Windows 候选包。下载前先阅读对应 Release 的验证范围；旧标签不会自动包含后续源码修复。
-
-当前源码已修复安装版账户页的三个连接问题：Spring 将桌面 CORS 预检交给 FastAPI 的精确白名单裁决；合法 WebView 写请求同时要求允许来源、正确桌面启动凭证和本机连接；启动配置读取失败后允许用户显式刷新。注册仍采用管理员审批，登录或注册写请求不会自动重放。
-
-安装器仍未签名。每个新安装器必须单独完成资源绑定、原生桌面登录流程和安装/卸载检查，不能继承旧构建的回执。构建与使用边界见 [Windows 安装说明](docs/WINDOWS_INSTALLER.md)。
-
-日常操作使用 **React 工作台**；Tauri 封装同一界面，Streamlit 保留兼容，Reviewer Server 提供证据投影。它们不是四套平行产品。参见 [界面选择](docs/INTERFACE_SUPPORT.md)。
-
-跨平台源码启动（Python 3.12/3.13、uv、Node.js 22.12+）：
+准备 **Git、Python 3.12／3.13、[uv](https://docs.astral.sh/uv/) 和 Node.js 22.12+**。在一个新的工作目录执行：
 
 ```text
+git clone https://github.com/dukeandBaron/visiondata-gate.git
+cd visiondata-gate
 uv sync --extra api --extra qa --locked
 npm --prefix web ci
 uv run python tools/run_cross_platform_workbench.py --check
 uv run python tools/run_cross_platform_workbench.py
 ```
 
-该入口启动本地 API 与 React，不把公开 Pages 变成可写服务；不读取私有 `.env` 或自动调用远端模型。Linux/macOS 实机验收和原生安装包不由源码可运行性推定。CLI、数据目录和会话说明见 [跨平台 Quickstart](docs/CROSS_PLATFORM_QUICKSTART.md)。
+启动器会打开本地浏览器工作台。**首次使用先创建管理员；已有账户则登录。**随后创建工作区与项目，从 [sample_data](sample_data/README.md) 的合成样本开始，体验导入、标注、保存和检查。
 
-Python 内核：
+这条确定性入门路径不要求 GPU 或模型 API Key。使用大模型规划或视觉训练时，再到“模型与 API”配置相应能力。源码启动需要保留启动终端；它不是直接面向公网的部署方案。若仓库当前为私有，克隆和下载需要访问权限。
 
-```powershell
-uv sync --extra api --extra qa --locked
-uv run python -m pytest tests/test_policy_agents.py tests/test_evidence_state.py tests/test_audit_envelope.py
+端口占用、数据目录、重新打开及命令行用法见 [源码启动指南](docs/CROSS_PLATFORM_QUICKSTART.md) 与 [本地会话管理](docs/LOCAL_WORKBENCH.md)。
+
+### 使用 Windows 桌面候选包
+
+前往 [Releases](https://github.com/dukeandBaron/visiondata-gate/releases)，选择带验证回执和 SHA-256 清单的 **Windows x64 候选包**，先阅读对应版本说明再安装。
+
+核心工作台内嵌运行组件；**可选的外部 Python、Torch、Ultralytics 与模型权重不随包分发**。候选安装器未签名，WebView2 是运行前提，独立干净机和同版本升级需另行验收。具体步骤见 [Windows 安装说明](docs/WINDOWS_INSTALLER.md)。
+
+<a id="workflow"></a>
+
+## 一条数据返修如何形成闭环
+
+两种起点，共用同一套数据与审核流程：
+
+- **还没有任务模型**：先整理并复核图像和标注，冻结满足训练准入条件的数据，再建立候选模型。
+- **已经有模型**：登记可信权重与运行环境，结合新增数据或已复核反馈，准备下一轮候选。
+
+```mermaid
+flowchart LR
+  A[导入与标注] --> B[人工复核与冻结]
+  B --> C[确定性质检]
+  C -->|满足准入条件| D[合格候选数据]
+  C -->|发现问题或缺证据| E[整改与补证]
+  E --> F[派生新版本]
+  F --> B
+  D --> G[可选候选模型训练]
+  G --> H[验证与人工复核]
+  H -.->|需要数据返修| E
 ```
 
-React 工作台：
+循环的关键不是“再跑一次”，而是**保留旧版本，用新版本重新验收**：
 
-```powershell
-cd web
-npm ci
-npm run typecheck
-npm run build
-```
+- 原始来源不被整改覆盖；Child Run 独立检查派生数据。
+- 完全重复样本只在审批范围内处理；近重复、划分冲突或标注争议需要进一步复核。
+- “没有发现问题”不能代替正常样本的人工语义确认。
+- 反馈先经人工分类，再关联下一轮数据；验证集、测试集不自动回灌训练。
 
-公开 Pages 构建：
+流程与接口边界见 [平台架构](docs/AGENT_PLATFORM.md)、[数据复核与算力交接](docs/DATASET_REVIEW_AND_COMPUTE.md) 和 [学习反馈工作台](docs/QUALITY_LEARNING_WORKBENCH.md)。
 
-```powershell
-cd web
-$env:VITE_VISIONDATA_PUBLIC_REPLAY = "true"
-$env:VISIONDATA_WEB_BASE_PATH = "/visiondata-gate-public/"
-npm run build
-python ..\tools\check_public_pages.py --dist dist
-```
+<a id="agent"></a>
 
-本地真实工作台、BYOK Provider、Hosted AgentTeams 和桌面封装具有更强的本机信任边界；请先阅读 [运行说明](docs/RUNNING.md)、[API 快速上手](docs/API_QUICKSTART.md) 与 [外部模型配置](docs/EXTERNAL_MODEL_CONFIGURATION.md)。
+## Agent 在哪里，人又负责什么
 
-## 可复用资产
+**Agent 负责组织任务和证据，专业工具负责测量，人负责关键判断。**
 
-- `src/visiondata_gate/`：受控 Agent 内核、证据、CAPA、血缘与门禁；
-- `schemas/`、`rulepacks/`、`skills/`：可迁移合同与工业规则；
-- `adapters/`、`agentteams/`：外部系统的显式适配边界；
-- `sample_data/`：固定 seed 合成样本与 SHA-256 清单；
-- `web/`：React/Tauri 多页面工作台与静态公开回放；
-- `tests/`：合同、失败关闭、安全边界和回放验证。
+单图取证用于查看当前图像、标注及问题依据；项目快照任务按冻结合同执行确定性检查。需要调查竞争假设、缺失证据和下一步补证时，使用 **Incident 案件编排路径**：可以查看 Worker 的选择／排除原因、预算、工具回执以及人工确认后的续跑记录。
 
-接口存在不等于外部平台已经连接。CVAT/FiftyOne 已完成本地合同验证；MES、OPC UA、PLC、VisionMaster 和 Hosted AgentTeams 在取得真实身份与探测回执前保持未连接。
+这三条路径有不同职责。**不是每次上传都调用大模型，也不是每个任务都动态重规划。**是否实际调用、调用了什么、还有哪些证据缺失，以该次任务保存的记录为准。
 
-第三方 Python 集成应从 [公共 API 与兼容合同](docs/PUBLIC_API.md) 选择入口；文件带版本号不代表旧协议已经弃用。外部建议的核实结果见 [review 逐项响应](docs/EXTERNAL_REVIEW_RESPONSE.md)。
+系统不把模型建议当成已验证的根因，不替人批准整改或生产放行。配置提供方也不等于已经调用它。详情见 [Agent 平台](docs/AGENT_PLATFORM.md)、[模型规划配置](docs/INCIDENT_MODEL_PLANNER.md) 与 [用量和中断恢复](docs/AGENT_PLATFORM_OPERATIONS.md)。
 
-[工程质量门禁](docs/ENGINEERING_QUALITY_IMPLEMENTATION.md) 提供独立工具锁、限定范围类型检查、逐文件行/分支覆盖率和安全扫描。广域类型债务与静态安全告警仍明确保留，不把 scoped PASS 写成全仓或生产安全认证。
+## 接入已有工程流程
 
-当前尚有一项来自 Tauri Linux GTK 依赖链的 `glib 0.18.5` 中等级上游告警；Windows 目标不编译该依赖，Linux 桌面仍保持 HOLD。依赖链与处理边界记录在 [独立质量工具说明](quality/README.md)。
+- **本地数据与模型**：图像和业务记录留在选定的数据目录；模型服务由使用者显式配置，不因打开页面自动调用外部模型。
+- **工具与标注生态**：通过 REST API、Schema、Rule Pack 和 Adapter 扩展。CVAT／FiftyOne 的本地往返合同不等于目标服务已连接。
+- **算力交接**：保留 CANN／昇腾等后续调度入口；当前离线交接状态为 `PREPARED_NOT_SUBMITTED`，不是集群作业提交成功。
 
-完整 Git 历史隐私扫描也仍为 HOLD：当前可达历史中有 12 个非 noreply 身份提交，其中 9 个是既有作者记录，另 3 个是 GitHub 对 PR #21 执行服务端 rebase 时产生的提交者记录。GitHub/Dependabot Bot 的标准签名格式和 3 个经逐 SHA 复核的历史工作台截图已不再产生误报，但没有把私人邮箱加入白名单，也没有重写远端历史。`tools/export_public_repository.py` 生成的 history-free 快照具有独立门禁；它通过只说明当前导出文件树可公开，不等于完整历史已经通过。
+不承诺任意格式开箱即用，也不将 MES、PLC、OPC UA 等未验证的连接写成已接入。接入前请查看 [公共 API](docs/PUBLIC_API.md) 和 [外部模型配置](docs/EXTERNAL_MODEL_CONFIGURATION.md)。
 
-## 状态
+<a id="verification"></a>
 
-```text
-github_source=ACTIVE_ENGINEERING_SOURCE
-history_free_public_snapshot=REQUIRES_CURRENT_SHA_BOUND_MANIFEST
-full_git_history_privacy=HOLD_PENDING_AUTHORIZED_HISTORY_REWRITE
-windows_release=UNSIGNED_LOCAL_CANDIDATE
-installed_native_gui=REQUIRES_PER_BUILD_RECEIPT
-clean_machine_validation=NOT_RUN
-industrial_model_effectiveness=HOLD
-official_submission=PENDING
-official_evaluation=NOT_EVALUATED
-factory_shadow_metrics=NOT_MEASURED_PENDING_ADJUDICATION
-production_release_allowed=false
-authority=human_only
-```
+## 验证与使用边界
 
-源码、Pages、安装器和模型运行分别绑定自己的提交或摘要；任何一层成功都不会自动改变比赛、客户、工厂或生产状态。
+项目持续验证本地流程、权限、失败恢复和数据身份；**工程测试通过不等于工业模型达标或客户收益成立**。
 
-## License 与供应链
+- **编排**：DynamicBench-v3 提供固定合成场景的对照与复现，不代表胜过未经实测的外部 Agent 框架。
+- **模型**：可运行训练或推理流程，不等于精度足够；当前工业模型效果仍保留 HOLD。
+- **安装**：每个 Windows 候选绑定自己的源码与回执，旧包的通过记录不自动适用于新构建。
+- **数据与权限**：生产决定由人确认，`production_release_allowed=false`；工厂误放行／误拦截仍为 `NOT_MEASURED_PENDING_ADJUDICATION`。
 
-版本内容见 [CHANGELOG](CHANGELOG.md)，引用软件可使用 [CITATION.cff](CITATION.cff)。已有 GitHub prerelease 不代表 PyPI 已发布；发布新包或新安装器前请按 [发布准备](docs/RELEASE_PREPARATION.md) 验证对应源码和产物。
+完整 Git 历史的隐私处理仍是独立待办；**经审查的无历史快照，不等于整个 Git 历史可以公开**。静态合成回放也不等于本地可写工作台或工厂在线连接。
 
-代码采用 [Apache License 2.0](LICENSE)，版权与声明见 [NOTICE](NOTICE)。合并 CycloneDX SBOM 同时绑定 `uv.lock`、`web/package-lock.json` 与 `web/src-tauri/Cargo.lock`；依赖、SPDX 和第三方许可证证据见 [SBOM](docs/SBOM.cdx.json)、[Cargo 许可证快照](docs/CARGO_LICENSES.locked.json)、[第三方依赖清单](docs/THIRD_PARTY_LICENSE_INVENTORY.generated.md) 与 [Notices](docs/THIRD_PARTY_NOTICES.md)。
+日期化结果、实验分母、安装回执与剩余限制集中在 [验证与交付状态](docs/README_STATUS_AND_EVIDENCE.md)。声明规则见 [Claim Scope](docs/CLAIM_SCOPE.md)，安全问题请按 [SECURITY.md](SECURITY.md) 报告。
 
-参与开发前请阅读 [贡献指南](CONTRIBUTING.md)、[安全策略](SECURITY.md) 与 [社区行为准则](CODE_OF_CONDUCT.md)。请勿在 Issue 或 PR 中上传真实工厂数据、密钥、个人信息或私有运行回执。
+<a id="docs"></a>
+
+## 文档与参与
+
+| 想做什么 | 从这里开始 |
+| --- | --- |
+| 本地运行或安装桌面候选 | [源码启动](docs/CROSS_PLATFORM_QUICKSTART.md) · [Windows 安装](docs/WINDOWS_INSTALLER.md) |
+| 理解任务、复验和版本关系 | [平台架构](docs/AGENT_PLATFORM.md) · [数据复核](docs/DATASET_REVIEW_AND_COMPUTE.md) |
+| 配置模型、API 与恢复 | [外部模型](docs/EXTERNAL_MODEL_CONFIGURATION.md) · [平台操作](docs/AGENT_PLATFORM_OPERATIONS.md) |
+| 核对实验和工程质量 | [基准复现](docs/BENCHMARK_REPRODUCIBILITY.md) · [工程质量](docs/ENGINEERING_QUALITY_IMPLEMENTATION.md) |
+| 扩展功能或参与贡献 | [公共 API](docs/PUBLIC_API.md) · [贡献指南](CONTRIBUTING.md) · [Issues](https://github.com/dukeandBaron/visiondata-gate/issues) |
+
+欢迎围绕数据导入、标注往返、失败恢复和可复现实验提出问题或贡献。提交 Issue／PR 时请使用最小合成示例，**不要附带客户图像、密钥、个人信息或私有运行回执**。
+
+## License
+
+项目代码采用 [Apache-2.0](LICENSE)，声明见 [NOTICE](NOTICE)。可选模型、权重、训练运行环境和第三方组件遵循各自许可证；独立进程不豁免 Ultralytics 的 AGPL／Enterprise 许可义务。
+
+[版本记录](CHANGELOG.md) · [软件引用](CITATION.cff) · [SBOM](docs/SBOM.cdx.json) · [第三方声明](docs/THIRD_PARTY_NOTICES.md) · [发布准备](docs/RELEASE_PREPARATION.md)

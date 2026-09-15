@@ -106,6 +106,7 @@ PUBLIC_EXACT_FILES = {
     "docs/PROJECT_STATUS.md",
     "docs/PUBLICATION_BOUNDARY.md",
     "docs/PUBLIC_REPOSITORY_README.md",
+    "docs/README_STATUS_AND_EVIDENCE.md",
     "docs/RC3_DELIVERY_CONTRACT.md",
     "docs/RELEASE_ATTESTATION_V1.md",
     "docs/RUNNING.md",
@@ -117,6 +118,7 @@ PUBLIC_EXACT_FILES = {
     "docs/TOOL_REPLAY_AND_MIGRATION.md",
     "docs/PUBLIC_BINARY_REVIEW.json",
     "docs/assets/web-command-center.png",
+    "docs/assets/workbook-local-synthetic.png",
     "gateway/pom.xml",
 }
 
