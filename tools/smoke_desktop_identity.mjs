@@ -1,4 +1,4 @@
-/** Verify a DevTools-enabled internal WebView; release installers use UIA smoke. */
+/** Verify a DevTools-enabled internal WebView; release installers use the UIA smoke. */
 import assert from 'node:assert/strict';
 import { createHash, randomBytes } from 'node:crypto';
 import { spawn } from 'node:child_process';
@@ -12,9 +12,14 @@ import {
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+const validationMode = 'DEVTOOLS_ENABLED_INTERNAL_ONLY';
+assert.equal(
+  process.env.VDG_EXPECT_DEVTOOLS_ENABLED,
+  'true',
+  'release builds disable DevTools; use smoke_desktop_identity_uia.ps1',
+);
+
 const [application, workRoot, mode = 'full'] = process.argv.slice(2);
-assert.equal(process.env.VDG_EXPECT_DEVTOOLS_ENABLED, 'true',
-  'release builds disable DevTools; use smoke_desktop_identity_uia.ps1');
 assert.ok(application && path.isAbsolute(application) && existsSync(application));
 assert.ok(
   workRoot && path.isAbsolute(workRoot) && !existsSync(workRoot),
@@ -205,7 +210,7 @@ try {
     path.join(workRoot, 'IDENTITY_DESKTOP_SMOKE.json'),
     JSON.stringify({
       status,
-      validation_mode: 'DEVTOOLS_ENABLED_INTERNAL_ONLY',
+      validation_mode: validationMode,
       application_sha256: createHash('sha256')
         .update(readFileSync(application))
         .digest('hex'),
@@ -225,6 +230,7 @@ try {
     path.join(workRoot, 'FAILURE.json'),
     JSON.stringify({
       status: 'FAIL',
+      validation_mode: validationMode,
       name: error?.name || 'Error',
       message: String(error?.message || error),
       actions,

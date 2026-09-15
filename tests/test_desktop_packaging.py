@@ -230,9 +230,44 @@ def test_desktop_identity_smoke_is_portable_explicit_and_fail_closed() -> None:
     assert smoke_path.is_file()
     source = smoke_path.read_text(encoding="utf-8")
     assert "VDG_PLAYWRIGHT_MODULE" in source
+    assert "VDG_EXPECT_DEVTOOLS_ENABLED" in source
+    assert "DEVTOOLS_ENABLED_INTERNAL_ONLY" in source
     assert "PASS_REAL_DESKTOP_IDENTITY" in source
     assert "clean_machine_validation: 'NOT_RUN'" in source
     assert "production_release_allowed: false" in source
     assert "!existsSync(workRoot)" in source
     assert "D:/Users/" not in source
     assert "C:/Users/" not in source
+
+
+def test_release_identity_smoke_uses_windows_accessibility_without_devtools() -> None:
+    smoke_path = PROJECT_ROOT / "tools" / "smoke_desktop_identity_uia.ps1"
+    assert smoke_path.is_file()
+    source = smoke_path.read_text(encoding="utf-8")
+    assert "UIAutomationClient" in source
+    assert "--force-renderer-accessibility" in source
+    assert "--remote-debugging-port" not in source
+    assert "PASS_REAL_DESKTOP_IDENTITY_UIA" in source
+    assert "clean_machine_validation" in source
+    assert "NOT_RUN" in source
+    assert "production_release_allowed" in source
+    assert "machine_write_permitted" in source
+    assert "CloseMainWindow" in source
+    assert "Kill" not in source
+    start_desktop = source.split("function Start-Desktop", 1)[1].split(
+        "function Stop-Desktop", 1
+    )[0]
+    assert "RootWebArea" in start_desktop
+    assert "创建首个管理员" not in start_desktop
+    login = source.split("function Login", 1)[1].split(
+        "function Open-Account", 1
+    )[0]
+    assert "工作空间导航" in login
+    assert "任务总览" not in login
+    assert "[string]$item.Current.Name" in source
+    assert '-NameContains $memberDisplay' in source
+    assert '-NameContains "$memberDisplay ·"' not in source
+    guide = (PROJECT_ROOT / "docs/WINDOWS_INSTALLER.md").read_text(encoding="utf-8")
+    assert "PASS_REAL_DESKTOP_IDENTITY_UIA" in guide
+    assert "--force-renderer-accessibility" in guide
+    assert "发布版不启用 DevTools" in guide

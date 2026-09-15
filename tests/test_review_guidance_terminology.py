@@ -236,3 +236,43 @@ def test_product_docs_surface_latest_model_and_installer_boundaries() -> None:
         "BUILD_COMPLETE_VALIDATION_PENDING",
     ):
         assert artifact in installer
+
+
+def test_final_windows_candidate_is_sha_bound_without_widening_release_claims() -> None:
+    report_path = "docs/WINDOWS_CANDIDATE_CA1FA7B_20260915.md"
+    release_url = (
+        "https://github.com/dukeandBaron/visiondata-gate/releases/tag/"
+        "windows-local-ca1fa7b-20260915"
+    )
+    assert _selected(report_path)
+    report = _read(report_path)
+    for token in (
+        "ca1fa7b1727535014e8723e5bceb4d539272cf2b",
+        "09468a0d148017717b2932fc940f17caa378e46fef88ededf582accfea6d05f0",
+        "40b381bfb48088bd77d8912660ce9313784f119998451a714d691083c494b33b",
+        "PASS_EXTRACTED_PLATFORM_POSTVALIDATION",
+        "PASS_LOCAL_INSTALLED_SMOKE",
+        "PASS_REAL_DESKTOP_IDENTITY_UIA",
+        "clean_machine_validation=NOT_RUN",
+        "production_release_allowed=false",
+    ):
+        assert token in report
+    for path in (
+        "README.md",
+        "docs/PUBLIC_REPOSITORY_README.md",
+        "docs/README_STATUS_AND_EVIDENCE.md",
+        "docs/VERSION_EVOLUTION.md",
+    ):
+        document = _read(path)
+        assert "windows-local-ca1fa7b-20260915" in document
+        assert "WINDOWS_CANDIDATE_CA1FA7B_20260915.md" in document
+    for path in (
+        "README.md",
+        "docs/PUBLIC_REPOSITORY_README.md",
+        "docs/README_STATUS_AND_EVIDENCE.md",
+        report_path,
+    ):
+        assert release_url in _read(path)
+    assert "new_windows_installer_for_current_source=NOT_BUILT" not in _read(
+        "docs/VERSION_EVOLUTION.md"
+    )
