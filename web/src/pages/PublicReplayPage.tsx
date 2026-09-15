@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { BrowserLocalImageLab } from "../components/BrowserLocalImageLab";
+import "../styles/public-workbook.css";
 import { InspectionCanvas } from "../components/visuals";
 import {
   ClaimBoundary,
@@ -204,11 +205,9 @@ function Workspace({ manifest }: { manifest: PublicReplayManifest }) {
   const syntheticCase = cases.find((item) => item.id === "synthetic-v3");
   return (
     <>
-      <BrowserLocalImageLab />
-      <div className="public-reference-divider">
-        <span>SHA-BOUND REFERENCE</span>
-        <strong>以下是独立的冻结合成回放，不会读取上方用户图片</strong>
-      </div>
+      <details className="public-workbook-reference">
+      <summary>查看独立合成案例与清单校验 · 不使用当前导入图片</summary>
+      <PublicManifestGate manifest={manifest} />
       <div className="public-workspace-grid">
         <Panel variant="raised">
           <PanelHeader
@@ -231,6 +230,7 @@ function Workspace({ manifest }: { manifest: PublicReplayManifest }) {
           </div>
         </Panel>
       </div>
+      </details>
     </>
   );
 }
@@ -461,6 +461,21 @@ function renderView(view: PublicReplayView, manifest: PublicReplayManifest) {
 export function PublicReplayPage({ view }: { view: PublicReplayView }) {
   const state = usePublicReplayManifest();
   const copy = viewCopy[view];
+
+  // Local image operations do not depend on the independent replay manifest.
+  // A missing manifest must block replay facts, not erase the user's local work.
+  if (view === "workspace") {
+    return (
+      <div className="public-workbook-page">
+        <BrowserLocalImageLab />
+        {state.status === "VERIFIED" ? <Workspace manifest={state.manifest} /> : <>
+          <div className="public-workbook-manifest-status" role="status">
+            {state.status === "LOADING" ? "正在核验独立合成清单；本地图像操作可继续。" : "独立合成清单不可用，回放暂停；本地图像未作为回放证据。"}
+          </div>
+        </>}
+      </div>
+    );
+  }
 
   if (state.status === "LOADING") {
     return (

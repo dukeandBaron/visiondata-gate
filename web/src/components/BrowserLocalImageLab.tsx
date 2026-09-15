@@ -8,8 +8,13 @@ import {
   LockKeyhole,
   MousePointer2,
   ScanLine,
-  ShieldCheck,
   Trash2,
+  Search,
+  SquareDashed,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Bot,
 } from "lucide-react";
 import {
   useEffect,
@@ -20,7 +25,8 @@ import {
   type DragEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { Panel, PanelHeader, StatusBadge } from "./ui";
+import { Panel, StatusBadge } from "./ui";
+import { Link } from "react-router-dom";
 import "../styles/browser-local-image-lab.css";
 
 const MAX_FILE_BYTES = 32 * 1024 * 1024;
@@ -245,7 +251,13 @@ export function BrowserLocalImageLab() {
   const [busy, setBusy] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string>();
+  const [query, setQuery] = useState("");
+  const [tool, setTool] = useState<"select" | "box">("box");
+  const [zoom, setZoom] = useState(1);
+  const [inspector, setInspector] = useState<"properties" | "agent">("properties");
   const inputRef = useRef<HTMLInputElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [viewportSize, setViewportSize] = useState({ width: 480, height: 480 });
   const assetsRef = useRef<LocalAsset[]>([]);
 
   useEffect(() => {
@@ -257,7 +269,21 @@ export function BrowserLocalImageLab() {
   }, []);
 
   const activeAsset = assets.find((asset) => asset.id === selectedId) ?? assets[0];
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const measure = () => setViewportSize({ width: viewport.clientWidth, height: viewport.clientHeight });
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [activeAsset?.id]);
+  const fittedWidth = activeAsset ? activeAsset.width * Math.min(
+    Math.max(1, viewportSize.width - 48) / activeAsset.width,
+    Math.max(1, viewportSize.height - 48) / activeAsset.height,
+  ) : 0;
   const activeBoxes = activeAsset ? annotations[activeAsset.id] ?? [] : [];
+  const visibleAssets = assets.filter(asset => `${asset.name} ${asset.sha256}`.toLowerCase().includes(query.toLowerCase()));
   const signalTone = activeAsset?.measurements.signal === "MEASURED" ? "success" : "warning";
   const trace = useMemo(() => {
     if (!activeAsset) return [];
@@ -312,6 +338,8 @@ export function BrowserLocalImageLab() {
     setAnnotations({});
     setDraft(undefined);
     setError(undefined);
+    setQuery("");
+    setZoom(1);
   };
 
   const imagePoint = (
@@ -326,7 +354,7 @@ export function BrowserLocalImageLab() {
   };
 
   const beginBox = (event: ReactPointerEvent<SVGSVGElement>) => {
-    if (!activeAsset || event.button !== 0) return;
+    if (!activeAsset || tool !== "box" || event.button !== 0) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     const point = imagePoint(event, activeAsset);
     setDraft({ startX: point.x, startY: point.y, endX: point.x, endY: point.y });
@@ -406,25 +434,25 @@ export function BrowserLocalImageLab() {
   const draftBox = draft ? normalizedDraft(draft) : undefined;
 
   return (
-    <section className="browser-local-lab" aria-label="浏览器本地图像取证台">
-      <div className="browser-local-airgap">
-        <div>
-          <ShieldCheck size={17} />
-          <span><strong>BROWSER-LOCAL AIR GAP</strong> 文件 → 当前标签页内存 → 本地证据</span>
+    <section className="browser-local-lab operator-workspace" aria-label="浏览器本地图像取证台">
+      <header className="operator-commandbar public-workbook-commandbar">
+        <div className="operator-commandbar__title">
+          <span className="operator-kicker">当前工作簿</span>
+          <strong>图像工作簿</strong>
+          <span>浏览器本地 · {assets.length} 张图片 · 刷新后清空</span>
         </div>
-        <small>无网络上传 · 无后端 · 无模型调用 · 刷新即清空</small>
-      </div>
+        <div className="operator-commandbar__actions">
+          <button type="button" onClick={() => inputRef.current?.click()} disabled={busy || assets.length >= MAX_ASSETS}><ImagePlus size={15} />导入图像</button>
+          <button type="button" onClick={exportReceipt} disabled={!activeAsset}><Download size={15} />导出本地标注与证据</button>
+          <Link to="/command-center">查看合成任务</Link>
+        </div>
+      </header>
 
       <Panel variant="raised">
-        <PanelHeader
-          eyebrow="REAL INPUT · EPHEMERAL SESSION"
-          title="浏览器本地图像取证台"
-          detail="选择你自己的图片，现场计算真实文件哈希和像素测量；结果不与冻结合成案件混算。"
-          actions={<StatusBadge tone="success">BROWSER LOCAL</StatusBadge>}
-        />
-
         <div className="browser-local-grid">
           <aside className="browser-local-assets">
+            <div className="public-workbook-section-title"><FileImage size={14} />图像资产 <span>{assets.length} / {MAX_ASSETS}</span></div>
+            <label className="public-workbook-search"><Search size={14} /><input aria-label="按文件名或 SHA 筛选图片" placeholder="按文件名或 SHA 筛选" value={query} onChange={event => setQuery(event.target.value)} /></label>
             <button
               type="button"
               className={`browser-local-dropzone${dragActive ? " is-active" : ""}`}
@@ -456,18 +484,19 @@ export function BrowserLocalImageLab() {
             />
 
             <div className="browser-local-asset-list" aria-label="当前标签页图片">
-              {assets.map((asset, index) => (
+              {visibleAssets.map((asset) => (
                 <button
                   type="button"
                   key={asset.id}
                   className={asset.id === activeAsset?.id ? "is-active" : ""}
-                  onClick={() => { setSelectedId(asset.id); setDraft(undefined); }}
+                  onClick={() => { setSelectedId(asset.id); setDraft(undefined); setZoom(1); }}
                 >
-                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <img src={asset.objectUrl} alt="" className="public-workbook-thumbnail" />
                   <div><strong>{asset.name}</strong><small>{asset.width}×{asset.height} · {formatBytes(asset.sizeBytes)}</small></div>
                   {asset.duplicateOf ? <em>DUP</em> : <FileImage size={14} />}
                 </button>
               ))}
+              {assets.length > 0 && !visibleAssets.length ? <p className="public-workbook-hint">没有匹配图片；筛选不会删除图像。</p> : null}
             </div>
 
             {assets.length ? (
@@ -478,14 +507,19 @@ export function BrowserLocalImageLab() {
           </aside>
 
           <div className="browser-local-canvas">
+            <div className="public-workbook-tools" role="toolbar" aria-label="图像工具栏">
+              <button type="button" aria-pressed={tool === "select"} onClick={() => {setTool("select"); setDraft(undefined);}}><MousePointer2 size={14} />查看</button>
+              <button type="button" aria-pressed={tool === "box"} onClick={() => setTool("box")}><SquareDashed size={14} />框选</button>
+              <span className="public-workbook-tool-spacer" />
+              <button type="button" aria-label="缩小图像" disabled={!activeAsset || zoom <= .5} onClick={() => setZoom(value => Math.max(.5, value - .25))}><ZoomOut size={14} /></button>
+              <output aria-label="图像缩放" title="相对于适应画布的尺寸">{Math.round(zoom * 100)}%</output>
+              <button type="button" aria-label="放大图像" disabled={!activeAsset || zoom >= 2} onClick={() => setZoom(value => Math.min(2, value + .25))}><ZoomIn size={14} /></button>
+              <button type="button" aria-label="重置图像缩放" onClick={() => setZoom(1)}><Maximize2 size={14} /></button>
+            </div>
             {activeAsset ? (
               <>
-                <header>
-                  <div><MousePointer2 size={14} /><span>在图像上拖动以框选复核区域</span></div>
-                  <strong>{activeBoxes.length} BOXES</strong>
-                </header>
-                <div className="browser-local-canvas__viewport">
-                  <div className="browser-local-canvas__stage">
+                <div className="browser-local-canvas__viewport" ref={viewportRef}>
+                  <div className="browser-local-canvas__stage" style={{width: fittedWidth * zoom, maxWidth: "none"}}>
                     <img src={activeAsset.objectUrl} alt={`当前本地图片：${activeAsset.name}`} />
                     <svg
                       viewBox={`0 0 ${activeAsset.width} ${activeAsset.height}`}
@@ -495,6 +529,7 @@ export function BrowserLocalImageLab() {
                       onPointerUp={finishBox}
                       onPointerCancel={() => setDraft(undefined)}
                       aria-label="浏览器本地框选画布"
+                      style={{cursor: tool === "box" ? "crosshair" : "default"}}
                     >
                       {activeBoxes.map((box) => (
                         <g key={box.id}>
@@ -510,19 +545,33 @@ export function BrowserLocalImageLab() {
             ) : (
               <div className="browser-local-empty">
                 <ScanLine size={36} />
-                <strong>等待真实图片输入</strong>
-                <span>图片只在当前浏览器标签页解码，不会发送到 GitHub 或第三方服务。</span>
+                <strong>把图片放进工作簿，开始检查</strong>
+                <span>导入图像 → 查看像素与重复信息 → 人工框选 → 导出本地证据</span>
+                <button type="button" onClick={() => inputRef.current?.click()} disabled={busy}>导入第一张图片</button>
+                <small>文件只在当前标签页处理，不上传服务器。</small>
               </div>
             )}
+            <footer className="public-workbook-canvas-status"><span>{activeAsset ? `${activeAsset.width} × ${activeAsset.height} · ${activeAsset.type}` : "等待图像"}</span><span>{activeBoxes.length} 个手工框 · {tool === "box" ? "框选模式" : "查看模式"}</span></footer>
           </div>
 
           <aside className="browser-local-inspector">
-            {activeAsset ? (
+            <div className="inspector-tabbar public-workbook-inspector-tabs" role="tablist" aria-label="图片工作面板">
+              <button type="button" role="tab" aria-selected={inspector === "properties"} onClick={() => setInspector("properties")}><Gauge size={14} />属性与测量</button>
+              <button type="button" role="tab" aria-selected={inspector === "agent"} onClick={() => setInspector("agent")}><Bot size={14} />Agent</button>
+            </div>
+            {inspector === "agent" ? <div className="public-workbook-agent-boundary" role="tabpanel">
+              <Bot size={24} /><strong>把界面操作与真实任务分开</strong>
+              <p>当前图片已在浏览器中处理，但没有启动后端 Agent，也没有生成 CAPA 工单。</p>
+              <Link to="/command-center">查看独立的合成 Agent 案例</Link>
+              <a href="https://github.com/dukeandBaron/visiondata-gate#quickstart" target="_blank" rel="noreferrer">运行完整本地工作台</a>
+            </div> : activeAsset ? (
               <>
+                <dl className="public-workbook-properties"><div><dt>文件</dt><dd>{activeAsset.name}</dd></div><div><dt>尺寸</dt><dd>{activeAsset.width} × {activeAsset.height}</dd></div><div><dt>大小</dt><dd>{formatBytes(activeAsset.sizeBytes)}</dd></div><div><dt>存储</dt><dd>当前标签页内存</dd></div></dl>
                 <div className="browser-local-signal">
                   <span>SCREENING SIGNAL</span>
                   <StatusBadge tone={signalTone}>{activeAsset.measurements.signal}</StatusBadge>
                 </div>
+                {activeAsset.duplicateOf ? <div className="public-workbook-duplicate" role="status">字节重复：与 {activeAsset.duplicateOf} 相同。此处未提供 train/val 划分，不能据此判断跨集泄漏。</div> : null}
                 <div className="browser-local-metrics">
                   <article><Gauge size={15} /><span>平均亮度</span><strong>{activeAsset.measurements.meanLuma.toFixed(1)}</strong></article>
                   <article><Focus size={15} /><span>Laplacian 方差</span><strong>{activeAsset.measurements.laplacianVariance.toFixed(1)}</strong></article>
@@ -542,6 +591,8 @@ export function BrowserLocalImageLab() {
                   <Download size={15} /> 导出本地证据 JSON
                 </button>
                 {activeBoxes.length ? (
+                  <div className="public-workbook-annotations"><div className="public-workbook-section-title">手工标注 <span>{activeBoxes.length}</span></div>
+                    {activeBoxes.map((box, index) => <div className="public-workbook-annotation" key={box.id}><span>#{index + 1} {box.label}</span><small>x {box.x.toFixed(1)} · y {box.y.toFixed(1)} · w {box.width.toFixed(1)} · h {box.height.toFixed(1)}</small></div>)}
                   <button
                     type="button"
                     className="browser-local-undo"
@@ -549,13 +600,14 @@ export function BrowserLocalImageLab() {
                   >
                     清除框选
                   </button>
+                  </div>
                 ) : null}
               </>
             ) : (
               <div className="browser-local-boundary">
                 <LockKeyhole size={24} />
-                <strong>本地会话尚未建立</strong>
-                <span>不创建账户，不保存 Cookie 身份，不读取 API Key。</span>
+                <strong>选择图片查看属性</strong>
+                <span>文件信息、实际像素测量、重复提示和人工标注将在这里显示。</span>
               </div>
             )}
           </aside>

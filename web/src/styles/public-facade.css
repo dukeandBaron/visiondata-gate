@@ -16,12 +16,6 @@
   --font-facade-display: "Bahnschrift SemiCondensed", "Arial Narrow", "Noto Sans SC", "Microsoft YaHei UI", sans-serif;
   --font-facade-body: "Segoe UI Variable Text", "Noto Sans SC", "Microsoft YaHei UI", system-ui, sans-serif;
   --font-facade-mono: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
-  --line: #344552;
-  --line-strong: #718594;
-  --line-soft: rgba(225, 240, 251, 0.11);
-  --accent-primary: #69d2ff;
-  --accent-secondary: #a9dff5;
-  --accent-primary-soft: rgba(105, 210, 255, 0.12);
 }
 
 :root[data-runtime-mode="public-replay"] body {
@@ -764,12 +758,17 @@
 /* The public replay remains the same workbench, but the visual frame now uses
    hard calibration lines and one controlled status accent. */
 :root[data-runtime-mode="public-replay"] .linear-shell {
-  background: #071019;
+  background: var(--bg-0);
+  --facade-cyan: var(--accent-primary);
+  --facade-cyan-soft: var(--accent-primary-soft);
+  --facade-white: var(--text-strong);
+  --facade-steel: var(--muted);
+  --facade-muted: var(--muted-2);
 }
 
 :root[data-runtime-mode="public-replay"] .linear-sidebar {
-  border-right-color: rgba(240, 248, 253, 0.56);
-  background: #071019;
+  border-right-color: var(--line);
+  background: var(--bg-1);
 }
 
 :root[data-runtime-mode="public-replay"] .linear-topbar,
@@ -779,11 +778,7 @@
 }
 
 :root[data-runtime-mode="public-replay"] .linear-content {
-  background:
-    linear-gradient(rgba(226, 241, 251, 0.022) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(226, 241, 251, 0.022) 1px, transparent 1px),
-    #091119;
-  background-size: 32px 32px;
+  background: var(--bg-0);
 }
 
 :root[data-runtime-mode="public-replay"] .linear-public-home,
@@ -807,9 +802,9 @@
 }
 
 :root[data-runtime-mode="public-replay"] .public-replay-banner {
-  border-top-color: rgba(242, 249, 253, 0.48);
-  border-bottom-color: rgba(242, 249, 253, 0.88);
-  background: #0a2638;
+  border-color: var(--line);
+  background: var(--surface-subtle);
+  color: var(--muted);
   box-shadow: none;
 }
 
@@ -817,13 +812,13 @@
 :root[data-runtime-mode="public-replay"] .public-replay-page .metric {
   border-color: rgba(229, 241, 249, 0.36);
   border-radius: 2px;
-  background: rgba(10, 21, 30, 0.95);
+  background: var(--surface);
   box-shadow: none;
 }
 
 :root[data-runtime-mode="public-replay"] .public-replay-page .panel--raised {
   border-color: rgba(242, 249, 253, 0.68);
-  background: #0c1822;
+  background: var(--surface-raised);
 }
 
 :root[data-runtime-mode="public-replay"] .public-replay-integrity,

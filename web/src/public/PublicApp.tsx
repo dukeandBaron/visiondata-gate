@@ -8,7 +8,8 @@ import { TaskGuidePage } from "../pages/TaskGuidePage";
 export function App() {
   return (
     <Routes>
-      <Route path="/" element={<PublicLandingPage />} />
+      <Route path="/" element={<Navigate to="/workspace" replace />} />
+      <Route path="/about" element={<PublicLandingPage />} />
       <Route element={<AppShell />}>
         <Route path="/start" element={<TaskGuidePage />} />
         <Route path="/pilot" element={<PilotPlanPage />} />

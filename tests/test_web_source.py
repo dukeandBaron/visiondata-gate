@@ -30,8 +30,9 @@ def test_public_facade_is_manifest_bound_and_fail_closed() -> None:
     assert "manifest.worker_selection.budget" in landing
     assert "missing_evidence" in landing
 
-    assert '<Route path="/" element={<PublicLandingPage />} />' in public_app
-    assert 'to={publicReplayMode ? "/" : "/workspace"}' in shell
+    assert '<Route path="/" element={<Navigate to="/workspace" replace />} />' in public_app
+    assert '<Route path="/about" element={<PublicLandingPage />} />' in public_app
+    assert 'to={publicReplayMode ? "/about" : "/workspace"}' in shell
     assert 'document.documentElement.dataset.runtimeMode = publicReplayMode' in main
     assert 'data-runtime-mode="public-replay"' in styles
     assert ".facade-gate-spine::before" in styles
@@ -39,6 +40,24 @@ def test_public_facade_is_manifest_bound_and_fail_closed() -> None:
     assert 'property="og:title"' in html
     assert 'property="og:image"' in html
     assert '%BASE_URL%favicon.svg' in html
+
+
+def test_public_workbook_uses_operational_layout_without_backend_authority() -> None:
+    page = _source("pages/PublicReplayPage.tsx")
+    lab = _source("components/BrowserLocalImageLab.tsx")
+    styles = _source("styles/public-workbook.css")
+    assert 'if (view === "workspace")' in page
+    assert 'className="public-workbook-page"' in page
+    assert '<details className="public-workbook-reference">' in page
+    assert 'className="operator-commandbar public-workbook-commandbar"' in lab
+    assert 'aria-label="按文件名或 SHA 筛选图片"' in lab
+    assert 'aria-label="图像工具栏"' in lab
+    assert 'tool !== "box"' in lab
+    assert 'backend_connected: false' in lab
+    assert 'server_sealed: false' in lab
+    assert 'production_release_allowed: false' in lab
+    assert 'var(--accent-primary)' in styles
+    assert 'max-height: none' in styles
 
 
 def test_canvas_annotation_selection_and_hover_are_bidirectional() -> None:

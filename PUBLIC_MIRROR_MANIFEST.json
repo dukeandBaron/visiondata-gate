@@ -1,15 +1,15 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "57a321ab03f71d2a03c22cb5efc5f56ffd8fbe86",
-  "source_tree_oid": "23376c4641989b8c51cc9943279d0add746238fb",
+  "source_commit_oid": "114bcde38358ee3ccbbe0740f53cf4608e30bfbd",
+  "source_tree_oid": "39ef948908d3f6b0f007d6b231fa6d630517d3ff",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
   "customer_data_included": false,
   "personal_data_included": false,
   "tracked_source_only": true,
-  "file_count": 730,
-  "snapshot_sha256": "fb0bed12d7b58552b6e19f073b6936e72fc431656aed70da6db459812c508132",
+  "file_count": 731,
+  "snapshot_sha256": "e2451f815355e5657fa0310e2d52bf661ca00a4caade7f3b6434e5401d43cc41",
   "files": [
     {
       "path": ".env.example",
@@ -2440,8 +2440,8 @@
     },
     {
       "path": "tests/test_web_source.py",
-      "sha256": "4445bd5c2222fbae4475387a6dd03026faf54ea7480d0505ab581c68c3b2f268",
-      "size_bytes": 41946
+      "sha256": "4399ceb9dd976c603c79cb64c1d97945bd68bef51671f2f7f0b3f6d91ce3a835",
+      "size_bytes": 42918
     },
     {
       "path": "tests/test_website_data.py",
@@ -3085,8 +3085,8 @@
     },
     {
       "path": "web/src/components/AppShell.tsx",
-      "sha256": "3b85f06812c9539d3f945e3be1cc89e8cbf6c6983f976d9542b3a37748502edb",
-      "size_bytes": 35495
+      "sha256": "f12ecd989754b6109f5422acf9835bc319c081c5db39ec628605d94201c61f98",
+      "size_bytes": 35505
     },
     {
       "path": "web/src/components/BrandMark.tsx",
@@ -3095,8 +3095,8 @@
     },
     {
       "path": "web/src/components/BrowserLocalImageLab.tsx",
-      "sha256": "80594687998e413df59c4904b5c0df69885b3241919bff8d9f4da943942b93e1",
-      "size_bytes": 21494
+      "sha256": "5c21be2cee91cdd58bb6a7432f92adad0683c464989c0a63d9c0ea3cbe0eb8d7",
+      "size_bytes": 27017
     },
     {
       "path": "web/src/components/BusinessTaskContext.tsx",
@@ -3435,8 +3435,8 @@
     },
     {
       "path": "web/src/pages/PublicReplayPage.tsx",
-      "sha256": "303419e024dcb673b2153fb6df889b47327ace37409d0577ea085ba68933427f",
-      "size_bytes": 20679
+      "sha256": "c4cefb7fed621c9ce00fe785fd7b22c71cab2e7cdad2b53793945b597435eadd",
+      "size_bytes": 21395
     },
     {
       "path": "web/src/pages/ReviewPage.tsx",
@@ -3470,8 +3470,8 @@
     },
     {
       "path": "web/src/public/PublicApp.tsx",
-      "sha256": "85b8001f47b5b13685785c4782deaae2fb4859fe56f27947488be94f72132164",
-      "size_bytes": 1783
+      "sha256": "d89247437e3537d8ea65610885cd906a28ca81a561b7908d0db97fdcf90307d9",
+      "size_bytes": 1860
     },
     {
       "path": "web/src/public/PublicIdentityAccessScreen.tsx",
@@ -3595,8 +3595,13 @@
     },
     {
       "path": "web/src/styles/public-facade.css",
-      "sha256": "cc642a9ba7673c19e92486347e92d585c09247abf2e37f08576557d635404a85",
-      "size_bytes": 24364
+      "sha256": "b10b21214644bcb1b8a01e636c96b6037adad48a185e1f169df40c4a205e7f99",
+      "size_bytes": 24151
+    },
+    {
+      "path": "web/src/styles/public-workbook.css",
+      "sha256": "58c4fe17334251578e35d57f5575fb3574d4a8458bb30a3645973e66ec749c52",
+      "size_bytes": 11736
     },
     {
       "path": "web/src/styles/semifinal-manifest.css",
