@@ -1,15 +1,15 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "0640f2c106c4acf24dec1ca15acf0b0a913d8016",
-  "source_tree_oid": "62c823dd64ca5cb7992e9f4f71a7aa459cfd061b",
+  "source_commit_oid": "bcbaeaba26c9feb7e85631ebc327e79f02371ce2",
+  "source_tree_oid": "f67aaaffa5b4f884bfdbed0248d8435e073aae48",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
   "customer_data_included": false,
   "personal_data_included": false,
   "tracked_source_only": true,
-  "file_count": 726,
-  "snapshot_sha256": "f8c1cca3d54e1fcd53b0d4bb76d2a6fd18fb95703171570afdc79c72fd866dd8",
+  "file_count": 729,
+  "snapshot_sha256": "6cda14329dafc2949545297334545ccb5a85de2a5fe17ae74e34d383d2203d7c",
   "files": [
     {
       "path": ".env.example",
@@ -54,8 +54,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "9c99791f4ac5839a78817b843c457b3e19437514d643db88caa0073ecbccfedb",
-      "size_bytes": 3818
+      "sha256": "5312a82b4418600d4a22c609f119bb37919f370e18fa5201c7295bc4f1c6e26f",
+      "size_bytes": 4185
     },
     {
       "path": "CITATION.cff",
@@ -84,8 +84,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "f2306a5d861d1e6e674e5da83c3aaed292aa38ffce977908a90a489e94d6730e",
-      "size_bytes": 13194,
+      "sha256": "ab0329ea937999c6669d46279b19713653e0ec86ba177e263d4642ba1c299065",
+      "size_bytes": 14049,
       "source": "docs/PUBLIC_REPOSITORY_README.md"
     },
     {
@@ -349,6 +349,11 @@
       "size_bytes": 3821
     },
     {
+      "path": "docs/MODEL_JOB_RETENTION.md",
+      "sha256": "aa25d8394cf6411306b7d1e6a947fec73e43374ced877e1bb4b2e4366dd55759",
+      "size_bytes": 1799
+    },
+    {
       "path": "docs/OPEN_REUSE_CONTRACTS.md",
       "sha256": "21ffb4ac3335490bcb8c2ae51804c6efc9b04f27e0891e1a486da06f991d8456",
       "size_bytes": 4550
@@ -385,8 +390,8 @@
     },
     {
       "path": "docs/PUBLIC_REPOSITORY_README.md",
-      "sha256": "f2306a5d861d1e6e674e5da83c3aaed292aa38ffce977908a90a489e94d6730e",
-      "size_bytes": 13194
+      "sha256": "ab0329ea937999c6669d46279b19713653e0ec86ba177e263d4642ba1c299065",
+      "size_bytes": 14049
     },
     {
       "path": "docs/QUALITY_LEARNING_WORKBENCH.md",
@@ -460,13 +465,18 @@
     },
     {
       "path": "docs/VERSION_EVOLUTION.md",
-      "sha256": "a48767319b4377ce7df78f37c1eb5da1bbc4250af7d34c05f7bcc68eaa18ab45",
-      "size_bytes": 6710
+      "sha256": "6322a38a21346a0dd7023eb58807c484758bbe930ddb093411189ec0f814af0c",
+      "size_bytes": 6770
+    },
+    {
+      "path": "docs/VISION_MODEL_API_CONTRACT.md",
+      "sha256": "6b3e80cb5e73c5d3cdbcc0916adb29d5af73e2c02c4c90f2c7bbe206bfda3f29",
+      "size_bytes": 4758
     },
     {
       "path": "docs/WINDOWS_INSTALLER.md",
-      "sha256": "2af132c028cd861354ffeca5200f70998fa00594cc37d68e42c042c90d9c5238",
-      "size_bytes": 8235
+      "sha256": "ce9d49ffa5111eb6a5f4d35d598fa91fb719f0ef618307ad90ea688fdede0e87",
+      "size_bytes": 9206
     },
     {
       "path": "docs/assets/web-command-center.png",
@@ -1190,8 +1200,8 @@
     },
     {
       "path": "src/visiondata_gate/learning_detection_dataset.py",
-      "sha256": "c8cb896f6ea5cebc2b0b2fd4ffe1809f8024376729427ae981dd22261756923e",
-      "size_bytes": 18989
+      "sha256": "bd7d6aca8fbc9839408f4d88683b6f919a1588b1baf7c05683bbbb53d4783ec8",
+      "size_bytes": 19303
     },
     {
       "path": "src/visiondata_gate/learning_engine.py",
@@ -1220,8 +1230,8 @@
     },
     {
       "path": "src/visiondata_gate/learning_yolo_backend.py",
-      "sha256": "4510f23f3c41778aef791dab90fcbe840e8828ef0594995b16e995014f4b2120",
-      "size_bytes": 41245
+      "sha256": "437a71c279477d6b4d8dd33e04b6a91b257bb621943aac56b05f49332df1c4f3",
+      "size_bytes": 43583
     },
     {
       "path": "src/visiondata_gate/lineage.py",
@@ -1655,8 +1665,8 @@
     },
     {
       "path": "tests/test_build_learning_installer.py",
-      "sha256": "01ea31af10a8652a9774291f4c2917aa2cc92015409044d7b66e71b22d983053",
-      "size_bytes": 20430
+      "sha256": "19fa0a4da81a10a06a174328945d99c6065b6225e28a9cd6bd53c86012e48182",
+      "size_bytes": 21497
     },
     {
       "path": "tests/test_build_semifinal_defense_kit.py",
@@ -1720,8 +1730,8 @@
     },
     {
       "path": "tests/test_desktop_packaging.py",
-      "sha256": "0c4e8d7fc64323bd45a4e63900bc7c9326ad10688cbd651c3803b47510d5f71f",
-      "size_bytes": 8254
+      "sha256": "b2c4b28807dbdd289d8195d342da3f605a03d5b94a3585a0c01b5094f086f834",
+      "size_bytes": 8821
     },
     {
       "path": "tests/test_desktop_release_resources.py",
@@ -1850,8 +1860,8 @@
     },
     {
       "path": "tests/test_identity_api.py",
-      "sha256": "b16c1f437767bb46ab49c901ca489b2b96469ef4d004503cd5cb6e525e229388",
-      "size_bytes": 27715
+      "sha256": "05dd11a6aa357f63eb15dbdd557ce65ecf00c95bdd4ac7e29a218aab9fcd719c",
+      "size_bytes": 28997
     },
     {
       "path": "tests/test_identity_background.py",
@@ -1985,8 +1995,8 @@
     },
     {
       "path": "tests/test_learning_detection_dataset.py",
-      "sha256": "31fe47f22ce57cf5755350e4dccae3533ec052cc7152fbf70654457db71a5e81",
-      "size_bytes": 12620
+      "sha256": "1e0f4a3b363a879156f5171c13594a153c7c661d8e86cd8a5997c32f08e28ce6",
+      "size_bytes": 13698
     },
     {
       "path": "tests/test_learning_engine.py",
@@ -2045,8 +2055,8 @@
     },
     {
       "path": "tests/test_learning_yolo_backend.py",
-      "sha256": "3cd89d1f6ff2bac096540037c303ca55a481fd8ddb727e4db1c4e93e4e670110",
-      "size_bytes": 22406
+      "sha256": "1456ff2864d837ecc960b603db457793507405c993f5c8687f008f96825c535c",
+      "size_bytes": 26924
     },
     {
       "path": "tests/test_local_model_registry.py",
@@ -2290,8 +2300,8 @@
     },
     {
       "path": "tests/test_review_guidance_terminology.py",
-      "sha256": "70702326fce13957d055853552950a5a557bf488943bcc9ded33ace75009ccd0",
-      "size_bytes": 7739
+      "sha256": "2cc1ad3e99f4ff35535252f33781f59694d767ebbea980c3348e1badc3881ae1",
+      "size_bytes": 8660
     },
     {
       "path": "tests/test_reviewer_audit.py",
@@ -2605,8 +2615,8 @@
     },
     {
       "path": "tools/build_learning_installer.py",
-      "sha256": "cee9b9c01d631f699fedf4c5558bdebbf3cece1d074c3c12b5eb70dc5209c3e9",
-      "size_bytes": 43826
+      "sha256": "c50b4412ca5cdbeb5cfc369f6d2bed73beae73d6b9d629fd2be495869c7451b3",
+      "size_bytes": 45307
     },
     {
       "path": "tools/build_rc3_candidate.py",
@@ -2700,8 +2710,8 @@
     },
     {
       "path": "tools/export_public_repository.py",
-      "sha256": "923557048ab1fc50e55ab13e07868ed1c165985ced99761902704bf2a1b6bb94",
-      "size_bytes": 14993
+      "sha256": "bb88ea44813b607c2aead9cfce7af5f771c04753ea4feaac26ecc3d427115ac2",
+      "size_bytes": 15069
     },
     {
       "path": "tools/generate_cargo_license_snapshot.py",
@@ -2802,6 +2812,11 @@
       "path": "tools/run_visa_yolo26_normality.py",
       "sha256": "23e186cb4f01cb316366bf2a6acfe9d997abfc0965ef33f01002d385733c2570",
       "size_bytes": 66528
+    },
+    {
+      "path": "tools/smoke_desktop_identity.mjs",
+      "sha256": "e46163beaca98c42144c78dca5ec0675990cef1ae753a6fae3bdbeb035f1e50e",
+      "size_bytes": 9027
     },
     {
       "path": "tools/smoke_extracted_platform.py",
