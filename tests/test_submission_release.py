@@ -26,6 +26,10 @@ from visiondata_gate.evidence import canonical_json_bytes, sha256_bytes
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_RELEASE = PROJECT_ROOT / "evidence" / "submission" / DEFAULT_RELEASE_ID
+pytestmark = pytest.mark.skipif(
+    not PUBLIC_RELEASE.is_dir(),
+    reason="PRIVATE_RC1_RELEASE_NOT_DISTRIBUTED",
+)
 
 
 def test_public_release_is_cross_hashed_and_application_first() -> None:

@@ -1504,6 +1504,11 @@ def _parse_evidence_projections(
     resolved_paths: set[Path] = set()
     for label, reference in receipt.evidence_projections.items():
         try:
+            if any(
+                ord(character) < 32 or ord(character) == 127
+                for character in reference.path
+            ):
+                raise ValueError("projection path contains a control character")
             lexical = base / reference.path
             reparse = bool(
                 lexical.is_symlink()

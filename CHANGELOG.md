@@ -35,6 +35,9 @@ competition artifact tags are not a claim of a matching PyPI package version.
   without enabling DevTools in the shipped desktop. The `ca1fa7b` runtime source
   produced a SHA-bound local Windows candidate; signing, clean-machine and
   industrial-effectiveness gates remain open.
+- A bounded anomaly operating-point component now selects score channel and
+  threshold on calibration members only, evaluates on disjoint held-out
+  development members, and keeps deployment/production authorization disabled.
 
 ### Fixed
 
@@ -45,6 +48,14 @@ competition artifact tags are not a claim of a matching PyPI package version.
 - Product, defense and workbench copy now separates initial dataset candidates,
   governed dataset candidates, supervised BBox detection, Normality development,
   human-adjudicated hard-example candidates and unimplemented VLM/TTT routes.
+- Public documentation and Pages examples now use only the canonical
+  `dukeandBaron/visiondata-gate` repository and `/visiondata-gate/` base path.
+- Slow learning lifecycle tests use explicit test-only wall-time headroom and
+  assert run completion before feedback, without changing the production
+  20-second default or manufacturing success claims.
+- The canonical public-source candidate completed one continuous Python 3.12
+  regression with 2,093 collected, 2,066 passed, 27 explicitly bounded skips,
+  zero failures and 17 deprecation warnings; this did not rebuild the installer.
 
 ### Security and compatibility
 

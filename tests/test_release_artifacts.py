@@ -7,15 +7,37 @@ import subprocess
 import sys
 from pathlib import Path, PurePosixPath
 
+import pytest
 import yaml
+
+from visiondata_gate.release import DEFAULT_RELEASE_ID
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PRIVATE_RELEASE_ROOT = (
+    PROJECT_ROOT / "evidence" / "submission" / DEFAULT_RELEASE_ID
+)
+
+
+def _require_private_release() -> None:
+    if not PRIVATE_RELEASE_ROOT.is_dir():
+        pytest.skip("PRIVATE_RC1_RELEASE_NOT_DISTRIBUTED")
+
+
+def _contains_continue_on_error(value: object) -> bool:
+    if isinstance(value, dict):
+        return "continue-on-error" in value or any(
+            _contains_continue_on_error(item) for item in value.values()
+        )
+    if isinstance(value, list):
+        return any(_contains_continue_on_error(item) for item in value)
+    return False
 
 
 def test_release_checker_writes_utf8_under_legacy_stdout_codec() -> None:
     """Reproduce the Windows cp1252 failure that previously produced false-green CI."""
 
+    _require_private_release()
     environment = os.environ.copy()
     environment["PYTHONIOENCODING"] = "cp1252"
     process = subprocess.run(
@@ -33,28 +55,24 @@ def test_release_checker_writes_utf8_under_legacy_stdout_codec() -> None:
     assert payload["track"] == "Boundless Agents / AI+工业制造"
 
 
-def test_ci_release_validators_are_independent_fail_fast_steps() -> None:
-    workflow = (PROJECT_ROOT / ".github" / "workflows" / "ci.yml").read_text(
-        encoding="utf-8"
-    )
+def test_public_workflows_keep_quality_security_and_pages_gates_independent() -> None:
+    workflow_root = PROJECT_ROOT / ".github" / "workflows"
+    quality = (workflow_root / "quality.yml").read_text(encoding="utf-8")
+    security = (workflow_root / "security.yml").read_text(encoding="utf-8")
+    pages = (workflow_root / "pages.yml").read_text(encoding="utf-8")
 
-    assert 'PYTHONUTF8: "1"' in workflow
-    assert "- name: Validate submission evidence" in workflow
-    assert "- name: Validate reviewer website projection" in workflow
-    assert "- name: Validate detached release assets" in workflow
-    steps = yaml.safe_load(workflow)["jobs"]["verify"]["steps"]
-    for script in (
-        "check_release_consistency.py",
-        "check_website_data.py",
-        "check_release_assets.py",
-    ):
-        matching = [step for step in steps if f"tools/{script}" in step.get("run", "")]
-        assert len(matching) == 1
-        assert matching[0]["run"] == (
-            'uv run --frozen --python "${{ matrix.python-version }}" '
-            f"python tools/{script}"
-        )
-    assert "- name: Validate release evidence" not in workflow
+    assert 'PYTHONUTF8: "1"' in quality
+    assert "Public-safe fixed test slice with branch coverage" in quality
+    assert "pip_audit" in security
+    assert "check_bandit_baseline.py check" in security
+    assert "github/codeql-action/analyze" in security
+    assert "python tools/check_public_repository.py --history" in pages
+    assert "python tools/check_public_pages.py --dist web/dist" in pages
+    parsed = [yaml.safe_load(text) for text in (quality, security, pages)]
+    assert not any(_contains_continue_on_error(item) for item in parsed)
+    assert parsed[0]["name"] == "Scoped engineering quality"
+    assert parsed[1]["name"] == "Dependency and source security checks"
+    assert parsed[2]["name"] == "Public synthetic workbench"
 
 
 def _sha256(path: Path) -> str:
@@ -206,9 +224,14 @@ def test_semifinal_rc3_video_qa_binds_current_workbench_demo() -> None:
         "106d5e386708a56c52989903ffb60b1f2c1af685356ad58e38dd7487ba75d9d2"
     )
 
-    qa = json.loads(qa_path.read_text(encoding="utf-8"))
     video_path = _project_member(video_member)
     contact_sheet_path = _project_member(contact_sheet_member)
+    if not qa_path.is_file():
+        assert not video_path.exists()
+        assert not contact_sheet_path.exists()
+        pytest.skip("PRIVATE_RC3_VIDEO_EVIDENCE_NOT_DISTRIBUTED")
+
+    qa = json.loads(qa_path.read_text(encoding="utf-8"))
 
     assert qa["schema_version"] == "visiondata-gate.video-qa.v3"
     assert qa["status"] == "PASS_LOCAL_VIDEO_QA"

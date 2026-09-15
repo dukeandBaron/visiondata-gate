@@ -111,7 +111,7 @@ flowchart LR
 | --- | --- | --- | --- |
 | CPU 参考学习 | NumPy 六权重二值像素模型，两轮 HTTP 参考流程 | `mean(BCE) + l2/2 × Σw_nonbias²`，全批梯度下降 | 证明数据／模型／评测／人审合同，不是工业模型或 RL |
 | YOLO detect | 受权环境中的 Ultralytics／PyTorch 子进程 | 由锁定模型实现计算检测损失与优化器更新 | 权重、环境、预算与 checkpoint 需逐次登记；第三方许可证单独适用 |
-| Normality | 冻结 YOLO26n-cls 骨干，训练多尺度特征重建头 | 正常特征目标、候选头、阈值校准与留出评测分开 | 异常热图不是概率真值，Normality→CAPA→续训的同一链尚未贯通 |
+| Normality | 冻结 YOLO26n-cls 骨干，训练多尺度特征重建头 | 正常特征目标、候选头、阈值校准与留出评测分开；源码级 [Operating Point 组件](ANOMALY_OPERATING_POINT.md) 已测 | 异常热图不是概率真值，组件尚未接入产品 API，Normality→CAPA→续训的同一链尚未贯通 |
 
 评测比较目标缺陷、旧物件保留、速度／资源和绝对门槛；不满足条件就保留父模型。错误样本先由人分类为标签错误、困难样本、新工况或信息不足，再产生下一版数据任务；val／test 不自动回灌 train。
 

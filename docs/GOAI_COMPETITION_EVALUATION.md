@@ -9,7 +9,7 @@
 | 产品体验与 Demo 20% | 是否能从零运行并快速看懂闭环 | 工业 Web 工作台、Reviewer Mode、固定 Demo、REST API 与失败分支 | 本地 served UI 已通过 3 轮 × 7 视口、Goal3 Authority 3/3、console 0/0；89.9 秒 Synthetic Fixture Replay 视频及 QA 已冻结；公开 Pages 只投影 SHA 绑定的合成只读事实 |
 | 技术实现深度 15% | 架构、状态、测试和复现是否可信 | Typed contracts、ToolTrace、Control Plane、DynamicBench、lineage、Audit Envelope | `PASS_LOCAL_RC3_RELEASE_CANDIDATE`；精确 Full、双构包、clean-extract、Attestation、匹配 clean checkout 与 toolchain 以完整本地验证集为准，第三方复现仍待外部证据 |
 | 安全、合规与可追溯 10% | 授权、隐私、幻觉、人工确认和依据 | 只读默认、allowlist、Grounding Guard、人工批准、脱敏 evidence、失败关闭 | 独立法律审查、生产 IAM 与现场验收仍属于外部范围 |
-| 开放 / 复用贡献 5% | 是否有接口、示例、文档和许可证 | Apache-2.0、Site Pack、Tool/Rule Contract、Evidence Schema、Adapter SDK、API、SBOM | 隐私安全公共镜像已提供源码、锁文件、示例和文档；第三方 clean-clone 复现仍需独立回执 |
+| 开放 / 复用贡献 5% | 是否有接口、示例、文档和许可证 | Apache-2.0、Site Pack、Tool/Rule Contract、Evidence Schema、Adapter SDK、API、SBOM | 唯一 GitHub 主仓已提供经隐私审查的源码、锁文件、示例和文档；第三方 clean-clone 复现仍需独立回执 |
 
 ## 工业方向补充检查
 

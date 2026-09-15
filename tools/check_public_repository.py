@@ -1,4 +1,4 @@
-"""Audit a Git snapshot and optional full history before public mirroring."""
+"""Audit a Git snapshot and optional full history before public publication."""
 
 from __future__ import annotations
 

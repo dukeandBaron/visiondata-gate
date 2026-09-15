@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from visiondata_gate.reviewer_server import (
@@ -10,6 +11,12 @@ from visiondata_gate.reviewer_server import (
     DEFAULT_SYNTHETIC_ROOT,
     build_reviewer_snapshot,
     create_reviewer_app,
+)
+
+
+pytestmark = pytest.mark.skipif(
+    not DEFAULT_RELEASE_ROOT.is_dir() or not DEFAULT_SYNTHETIC_ROOT.is_dir(),
+    reason="PRIVATE_REVIEWER_SNAPSHOT_INPUTS_NOT_DISTRIBUTED",
 )
 
 

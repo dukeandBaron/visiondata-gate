@@ -28,7 +28,7 @@ npm --prefix web run typecheck
 npm --prefix web run build
 ```
 
-Public-mirror changes must also pass:
+Changes to the public surface of the canonical repository must also pass:
 
 The commands above are a portable core slice, not the full authority test suite.
 The authority's release tests require their matching private/frozen artifacts;

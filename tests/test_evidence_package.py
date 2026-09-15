@@ -890,6 +890,9 @@ def test_builder_excludes_historical_ui_screenshots(tmp_path: Path) -> None:
 
 
 def test_default_required_paths_cover_final_submission_anchors() -> None:
+    project_root = Path(__file__).resolve().parents[1]
+    if not (project_root / GOAL3_PUBLIC_ROOT).is_dir():
+        pytest.skip("PRIVATE_GOAL3_EVIDENCE_NOT_DISTRIBUTED")
     required = set(DEFAULT_SUBMISSION_REQUIRED_PATHS)
     stale_track_docs = {
         "docs/AGENT_EVALUATION_TOOLS_20260823.md",
@@ -972,12 +975,13 @@ def test_default_required_paths_cover_final_submission_anchors() -> None:
     assert set(CURRENT_GOAL3_PUBLIC_EVIDENCE_PATHS) == set(GOAL3_PUBLIC_REQUIRED_PATHS)
     assert required.isdisjoint(stale_track_docs)
     assert required.isdisjoint(historical)
-    project_root = Path(__file__).resolve().parents[1]
     assert all((project_root / path).is_file() for path in expected)
 
 
 def test_goal3_public_evidence_is_jcs_redacted_and_receipt_bound() -> None:
     project_root = Path(__file__).resolve().parents[1]
+    if not (project_root / GOAL3_PUBLIC_ROOT).is_dir():
+        pytest.skip("PRIVATE_GOAL3_EVIDENCE_NOT_DISTRIBUTED")
     result = verify_goal3_public_evidence(project_root)
 
     assert result["status"] == "PASS_LOCAL_GOAL3_PUBLIC_EVIDENCE"
@@ -1080,6 +1084,8 @@ def test_goal3_public_evidence_rejects_false_cross_source_identity(
     tmp_path: Path,
 ) -> None:
     project_root = Path(__file__).resolve().parents[1]
+    if not (project_root / GOAL3_PUBLIC_ROOT).is_dir():
+        pytest.skip("PRIVATE_GOAL3_EVIDENCE_NOT_DISTRIBUTED")
     source = project_root / GOAL3_PUBLIC_ROOT
     target = tmp_path / GOAL3_PUBLIC_ROOT
     shutil.copytree(source, target)

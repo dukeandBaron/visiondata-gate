@@ -1,12 +1,19 @@
 # VisionData Gate｜产品与发布状态
 
-更新时间：2026-09-02
+更新时间：2026-09-16
 
 ## 当前裁决
 
 ```text
-current_worktree_state=RC4_DEFENSE_KIT_WIP
-current_release_decision=HOLD_RC4_DEFENSE_KIT
+current_worktree_state=CANONICAL_MAIN_SYNC_CANDIDATE
+source_validation_anchor=9417f01216925b6912a1f2c9bdc994c9cf1f6ef9
+source_full_pytest=PASS_2066_PASSED_27_SKIPPED_0_FAILED
+current_release_decision=HOLD_NEW_INSTALLER_NOT_BUILT
+canonical_public_main_before_candidate=b604a63bef10fe1160fe90ba9c21c92e428f6c7f
+public_pages_mode=PUBLIC_SYNTHETIC_REPLAY
+online_backend_deployment=HOLD_NO_SERVER
+latest_verified_windows_source=ca1fa7b1727535014e8723e5bceb4d539272cf2b
+new_windows_candidate=NOT_BUILT
 frozen_rc3_state=RC3_FROZEN_LOCAL
 frozen_rc3_release_candidate_ready=true
 frozen_rc3_release_decision=PASS_LOCAL_RC3_RELEASE_CANDIDATE
@@ -19,12 +26,14 @@ production_release_allowed=false
 machine_write_permitted=false
 factory_shadow_metrics=NOT_MEASURED_PENDING_ADJUDICATION
 release_evidence_binding=DETACHED_RELEASE_NAMESPACE_REQUIRED
-public_distribution=PRIVACY_SAFE_MIRROR_ONLY
+public_distribution=CANONICAL_REPOSITORY_REVIEWED_SURFACE_ONLY
 ```
 
-冻结 RC3 的本地候选代码、材料与可复现实跑只绑定上述 commit/tree 及其 detached 验证集。当前 RC4 Defense Kit 正在更新答辩材料，PPT/PDF、60 秒视频、附件 ZIP 与清单尚未全部完成独立 QA，因此保持 `HOLD_RC4_DEFENSE_KIT`，不得继承 RC3 PASS。这些状态都不代表官网已经上传、评委已经验收、客户已经采用，或工厂允许生产放行。
+当前源码候选在 Python 3.12.5 锁定环境中完成一次连续全仓回归：2093 项收集、2066 passed、27 skipped、0 failed、17 warnings，耗时 3422.65 秒。27 项 skip 保留私有历史证据、symlink 主机权限和外部 YOLO 授权边界；详见 [全仓回归记录](FULL_REGRESSION_9417F01_20260916.md)。这只把源码验证升级为 PASS，不自动升级安装包、Pages、官方提交、客户验收或生产放行。
 
-公开交付采用私有权威仓与公共镜像分离：公共镜像只含允许公开的源码、合成样本、锁文件、文档与静态 `PUBLIC_SYNTHETIC_REPLAY`，不含私域运行证据、原始 Omni/CAPA 资产、密钥、本机路径或完整私有 Git 历史。公共仓和 Pages 是否与当前权威源码一致，必须同时核对 mirror manifest 的 source commit/tree 与部署 SHA。
+冻结 RC3 的本地候选代码、材料与可复现实跑仍只绑定其历史 commit/tree 及 detached 验证集。现有 `ca1fa7b` Windows 候选也只代表自己的冻结源与回执；本轮更新源码尚未重新打包，因此 `HOLD_NEW_INSTALLER_NOT_BUILT`。
+
+公开交付只使用唯一主仓 `dukeandBaron/visiondata-gate`：本地完整工作区中的私域运行证据、原始 Omni/CAPA 资产、密钥、本机路径和未审查材料不进入 Git；主仓保留允许公开的源码、合成样本、锁文件、文档与静态 `PUBLIC_SYNTHETIC_REPLAY`。主仓和 Pages 是否与当前候选一致，必须同时核对 `PUBLIC_MIRROR_MANIFEST.json`（兼容文件名）的 source commit/tree 与部署 SHA。
 
 `PASS_LOCAL_RC3_RELEASE_CANDIDATE` 只有在冻结 RC3 的完整本地验证集由 verifier 返回 `PASS_LOCAL_INTEGRITY` 时才成立。detached release namespace 必须含 Attestation、两份候选 ZIP、四份 receipt 与 Full JUnit；项目根还必须是匹配的 clean checkout，具有精确 commit/tree、`uv.lock`、SBOM 和 Attestation 声明的本地 toolchain。Attestation 位于 release namespace 根，候选 ZIP 位于其 build 子目录；单独复制“候选 ZIP + Attestation”不能完成复验。本文不复制会随重新封包变化的哈希。任一旁车、checkout 或 toolchain 对账失败时，状态立即退回 `HOLD_AS_RELEASE_TREE`；RC4 还必须有独立附件清单与内容/隐私 QA 才能升级当前包装状态。
 

@@ -129,6 +129,10 @@ Omni 授权离线试跑的历史记录中，派生版本包含 **180 张图像�
 
 这说明系统能保留整改和复验的真实负结果。它不是工厂在线 shadow test，也不替代独立真值上的误放行、误拦截指标。[数据与实验边界](docs/EVIDENCE_AND_BENCHMARKS.md)
 
+### 异常检测阈值：源码组件已测，产品链仍未连接
+
+源码提供确定性的异常分数通道与阈值选择组件：只在 `calibration` 上联合选择 operating point，再在互斥的 `heldout_development` 上检查 Recall 与 FPR，并记录分母、混淆矩阵和 Wilson 区间。当前状态是 `SOURCE_COMPONENT_TESTED / PRODUCT_API_NOT_CONNECTED`；没有 fresh external run，不生成可部署阈值，`production_release_allowed=false`。[查看 Operating Point 治理合同](docs/ANOMALY_OPERATING_POINT.md)
+
 <a id="quickstart"></a>
 
 ## 现在开始使用
@@ -227,6 +231,8 @@ YOLO 训练预算在 API、Schema、Web 和执行器统一为 **10–600 秒**�
 ## 持续演进
 
 项目从批次质量检查，演进到案件补证与派生复验，再扩展到图像工作簿、模型反馈和桌面交付。近期 `windows-local-ca1fa7b-20260915` 已把训练输入去重、预算一致性、任务存储保护、安装器源码绑定和发布版 UIA 登录验收收口到同一候选；证据见 [ca1fa7b Windows 候选](docs/WINDOWS_CANDIDATE_CA1FA7B_20260915.md)。
+
+2026-09-16 的源码候选完成一次连续全仓回归：2093 项收集、2066 passed、27 项带理由 skip、0 failed；该结果不表示新安装包已构建。[查看完整回归边界](docs/FULL_REGRESSION_9417F01_20260916.md)
 
 软件版本、源码提交、模型版本和安装构建各自标识，不让旧结果替新版本背书。[版本演进](docs/VERSION_EVOLUTION.md) · [CHANGELOG](CHANGELOG.md) · [当前验证与交付状态](docs/README_STATUS_AND_EVIDENCE.md)
 

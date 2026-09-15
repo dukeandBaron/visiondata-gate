@@ -14,6 +14,7 @@ def test_feedback_links_exact_new_gate_members_without_claiming_issue_closed(
     client, product, (task_id, preflight, groups) = learning_input
     service = LearningService(product)
     cycle, run = support.create_and_run(service, task_id, preflight, groups)
+    assert run["status"] == "COMPLETED", run
     assert run["feedback"]
     cycle = support.review_and_select(service, cycle["cycle_id"], run)
     task2, preflight2, groups2 = support.make_task(

@@ -792,6 +792,11 @@ def test_loader_rejects_noncanonical_or_unknown_statement_members(
 
 
 def test_build_and_verify_cli_roundtrip(tmp_path: Path) -> None:
+    if any(
+        not PROJECT_ROOT.joinpath(*required_path.split("/")).is_file()
+        for required_path in PRODUCTION_RC3_REQUIRED_PATHS
+    ):
+        pytest.skip("PRIVATE_RC3_RELEASE_INPUTS_NOT_DISTRIBUTED")
     fixture = _build_release_fixture(
         tmp_path,
         required_paths=PRODUCTION_RC3_REQUIRED_PATHS,
