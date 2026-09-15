@@ -27,7 +27,7 @@ EXPERIMENTAL_MARKERS = (
     "model_backends",
 )
 
-CURRENT_CLAIM_REQUIREMENTS: dict[str, tuple[str, ...]] = {
+HISTORICAL_CLAIM_REQUIREMENTS: dict[str, tuple[str, ...]] = {
     # Public product entrypoints retain the semantic boundary and a link to
     # canonical evidence. Private historical run-directory suffixes belong in
     # those evidence documents, not in every product-facing summary.
@@ -88,6 +88,32 @@ CURRENT_CLAIM_REQUIREMENTS: dict[str, tuple[str, ...]] = {
         "NOT_ESTIMABLE",
         "DynamicBench-v1",
     ),
+}
+
+# Public documentation owns current claims; archived competition paperwork is
+# not a required dependency of an open-source checkout. Historical requirements
+# remain available for an explicitly requested local evidence audit.
+CURRENT_CLAIM_REQUIREMENTS: dict[str, tuple[str, ...]] = {
+    "README.md": (
+        "docs/README_STATUS_AND_EVIDENCE.md",
+        "benchmarks/README.md",
+        "DynamicBench-v3",
+        "工厂",
+    ),
+    "docs/README_STATUS_AND_EVIDENCE.md": (
+        "NOT_MEASURED_PENDING_ADJUDICATION",
+        "production_release_allowed=false",
+        "DynamicBench-v3",
+        "CLAIM_SCOPE.md",
+    ),
+    "docs/EVIDENCE_AND_BENCHMARKS.md": (
+        "_05",
+        "_06",
+        "NOT_ESTIMABLE",
+        "DynamicBench-v1",
+        "实际模型调用为 0",
+    ),
+    "docs/PUBLICATION_BOUNDARY.md": ("production_release_allowed=false",),
 }
 
 STALE_CURRENT_CLAIM_PATTERNS: dict[str, re.Pattern[str]] = {
@@ -240,7 +266,12 @@ def _audit_current_claims(
 ) -> dict[str, Any]:
     missing_requirements: list[dict[str, Any]] = []
     stale_claim_hits: list[dict[str, Any]] = []
-    for relative, required_tokens in CURRENT_CLAIM_REQUIREMENTS.items():
+    requirements = dict(CURRENT_CLAIM_REQUIREMENTS)
+    if require_local_evidence:
+        for relative, tokens in HISTORICAL_CLAIM_REQUIREMENTS.items():
+            if relative not in requirements:
+                requirements[relative] = tokens
+    for relative, required_tokens in requirements.items():
         path = root / relative
         if not path.is_file():
             missing_requirements.append(
@@ -328,7 +359,7 @@ def _audit_current_claims(
     passed = not missing_requirements and not stale_claim_hits and not evidence_failures
     return {
         "status": "PASS" if passed else "FAIL",
-        "current_claim_file_count": len(CURRENT_CLAIM_REQUIREMENTS),
+        "current_claim_file_count": len(requirements),
         "missing_requirements": missing_requirements,
         "stale_claim_hits": stale_claim_hits,
         "local_evidence_checks": evidence_checks,

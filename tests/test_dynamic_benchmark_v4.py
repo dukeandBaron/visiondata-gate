@@ -18,7 +18,7 @@ from visiondata_gate.evidence import canonical_json_bytes
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-V3_REPORT = PROJECT_ROOT / "10_reports" / "DYNAMICBENCH_V3_REPLANNING_20260829.json"
+V3_REPORT = PROJECT_ROOT / "benchmarks" / "DYNAMICBENCH_V3_REPLANNING_20260829.json"
 
 
 @pytest.fixture(scope="module")

@@ -23,6 +23,12 @@ PUBLIC_PAGES_TEMPLATE = "tools/templates/public-pages.yml"
 PUBLIC_PAGES_WORKFLOW = ".github/workflows/pages.yml"
 
 PUBLIC_EXACT_FILES = {
+    "benchmarks/README.md",
+    "docs/DEVELOPMENT_PROVENANCE.md",
+    "docs/LIVE_REPRODUCTION.md",
+    ".github/ISSUE_TEMPLATE/bug_report.md",
+    ".github/ISSUE_TEMPLATE/reproduction.md",
+    ".github/pull_request_template.md",
     "docs/PROJECT_TECHNICAL_OVERVIEW.md",
     ".env.example",
     ".gitattributes",

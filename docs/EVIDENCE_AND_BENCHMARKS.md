@@ -1,14 +1,16 @@
 # VisionData Gate｜Evidence & Benchmarks
 
-不同实验 namespace 使用不同输入、分母和结论，不能合并成一个总准确率。
+本项目用分层实验检验流程、架构、调度和实际数据交接。[Benchmark Suite](../benchmarks/README.md) 汇总各项设计问题、复现入口和冻结结果；各协议的输入与指标分别记录。
 
-| Namespace | 固定输入 / 分母 | 已观察结果 | 只能证明 |
+| 实验基准 | 实验设置 | 关键发现 | 验证目标与适用范围 |
 |---|---:|---|---|
 | Synthetic-v3 | 12 个注入真值问题 | 初始 `RECAPTURE`，修复后 `PASS`，F1 1.00 | 合成工程闭环；不是工厂效果 |
 | ArchBench-v2 | 3 架构 × 96 = 288 records | 固定 SOP 下三架构质量持平 | 固定 SOP 下多 Agent 必要性未被支持 |
 | Omni-180-v1 / RC2 | 本地离线副本中 180 张冻结样本 | 45 findings / 45 工单，1 次 replan，3 个 Workers，`RECAPTURE` | 冻结脱敏证据快照；不证明原图可再分发，不能替代 RC3 |
 | DynamicBench-v1 | 4 架构 × 24 fixtures × 3 repeats = 288 | Dynamic P/R 1.0/1.0；比固定多 Agent少 57 次无效补证；质量与单 Agent 持平且本机 P95 更慢 | 确定性触发语义；实际模型调用为 0 |
 | DynamicBench-v2 | 24 优先级 fixtures × 4 输入顺序 × 3 repeats = 288 | 288/288 选择符合冻结字典序；24/24 输入顺序不变；24/24 重复回执稳定 | 确定性 Worker 排序语义；不是 Active Sensing 校准、工业准确率或端到端性能 |
+| DynamicBench-v3 | 8 冻结合成场景、16 配对记录 | 正确终态 8/8 对 4/8，工具调用 14 对 24 | 冲突、新证据与故障下的补证完整性；[协议](DYNAMICBENCH_V3.md) |
+| DynamicBench-v4 | 4 个冻结合成案件 | 验证 ProductService/Incident v6 到 DecisionPacket 的真实软件链路 | 产品运行时集成；[协议](DYNAMICBENCH_V4.md) |
 | IndustrialIncidentBench v1 | 12 个固定本地 fixture 场景 | 人工闸门、陌生/对抗输入、Worker 失败、预算耗尽、授权撤销、CAPA/Child Run 均失败关闭；外部模型调用 0 | Incident 合同与闭环安全性；不是工厂效果、客户验收或生产 SLO |
 | Omni RC3 `_03` | 4,464 图像 / 1,439 masks 只读 profile；固定 180 Gate | 48→49 findings，5→8 ToolTrace，3 风险流，3 方案，`RECAPTURE` | 当前本地授权运行；不是 4,464 张全量认证 |
 | Omni RC3 `_05` | 49/49 方案；派生 180 图像 / 60 masks；独立 Child Run | 49→33 findings；6 关闭 / 43 打开；`TRANSFERRED_TO_INVESTIGATION` | 整改与复验已执行；不是恢复成功 |

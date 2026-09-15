@@ -15,6 +15,7 @@ import {
   Workflow,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { finalsReview } from "../finalsReview";
 import { BrowserLocalImageLab } from "../components/BrowserLocalImageLab";
 import "../styles/public-workbook.css";
 import { InspectionCanvas } from "../components/visuals";
@@ -389,17 +390,13 @@ function Governance({ manifest }: { manifest: PublicReplayManifest }) {
 }
 
 function Review({ manifest }: { manifest: PublicReplayManifest }) {
-  const rows = [
-    ["问题真实", "公开行业来源与场景边界", "README / INDUSTRY_SCENARIO_VALUE"],
-    ["能力真实", "选中/拒绝 Worker、预算、触发证据", "Public replay manifest"],
-    ["闭环结构可核验", "Parent / Human / Derived / Child", "Lineage view"],
-    ["异常稳定", "缺失事实保持 HOLD，不制造 PASS", "Governance view"],
-    ["安全合规", "无客户数据、无密钥、无人机写", "Publication boundary"],
-    ["开放复用", "Apache-2.0、SBOM、格式合同", "Repository docs"],
-  ];
+  const rows = finalsReview.dimensions.map(row => [
+    `${row.title} · ${row.points} 分`, row.proof,
+    row.criteria.map(item => `${item.title} ${item.points}`).join(" / "),
+  ]);
   return (
     <Panel variant="raised">
-      <PanelHeader eyebrow="GOAI REVIEW INDEX" title="评审问题 → 客观证明物" detail="链接材料仍需评委独立核验。" />
+      <PanelHeader eyebrow="GOAI 2026 FINALS" title="决赛技术与事实核验入口" detail="按决赛五维、十三项标准组织；这里显示评价权重，不是项目得分。完整任务需运行本地后端。" />
       <div className="public-review-table">
         {rows.map(([question, evidence, source]) => (
           <article key={question}><strong>{question}</strong><span>{evidence}</span><code>{source}</code></article>

@@ -13,6 +13,7 @@ import {
 import { Link } from "react-router-dom";
 import type { MouseEvent } from "react";
 import { BrandMark } from "../components/BrandMark";
+import { finalsReview } from "../finalsReview";
 import { CommercialStory } from "../components/CommercialStory";
 import {
   publicReplayManifestUrl,
@@ -20,50 +21,9 @@ import {
   type PublicReplayManifest,
 } from "../publicReplay";
 
-const scoreRows = [
-  {
-    weight: "25%",
-    title: "行业场景价值",
-    proof: "多源工业视觉证据、目标用户、影子评测合同与迁移梯度",
-    href: "/review",
-    internal: true,
-  },
-  {
-    weight: "25%",
-    title: "Agent 任务闭环",
-    proof: "Intake → Planner → Tool → Judge → CAPA → Child Run",
-    href: "/runs",
-    internal: true,
-  },
-  {
-    weight: "20%",
-    title: "产品与 Demo",
-    proof: "可交互多页面工作台、独立静态清单读取、错误与缺失状态失败关闭",
-    href: "/command-center",
-    internal: true,
-  },
-  {
-    weight: "15%",
-    title: "技术实现",
-    proof: "typed kernel、确定性工具、动态补证、JCS / SHA-256 证据绑定",
-    href: "/evidence",
-    internal: true,
-  },
-  {
-    weight: "10%",
-    title: "安全与可追溯",
-    proof: "只读来源、具名人工权限、私有派生整改、production=false",
-    href: "/governance",
-    internal: true,
-  },
-  {
-    weight: "5%",
-    title: "开放与复用",
-    proof: "Apache-2.0、SBOM、Schema、Rule Pack、Adapter 与示例数据",
-    href: "/integrations",
-    internal: true,
-  },
-] as const;
+const scoreRows = finalsReview.dimensions.map(row => ({
+  ...row, weight: `${row.points} 分`, internal: true,
+}));
 
 function compactDigest(value: string): string {
   return `${value.slice(0, 14)}…${value.slice(-12)}`;
@@ -248,7 +208,7 @@ export function PublicLandingPage() {
         <section className="facade-proof" id="proof" aria-labelledby="proof-title">
           <header className="facade-section-heading">
             <span>03 / REVIEWER PROOF MAP</span>
-            <h2 id="proof-title">沿着评分表取证，不靠口号拿分</h2>
+            <h2 id="proof-title">从项目价值到可复现实现</h2>
           </header>
           <div className="facade-score-ledger">
             {scoreRows.map((row) => {

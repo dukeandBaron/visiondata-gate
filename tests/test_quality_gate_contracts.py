@@ -7,29 +7,41 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_full_regression_job_has_room_for_the_measured_windows_suite() -> None:
-    workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text("utf-8"))
-    assert workflow["jobs"]["verify"]["timeout-minutes"] == 45
+def test_public_job_is_explicitly_scoped_not_a_full_freeze_regression() -> None:
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/quality.yml").read_text("utf-8")
+    )
+    job = workflow["jobs"]["contracts-and-coverage"]
+    assert job["timeout-minutes"] == 15
+    assert "Scoped" in job["name"]
+    assert any(
+        "check_engineering_quality.py coverage" in s.get("run", "")
+        for s in job["steps"]
+    )
 
 
 def test_python_ci_pins_both_supported_versions_on_both_platforms() -> None:
-    workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text("utf-8"))
-    job = workflow["jobs"]["verify"]
+    workflow = yaml.safe_load(
+        (ROOT / ".github/workflows/quality.yml").read_text("utf-8")
+    )
+    job = workflow["jobs"]["contracts-and-coverage"]
     matrix = job["strategy"]["matrix"]
     assert set(matrix["os"]) == {"ubuntu-latest", "windows-latest"}
     assert set(matrix["python-version"]) == {"3.12", "3.13"}
     assert job["strategy"]["fail-fast"] is False
     version = "${{ matrix.python-version }}"
     assert version in job["name"]
-    setup = next(step for step in job["steps"] if step["name"] == "Install uv")
+    setup = next(step for step in job["steps"] if step.get("name") == "Install uv")
     assert setup["with"]["python-version"] == version
     sync = next(
-        step for step in job["steps"] if step["name"] == "Install locked dependencies"
+        step
+        for step in job["steps"]
+        if step.get("name") == "Install locked application test dependencies"
     )["run"]
     assert "--locked" in sync
     assert f'--python "{version}"' in sync
     verify = next(
-        step for step in job["steps"] if step["name"] == "Verify selected Python"
+        step for step in job["steps"] if step.get("name") == "Verify selected Python"
     )["run"]
     assert "sys.version_info" in verify
     assert version in verify
@@ -45,10 +57,12 @@ def test_explicit_ruff_rules_preserve_the_existing_default_gate() -> None:
 
 
 def test_native_lint_and_format_failures_cannot_mask_each_other() -> None:
-    workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text("utf-8"))
-    steps = workflow["jobs"]["verify"]["steps"]
-    lint = [step for step in steps if "ruff check" in step.get("run", "")]
-    formatting = [step for step in steps if "ruff format" in step.get("run", "")]
+    # Formatting remains an explicit contributor gate while whole-tree format
+    # debt is documented; do not invent a full-format hosted CI PASS.
+    config = yaml.safe_load((ROOT / ".pre-commit-config.yaml").read_text("utf-8"))
+    steps = config["repos"][0]["hooks"]
+    lint = [step for step in steps if "ruff check" in step["entry"]]
+    formatting = [step for step in steps if "ruff format --check" in step["entry"]]
     assert len(lint) == len(formatting) == 1
     assert lint[0] is not formatting[0]
 

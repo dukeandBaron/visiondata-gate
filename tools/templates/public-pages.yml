@@ -51,6 +51,9 @@ jobs:
         working-directory: web
         run: npm run typecheck
 
+      - name: Verify finals evaluation navigation
+        run: node --experimental-strip-types --test tests/web_finals_review.test.mjs
+
       - name: Build public synthetic replay
         working-directory: web
         env:

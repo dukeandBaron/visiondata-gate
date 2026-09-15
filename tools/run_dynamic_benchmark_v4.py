@@ -27,17 +27,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--output",
         type=Path,
-        default=(
-            PROJECT_ROOT
-            / "10_reports"
-            / "DYNAMICBENCH_V4_PRODUCT_RUNTIME_20260829.json"
-        ),
+        default=(PROJECT_ROOT / "output" / "dynamicbench-v4" / "report.json"),
     )
     parser.add_argument(
         "--v3-report",
         type=Path,
         default=(
-            PROJECT_ROOT / "10_reports" / "DYNAMICBENCH_V3_REPLANNING_20260829.json"
+            PROJECT_ROOT / "benchmarks" / "DYNAMICBENCH_V3_REPLANNING_20260829.json"
         ),
     )
     parser.add_argument(

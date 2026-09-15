@@ -92,6 +92,8 @@ Agent 根据当前任务和证据组织下一步，专业工具执行可复算�
 
 ## 用结果说明，而不是只展示一次成功
 
+[**Benchmark Suite：查看完整实验体系**](benchmarks/README.md) — 从固定流程与多 Agent 的架构对照，到调度稳定性、动态补证和真实产品运行时桥接。每项实验都有自己的验证问题、实现入口和结果口径。
+
 ### 动态补证：相同输入下比较编排方式
 
 作者定义并冻结的 **DynamicBench-v3** 包含 8 个合成场景，覆盖证据冲突、工具故障、不确定性和新证据。
@@ -178,6 +180,8 @@ flowchart TB
 - **学习路径**：CPU 参考闭环、检测框训练、Normality 异常检测与持续学习验收各自说明范围；TTT／RL、VLM 预标注和 Active Learning 不作为已完成能力。
 
 [公共 API](docs/PUBLIC_API.md) · [工业 Skill SDK](docs/INDUSTRIAL_SKILL_SDK.md) · [术语与合同](docs/TECHNICAL_TERMINOLOGY.md) · [完整技术映射](docs/REVIEW_GUIDANCE_CLOSURE_20260915.md)
+
+[现场与第三方复现](docs/LIVE_REPRODUCTION.md) · [自研贡献与 AI 辅助开发说明](docs/DEVELOPMENT_PROVENANCE.md)
 
 <details>
 <summary>实现细节：训练输入与安装交付保护</summary>
