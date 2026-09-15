@@ -1,4 +1,4 @@
-# 持续学习与 TTT 防遗忘门禁
+# 持续学习候选的防遗忘评估合同（TTT 运行时未实现）
 
 VisionData Gate 将持续学习定义为一个受控模型版本转换，而不是让生产权重在
 测试流量上无限更新：
@@ -17,9 +17,10 @@ ELIGIBLE_FOR_SANDBOX_REVIEW / HOLD_CATASTROPHIC_FORGETTING
 具名 APPROVE_SANDBOX_CONTINUAL / 保留父模型
 ```
 
-该能力当前实现了强类型合同、确定性计算、不可变本地回执、认证 API 和候选模型
-选择硬门禁。它不包含在线设备控制，不会把 TTT 参数更新自动写回生产模型，也不
-代表已经完成真实多物件训练、工厂影子测试或工业验收。
+当前实现的是强类型 retention/forgetting **评估合同**、确定性计算、不可变本地
+回执、认证 API 和候选模型选择硬门禁；`TTT_RUNTIME=NOT_IMPLEMENTED`。系统不
+在推理时更新参数，也不包含在线设备控制。该合同不代表已经完成真实多物件
+训练、工厂影子测试或工业验收。
 
 ## 为什么不直接持续更新一个全局模型
 
@@ -164,4 +165,3 @@ FACTORY_SHADOW_TEST=NOT_RUN
 INDUSTRIAL_ACCEPTANCE=HOLD
 PRODUCTION_RELEASE_ALLOWED=false
 ```
-

@@ -426,7 +426,7 @@ function FeedbackCard({ item, run, canAct, execute }: { item: VisionFeedback; ru
     </tbody></table></div></details>
     {item.status === 'PENDING_HUMAN_REVIEW' ? <form onSubmit={event => { event.preventDefault(); void execute(`triage_feedback:${item.feedback_id}`, key => ({ ...approval(review, key), expected_run_sha256: run.receipt_sha256,
       expected_feedback_sha256: item.receipt_sha256, operator_attests_reviewed: attested, classification }), { runId: run.run_id }); }}><fieldset disabled={!canAct}>
-      <label>人工反馈分类<select aria-label="人工反馈分类" value={classification} onChange={e => { setClassification(e.target.value as VisionFeedbackClassification); setAttested(false); }}><option value="UNKNOWN">未知 · 证据不足</option><option value="MODEL_ERROR">模型问题（人工判断）</option><option value="LABEL_REVIEW_REQUIRED">标签需要复核（未确认错误）</option><option value="HARD_SAMPLE">困难样本（人工判断）</option></select></label>
+      <label>人工反馈分类<select aria-label="人工反馈分类" value={classification} onChange={e => { setClassification(e.target.value as VisionFeedbackClassification); setAttested(false); }}><option value="UNKNOWN">未知 · 证据不足</option><option value="MODEL_ERROR">模型问题候选（人工裁定）</option><option value="LABEL_REVIEW_REQUIRED">标签复核候选（尚未确认错误）</option><option value="HARD_SAMPLE">困难样本候选（人工裁定）</option></select></label>
       <ApprovalFields value={review} onChange={setReview} /><Check label="我已复核预测与参考标签证据，明确记录上述分类；不自动关闭问题，也不授权回灌验证样本。" checked={attested} onChange={setAttested} />
       <button type="submit" disabled={!attested || !approvalReady(review)}>记录人工反馈分类</button>
     </fieldset></form> : <p>已人工分类：{item.classification} · TRIAGED_FOR_REVIEW。请在左侧新轮次中明确选择该反馈和新数据版本；UNKNOWN 不可用于关联。</p>}

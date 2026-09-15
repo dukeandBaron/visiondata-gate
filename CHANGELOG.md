@@ -21,6 +21,8 @@ competition artifact tags are not a claim of a matching PyPI package version.
   coverage and testcase-identity gates, security scan workflows and contributor hooks.
 - Public balanced DynamicBench-v3 reproducibility subset, raw fixed-set injection
   evidence, and explicit API/whole-chain-rewrite trust boundaries.
+- Review-grounded three-stage dataset lifecycle, five-function governance control
+  loop, dual replan routes and a normative bilingual terminology guide.
 
 ### Fixed
 
@@ -28,6 +30,9 @@ competition artifact tags are not a claim of a matching PyPI package version.
   reconciliation; pre-dispatch rejection is distinct from an untrusted response.
 - Stale read results no longer authorize learning actions. Same-project
   connection refreshes preserve unfinished review forms.
+- Product, defense and workbench copy now separates initial dataset candidates,
+  governed dataset candidates, supervised BBox detection, Normality development,
+  human-adjudicated hard-example candidates and unimplemented VLM/TTT routes.
 
 ### Security and compatibility
 

@@ -1,4 +1,20 @@
-# Data disposition and local learning workbench
+# 数据去向与本地模型学习工作台
+
+本工作台属于 [受控模型开发与反馈回流](TECHNICAL_TERMINOLOGY.md)，不负责
+替代前置的人机协同数据集冷启动或 Agent 编排的数据质量治理。其输入必须是
+已经绑定来源、版本、用途和 Gate 的冻结训练候选；其输出仍只是候选模型、
+评估回执和人工反馈队列。
+
+## Canonical feedback terms
+
+- `LABEL_ERROR` 是兼容既有 API 的 wire value，只能在具名人员完成裁定后解释
+  为“人工确认的标签问题”；模型分歧在裁定前叫 `LABEL_REVIEW_CANDIDATE`。
+- `HARD_SAMPLE` 对外显示为“困难样本候选（人工裁定）”。它不能根据低置信度
+  自动成立，也不能把原 val/test 样本直接搬入 train。
+- `DISTRIBUTION_SHIFT` 是人工分类的补采信号，不等于已经完成统计漂移检验。
+- `INSUFFICIENT_EVIDENCE` 必须保持 HOLD；缺少反馈不解释为零错误。
+- 当前反馈回流是 `Train–Evaluate–Review` 受控迭代，不是 Active Learning query
+  engine、在线 Continual Learning 或 Test-Time Training。
 
 ## What is connected
 

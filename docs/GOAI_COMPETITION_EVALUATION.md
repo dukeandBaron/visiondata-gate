@@ -18,6 +18,13 @@
 - **可操作性**：输出责任队列、整改方案、人工节点和复验条件，而不是只给文本建议。
 - **安全红线**：`human_only`、`no_device_control`、`production_release_allowed=false` 是硬边界。
 
+评审时先用三阶段业务链回答“项目到底做什么”：**人机协同数据集冷启动 →
+Agent 编排的数据质量治理 → 受控模型开发与反馈回流**；再用五个受控功能回答
+“Agent 为什么不是普通 Workflow”：Data Quality Diagnoser、Remediation Planner、
+Authorized Remediation Executor、Independent Verification Gate 和
+Evidence-gap-driven Bounded Replanner。底层仍映射到现有 Incident v6 六阶段，
+不虚构新的自治 Agent。
+
 ## 使用方法
 
 评审材料应从产品流程自然展示这些证明物。首页只保留产品定位、任务闭环与运行入口；完整分母见 [EVIDENCE_AND_BENCHMARKS.md](EVIDENCE_AND_BENCHMARKS.md)，当前状态见 [PROJECT_STATUS.md](PROJECT_STATUS.md)，可声明边界见 [CLAIM_SCOPE.md](CLAIM_SCOPE.md)。

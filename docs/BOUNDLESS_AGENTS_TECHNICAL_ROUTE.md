@@ -16,6 +16,12 @@ VisionData Gate 是一个面向工业视觉算法工程师、质量负责人和�
 
 VisionData Gate 把这些碎片化动作组织成可运行、可复核、可交付的任务闭环。
 
+评审展示时先使用三阶段业务主线：**人机协同数据集冷启动 → Agent 编排的
+数据质量治理 → 受控模型开发与反馈回流**。下文的 Manager、Leader、Worker、
+Council 和 Judge 是第二阶段内部的运行时角色，不能与三个业务阶段混为同一层
+级，也不能把模型训练说成 Agent 自己制造测量事实。规范映射见
+[`TECHNICAL_TERMINOLOGY.md`](TECHNICAL_TERMINOLOGY.md)。
+
 ## 用户看到的六步闭环
 
 ```text
@@ -47,7 +53,7 @@ Streamlit 企业工作台提供项目、审核任务、审核记录、能力目�
 
 ### 2. Agent 编排层
 
-Manager 负责目标与合同校验；Leader 负责拆解任务和依据证据重规划；Workers 调用白名单工具；AI Council 只做有引用的解释和质询；冻结 Policy Judge 拥有门禁裁决权；Repair Operator 只在保留副本上执行允许的工单；Audit Clerk 负责证据交付。
+Manager 负责目标与合同校验；Leader 负责拆解任务和依据证据重规划；Workers 调用白名单工具；Deterministic Evidence Council 只做有引用的交叉检查（历史回执可能保留 `AI Expert Council` 显示名）；冻结 Policy Judge 拥有门禁裁决权；Repair Operator 只在保留副本上执行允许的工单；Audit Clerk 负责证据交付。
 
 这些角色均为工具与规则驱动的本地确定性 Agent 角色，不是真人专家，也不冒充外部大模型调用。本版本实际模型调用数和模型费用均为 0。
 

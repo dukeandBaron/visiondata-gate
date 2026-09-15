@@ -4,6 +4,10 @@
 
 证据模式：`PUBLIC_SYNTHETIC_REPLAY`。公开页面无 Python 后端、无客户数据、无 API Key、无生产写操作；浏览器只有在 JCS SHA-256 一致后才显示案件事实。
 
+这 60 秒只演示三阶段主线中的 **Agent 编排的数据质量治理**，不演示 VLM
+预标注、模型训练或生产推理。开场应明确输入是“初始候选数据集版本”，收尾
+应称输出为“经治理的数据集候选版本或 HOLD”，不能说已经得到最终准确数据。
+
 本脚本只读取公开清单：`3 selected / maximum 5 / 2 rejected / 4 hypotheses / 4 external evidence gaps`。这组数字不得绑定到另一条 Goal3 持久交互回执（`5 selected / budget 5 / 3 rejected / Child CONTINUE_HOLD`）。公开清单只声明 `human gate=REQUIRED`、`public_snapshot_attestation=NOT_ISSUED`，不证明具名人工审批已经完成。
 
 ## 现场路径

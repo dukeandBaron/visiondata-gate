@@ -110,6 +110,8 @@ class ModelSelection(CycleAction):
 
 
 class FeedbackReview(CycleAction):
+    """Named human-adjudicated feedback; never an automatic label-truth claim."""
+
     classification: Literal[
         "LABEL_ERROR", "HARD_SAMPLE", "DISTRIBUTION_SHIFT", "INSUFFICIENT_EVIDENCE"
     ]

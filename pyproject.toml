@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "visiondata-gate"
 version = "0.1.0"
-description = "Auditable industrial-vision data release gate with an AI Expert Council"
+description = "Auditable industrial-vision dataset governance and model-development Agent"
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]

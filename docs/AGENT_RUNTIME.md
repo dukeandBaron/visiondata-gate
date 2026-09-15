@@ -16,6 +16,23 @@ Validation     已保存的运行产物 -> 变异/故障/重放评测 -> 独立�
 生产任务的完成不依赖 pytest、fixture、Fake runner、轨迹变异、故障注入、消融或 benchmark。
 Validation 只能观察或复制已保存产物，不能参与生产任务的规划、工具执行、裁决和证据生成。
 
+## 评审解释层与六阶段运行时的映射
+
+评审草图中的 Detector、Solver、Evaluator 和 Planner 是业务解释，不是另一套
+运行时。规范映射如下：
+
+| 解释层功能 | 六阶段 / 产品合同 |
+|---|---|
+| Data Quality Diagnoser | Intake + Tool + Evidence Council；输出测量、Finding、竞争假设和证据缺口 |
+| Remediation Planner | Planner + Decision Packet；输出候选动作、责任人和验收条件 |
+| Authorized Remediation Executor | 六阶段之外的具名人工/CAPA 服务；只写派生副本 |
+| Independent Verification Gate | Child Run 的 Tool + Judge + Delivery；比较关闭、持续和回归 Finding |
+| Evidence-gap-driven Bounded Replanner | Planner 内的 Worker Selection、预算和 fresh replan；不扩大工具或模型权限 |
+
+因此，PPT 可以用“诊断—整改—评价—重规划”帮助评委理解，但代码仍以现有
+Incident v6 六阶段和 CAPA/Child 合同为准。详见
+[技术术语表](TECHNICAL_TERMINOLOGY.md)。
+
 ## 1. 授权本地生产内核
 
 正式本地入口是 `visiondata-gate product-run`。它只通过 `ProductService` 公开接口创建租户、

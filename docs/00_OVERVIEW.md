@@ -14,6 +14,8 @@ VisionData Gate 是 GOAI 赛道二“无界应用 Boundless Agents”应用作�
 - 冻结实验与证据命名空间：`vdg-20260816-rc1`（RC2 不改实验结论）
 - 附件摘要：[`../release/SHA256SUMS.txt`](../release/SHA256SUMS.txt)
 - 小白技术路线：[`BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md`](BOUNDLESS_AGENTS_TECHNICAL_ROUTE.md)
+- 评审后统一架构：[`REVIEW_GUIDANCE_CLOSURE_20260915.md`](REVIEW_GUIDANCE_CLOSURE_20260915.md)
+- 规范术语表：[`TECHNICAL_TERMINOLOGY.md`](TECHNICAL_TERMINOLOGY.md)
 - 一页纸：[`one_pager.md`](one_pager.md)
 
 项目采用双层结构：工业视觉异常处置 Agent 是用户可见的应用主线；Agent Runtime、Skill、Tool Contract、Policy Judge、可重放证据和 AgentTeams adapter 是可复用的 Infra 加分层。后者直接增强 Agent 闭环、技术深度、安全追溯和开放复用，同时保持应用赛道定位清晰。

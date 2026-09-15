@@ -4,6 +4,10 @@ This module is intentionally model-runtime agnostic.  It freezes the policy
 that may be a local PyTorch worker can update weights from, records which
 candidate workers were rejected, and keeps optimization convergence separate
 from public-development effectiveness and industrial acceptance.
+
+The resulting experiment is a normality proxy over multiscale classification
+features.  It is not the supervised bounding-box detector implemented by the
+separate YOLO training backend, and it does not generate adjudicated masks.
 """
 
 from __future__ import annotations

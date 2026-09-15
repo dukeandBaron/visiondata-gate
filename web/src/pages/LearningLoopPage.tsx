@@ -21,9 +21,9 @@ const states: Record<string, string> = {
   COMPLETED: "本轮计算完成", FAILED: "本轮失败", CANCELLED: "已取消", INTERRUPTED: "运行中断",
 };
 const classifications = {
-  LABEL_ERROR: ["标注错误", "修订标注后建立新评估协议；不能在旧验证集上继续择优。"],
-  HARD_SAMPLE: ["有效难例", "保留当前验证样本，另行采集类似的训练样本。"],
-  DISTRIBUTION_SHIFT: ["分布变化", "补采具有代表性的训练数据，不移动验证集或测试集。"],
+  LABEL_ERROR: ["人工确认的标签问题", "修订标注后建立新评估协议；不能在旧验证集上继续择优。"],
+  HARD_SAMPLE: ["困难样本候选（人工裁定）", "保留当前验证样本，另行采集类似的训练样本。"],
+  DISTRIBUTION_SHIFT: ["分布变化候选（人工裁定）", "补采具有代表性的训练数据，不移动验证集或测试集。"],
   INSUFFICIENT_EVIDENCE: ["证据不足", "暂停当前协议并补证，不将样本直接归为坏数据。"],
 } as const;
 type Classification = keyof typeof classifications;
@@ -181,7 +181,7 @@ function LearningWorkbench({ scope, projectName }: { scope: LearningScope; proje
             <details><summary>逐样本查看标签、采集组与版本（{current.dataset.samples.length}）</summary><div className="learning-table-wrap"><table><thead><tr><th>样本</th><th>产品 / 缺陷类别</th><th>当前用途</th><th>采集组</th><th>图像版本</th></tr></thead><tbody>{current.dataset.samples.map(item => <tr key={item.sample_id}>
               <td><Link to={`/workspace?purpose=annotation-rework&asset=${encodeURIComponent(item.sample_id)}`}>{item.sample_id}</Link></td><td>{item.category}{item.mask_origin && <small>具名确认的全零掩膜副本</small>}</td><td>{item.split}</td><td>{item.group_id}</td><td title={item.image_sha256}>{short(item.image_sha256)}</td></tr>)}</tbody></table></div><p>工作簿打开的是当前工作副本；这里保留的是本轮冻结版本。修改后必须重新具名复核、冻结和检查。</p></details>
           </section>
-          {latest && <section className="learning-feedback"><h2>本轮反馈收件箱</h2><p>预测错误只触发复核候选。你需要说明它是标注错误、有效难例、分布变化，还是证据不足。</p>
+          {latest && <section className="learning-feedback"><h2>本轮反馈收件箱</h2><p>预测分歧只触发复核候选。具名人员需要将其裁定为标签问题、困难样本候选、分布变化候选或证据不足；模型输出本身不是标签真值。</p>
             {!latest.feedback.length && <p>{latest.status === "COMPLETED" ? "本轮没有验证错误候选；这不等于全部数据合格或模型可以生产放行。" : "本轮尚无可用反馈，请查看运行状态。"}</p>}
             {latest.feedback.map(item => <FeedbackCard key={`${item.feedback_id}:${current.receipt_sha256}`} feedback={item} cycle={current} run={latest} canAct={canAct} scope={scope} execute={execute} />)}
           </section>}

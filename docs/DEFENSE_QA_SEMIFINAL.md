@@ -10,6 +10,12 @@
 | 为什么误放行率和误拦截率没有数字？ | 当前没有独立双人或 QMS 真值分母。把 0/0 写成 0% 会误导，所以状态保持 `NOT_MEASURED_PENDING_ADJUDICATION`。 | Governance 指标合同 | 用合成 benchmark 替代工厂真值 |
 | 49 降到 33 是否说明整改成功？ | 不能。只关闭 6 条责任项，43 条仍开放，Child 仍为 RECAPTURE，所以结果是转人工调查，不是恢复生产。 | Parent/CAPA/Child、Outcome Envelope | 根因成立、生产恢复 |
 | Child 显示 PASS 是否能放行？ | 公开 Child 只表示本地合成同合同复验；`production_release_allowed=false` 始终独立，真实生产需要机构 IAM、具名审批和外部回执。 | Lineage、Governance | 生产批准 |
+| 为什么现在分成三个阶段？ | 数据形成、数据治理和模型学习回答的是三种不同问题。先由人机协同形成初始候选版本，再由 Agent 编排诊断、整改和复验，最后才用用途合格的冻结候选做模型开发和反馈回流。 | 技术术语表、评审指导闭环 | 一个模型同时拥有标签真值、数据准入和生产放行权 |
+| Detector、Solver、Evaluator、Planner 是四个 Agent 吗？ | 不是，它们是答辩层功能。运行口径是 Data Quality Diagnoser、Remediation Planner、具名人工授权执行、Independent Verification Gate 和 Bounded Replanner；底层仍是现有六阶段 Runtime。 | Incident v6、Decision Packet、CAPA | 为展示效果虚构四个自治 Agent |
+| 是否已经用 VLM 自动标注？ | 没有。当前有人工标注/复核和模型验证分歧合同；VLM 预标注仍是 `PLANNED_NOT_CONNECTED`。未来即使接入，输出也只是候选框和文本，必须人工确认后才能形成新 annotation revision。 | Operator Workspace、模型配置边界 | VLM 输出等于标签真值 |
+| 什么叫困难样本？ | 它不是坏数据，也不能由低置信度自动决定。当前 `HARD_SAMPLE` 是具名人员对固定评估分歧作出的分类，只能触发另采相似训练样本，不能把原 val/test 样本搬进 train。 | Learning feedback、Data Pool | 困难样本等于标签错误或质量不合格 |
+| 是否实现了 Active Learning、持续学习或 TTT？ | 已有人工反馈回流和持续学习 retention/forgetting 评估合同；但没有未标注池 query engine，也没有推理时参数更新，所以 Active Learning 和 TTT 运行时均保持未实现。 | Learning Loop、Continual Learning Retention | 反馈页面存在就等于在线持续学习 |
+| 为什么不直接生成 Mask？ | 当前监督检测路径使用 BBox；Normality 路径输出开发用 score/heatmap，公共参考 Mask 只用于权重更新之后的评估。没有经过人工裁定的自动 Mask 真值生成，因此不把热力图写成分割标签。 | YOLO backend、Normality model pack | 热力图或伪标签就是现场 Mask 真值 |
 | 大模型会不会编数字？ | 清晰度、dHash、标注偏移等事实由确定性工具产生；模型只能组织假设和计划，Frozen Policy Judge 以工具回执为准。 | Tool Receipt、Policy Judge | 模型判断等于测量事实 |
 | 工具失败怎么办？ | 主工具失败时只允许合同内 fallback；无法恢复就 HOLD。DynamicBench-v3 的两条故障夹具恢复 2/2，但这仍是冻结合成测试。 | Runs、DynamicBench-v3 | 所有现场故障已覆盖 |
 | 数据和密钥会上传吗？ | 公开 Pages 无后端和密钥入口；本地 BYOK 密钥只在本机服务端保管，原始来源默认只读，公共镜像经过隐私门禁。 | Publication Boundary、Settings、privacy gate | 公网生产 IAM 已完成 |

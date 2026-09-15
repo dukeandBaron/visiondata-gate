@@ -72,7 +72,7 @@ def _checked_executable(executable: Path, expected: str) -> Path:
 
 @dataclass(frozen=True)
 class YoloTrainingConfig:
-    """Small supervised detection budget; device/workers/AMP are not mutable."""
+    """Small supervised bounding-box detection budget; not segmentation or VLM."""
 
     epochs: int = 1
     imgsz: int = 64
