@@ -9,7 +9,7 @@ VisionData Gate 的公开交付采用“私有权威仓 + 干净公共镜像”�
 - GitHub Pages 只运行 React 的 **PUBLIC_SYNTHETIC_REPLAY** 模式，不连接 Python API、客户系统或模型网关。
 - Pages 部署成功不改变比赛、客户、工厂或生产状态。
 
-截至 2026-09-15，当前 GitHub 仓的完整历史扫描仍为 **HOLD**：9 个既有提交包含非 noreply 作者邮箱。标准 GitHub Bot 身份与经逐 SHA 复核的历史二进制已从误报中排除，剩余项不能靠扩大白名单消除。远端历史没有被重写；因此现阶段只能对由导出器生成、`source_history_included=false` 的 history-free 快照作独立隐私声明。Pages 工作流继续保留完整历史门禁，在获得历史重写授权并完成复核前可能被该门禁阻断。
+截至 2026-09-15，当前 GitHub 仓的完整历史扫描仍为 **HOLD**：12 个提交包含非 noreply 身份，其中 9 个来自既有作者记录，3 个来自 GitHub 对 PR #21 的服务端 rebase 提交者记录。标准 GitHub Bot 身份与经逐 SHA 复核的历史二进制已从误报中排除，剩余项不能靠扩大白名单消除。远端历史没有被重写；因此现阶段只能对由导出器生成、`source_history_included=false` 的 history-free 快照作独立隐私声明。Pages 工作流继续保留完整历史门禁，在获得历史重写授权并完成复核前可能被该门禁阻断。
 
 之所以不直接公开原仓，是因为 Git 提交元数据本身也属于公开内容；即使当前文件不含密钥，旧提交中的个人邮箱或已删除内容仍会随完整历史公开。公共镜像从审核后的当前快照建立新历史，并使用 GitHub noreply 身份提交。
 

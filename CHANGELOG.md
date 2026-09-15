@@ -38,9 +38,11 @@ competition artifact tags are not a claim of a matching PyPI package version.
   `uuid` to 1.26.1 and `tauri-plugin-single-instance` to 2.4.4; regenerated
   lock-bound SBOM and notices remain part of the review.
 - Public-history checks accept only exact GitHub Bot metadata and exact-SHA
-  reviewed historical screenshots. Nine pre-existing non-noreply author
-  identities keep the complete-history gate on HOLD; the Tauri Linux
-  `glib 0.18.5` advisory also remains open pending an upstream-compatible graph.
+  reviewed historical screenshots. Twelve non-noreply identities keep the
+  complete-history gate on HOLD: nine existing author records plus three
+  committer records created by GitHub's server-side rebase of PR #21. The Tauri
+  Linux `glib 0.18.5` advisory also remains open pending an upstream-compatible
+  graph.
 - Source changes above are not a statement that an older release/installer or
   PyPI distribution contains them. Review, freeze and publish separately.
 

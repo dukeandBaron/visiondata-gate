@@ -164,7 +164,7 @@ python ..\tools\check_public_pages.py --dist dist
 
 当前尚有一项来自 Tauri Linux GTK 依赖链的 `glib 0.18.5` 中等级上游告警；Windows 目标不编译该依赖，Linux 桌面仍保持 HOLD。依赖链与处理边界记录在 [独立质量工具说明](quality/README.md)。
 
-完整 Git 历史隐私扫描也仍为 HOLD：当前可达历史中有 9 个既有提交使用非 noreply 作者邮箱。GitHub/Dependabot Bot 的标准签名格式和 3 个经逐 SHA 复核的历史工作台截图已不再产生误报，但没有把私人邮箱加入白名单，也没有重写远端历史。`tools/export_public_repository.py` 生成的 history-free 快照具有独立门禁；它通过只说明当前导出文件树可公开，不等于完整历史已经通过。
+完整 Git 历史隐私扫描也仍为 HOLD：当前可达历史中有 12 个非 noreply 身份提交，其中 9 个是既有作者记录，另 3 个是 GitHub 对 PR #21 执行服务端 rebase 时产生的提交者记录。GitHub/Dependabot Bot 的标准签名格式和 3 个经逐 SHA 复核的历史工作台截图已不再产生误报，但没有把私人邮箱加入白名单，也没有重写远端历史。`tools/export_public_repository.py` 生成的 history-free 快照具有独立门禁；它通过只说明当前导出文件树可公开，不等于完整历史已经通过。
 
 ## 状态
 
