@@ -122,13 +122,20 @@ output\<本次独立staging>\deliverables\
 
 ## 交付工件
 
+独立 staging 构建器将以下文件一起放入 `deliverables`，不再只复制 EXE：
+
 - `VisionData Gate_0.1.0_x64-setup.exe`
 - `SHA256SUMS.txt`
 - `BUILD_MANIFEST.json`
-- `BACKEND_SIDECAR_SMOKE.json`
-- `GATEWAY_SMOKE.json`
-- `INSTALLER_SMOKE.json`
+- `SOURCE_MANIFEST.json`
+- `DELIVERY_STATUS.json`
+
+`SHA256SUMS.txt` 校验安装器和旁附 JSON，不是样例图片校验表。构建刚完成时，`DELIVERY_STATUS.json` 为 `BUILD_COMPLETE_VALIDATION_PENDING`，安装、GUI、干净机等项目显式为 `NOT_RUN`；不能将该目录当作已验收正式发行。
+
+`BACKEND_SIDECAR_SMOKE.json`、`GATEWAY_SMOKE.json`、`INSTALLER_SMOKE.json` 或该构建实际采用的验证回执，只有真实执行相应检查后才附加，并核对安装器 SHA、执行方式和范围。没有执行时不生成伪造 Smoke 文件，也不继承另一安装包的 PASS。追加回执后需重新生成该交付集合的校验清单。
 
 实际文件名以本次交付清单为准。不要把构建日志、DPAPI 状态、测试数据库、私域图像或含个人路径的内部回执加入可公开下载的包。
 
 这些是本地构建证据，不等于代码签名、客户验收、生产发布或官方平台验证。另一台干净 Windows 电脑完成实装前，状态保持 `CLEAN_MACHINE_VALIDATION=HOLD`。现有 Python/npm/Cargo SBOM 不包含完整 Maven/JRE 物料；完整三层 SBOM 仍是单独 HOLD，不宣称原清单覆盖整个安装包。
+
+失败训练任务的存储与保留范围见 [模型任务存储策略](MODEL_JOB_RETENTION.md)。升级训练执行器后，其源码指纹会改变；已有外部运行环境需要显式重新探测并确认新的指纹，不能为兼容旧记录而关闭身份校验。

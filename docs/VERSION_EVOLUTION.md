@@ -31,7 +31,7 @@ commit、构建产物、验证分母和对应摘要。
 | RC4 prerelease `v0.4.0-goai-semifinal-rc4` | 面向复赛整理 60 秒 Demo、防守材料、静态 `PUBLIC_SYNTHETIC_REPLAY` 和边界说明 | 让评委可在不接触私域数据的情况下查看冻结合成证据 | Release notes 仍为 `official_submission=PENDING`、`official_evaluation=NOT_EVALUATED`、`production_release_allowed=false` |
 | Windows 候选 `windows-local-ce72604-20260914` | 将 React／Tauri／Spring／FastAPI 本地链打包；最终 NSIS 工件记录资源、HTTP 与两轮学习流程验证 | 证明可形成自包含 Windows 候选，而不是只有源码 | 未签名；该候选没有安装后原生 GUI、独立干净机或同版本升级验证 |
 | Windows 登录修复候选 `windows-local-dc3a4b-login-fix-20260915` | 修复 WebView CORS、桌面启动凭证与启动配置刷新；回执记录真实 Tauri WebView → IPC → Spring → FastAPI 的账户流程和 NSIS 安装／启动／卸载 | 解决“安装包登录注册卡住”的具体问题 | 仍未签名；独立干净机未运行；Torch、Ultralytics、权重和工业模型效果仍在包外／HOLD |
-| `CURRENT_SOURCE_UNRELEASED` | 在已发布候选之后继续加入产品化 README、真实合成工作簿截图、学习反馈、质量工具、依赖兼容，以及评审后的三阶段／五功能／双反馈规范 | GitHub 源码可以展示当前产品主线与诚实能力边界 | 当前源码改进尚未自动生成新安装包、PyPI 发布、工厂 KPI、客户验收或官方评测结果 |
+| `CURRENT_SOURCE_UNRELEASED` | 在已发布候选之后继续加入产品化 README、真实合成工作簿截图、学习反馈、质量工具、依赖兼容、评审后的三阶段／五功能／双反馈规范，以及 YOLO 重复／磁盘保护和安装器旁附身份清单 | GitHub 源码可以展示当前产品主线与诚实能力边界 | 当前源码改进尚未自动生成新安装包、PyPI 发布、工厂 KPI、客户验收或官方评测结果 |
 
 ## 当前架构变化如何理解
 

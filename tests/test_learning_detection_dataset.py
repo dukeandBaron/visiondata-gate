@@ -191,6 +191,34 @@ def test_rejects_split_leakage(module, source, kind):
     assert not source[2].exists()
 
 
+@pytest.mark.parametrize("split", ["train", "val", "test"])
+@pytest.mark.parametrize("encoding", ["same_bytes", "same_pixels"])
+def test_rejects_within_split_duplicates_before_freezing(
+    module, source, split, encoding
+):
+    root, manifest, target = source
+    sample = next(item for item in manifest["samples"] if item["split"] == split)
+    original, copied = root / sample["image_path"], root / "copy.png"
+    if encoding == "same_bytes":
+        copied.write_bytes(original.read_bytes())
+    else:
+        info = PngImagePlugin.PngInfo()
+        info.add_text("note", "different bytes, identical pixels")
+        with Image.open(original) as image:
+            image.save(copied, pnginfo=info)
+    manifest["samples"].append(
+        {
+            **sample,
+            "sample_id": "copy",
+            "image_path": "copy.png",
+            "image_sha256": hashlib.sha256(copied.read_bytes()).hexdigest(),
+        }
+    )
+    with pytest.raises(ValueError, match="(?:IMAGE|PIXEL)_WITHIN_SPLIT_DUPLICATE"):
+        freeze(module, source)
+    assert not target.exists()
+
+
 @pytest.mark.parametrize("mutation", ["extra", "classes", "missing_split"])
 def test_rejects_incomplete_or_open_manifest(module, source, mutation):
     manifest = source[1]

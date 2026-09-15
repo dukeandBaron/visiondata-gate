@@ -62,6 +62,8 @@ REQUIRED_INPUTS = (
     "NOTICE",
     "README.md",
     "docs/WINDOWS_INSTALLER.md",
+    "docs/VISION_MODEL_API_CONTRACT.md",
+    "docs/MODEL_JOB_RETENTION.md",
     "docs/THIRD_PARTY_NOTICES.md",
     "docs/SBOM.cdx.json",
     "pyproject.toml",
@@ -86,6 +88,7 @@ REQUIRED_INPUTS = (
     "benchmarks/DYNAMICBENCH_V4_PRODUCT_RUNTIME_20260829.json",
     "tools/build_learning_installer.py",
     "tools/smoke_packaged_learning.py",
+    "tools/smoke_desktop_identity.mjs",
     "tools/run_learning_demo.py",
     "tools/run_visa_yolo26_normality.py",
     "tools/summarize_visa_yolo26_stability.py",
@@ -1064,6 +1067,36 @@ def bind_artifacts(staging: Path, source_manifest: dict, modules: dict) -> dict:
         installer, delivery / installer.name, record["artifacts"]["installer"]
     )
     write_json_new(staging / "evidence/BUILD_MANIFEST.json", record)
+    # Keep source/build identity beside the installer. Copying deliverables must
+    # not silently detach the executable from its frozen source and HOLD gates.
+    write_json_new(delivery / "BUILD_MANIFEST.json", record)
+    write_json_new(delivery / "SOURCE_MANIFEST.json", source_manifest)
+    write_json_new(
+        delivery / "DELIVERY_STATUS.json",
+        {
+            "schema_version": "visiondata-gate.build-delivery-status.v1",
+            "status": record["status"],
+            "installer_sha256": record["artifacts"]["installer"]["sha256"],
+            "source_content_sha256": source_manifest["source_content_sha256"],
+            "scope": "INTERNAL_PREVIEW_REVIEW_BEFORE_PUBLIC_DISTRIBUTION",
+            "production_release_allowed": False,
+            "code_signed": False,
+            "validation": {
+                "packaged_learning": "NOT_RUN",
+                "native_gui": "NOT_RUN",
+                "installer_install": "NOT_RUN",
+                "clean_machine": "NOT_RUN",
+            },
+        },
+    )
+    with (delivery / "SHA256SUMS.txt").open(
+        "x", encoding="utf-8", newline="\n"
+    ) as sums:
+        for member in sorted(delivery.iterdir()):
+            if member.name != "SHA256SUMS.txt":
+                sums.write(
+                    f"{hash_file(member, member.name)['sha256']}  {member.name}\n"
+                )
     return record
 
 

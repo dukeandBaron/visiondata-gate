@@ -52,6 +52,120 @@ def test_frozen_config_and_unknown_fields():
         backend.YoloTrainingConfig(device="cuda")
 
 
+@pytest.mark.parametrize("seconds", [5, 6, 7, 8, 9])
+def test_training_budget_matches_api_minimum(seconds):
+    with pytest.raises(ValueError, match="YOLO_CONFIG_INVALID_MAX_SECONDS"):
+        backend.YoloTrainingConfig(max_seconds=seconds)
+
+
+def test_training_budget_schema_matches_backend():
+    from dataclasses import asdict
+
+    from visiondata_gate.local_model_registry import VisionTrainingBudget
+
+    props = VisionTrainingBudget.model_json_schema()["properties"]
+    assert asdict(backend.YoloTrainingConfig()) == VisionTrainingBudget().model_dump()
+    schema = json.loads(
+        (
+            Path(__file__).resolve().parents[1]
+            / "schemas/vision_model_requests.v1.json"
+        ).read_text("utf-8")
+    )
+
+    def budget_properties(value):
+        if isinstance(value, dict):
+            if value.get("title") == "VisionTrainingBudget":
+                yield value["properties"]
+            for child in value.values():
+                yield from budget_properties(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from budget_properties(child)
+
+    copies = list(budget_properties(schema))
+    assert copies and all(copy == props for copy in copies)
+    for name, prop in props.items():
+        for value in (prop["minimum"], prop["maximum"]):
+            if name == "imgsz" and value % 32:
+                continue
+            backend.YoloTrainingConfig(**{name: value})
+        for value in (prop["minimum"] - 1, prop["maximum"] + 1):
+            with pytest.raises(ValueError):
+                backend.YoloTrainingConfig(**{name: value})
+
+
+@pytest.mark.parametrize("split", ["train", "val", "test"])
+@pytest.mark.parametrize("encoding", ["same_bytes", "same_pixels"])
+def test_training_rejects_within_split_duplicates(tmp_path, split, encoding):
+    from PIL import PngImagePlugin
+
+    dataset = _dataset(tmp_path / "dataset")
+    original = dataset / "images" / split / "0.png"
+    copied = original.with_name("duplicate.png")
+    if encoding == "same_bytes":
+        copied.write_bytes(original.read_bytes())
+    else:
+        info = PngImagePlugin.PngInfo()
+        info.add_text("note", "same pixels, different container")
+        with Image.open(original) as image:
+            image.save(copied, pnginfo=info)
+    (dataset / "labels" / split / "duplicate.txt").write_text(
+        "0 0.5 0.5 0.5 0.5\n", encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="YOLO_.*DUPLICATE"):
+        backend._dataset_receipt(dataset)
+
+
+def test_low_disk_stops_before_probe_or_dataset_copy(tmp_path, monkeypatch):
+    dataset = _dataset(tmp_path / "dataset")
+    monkeypatch.setattr(
+        backend.shutil, "disk_usage", lambda _path: SimpleNamespace(free=0)
+    )
+
+    def unexpected_probe(*_args, **_kwargs):
+        pytest.fail("low disk must be rejected before starting a runtime")
+
+    monkeypatch.setattr(backend, "_probe_runtime", unexpected_probe)
+    result = backend.run_yolo_training(
+        executable=Path(sys.executable),
+        expected_executable_sha256=backend._sha(Path(sys.executable)),
+        expected_runtime_sha256="a" * 64,
+        dataset_root=dataset,
+        output_root=tmp_path / "job",
+        config=backend.YoloTrainingConfig(),
+    )
+    assert result["status"] == "failed"
+    assert result["error_code"] == "YOLO_OUTPUT_SPACE_INSUFFICIENT"
+    assert not (tmp_path / "job/dataset").exists()
+    assert (
+        json.loads((tmp_path / "job/result.json").read_text("utf-8"))["error_code"]
+        == result["error_code"]
+    )
+    assert (dataset / "images/train/0.png").is_file()
+
+
+def test_failed_training_keeps_evidence_with_explicit_retention_policy(
+    tmp_path, monkeypatch
+):
+    dataset = _dataset(tmp_path / "dataset")
+    result = backend.run_yolo_training(
+        executable=Path(sys.executable),
+        expected_executable_sha256=backend._sha(Path(sys.executable)),
+        expected_runtime_sha256="a" * 64,
+        dataset_root=dataset,
+        output_root=tmp_path / "job",
+        config=backend.YoloTrainingConfig(),
+        cancelled=lambda: True,
+    )
+    policy = json.loads((tmp_path / "job/retention.json").read_text("utf-8"))
+    assert policy["status"] == result["status"] == "cancelled"
+    assert policy["automatic_deletion_permitted"] is False
+    assert policy["cleanup_requires_reference_review"] is True
+    assert "result.json" in policy["preserve"]
+    assert "dataset" in policy["reviewable_working_copies"]
+    assert (tmp_path / "job/result.json").is_file()
+
+
 def test_small_budget_options_disable_minimum_warmup_and_step_every_batch(tmp_path):
     config = backend.YoloTrainingConfig(batch=4)
     options = backend._training_options(
@@ -446,11 +560,11 @@ def test_training_interrupt_is_durable_and_stops_worker(tmp_path, monkeypatch, i
     result = backend.run_yolo_training(
         executable=Path(sys.executable), expected_executable_sha256=backend._sha(Path(sys.executable)),
         expected_runtime_sha256="a" * 64, dataset_root=dataset,
-        output_root=tmp_path / "job", config=backend.YoloTrainingConfig(max_seconds=5),
+        output_root=tmp_path / "job", config=backend.YoloTrainingConfig(max_seconds=10),
         cancelled=(lambda: bool(processes)) if interrupt == "cancelled" else None,
     )
     assert result["status"] == interrupt
-    assert result["elapsed_seconds"] < 8
+    assert result["elapsed_seconds"] < 13
     assert len(processes) == 1 and processes[0].poll() is not None
     assert "checkpoint" not in result
     assert json.loads((tmp_path / "job/result.json").read_text())["status"] == interrupt

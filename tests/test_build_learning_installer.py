@@ -1,6 +1,7 @@
 """Synthetic, non-building tests for the staged authority-source builder."""
 
 import importlib.util
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -22,6 +23,9 @@ def test_model_reproducibility_drivers_are_frozen_source_inputs(builder):
         "tools/run_visa_yolo26_normality.py",
         "tools/summarize_visa_yolo26_stability.py",
         "tools/run_normality_registry_smoke.py",
+        "tools/smoke_desktop_identity.mjs",
+        "docs/VISION_MODEL_API_CONTRACT.md",
+        "docs/MODEL_JOB_RETENTION.md",
     }.issubset(set(builder.REQUIRED_INPUTS))
 
 
@@ -453,6 +457,26 @@ def test_build_manifest_binds_external_runtime_capability(builder, tmp_path):
     assert capability["capability"] == "EXTERNAL_RUNTIME_REQUIRED"
     assert capability["model_pack_bundled"] is False
     assert capability["production_release_allowed"] is False
+
+    delivery = staging / "deliverables"
+    assert json.loads((delivery / "BUILD_MANIFEST.json").read_text("utf-8")) == manifest
+    assert json.loads((delivery / "SOURCE_MANIFEST.json").read_text("utf-8")) == {
+        "source_content_sha256": "a" * 64,
+    }
+    sums = (delivery / "SHA256SUMS.txt").read_text("utf-8")
+    for name in (
+        "setup.exe",
+        "BUILD_MANIFEST.json",
+        "SOURCE_MANIFEST.json",
+        "DELIVERY_STATUS.json",
+    ):
+        digest = hashlib.sha256((delivery / name).read_bytes()).hexdigest()
+        assert f"{digest}  {name}" in sums
+    status = json.loads((delivery / "DELIVERY_STATUS.json").read_text("utf-8"))
+    assert status["status"] == "BUILD_COMPLETE_VALIDATION_PENDING"
+    assert status["production_release_allowed"] is False
+    assert all(value == "NOT_RUN" for value in status["validation"].values())
+    assert not (delivery / "INSTALLER_SMOKE.json").exists()
 
 
 def test_resource_inventory_rejects_database_and_does_not_read_it(builder, tmp_path):

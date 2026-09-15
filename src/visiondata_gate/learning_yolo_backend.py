@@ -83,7 +83,7 @@ class YoloTrainingConfig:
 
     def __post_init__(self) -> None:
         limits = {"epochs": (1, 5), "imgsz": (64, 320), "batch": (2, 8),
-                  "seed": (0, 2**31 - 1), "max_seconds": (5, 600),
+                  "seed": (0, 2**31 - 1), "max_seconds": (10, 600),
                   "threads": (1, 4)}
         for name, (low, high) in limits.items():
             value = getattr(self, name)
@@ -216,6 +216,7 @@ def _dataset_receipt(dataset_root: Path) -> dict:
     if "nc" in data and (type(data["nc"]) is not int or data["nc"] != len(names)):
         raise ValueError("YOLO_CLASS_MAPPING_INVALID")
     files, seen, counts = [], {}, {}
+    seen_pixels: dict[str, str] = {}
     total_bytes = 0
     for split in ("train", "val", "test"):
         if split == "test" and split not in data:
@@ -242,14 +243,32 @@ def _dataset_receipt(dataset_root: Path) -> dict:
             if total_bytes > 128_000_000:
                 raise ValueError("YOLO_DATASET_BYTE_LIMIT")
             image_sha = _sha(image)
-            if image_sha in seen and seen[image_sha] != split:
-                raise ValueError("YOLO_DUPLICATE_IMAGE_OR_SPLIT_LEAKAGE")
+            if image_sha in seen:
+                raise ValueError(
+                    "YOLO_IMAGE_WITHIN_SPLIT_DUPLICATE"
+                    if seen[image_sha] == split
+                    else "YOLO_DUPLICATE_IMAGE_OR_SPLIT_LEAKAGE"
+                )
             seen[image_sha] = split
             # Test bytes are hashed for split isolation; never supplied to the model.
             with Image.open(image) as decoded:
                 if not 1 <= decoded.width <= 2048 or not 1 <= decoded.height <= 2048:
                     raise ValueError("YOLO_IMAGE_DIMENSION_LIMIT")
                 decoded.verify()
+            with Image.open(image) as decoded:
+                rgb = decoded.convert("RGB")
+                pixel_sha = hashlib.sha256(
+                    rgb.width.to_bytes(4, "big")
+                    + rgb.height.to_bytes(4, "big")
+                    + rgb.tobytes()
+                ).hexdigest()
+            if pixel_sha in seen_pixels:
+                raise ValueError(
+                    "YOLO_PIXEL_WITHIN_SPLIT_DUPLICATE"
+                    if seen_pixels[pixel_sha] == split
+                    else "YOLO_DUPLICATE_PIXELS_OR_SPLIT_LEAKAGE"
+                )
+            seen_pixels[pixel_sha] = split
             label_text = label.read_text(encoding="utf-8")
             for line in label_text.splitlines():
                 tokens = line.split()
@@ -329,11 +348,49 @@ def run_yolo_training(
                   "runtime_sha256": expected_runtime_sha256,
                   "elapsed_seconds": round(time.monotonic() - started, 4), **details}
         _json_write(output / "result.json", result)
+        _json_write(
+            output / "retention.json",
+            {
+                "schema_version": "visiondata-gate.yolo-job-retention.v1",
+                "status": status,
+                "automatic_deletion_permitted": False,
+                "cleanup_requires_reference_review": True,
+                "preserve": [
+                    "started.json",
+                    "result.json",
+                    "dataset_receipt.json",
+                    "request.json",
+                    "child_result.json",
+                    "worker.log",
+                ],
+                "reviewable_working_copies": [
+                    "dataset",
+                    "initial.pt",
+                    "environment",
+                    "probe",
+                ],
+                "checkpoints": (
+                    "PRESERVE_UNTIL_MODEL_AND_FEEDBACK_REFERENCES_REVIEWED"
+                ),
+                "scope": "THIS_JOB_ONLY_NOT_SOURCE_DATA_OR_REGISTRY",
+            },
+        )
         return result
 
     if status := interrupted():
         return finish(status)
     receipt = _dataset_receipt(source)
+    # This preflight is not a quota: another process can consume disk later.
+    # Evidence is retained and failed jobs are never deleted automatically.
+    copy_bytes = sum(
+        (source / item["path"]).stat().st_size
+        for item in receipt["files"]
+        if item["split"] != "test"
+    )
+    weights_bytes = initial_weights.stat().st_size if initial_weights else 0
+    required_free = copy_bytes + weights_bytes + 576 * 1024 * 1024
+    if shutil.disk_usage(output).free < required_free:
+        return finish("failed", error_code="YOLO_OUTPUT_SPACE_INSUFFICIENT")
     runtime = _probe_runtime(executable, expected_executable_sha256,
                              output / "probe", import_check=False,
                              timeout=max(0.1, config.max_seconds - (time.monotonic() - started)),

@@ -335,10 +335,20 @@ def _collect(
             raise DetectionDatasetError("TOTAL_PIXEL_CAP")
         if total_bytes > MAX_TOTAL_FILE_BYTES:
             raise DetectionDatasetError("TOTAL_FILE_BYTE_CAP")
-        if seen_images.setdefault(sample.image_sha256, sample.split) != sample.split:
-            raise DetectionDatasetError("IMAGE_SPLIT_LEAKAGE")
-        if seen_pixels.setdefault(pixel_sha, sample.split) != sample.split:
-            raise DetectionDatasetError("PIXEL_SPLIT_LEAKAGE")
+        if sample.image_sha256 in seen_images:
+            raise DetectionDatasetError(
+                "IMAGE_WITHIN_SPLIT_DUPLICATE"
+                if seen_images[sample.image_sha256] == sample.split
+                else "IMAGE_SPLIT_LEAKAGE"
+            )
+        if pixel_sha in seen_pixels:
+            raise DetectionDatasetError(
+                "PIXEL_WITHIN_SPLIT_DUPLICATE"
+                if seen_pixels[pixel_sha] == sample.split
+                else "PIXEL_SPLIT_LEAKAGE"
+            )
+        seen_images[sample.image_sha256] = sample.split
+        seen_pixels[pixel_sha] = sample.split
         labels = _labels(sample)
         if frozen and _read(root, label_path, MAX_MANIFEST_BYTES) != labels:
             raise DetectionDatasetError("LABEL_CONTENT_MISMATCH")

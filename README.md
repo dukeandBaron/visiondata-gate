@@ -151,6 +151,10 @@ flowchart LR
 - **安装**：每个 Windows 候选绑定自己的源码与回执，旧包的通过记录不自动适用于新构建。
 - **数据与权限**：生产决定由人确认，`production_release_allowed=false`；工厂误放行／误拦截仍为 `NOT_MEASURED_PENDING_ADJUDICATION`。
 
+当前源码在最新已发布安装候选之后继续增加了三组保护：YOLO 训练预算已在 API、Schema、Web 和执行器统一为 **10–600 秒**；训练冻结会拒绝同一分区的字节重复或解码像素重复；训练前执行目标卷空间预检，失败／取消／超时任务写入显式保留策略。详细合同见 [本地视觉模型 API](docs/VISION_MODEL_API_CONTRACT.md) 与 [模型任务保留](docs/MODEL_JOB_RETENTION.md)。
+
+安装构建器也会把 `BUILD_MANIFEST.json`、`SOURCE_MANIFEST.json`、`DELIVERY_STATUS.json` 与覆盖安装器及旁附 JSON 的 `SHA256SUMS.txt` 放在同一交付目录。它们只是新构建的身份与待验状态合同；在真实构建、安装和 GUI smoke 完成前，当前源码对应的新安装包仍是 `NOT_BUILT`。
+
 完整 Git 历史的隐私处理仍是独立待办；**经审查的无历史快照，不等于整个 Git 历史可以公开**。静态合成回放也不等于本地可写工作台或工厂在线连接。
 
 日期化结果、实验分母、安装回执与剩余限制集中在 [验证与交付状态](docs/README_STATUS_AND_EVIDENCE.md)。声明规则见 [Claim Scope](docs/CLAIM_SCOPE.md)，安全问题请按 [SECURITY.md](SECURITY.md) 报告。
@@ -165,7 +169,7 @@ flowchart LR
 | RC3 | 形成 Incident v6、Parent／Human／Derived／Child 闭环，并以 `49 → 33`、`6 closed / 43 open` 保存真实负向结果 | 终态仍为调查／HOLD，不是生产恢复 |
 | RC4 | 收口复赛 60 秒演示、隐私安全静态回放和防守材料 | GitHub prerelease 不等于官网提交或评委验收 |
 | Windows candidates | 将 React／Tauri／Spring／FastAPI 打入本地候选包，并修复桌面登录注册链 | 最新已发布候选早于当前源码；未签名，独立干净机仍未验证 |
-| `CURRENT_SOURCE_UNRELEASED` | 产品化首页、工作簿截图、学习反馈、工程质量与评审术语继续进入源码 | 尚未据此生成新安装包或工业效果回执 |
+| `CURRENT_SOURCE_UNRELEASED` | 产品化首页、工作簿截图、学习反馈、工程质量、评审术语、YOLO 重复／磁盘保护与安装器旁附清单继续进入源码 | 尚未据此生成新安装包或工业效果回执 |
 
 详细的 tag、commit、构建与证据边界见 [版本演进与身份规则](docs/VERSION_EVOLUTION.md)。旧版本回执不会自动证明当前源码或新安装包。
 

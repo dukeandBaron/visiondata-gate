@@ -25,6 +25,11 @@ competition artifact tags are not a claim of a matching PyPI package version.
   loop, dual replan routes and a normative bilingual terminology guide.
 - Product-facing version evolution map that separates competition milestones,
   Python package metadata, Windows build identities, Git commits and receipts.
+- YOLO execution preflight now aligns the 10–600 second budget, rejects byte or
+  decoded-pixel duplicates within a split, checks target-disk headroom and emits
+  an explicit failed-job retention policy.
+- Installer delivery folders now bind the executable to build/source manifests,
+  pending validation status and a checksum list instead of copying an EXE alone.
 
 ### Fixed
 

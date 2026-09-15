@@ -206,3 +206,33 @@ def test_version_evolution_separates_milestones_packages_builds_and_evidence() -
         assert identifier in document
     assert "竞赛里程碑 ≠ Python 包版本 ≠ Windows 构建身份 ≠ Git 提交" in document
     assert "旧版本回执不会自动证明当前源码或新安装包" in document
+
+
+def test_product_docs_surface_latest_model_and_installer_boundaries() -> None:
+    readme = _read("README.md")
+    for token in (
+        "10–600 秒",
+        "同一分区的字节重复或解码像素重复",
+        "BUILD_MANIFEST.json",
+        "SOURCE_MANIFEST.json",
+        "DELIVERY_STATUS.json",
+        "SHA256SUMS.txt",
+        "docs/VISION_MODEL_API_CONTRACT.md",
+        "docs/MODEL_JOB_RETENTION.md",
+    ):
+        assert token in readme
+    for document in (
+        "docs/VISION_MODEL_API_CONTRACT.md",
+        "docs/MODEL_JOB_RETENTION.md",
+    ):
+        assert _selected(document)
+        assert _read(document)
+    installer = _read("docs/WINDOWS_INSTALLER.md")
+    for artifact in (
+        "BUILD_MANIFEST.json",
+        "SOURCE_MANIFEST.json",
+        "DELIVERY_STATUS.json",
+        "SHA256SUMS.txt",
+        "BUILD_COMPLETE_VALIDATION_PENDING",
+    ):
+        assert artifact in installer

@@ -223,3 +223,16 @@ def test_windows_build_runs_the_evidence_aware_packaged_sidecar_smoke() -> None:
     assert '"PASS_LOCAL_EVIDENCE"' in smoke_source
     assert '"PASS_LOCAL_DEMO_VERIFIED"' in smoke_source
     assert '"desktop_release_status": "NOT_CLAIMED"' in smoke_source
+
+
+def test_desktop_identity_smoke_is_portable_explicit_and_fail_closed() -> None:
+    smoke_path = PROJECT_ROOT / "tools" / "smoke_desktop_identity.mjs"
+    assert smoke_path.is_file()
+    source = smoke_path.read_text(encoding="utf-8")
+    assert "VDG_PLAYWRIGHT_MODULE" in source
+    assert "PASS_REAL_DESKTOP_IDENTITY" in source
+    assert "clean_machine_validation: 'NOT_RUN'" in source
+    assert "production_release_allowed: false" in source
+    assert "!existsSync(workRoot)" in source
+    assert "D:/Users/" not in source
+    assert "C:/Users/" not in source

@@ -67,6 +67,40 @@ def setup(client: TestClient) -> dict:
     return response.json()
 
 
+@pytest.mark.parametrize(
+    "origin,token,expected",
+    [
+        ("http://tauri.localhost", STARTUP_CAPABILITY, 201),
+        ("http://tauri.localhost", "incorrect-desktop-token", 403),
+        ("http://tauri.localhost", "", 403),
+        ("https://untrusted.example", STARTUP_CAPABILITY, 403),
+    ],
+)
+def test_native_cross_site_setup_requires_origin_and_desktop_capability(
+    tmp_path, monkeypatch, origin, token, expected
+):
+    monkeypatch.setenv("VISIONDATA_DESKTOP_SESSION_TOKEN", STARTUP_CAPABILITY)
+    monkeypatch.setenv("VISIONDATA_WEB_ORIGINS", "http://tauri.localhost")
+    monkeypatch.setenv("VISIONDATA_INSECURE_TEST_ACTOR_HEADER_BYPASS", "false")
+    product = ProductService(tmp_path / "native-product", recover_interrupted=False)
+    try:
+        with TestClient(
+            create_app(product), client=("127.0.0.1", 49321)
+        ) as client:
+            response = client.post(
+                "/v1/identity/setup",
+                json=account(),
+                headers={
+                    "Origin": origin,
+                    "Sec-Fetch-Site": "cross-site",
+                    "X-VisionData-Desktop-Token": token,
+                },
+            )
+            assert response.status_code == expected
+    finally:
+        product.close(wait=True)
+
+
 def register(client: TestClient, name: str = "ordinary-user") -> dict:
     response = client.post("/v1/identity/register", json=account(name))
     assert response.status_code == 201, response.text
