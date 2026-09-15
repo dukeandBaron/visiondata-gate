@@ -23,6 +23,8 @@ competition artifact tags are not a claim of a matching PyPI package version.
   evidence, and explicit API/whole-chain-rewrite trust boundaries.
 - Review-grounded three-stage dataset lifecycle, five-function governance control
   loop, dual replan routes and a normative bilingual terminology guide.
+- Product-facing version evolution map that separates competition milestones,
+  Python package metadata, Windows build identities, Git commits and receipts.
 
 ### Fixed
 

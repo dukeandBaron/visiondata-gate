@@ -171,3 +171,38 @@ def test_spoken_answers_state_the_boundary_without_repeating_rejected_label() ->
     for answer in (review_answer, terminology_answer):
         assert "不作数据准确性已经独立证明的结论" in answer
         assert "不是“精准数据集”" not in answer
+
+
+def test_product_readme_surfaces_current_architecture_and_version_evolution() -> None:
+    readme = _read("README.md")
+    public_template = _read("docs/PUBLIC_REPOSITORY_README.md")
+    assert readme == public_template
+    for term in (
+        "人机协同数据集冷启动",
+        "Agent 编排的数据质量治理",
+        "受控模型开发与反馈回流",
+        "DIAGNOSIS_REVISION",
+        "REMEDIATION_REVISION",
+        "docs/TECHNICAL_TERMINOLOGY.md",
+        "docs/REVIEW_GUIDANCE_CLOSURE_20260915.md",
+        "docs/VERSION_EVOLUTION.md",
+    ):
+        assert term in readme
+
+
+def test_version_evolution_separates_milestones_packages_builds_and_evidence() -> None:
+    assert _selected("docs/VERSION_EVOLUTION.md")
+    document = _read("docs/VERSION_EVOLUTION.md")
+    for identifier in (
+        "vdg-20260816-rc1",
+        "v0.1.0-goai-rc2",
+        "v0.3.0-goai-rc3",
+        "v0.4.0-goai-semifinal-rc4",
+        "windows-local-ce72604-20260914",
+        "windows-local-dc3a4b-login-fix-20260915",
+        "CURRENT_SOURCE_UNRELEASED",
+        "production_release_allowed=false",
+    ):
+        assert identifier in document
+    assert "竞赛里程碑 ≠ Python 包版本 ≠ Windows 构建身份 ≠ Git 提交" in document
+    assert "旧版本回执不会自动证明当前源码或新安装包" in document

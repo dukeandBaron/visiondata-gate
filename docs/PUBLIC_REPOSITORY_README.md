@@ -13,7 +13,9 @@
   <a href="#quickstart">本地运行</a> ·
   <a href="https://github.com/dukeandBaron/visiondata-gate/releases">Windows 候选包</a> ·
   <a href="#workflow">工作流程</a> ·
+  <a href="#architecture">技术主线</a> ·
   <a href="#agent">Agent 的作用</a> ·
+  <a href="#versions">版本演进</a> ·
   <a href="#docs">文档</a>
 </p>
 
@@ -43,6 +45,20 @@ VisionData Gate 连接这段工作：从图像现场定位问题，把整改交�
 | 团队协作 | 管理账户、注册审批、工作区和项目权限 | 可归属的操作与人工决定 |
 
 **候选数据不等于标签真值，检查通过不等于允许生产上线。**缺证据、工具失败或版本变化时，系统保留待处理状态，不默认放行。
+
+<a id="architecture"></a>
+
+## 当前技术主线
+
+项目按三个业务阶段解释，不把数据治理、模型训练和生产裁决混成一个“识别模型”：
+
+1. **人机协同数据集冷启动**：人工完成标注与复核；可选模型未来只能提供预标注候选。输出是初始候选数据集版本，不代表标签真值已被独立确认。
+2. **Agent 编排的数据质量治理**：确定性工具诊断，Agent 组织证据和整改计划，具名人员批准后只在派生副本执行，再由 Child Run 独立复验。必要条件不满足时保持 `HOLD`。
+3. **受控模型开发与反馈回流**：冻结 train／val／test 后执行有界训练与独立评估；预测分歧经人工裁定，再通过新采集或新标注版本进入下一轮，val／test 不自动回灌 train。
+
+治理控制环使用五个受控功能：Data Quality Diagnoser、Remediation Planner、Authorized Remediation Executor、Independent Verification Gate 和 Evidence-gap-driven Bounded Replanner。复验发现诊断缺证或定位错误时走 `DIAGNOSIS_REVISION`；整改无效、持续项未清或引入回归时走 `REMEDIATION_REVISION`。它们是现有六阶段 Runtime 的职责解释，不是为了包装而新增四个自治 Agent。
+
+当前 VLM 预标注、样本级 Top-K query engine、Active Learning、TTT 和自动 Mask 生成均未作为完成能力声明。完整口径见 [技术术语表](docs/TECHNICAL_TERMINOLOGY.md) 与 [评审指导闭环](docs/REVIEW_GUIDANCE_CLOSURE_20260915.md)。
 
 <a id="quickstart"></a>
 
@@ -139,6 +155,20 @@ flowchart LR
 
 日期化结果、实验分母、安装回执与剩余限制集中在 [验证与交付状态](docs/README_STATUS_AND_EVIDENCE.md)。声明规则见 [Claim Scope](docs/CLAIM_SCOPE.md)，安全问题请按 [SECURITY.md](SECURITY.md) 报告。
 
+<a id="versions"></a>
+
+## 版本演进
+
+| 阶段 | 主要变化 | 仍需注意 |
+| --- | --- | --- |
+| RC1／RC2 | 建立冻结实验、确定性质量门禁、Omni-180 脱敏基线和动态 Worker 触发证据 | 历史里程碑，不代表当前安装包或生产效果 |
+| RC3 | 形成 Incident v6、Parent／Human／Derived／Child 闭环，并以 `49 → 33`、`6 closed / 43 open` 保存真实负向结果 | 终态仍为调查／HOLD，不是生产恢复 |
+| RC4 | 收口复赛 60 秒演示、隐私安全静态回放和防守材料 | GitHub prerelease 不等于官网提交或评委验收 |
+| Windows candidates | 将 React／Tauri／Spring／FastAPI 打入本地候选包，并修复桌面登录注册链 | 最新已发布候选早于当前源码；未签名，独立干净机仍未验证 |
+| `CURRENT_SOURCE_UNRELEASED` | 产品化首页、工作簿截图、学习反馈、工程质量与评审术语继续进入源码 | 尚未据此生成新安装包或工业效果回执 |
+
+详细的 tag、commit、构建与证据边界见 [版本演进与身份规则](docs/VERSION_EVOLUTION.md)。旧版本回执不会自动证明当前源码或新安装包。
+
 <a id="docs"></a>
 
 ## 文档与参与
@@ -149,6 +179,7 @@ flowchart LR
 | 理解任务、复验和版本关系 | [平台架构](docs/AGENT_PLATFORM.md) · [数据复核](docs/DATASET_REVIEW_AND_COMPUTE.md) |
 | 配置模型、API 与恢复 | [外部模型](docs/EXTERNAL_MODEL_CONFIGURATION.md) · [平台操作](docs/AGENT_PLATFORM_OPERATIONS.md) |
 | 核对实验和工程质量 | [基准复现](docs/BENCHMARK_REPRODUCIBILITY.md) · [工程质量](docs/ENGINEERING_QUALITY_IMPLEMENTATION.md) |
+| 区分 RC、源码和安装包版本 | [版本演进](docs/VERSION_EVOLUTION.md) · [Changelog](CHANGELOG.md) |
 | 扩展功能或参与贡献 | [公共 API](docs/PUBLIC_API.md) · [贡献指南](CONTRIBUTING.md) · [Issues](https://github.com/dukeandBaron/visiondata-gate/issues) |
 
 欢迎围绕数据导入、标注往返、失败恢复和可复现实验提出问题或贡献。提交 Issue／PR 时请使用最小合成示例，**不要附带客户图像、密钥、个人信息或私有运行回执**。
