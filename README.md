@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>让每一版视觉数据，都有依据地进入下一步。</strong><br />
-  面向机器视觉交付团队的数据治理、整改复验与模型迭代工作台
+  工业视觉训练数据的准入、整改复验与模型迭代工作台
 </p>
 
 <p align="center">
@@ -24,7 +24,7 @@
   <a href="#docs">开发文档</a>
 </p>
 
-**VisionData Gate 帮助算法工程师、视觉方案商和数据质量负责人，把“一批数据有问题”推进到“问题有处理、修订有版本、结果有复验”。** 在同一个工作台中导入图像、复核标注、执行质量检查、跟踪整改，并把经过审核的数据与模型反馈连接起来。
+**像代码合入前需要 CI，视觉模型训练与版本交付前也需要一个能拒绝放行的数据门禁。** VisionData Gate 帮助算法工程师、视觉方案商和数据质量负责人，把“一批数据有问题”推进到“问题有处理、修订有版本、结果有复验”。
 
 它工作在工业视觉的**数据准备与模型交付环节**：工具负责测量，Agent 组织补证与下一步任务，人保留关键决定权。
 
@@ -33,6 +33,16 @@
   <br />
   <sub>真实本地工作簿截图，使用公开合成样本；框为人工标注，曲线为像素量测。</sub>
 </p>
+
+## 三种入口，对应三种证据
+
+| 入口 | 评审者实际能做什么 | 证据边界 |
+| --- | --- | --- |
+| **在线图像工作簿** | 更换自己的图片，复算 SHA、亮度、清晰度、同会话字节重复；人工框选并导出 JSON | 浏览器当前标签页；不上传、不创建后端案件、不生成生产 PASS |
+| **冻结 Agent 案件** | 查看触发证据、Worker 选择／拒绝、竞争假设、预算、CAPA 血缘和六阶段 Trace | SHA 绑定的合成回放；不冒充当前上传图片的 Agent 结果 |
+| **本地完整工作台** | 使用账户、项目和持久化 API，执行具名决定、派生整改、Child Run 与支持的模型任务 | 本机受控运行；工厂接入、客户验收和生产授权需另行取证 |
+
+[按核验路径打开 Demo](https://dukeandbaron.github.io/visiondata-gate/#/review) · [现场改变输入与复现](docs/LIVE_REPRODUCTION.md)
 
 ## 为什么是数据交付，而不只是再训练一次
 
@@ -43,6 +53,12 @@
 **一条建议，不是一份交付。** 遇到缺失证据、工具失败或相互冲突的判断，用户需要知道下一步查什么、谁来确认，以及哪些问题仍然开放。
 
 VisionData Gate 把这些工作组织成可重复的流程。**带有真实缺陷、标注正确的图片可能是优质训练材料；正常产品的模糊图片也可能不适合当前任务。**
+
+## 为什么需要 Agent，而不是把脚本串得更长
+
+已知、稳定、无冲突的 SOP 应该交给固定工具。项目的 ArchBench-v2 也得到这一负结论：固定 SOP 下，传统流程、单 Agent 与多 Agent 质量持平，增加角色本身没有价值。
+
+Agent 只处理固定脚本难以预写的部分：中间证据发生冲突、工具失败、出现新证据或预算不足时，判断缺什么证据、选择哪一个专项 Worker、何时停止并请求人工决定。DynamicBench-v3 在相同输入、工具和 Fail-Closed Judge 下验证了这一边界；它证明编排完整性与效率，不声称多 Agent 普遍更强。
 
 ## 在工作台里完成一轮任务
 
@@ -173,7 +189,7 @@ flowchart TB
   RETAIN -.-> FUTURE["TTT / RL 执行：演进方向"]
 ```
 
-图中为模块关系，不表示所有模型分支已在同一个案例中贯通；虚线表示交接、独立验收或演进接口。[展开完整技术总览：数据流、Agent、损失、参数更新与算力](docs/PROJECT_TECHNICAL_OVERVIEW.md)
+图中为模块关系，不表示所有模型分支已在同一个案例中贯通；虚线表示交接、独立验收或演进接口。[完整技术路线：数据流、Agent、损失、参数更新与算力](docs/PROJECT_TECHNICAL_OVERVIEW.md)
 
 - **工作台**：React／TypeScript；Tauri 提供桌面外壳。
 - **业务服务**：FastAPI 承接领域逻辑；桌面 Spring WebFlux 网关处理本地代理与健康检查。
@@ -181,7 +197,7 @@ flowchart TB
 - **扩展入口**：REST API、Schema、Rule Pack、Adapter，以及显式版本注册的工业 Skill SDK。
 - **学习路径**：CPU 参考闭环、检测框训练、Normality 异常检测与持续学习验收各自说明范围；TTT／RL、VLM 预标注和 Active Learning 不作为已完成能力。
 
-[公共 API](docs/PUBLIC_API.md) · [工业 Skill SDK](docs/INDUSTRIAL_SKILL_SDK.md) · [术语与合同](docs/TECHNICAL_TERMINOLOGY.md) · [完整技术映射](docs/REVIEW_GUIDANCE_CLOSURE_20260915.md)
+[公共 API](docs/PUBLIC_API.md) · [工业 Skill SDK](docs/INDUSTRIAL_SKILL_SDK.md) · [可运行复用示例](examples/reuse/README.md) · [术语与合同](docs/TECHNICAL_TERMINOLOGY.md)
 
 [现场与第三方复现](docs/LIVE_REPRODUCTION.md) · [自研贡献与 AI 辅助开发说明](docs/DEVELOPMENT_PROVENANCE.md)
 

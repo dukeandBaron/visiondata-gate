@@ -184,7 +184,7 @@ def test_product_readme_surfaces_current_architecture_and_version_evolution() ->
         "DIAGNOSIS_REVISION",
         "REMEDIATION_REVISION",
         "docs/TECHNICAL_TERMINOLOGY.md",
-        "docs/REVIEW_GUIDANCE_CLOSURE_20260915.md",
+        "docs/PROJECT_TECHNICAL_OVERVIEW.md",
         "docs/VERSION_EVOLUTION.md",
     ):
         assert term in readme

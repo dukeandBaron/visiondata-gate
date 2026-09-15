@@ -390,20 +390,45 @@ function Governance({ manifest }: { manifest: PublicReplayManifest }) {
 }
 
 function Review({ manifest }: { manifest: PublicReplayManifest }) {
-  const rows = finalsReview.dimensions.map(row => [
-    `${row.title} · ${row.points} 分`, row.proof,
-    row.criteria.map(item => `${item.title} ${item.points}`).join(" / "),
-  ]);
   return (
-    <Panel variant="raised">
-      <PanelHeader eyebrow="GOAI 2026 FINALS" title="决赛技术与事实核验入口" detail="按决赛五维、十三项标准组织；这里显示评价权重，不是项目得分。完整任务需运行本地后端。" />
-      <div className="public-review-table">
-        {rows.map(([question, evidence, source]) => (
-          <article key={question}><strong>{question}</strong><span>{evidence}</span><code>{source}</code></article>
-        ))}
-      </div>
-      <Digest label="Public manifest SHA-256" value={manifest.manifest_sha256} />
-    </Panel>
+    <>
+      <section className="public-review-lanes" aria-label="三种核验路径">
+        <article>
+          <span>01 · CHANGED INPUT</span>
+          <strong>现场换图：浏览器本地取证</strong>
+          <p>导入两张图片，复算 SHA、亮度、清晰度与同会话字节重复；人工框选后导出未封存 JSON。</p>
+          <Link to="/workspace">打开图片工作簿</Link>
+        </article>
+        <article>
+          <span>02 · FROZEN AGENT CASE</span>
+          <strong>冻结案件：检查重规划与失败关闭</strong>
+          <p>沿同一清单查看触发证据、Worker 取舍、竞争假设、Parent/Human/Derived/Child 与六阶段 Trace。</p>
+          <Link to="/command-center">打开合成案件</Link>
+        </article>
+        <article>
+          <span>03 · LOCAL FULL RUNTIME</span>
+          <strong>本地服务：执行可写业务闭环</strong>
+          <p>账户、持久化、真实 API、具名决定、CAPA 和 Child Run 只在本地完整工作台运行。</p>
+          <a href="https://github.com/dukeandBaron/visiondata-gate/blob/main/docs/LIVE_REPRODUCTION.md" target="_blank" rel="noreferrer">查看复现命令</a>
+        </article>
+      </section>
+      <Panel variant="raised">
+        <PanelHeader eyebrow="GOAI 2026 FINALS" title="决赛技术与事实核验入口" detail="五维、十三项标准来自同一冻结配置；分值是官方权重，不是项目得分。每项同时显示本地证据与尚缺外部证据。" />
+        <div className="public-review-table">
+          {finalsReview.dimensions.map((row) => (
+            <article key={row.id}>
+              <header>
+                <strong>{row.title} · {row.points} 分</strong>
+                <StatusBadge tone={row.status.startsWith("PASS_PUBLIC") ? "success" : row.status.startsWith("PASS_LOCAL") ? "info" : "warning"} compact>{row.status}</StatusBadge>
+              </header>
+              <div><span>{row.proof}</span><p>{row.question}</p></div>
+              <div><code>{row.criteria.map(item => `${item.title} ${item.points}`).join(" / ")}</code><small>{row.boundary}</small><Link to={row.href}>打开对应证据</Link></div>
+            </article>
+          ))}
+        </div>
+        <Digest label="Public manifest SHA-256" value={manifest.manifest_sha256} />
+      </Panel>
+    </>
   );
 }
 

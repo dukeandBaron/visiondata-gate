@@ -1,11 +1,13 @@
-export const scoringCriteria = [
-  { id: "value", name: "场景价值与复制", weight: "25%", question: "谁反复需要这项工作，换一个项目如何复用？" },
-  { id: "agent", name: "Agent 与任务闭环", weight: "25%", question: "哪些步骤需要工具，哪些缺证或冲突需要 Agent 组织后续工作？" },
-  { id: "experience", name: "产品体验", weight: "20%", question: "目标用户能否独立开始、处理异常并交付结果？" },
-  { id: "engineering", name: "技术与复现", weight: "15%", question: "输入、修订和复验能否按同一合同重现？" },
-  { id: "safety", name: "安全与追溯", weight: "10%", question: "谁确认结果，错误与缺失信息如何保留？" },
-  { id: "reuse", name: "开放与复用", weight: "5%", question: "别人能否使用相同工具合同、模板和示例？" },
-] as const;
+import { finalsReview } from "./finalsReview.ts";
+
+export const scoringCriteria = finalsReview.dimensions.map((dimension) => ({
+  id: dimension.id,
+  name: dimension.title,
+  weight: `${dimension.points} 分`,
+  question: dimension.question,
+  status: dimension.status,
+  boundary: dimension.boundary,
+}));
 
 export type BusinessTaskId = "dataset-acceptance" | "annotation-rework" | "dataset-reuse";
 type ScoreId = (typeof scoringCriteria)[number]["id"];
@@ -39,10 +41,9 @@ export const businessTasks: BusinessTask[] = [
     ],
     proof: {
       value: "比较每批人工有效工时和整改往返；用第二批或第二项目验证重复使用。",
-      agent: "普通检查由工具执行；复杂 Incident 中再核对补证、选择理由与异常恢复回执。",
-      experience: "由目标用户独立导入、检查和交付，记录帮助、失败和超时，不只统计 PASS。",
-      engineering: "冻结快照、Parent、派生版本与 Child Run；保持原数据不被覆盖。",
-      safety: "批准绑定具体范围与版本；缺证保持待处理，不能自动授予生产权限。",
+      innovation: "普通检查由工具执行；复杂 Incident 才按新证据改变 Worker 与后续任务，并保留两类修订回路。",
+      technology: "冻结快照、Parent、具名批准、派生版本与 Child Run 由同一任务身份和摘要串联；缺证保持待处理。",
+      completion: "由目标用户独立导入、检查和交付；改变输入重跑，记录帮助、失败、超时与恢复，不只统计 PASS。",
       reuse: "记录第二项目的格式、规则和配置差异；同一版本按说明独立运行。",
     },
   },
@@ -61,10 +62,9 @@ export const businessTasks: BusinessTask[] = [
     ],
     proof: {
       value: "观察每批标注复核工时、返修往返和复核通过情况；在第二批标注继续使用。",
-      agent: "图像与标注事实先由工具提供，Agent 解释及组织处置；不宣称自动语义标注。",
-      experience: "复核人能找到图片、选择框、签发问题并检查新修订，记录作者代操作。",
-      engineering: "检查追加修订、并发版本冲突、工单绑定与新快照重检；语义正确性用独立标注标准验证。",
-      safety: "保留原图与修订历史，具名人员负责接受返修；多人权限与仲裁需额外验证。",
+      innovation: "图像与标注事实先由工具提供，Agent 依据缺口组织处置；Finding 消失仍需责任关闭条件，不宣称自动语义标注。",
+      technology: "检查追加修订、并发版本冲突、工单绑定与新快照重检；原图保留，具名人员接受返修。",
+      completion: "复核人能找到图片、选择框、签发问题并检查新修订；记录作者代操作、失败与恢复。",
       reuse: "相同工具适配第二种标注任务时，记录标签规范、导入格式和配置变化。",
     },
   },
@@ -83,10 +83,9 @@ export const businessTasks: BusinessTask[] = [
     ],
     proof: {
       value: "用第二项目接入成本和第二批独立使用记录验证持续价值。",
-      agent: "只对新批次实际出现的缺证或冲突补充工作，所有新结果绑定本次任务。",
-      experience: "同一用户换批次和另一用户换环境分别试用，记录学习与操作成本。",
-      engineering: "软件、规则和输入版本保持可核对，新批次必须实际执行。",
-      safety: "不同客户的数据、真值和规则适用范围分别授权，不能默认共享。",
+      innovation: "只对新批次实际出现的缺证或冲突补充工作，新事实使旧批准失效，所有结果绑定本次任务。",
+      technology: "软件、规则、输入和权限版本可核对；不同客户的数据、真值与适用范围分别授权。",
+      completion: "同一用户换批次和另一用户换环境分别实跑，记录学习、操作成本、失败与配置变化。",
       reuse: "区分同格式新批次、跨格式适配与跨环境部署，不合并为通用成功率。",
     },
   },
