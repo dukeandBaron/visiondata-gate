@@ -240,6 +240,10 @@ def test_product_docs_surface_latest_model_and_installer_boundaries() -> None:
 
 def test_final_windows_candidate_is_sha_bound_without_widening_release_claims() -> None:
     report_path = "docs/WINDOWS_CANDIDATE_CA1FA7B_20260915.md"
+    release_url = (
+        "https://github.com/dukeandBaron/visiondata-gate/releases/tag/"
+        "windows-local-ca1fa7b-20260915"
+    )
     assert _selected(report_path)
     report = _read(report_path)
     for token in (
@@ -262,6 +266,13 @@ def test_final_windows_candidate_is_sha_bound_without_widening_release_claims() 
         document = _read(path)
         assert "windows-local-ca1fa7b-20260915" in document
         assert "WINDOWS_CANDIDATE_CA1FA7B_20260915.md" in document
+    for path in (
+        "README.md",
+        "docs/PUBLIC_REPOSITORY_README.md",
+        "docs/README_STATUS_AND_EVIDENCE.md",
+        report_path,
+    ):
+        assert release_url in _read(path)
     assert "new_windows_installer_for_current_source=NOT_BUILT" not in _read(
         "docs/VERSION_EVOLUTION.md"
     )

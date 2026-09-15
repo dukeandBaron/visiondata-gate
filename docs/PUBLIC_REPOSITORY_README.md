@@ -142,7 +142,7 @@ uv run python tools/run_cross_platform_workbench.py
 
 [下载带版本说明与验证回执的 Windows 候选包](https://github.com/dukeandBaron/visiondata-gate/releases)。核心工作台内嵌运行组件；可选 Python／Torch／Ultralytics／权重需另行登记。安装器未签名，WebView2 为前提，干净机与升级验收按具体包记录。[安装指南](docs/WINDOWS_INSTALLER.md)
 
-最新本地候选身份为 `windows-local-ca1fa7b-20260915`，安装器 SHA-256 为 `09468a0d148017717b2932fc940f17caa378e46fef88ededf582accfea6d05f0`。它已完成构建/PYZ 绑定、提取态 120 次网关请求、两轮 packaged-learning、实际安装启动、SQLite 检查，以及不启用 DevTools 的 Tauri 登录注册 GUI 验收；独立干净机、签名和工业效果仍为 HOLD。[查看完整候选证据](docs/WINDOWS_CANDIDATE_CA1FA7B_20260915.md)
+最新本地候选身份为 [`windows-local-ca1fa7b-20260915`](https://github.com/dukeandBaron/visiondata-gate/releases/tag/windows-local-ca1fa7b-20260915)，安装器 SHA-256 为 `09468a0d148017717b2932fc940f17caa378e46fef88ededf582accfea6d05f0`。它已完成构建/PYZ 绑定、提取态 120 次网关请求、两轮 packaged-learning、实际安装启动、SQLite 检查，以及不启用 DevTools 的 Tauri 登录注册 GUI 验收；独立干净机、签名和工业效果仍为 HOLD。[查看完整候选证据](docs/WINDOWS_CANDIDATE_CA1FA7B_20260915.md)
 
 <a id="architecture"></a>
 

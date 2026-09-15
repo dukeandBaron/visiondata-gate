@@ -2,7 +2,7 @@
 
 ## 2026-09-15 公开访问恢复
 
-唯一主仓为 [visiondata-gate](https://github.com/dukeandBaron/visiondata-gate)，[在线 Demo](https://dukeandbaron.github.io/visiondata-gate/) 已完成同仓 Pages 部署。最新核对的成功部署记录为 [34977277083](https://github.com/dukeandBaron/visiondata-gate/actions/runs/34977277083)，对应提交 `0e677fa79ec1a0c911bdd07b5a829ec809e410d7`；本轮再次读取 Demo 得到 HTTP 200。GitHub API 返回仓库为 Public；本机对 GitHub HTML 的一次匿名 curl 被连接重置，未把该网络失败改写为 HTTP 成功。这不是完整在线后端或新安装器的验收。
+唯一主仓为 [visiondata-gate](https://github.com/dukeandBaron/visiondata-gate)，[在线 Demo](https://dukeandbaron.github.io/visiondata-gate/) 已完成同仓 Pages 部署。最新核对的成功部署记录为 [34989043847](https://github.com/dukeandBaron/visiondata-gate/actions/runs/34989043847)，对应提交 `df907baa1a107d1d49142f708b20133a0ebe1d4c`；本轮再次读取 Demo 得到 HTTP 200。GitHub API 返回仓库为 Public；本机对 GitHub HTML 的一次匿名 curl 被连接重置，随后全新匿名浏览器实际打开仓库页面成功。这不是完整在线后端或新安装器的验收。
 
 发布前已备份历史并修正分支/标签提交邮箱，逐提交文件树保持一致。GitHub 旧 PR/提交缓存的彻底清除不在普通推送能力范围内。以下表格是此前基线的历史记录，其 Private/历史 HOLD 状态已由本节更新。
 
@@ -23,7 +23,7 @@ CodeQL 分析任务成功与公开 Security 页的告警状态不是同一回事
 
 ## 最新核对的 Windows 候选
 
-最新本地候选身份为 `windows-local-ca1fa7b-20260915`，源码绑定 `ca1fa7b1727535014e8723e5bceb4d539272cf2b`。完整记录见 [Windows 候选 ca1fa7b](WINDOWS_CANDIDATE_CA1FA7B_20260915.md)。
+最新候选 prerelease 为 [`windows-local-ca1fa7b-20260915`](https://github.com/dukeandBaron/visiondata-gate/releases/tag/windows-local-ca1fa7b-20260915)，源码绑定 `ca1fa7b1727535014e8723e5bceb4d539272cf2b`。完整记录见 [Windows 候选 ca1fa7b](WINDOWS_CANDIDATE_CA1FA7B_20260915.md)。
 
 本次实际重新执行并记录：
 
@@ -34,7 +34,7 @@ CodeQL 分析任务成功与公开 Security 页的告警状态不是同一回事
 - 正式 Release 构建保持 DevTools 关闭；通过 Windows UI Automation 完成管理员初始化、错误密码恢复、待审批注册、管理员批准、成员登录、重启登录与退出。
 - 未签名；独立干净机 `NOT_RUN`；可选 Python／Torch／Ultralytics／权重仍为外部依赖；工厂效果、客户验收和生产放行未取得通过。
 
-内部候选 ZIP 已创建并保持 `RELEASE_HOLD`。在同一主仓真正创建对应 Release 附件前，不能把本地文件写成已经可公开下载。安装步骤和 WebView2 前提见 [Windows 安装说明](WINDOWS_INSTALLER.md)。
+内部候选 ZIP、直装 EXE、构建/源码清单、验证摘要/回执和 Release 校验表已经作为同一主仓的 prerelease 附件公开；Release 仍保持 `limited review / RELEASE_HOLD`，不等于正式生产发行。安装步骤和 WebView2 前提见 [Windows 安装说明](WINDOWS_INSTALLER.md)。
 
 此前 `windows-local-dc3a4b-login-fix-20260915` 仍是独立旧候选；它的回执不能替代 `ca1fa7b`，反之亦然。
 

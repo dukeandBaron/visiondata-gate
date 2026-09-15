@@ -26,6 +26,8 @@ production_release_allowed=false
 
 这是本机候选验证，不是生产发行、客户验收或工业模型效果证明。
 
+同一主仓 prerelease：[`windows-local-ca1fa7b-20260915`](https://github.com/dukeandBaron/visiondata-gate/releases/tag/windows-local-ca1fa7b-20260915)。Release 提供直装 EXE、完整候选 ZIP、Build/Source Manifest、验证摘要/回执和 Release SHA256SUMS；所有附件仍遵守下述 HOLD 边界。
+
 ## 构建身份
 
 | 项目 | 值 |
@@ -112,7 +114,7 @@ member_count=7
 status=CREATED_INTERNAL_CANDIDATE_RELEASE_HOLD
 ```
 
-该 ZIP 仍明确标记 `INTERNAL_ONLY / RELEASE_HOLD`。若作为 GitHub prerelease 附件提供，只能称为“限量评审候选”，不能称为正式生产安装包。
+该 ZIP 仍明确标记 `INTERNAL_ONLY / RELEASE_HOLD`，公开附件只称为“限量评审候选”，不能称为正式生产安装包。GitHub 返回的 7 个附件均为 `uploaded`，远端记录的大小和 SHA-256 与本地清单一致；Release、EXE 与 ZIP 的匿名 HEAD 检查均为 HTTP 200。
 
 ## 测试与未关闭门禁
 
