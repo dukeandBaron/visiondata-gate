@@ -93,7 +93,7 @@ magic
 ## 运行
 
 ```powershell
-uv run python tools/run_dynamic_benchmark_v3.py 10_reports/DYNAMICBENCH_V3_REPLANNING_20260829.json
+uv run python tools/run_dynamic_benchmark_v3.py output/reproducibility/dynamicbench-v3/report.json
 ```
 
 聚焦验证：

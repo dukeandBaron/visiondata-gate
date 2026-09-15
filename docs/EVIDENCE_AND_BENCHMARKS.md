@@ -39,7 +39,7 @@ JCS canonical payload
 
 当前能力是 tamper-evident 的确定性血缘复核。数字签名、可信时间戳和外部锚定必须按实际配置声明；仅有 SHA-256 不等于法律电子签名或物理不可篡改。
 
-协议细节见 [GOVERNED_AUDIT_ENVELOPE.md](GOVERNED_AUDIT_ENVELOPE.md)。证据登记与机器锚点见 [EVIDENCE_REGISTRY_RC3.md](EVIDENCE_REGISTRY_RC3.md)。
+协议细节见 [GOVERNED_AUDIT_ENVELOPE.md](GOVERNED_AUDIT_ENVELOPE.md)。公开基准原始结果与复现入口见 [Benchmark Suite](../benchmarks/README.md)；私有历史凭据不作为公开部署依赖。
 
 ## Governed Outcome Envelope
 

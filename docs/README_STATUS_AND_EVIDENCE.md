@@ -1,5 +1,22 @@
 # README 验证与交付状态
 
+## 2026-09-16 当前源码复现
+
+本轮在独立的 Python 3.12 锁定环境执行新运行，未修改旧基准结果或用户数据：
+
+| 路径 | 本轮结果 | 口径 |
+| --- | --- | --- |
+| CLI 两种 seed | 各自初检 12 findings，派生复验 0 findings | 合成数据流程；不是两个客户或工厂效果 |
+| DynamicBench-v2 | 288 条排序记录通过 | 确定性选择器协议 |
+| DynamicBench-v3 | 8 fixtures / 16 records；Dynamic 8/8、Fixed 4/8；双方 unsafe release 均 0 | 新报告封套与原冻结摘要 `6a2b107c20eac5f590d9e36a9bcdb835efd080dc9c456528d18e224831585455` 一致 |
+| DynamicBench-v4 | 4/4 实际 ProductService 案件通过；包含工具失败关闭 | 本地产品软件链路；外部模型调用 0 |
+| HTTP 学习参考流程 | 两轮完成、FINALIZED | NumPy 参考模型；模拟复核人，不是工业 RL/TTT |
+| 学习生命周期专项 | 14 项通过 | 独立复跑；此前大套运行的一次失败仍保留，不据此声称全套稳定 |
+
+**全仓冻结回归尚未通过。** 旧参赛包测试依赖未公开的历史材料，部分测试仍需迁移，不能用当前源码临时伪造旧凭据。公开 CI 是明确定义的测试切片；失败日志和后续复跑分别保存，不把测试次数相加变成一次全量 PASS。见 [质量范围](QUALITY_GATES.md) 与 [现场复现](LIVE_REPRODUCTION.md)。
+
+以下安装器记录属于 `ca1fa7b` 的已发布候选，本轮只是核对其现有文件、摘要与公开附件，没有把新文档和 Pages 更改声称为重新打包的 EXE。
+
 ## 2026-09-15 公开访问恢复
 
 唯一主仓为 [visiondata-gate](https://github.com/dukeandBaron/visiondata-gate)，[在线 Demo](https://dukeandbaron.github.io/visiondata-gate/) 已完成同仓 Pages 部署。最新核对的成功部署记录为 [34989043847](https://github.com/dukeandBaron/visiondata-gate/actions/runs/34989043847)，对应提交 `df907baa1a107d1d49142f708b20133a0ebe1d4c`；本轮再次读取 Demo 得到 HTTP 200。GitHub API 返回仓库为 Public；本机对 GitHub HTML 的一次匿名 curl 被连接重置，随后全新匿名浏览器实际打开仓库页面成功。这不是完整在线后端或新安装器的验收。
@@ -25,7 +42,7 @@ CodeQL 分析任务成功与公开 Security 页的告警状态不是同一回事
 
 最新候选 prerelease 为 [`windows-local-ca1fa7b-20260915`](https://github.com/dukeandBaron/visiondata-gate/releases/tag/windows-local-ca1fa7b-20260915)，源码绑定 `ca1fa7b1727535014e8723e5bceb4d539272cf2b`。完整记录见 [Windows 候选 ca1fa7b](WINDOWS_CANDIDATE_CA1FA7B_20260915.md)。
 
-本次实际重新执行并记录：
+该候选的原始验收实际执行并记录：
 
 - 冻结 350 个源码文件；安装器 SHA-256 为 `09468a0d148017717b2932fc940f17caa378e46fef88ededf582accfea6d05f0`。
 - 26 个 PyInstaller PYZ 运行模块与冻结 staged source 匹配。
@@ -61,17 +78,9 @@ CodeQL 分析任务成功与公开 Security 页的告警状态不是同一回事
 
 本页没有将未复核的旧 Pages 地址作为可工作的主入口。源码、历史镜像站点和最新安装器应分别辨认。
 
-## 历史参赛材料
+## 材料与运行版本
 
-2026-09-02 的复赛时间安排和演示脚本作为历史材料保留，不冒充新的决赛规则或当前产品规格：
-
-- [复赛指南核对](GOAI_SEMIFINAL_GUIDE_20260902.md)
-- [60 秒演示脚本](DEMO_60S_SCRIPT_SEMIFINAL.md)
-- [3 分钟陈述稿](DEFENSE_3MIN_SCRIPT_SEMIFINAL.md)
-- [答辩 Q&A](DEFENSE_QA_SEMIFINAL.md)
-- [答辩运行手册](SEMIFINAL_DEFENSE_RUNBOOK_20260902.md)
-
-本轮不核验个人赛事上传状态，不以仓库、网页或安装器的可访问性判断是否已提交或获奖。
+历史演示时长与脚本不定义当前产品能力。第三方运行请以 [复现指南](LIVE_REPRODUCTION.md)、所选源码提交和安装包各自的版本清单为准。仓库、网页或安装器可访问不代表个人赛事表单已提交，也不构成客户验收。
 
 ## 安全与治理
 

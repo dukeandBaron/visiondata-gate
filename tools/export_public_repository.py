@@ -26,6 +26,7 @@ PUBLIC_EXACT_FILES = {
     "benchmarks/README.md",
     "docs/DEVELOPMENT_PROVENANCE.md",
     "docs/LIVE_REPRODUCTION.md",
+    "docs/QUALITY_GATES.md",
     ".github/ISSUE_TEMPLATE/bug_report.md",
     ".github/ISSUE_TEMPLATE/reproduction.md",
     ".github/pull_request_template.md",

@@ -87,7 +87,6 @@ REQUIRED_INPUTS = (
     "benchmarks/DYNAMICBENCH_V3_REPLANNING_20260829.json",
     "benchmarks/DYNAMICBENCH_V4_PRODUCT_RUNTIME_20260829.json",
     "tools/build_learning_installer.py",
-    "tools/smoke_desktop_identity_uia.ps1",
     "tools/smoke_packaged_learning.py",
     "tools/smoke_desktop_identity.mjs",
     "tools/smoke_desktop_identity_uia.ps1",

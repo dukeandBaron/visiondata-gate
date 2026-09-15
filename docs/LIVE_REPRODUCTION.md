@@ -34,6 +34,8 @@ uv run --no-sync python tools/run_dynamic_benchmark_v4.py --output output/demo-d
 
 v3 比较同协议编排；v4 经实际 ProductService/Incident 执行合成案件。保留报告里的 case/事件/工具/结果引用，不能从不同案件拼成一条成功链。输出目录要新建；无需加入 `--force`。
 
+ArchBench 的默认 CLI 是较小规模的运行检查，不自动等于历史 ArchBench-v2 的 288 条记录。比较架构时必须固定相同 fixture、重复次数、预算和机器负载，不能将一次并发自测的时延当作正式性能优势。
+
 ## 3. 实际浏览器工作台
 
 ```text
