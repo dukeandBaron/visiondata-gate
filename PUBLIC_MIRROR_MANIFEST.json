@@ -1,15 +1,15 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "ed830430ca8718fc30a6731c68724aac1ad7f86d",
-  "source_tree_oid": "119df613be7ba56bb0c5a0d468c6b701c3092759",
+  "source_commit_oid": "e662e5225d7b751d806eb5d2b36a6201d22f382f",
+  "source_tree_oid": "f3f28858b83044b7cda9689198bb1cf69c7061da",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
   "customer_data_included": false,
   "personal_data_included": false,
   "tracked_source_only": true,
-  "file_count": 753,
-  "snapshot_sha256": "fb728a92b9bc93f2662a890671e378f3a943276858617403da70349b5d41d6fc",
+  "file_count": 755,
+  "snapshot_sha256": "95bdf1be8638b2b1e66d51ac5e03ede0a0f8d8c7be9f27dd723d426e62ba19d8",
   "files": [
     {
       "path": ".env.example",
@@ -69,8 +69,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "0bbc6e9b917578c82dc0f1d6d593ccbf732efd01b4c3b15bcc079e4b27169db3",
-      "size_bytes": 5359
+      "sha256": "9efd1f4b1e4faad1caedc8104a1d2625d086d62112ac6b6d184b7ca113aa8508",
+      "size_bytes": 5768
     },
     {
       "path": "CITATION.cff",
@@ -99,8 +99,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "a1ab6230f363e2d43bff21702ceb1b3dee37182ad0bdce94692e66cc4969f128",
-      "size_bytes": 16898,
+      "sha256": "47d266c5ca4808f66a9265fdea8a9f4b5753d2fdd3fca9365fb1e511bf5acd4f",
+      "size_bytes": 16975,
       "source": "docs/PUBLIC_REPOSITORY_README.md"
     },
     {
@@ -314,6 +314,11 @@
       "size_bytes": 3185
     },
     {
+      "path": "docs/FULL_REGRESSION_F7F31F7_20260916.md",
+      "sha256": "c977fef53a275e94934b38ba08b5c8aea322fe166e2d338c90e57957274a94a2",
+      "size_bytes": 2036
+    },
+    {
       "path": "docs/GOAI_COMPETITION_EVALUATION.md",
       "sha256": "ffb1500ace43f9e93df1e10e3e7aa898c1c03e8804a6e7dae4b98b9e403c56d8",
       "size_bytes": 3333
@@ -430,8 +435,8 @@
     },
     {
       "path": "docs/PUBLIC_REPOSITORY_README.md",
-      "sha256": "a1ab6230f363e2d43bff21702ceb1b3dee37182ad0bdce94692e66cc4969f128",
-      "size_bytes": 16898
+      "sha256": "47d266c5ca4808f66a9265fdea8a9f4b5753d2fdd3fca9365fb1e511bf5acd4f",
+      "size_bytes": 16975
     },
     {
       "path": "docs/QUALITY_GATES.md",
@@ -450,8 +455,8 @@
     },
     {
       "path": "docs/README_STATUS_AND_EVIDENCE.md",
-      "sha256": "014445810a3e5c1e2d16ed3c892ec28874cb47892e40b312417bb53d293f998c",
-      "size_bytes": 9307
+      "sha256": "3c9dd21cc57f9bd29c5628fc37ea1a6a0195f764af0fd5b48bdf6d3be5309735",
+      "size_bytes": 9169
     },
     {
       "path": "docs/RELEASE_ATTESTATION_V1.md",
@@ -510,8 +515,8 @@
     },
     {
       "path": "docs/VERSION_EVOLUTION.md",
-      "sha256": "a3ee0031a851e284155cb0de5e3c8b5d60d753d29f5a0228b768f90ef8f4d469",
-      "size_bytes": 7839
+      "sha256": "046980dd1f6c4dd7a780fb1a5bcd3e69c40688b601113d3d2e62f073885a0dcc",
+      "size_bytes": 8493
     },
     {
       "path": "docs/VISION_MODEL_API_CONTRACT.md",
@@ -522,6 +527,11 @@
       "path": "docs/WINDOWS_CANDIDATE_CA1FA7B_20260915.md",
       "sha256": "f21329d3ec770c0359672a951f43aa646b7f9a1a2943ee5074bc3d0685ea7fce",
       "size_bytes": 5676
+    },
+    {
+      "path": "docs/WINDOWS_CANDIDATE_F7F31F7_20260916.md",
+      "sha256": "840ef06bce68402349a90837a897a6e0bc9da8bc59c5a35c4da053095a96281d",
+      "size_bytes": 4837
     },
     {
       "path": "docs/WINDOWS_INSTALLER.md",
@@ -2390,8 +2400,8 @@
     },
     {
       "path": "tests/test_review_guidance_terminology.py",
-      "sha256": "297802d38bed57240f639ef395213a035182ee7d18688f17e6003973b8543b9f",
-      "size_bytes": 10142
+      "sha256": "da927651b68807c76d8ec147735000490ba2feb35b1466d90e6c7699d39dd161",
+      "size_bytes": 10933
     },
     {
       "path": "tests/test_reviewer_audit.py",
@@ -2810,8 +2820,8 @@
     },
     {
       "path": "tools/export_public_repository.py",
-      "sha256": "7bd387da4688ae48435d21ea8df1b33abc1dc82b67dc1a9b7bf79eef00fed92d",
-      "size_bytes": 15506
+      "sha256": "c2c12e2c1f53299e579261a9696870da327176bd9eea41b5d9f958001c5fd8ae",
+      "size_bytes": 15604
     },
     {
       "path": "tools/generate_cargo_license_snapshot.py",
