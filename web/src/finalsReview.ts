@@ -20,7 +20,7 @@ export const finalsReview = {
       { title: "自研贡献与复杂任务处理能力", points: 8 },
       { title: "安全、合规与可追溯设计", points: 7 },
     ] },
-    { id: "completion", title: "完成度与可验证性", points: 15, href: "/runs", proof: "真实本地运行、改变输入复验、异常恢复与版本对账", question: "评委更换输入后能否跑通，并对失败、重试、版本和结果逐项对账？", status: "PASS_LOCAL_HOLD_FREEZE", boundary: "本地业务链、公开图像工作簿与 Windows 候选可运行；全仓冻结回归、代码签名和独立干净机仍为 HOLD。", criteria: [
+    { id: "completion", title: "完成度与可验证性", points: 15, href: "/runs", proof: "真实本地运行、改变输入复验、异常恢复与版本对账", question: "评委更换输入后能否跑通，并对失败、重试、版本和结果逐项对账？", status: "PASS_LOCAL_HOLD_EXTERNAL", boundary: "本地业务链、公开图像工作簿、f7f31f7 Windows 候选和 2070 passed 连续回归可核验；代码签名、独立干净机、Hosted 业务后端与客户验收仍为 HOLD。", criteria: [
       { title: "核心任务闭环与稳定性", points: 8 },
       { title: "产品体验与结果一致性", points: 7 },
     ] },

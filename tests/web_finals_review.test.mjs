@@ -40,3 +40,14 @@ test('finals dates and presentation window do not inherit semifinal timing', () 
   assert.equal(finalsReview.questionsMinutes, 5);
   assert.equal(finalsReview.eventDate, '2026-09-22');
 });
+
+test('completion evidence reflects the final source run without erasing external holds', () => {
+  const completion = finalsReview.dimensions.find(row => row.id === 'completion');
+  assert.equal(completion?.status, 'PASS_LOCAL_HOLD_EXTERNAL');
+  assert.match(completion?.boundary ?? '', /f7f31f7 Windows 候选/);
+  assert.match(completion?.boundary ?? '', /2070 passed/);
+  assert.doesNotMatch(completion?.boundary ?? '', /全仓冻结回归.*HOLD/);
+  for (const hold of ['代码签名', '独立干净机', 'Hosted 业务后端', '客户验收']) {
+    assert.match(completion?.boundary ?? '', new RegExp(hold));
+  }
+});
