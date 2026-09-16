@@ -5,37 +5,40 @@
 ## 当前裁决
 
 ```text
-current_worktree_state=CANONICAL_MAIN_SYNC_CANDIDATE
-source_validation_anchor=9417f01216925b6912a1f2c9bdc994c9cf1f6ef9
-source_full_pytest=PASS_2066_PASSED_27_SKIPPED_0_FAILED
-current_release_decision=HOLD_NEW_INSTALLER_NOT_BUILT
-canonical_public_main_before_candidate=b604a63bef10fe1160fe90ba9c21c92e428f6c7f
+current_worktree_state=PUBLIC_MAIN_FINALS_CLOSURE
+source_validation_anchor=f7f31f7048b14b79990a445f285946f46d3bc41f
+source_tree=539fad43bc7074991d516539748bb2f9fa9e08dc
+source_full_pytest=PASS_2070_PASSED_24_SKIPPED_0_FAILED_0_ERRORS
+current_release_decision=PASS_LIMITED_REVIEW_PRERELEASE
+canonical_repository=dukeandBaron/visiondata-gate
+canonical_repository_visibility=PUBLIC
 public_pages_mode=PUBLIC_SYNTHETIC_REPLAY
-online_backend_deployment=HOLD_NO_SERVER
-latest_verified_windows_source=ca1fa7b1727535014e8723e5bceb4d539272cf2b
-new_windows_candidate=NOT_BUILT
-frozen_rc3_state=RC3_FROZEN_LOCAL
-frozen_rc3_release_candidate_ready=true
-frozen_rc3_release_decision=PASS_LOCAL_RC3_RELEASE_CANDIDATE
-frozen_rc3_source_commit=c5fd68fc38025ffab4345cd739e611c96b13c530
-frozen_rc3_source_tree=5501787b6ed452759af16e60dca76ce0c2ec54bf
-submission_eligible=false
-official_submission=PENDING
+online_demo=PASS_PUBLIC_STATIC_BROWSER_LOCAL_MEASUREMENT
+online_backend_deployment=NOT_DEPLOYED
+latest_verified_windows_source=f7f31f7048b14b79990a445f285946f46d3bc41f
+windows_candidate=BUILT_VALIDATED_AND_PUBLISHED_AS_PRERELEASE
+windows_release_tag=windows-local-f7f31f7-finals-20260916
+installer_sha256=e32b10cf7e6ac8a9cdeca06b00973c29ff08acec2ae193fbf80c9d0d9a48e826
+code_signed=false
+clean_machine_validation=NOT_RUN
+same_version_upgrade_validation=NOT_RUN
+finals_non_ppt_materials=PASS_LOCAL_READY
+official_finals_form_submission=PENDING_ACCOUNT_HOLDER_RECEIPT
 official_evaluation=NOT_EVALUATED
 production_release_allowed=false
 machine_write_permitted=false
 factory_shadow_metrics=NOT_MEASURED_PENDING_ADJUDICATION
-release_evidence_binding=DETACHED_RELEASE_NAMESPACE_REQUIRED
-public_distribution=CANONICAL_REPOSITORY_REVIEWED_SURFACE_ONLY
+release_evidence_binding=BOUND_TO_F7F31F7_MANIFESTS_AND_SHA256
+public_distribution=PUBLIC_SOURCE_AND_LIMITED_REVIEW_PRERELEASE
 ```
 
-当前源码候选在 Python 3.12.5 锁定环境中完成一次连续全仓回归：2093 项收集、2066 passed、27 skipped、0 failed、17 warnings，耗时 3422.65 秒。27 项 skip 保留私有历史证据、symlink 主机权限和外部 YOLO 授权边界；详见 [全仓回归记录](FULL_REGRESSION_9417F01_20260916.md)。这只把源码验证升级为 PASS，不自动升级安装包、Pages、官方提交、客户验收或生产放行。
+最终公开源树 `f7f31f7` 在 Python 3.12 锁定环境中完成一次连续全仓回归：2094 项收集、2070 passed、24 skipped、0 failed、0 errors、17 warnings，耗时 3067.57 秒。24 项 skip 分别对应 19 项未随公共仓分发的历史私有发行输入、4 项 Windows 当前用户无 symlink 权限和 1 项未授权的外部 YOLO 运行时；这些能力没有计入 PASS。详见 [最终全仓回归记录](FULL_REGRESSION_F7F31F7_20260916.md)。源码回归不自动升级 Pages、安装器、客户验收或生产放行。
 
-冻结 RC3 的本地候选代码、材料与可复现实跑仍只绑定其历史 commit/tree 及 detached 验证集。现有 `ca1fa7b` Windows 候选也只代表自己的冻结源与回执；本轮更新源码尚未重新打包，因此 `HOLD_NEW_INSTALLER_NOT_BUILT`。
+同一源树已经生成并公开 Windows limited-review prerelease [`windows-local-f7f31f7-finals-20260916`](https://github.com/dukeandBaron/visiondata-gate/releases/tag/windows-local-f7f31f7-finals-20260916)。候选完成 26 个 PYZ 模块源码匹配、113/113 提取态 HTTP 检查、两轮 packaged-learning、NSIS 实装/启动/卸载、SQLite integrity 和七步 Tauri UIA；安装器 SHA-256 为 `e32b10cf7e6ac8a9cdeca06b00973c29ff08acec2ae193fbf80c9d0d9a48e826`。它仍未签名，未完成独立干净机或同版本升级验证，因此不是生产发行。详见 [最终 Windows 候选记录](WINDOWS_CANDIDATE_F7F31F7_20260916.md)。
 
 公开交付只使用唯一主仓 `dukeandBaron/visiondata-gate`：本地完整工作区中的私域运行证据、原始 Omni/CAPA 资产、密钥、本机路径和未审查材料不进入 Git；主仓保留允许公开的源码、合成样本、锁文件、文档与静态 `PUBLIC_SYNTHETIC_REPLAY`。主仓和 Pages 是否与当前候选一致，必须同时核对 `PUBLIC_MIRROR_MANIFEST.json`（兼容文件名）的 source commit/tree 与部署 SHA。
 
-`PASS_LOCAL_RC3_RELEASE_CANDIDATE` 只有在冻结 RC3 的完整本地验证集由 verifier 返回 `PASS_LOCAL_INTEGRITY` 时才成立。detached release namespace 必须含 Attestation、两份候选 ZIP、四份 receipt 与 Full JUnit；项目根还必须是匹配的 clean checkout，具有精确 commit/tree、`uv.lock`、SBOM 和 Attestation 声明的本地 toolchain。Attestation 位于 release namespace 根，候选 ZIP 位于其 build 子目录；单独复制“候选 ZIP + Attestation”不能完成复验。本文不复制会随重新封包变化的哈希。任一旁车、checkout 或 toolchain 对账失败时，状态立即退回 `HOLD_AS_RELEASE_TREE`；RC4 还必须有独立附件清单与内容/隐私 QA 才能升级当前包装状态。
+旧 RC3／RC4、`ca1fa7b` 与 `9417f01` 记录继续作为不可变历史证据保留，但不能替代 `f7f31f7` 候选。当前候选的源码、构建清单、验证摘要、回归聚合回执和 SHA-256 已绑定到同一 GitHub prerelease；原始 JUnit 含本机绝对路径，只公开其摘要与原始文件哈希。其后的 README、清单或开源文档提交不会自动进入既有二进制。
 
 ## 当前主版本
 
@@ -56,7 +59,7 @@ public_distribution=CANONICAL_REPOSITORY_REVIEWED_SURFACE_ONLY
 - CAPA 派生版本使用同卷 staging、回读校验与不覆盖目标的原子目录发布；该原子性不扩大到数据库、授权、Child Run 或生产系统；
 - `GovernedOutcomeEnvelope v1` 将 12 类闭环工件汇总为 tamper-evident 本地投影；数字签名、可信时间戳和外部锚仍未配置；
 - 公开候选只包含可再分发的合成/脱敏证据。私域 Omni/CAPA 原始回执、图像、mask、本机路径、密钥和客户身份不进入公开包；
-- `run_semifinal_demo.ps1` 实现 lockfile 固定的 Web 依赖安装、真实本地 API 与精确 `/review?task=...` 深链合同；最终候选能否在全新解压目录稳定启动由包外 post-build smoke 单独判定，本文不预判该结果。
+- `run_semifinal_demo.ps1` 实现 lockfile 固定的 Web 依赖安装、真实本地 API 与精确 `/review?task=...` 深链合同；最终候选已经完成提取态 HTTP、实际安装启动、七步 UIA 与卸载验收，但独立第三方干净机仍为 `NOT_RUN`。
 
 ## 仍保持 HOLD / PENDING 的外部事项
 
@@ -64,18 +67,17 @@ public_distribution=CANONICAL_REPOSITORY_REVIEWED_SURFACE_ONLY
 - `official_evaluation=NOT_EVALUATED`：没有官方评分或复赛验收结果；
 - `factory_shadow_metrics=NOT_MEASURED_PENDING_ADJUDICATION`：没有工厂提供并双人复核的真值分母，因此误放行率、误拦截率和整改后通过率不得填写；
 - OpenToken/Gemini、Hosted AgentTeams、CVAT/FiftyOne、OPC UA、MES/QMS、VisionMaster 与工厂 IAM 没有真实成功连接回执；本地合同或 probe gateway 不等于生产集成；
-- Windows 安装包仍未签名，也未完成独立 clean-machine 安装/卸载、升级覆盖、可信时间戳或 macOS/Linux 桌面包验证；
+- Windows 安装包仍未签名，也未完成独立 clean-machine、同版本升级、可信时间戳或 macOS/Linux 桌面包验证；
 - `production_release_allowed=false`、`machine_write_permitted=false` 与 `authority=human_only` 不因本地候选通过而改变。
 
-## 如何独立确认本地候选
+## 如何独立确认当前候选
 
-1. 对候选 ZIP 计算 SHA-256，并与 detached Release Attestation 的 artifact binding 比对；
-2. 运行 `tools/verify_release_attestation.py`，要求返回 `PASS_LOCAL_INTEGRITY`；
-3. 在新目录解压候选，执行 `setup_env.ps1` 与 `run_semifinal_demo.ps1`；首次 Web 依赖缺失时入口自动运行锁定的 `npm ci`；
-4. 核对 8788 API 与 4180 Web 就绪、精确 Review 深链可打开、Synthetic/Replay/Read-only 标签存在；
-5. 任一 required path、manifest、凭据扫描、双构包、JUnit 或 clean-extract 校验失败时，停止提交并恢复 `HOLD_AS_RELEASE_TREE`。
+1. 从当前 prerelease 下载候选 ZIP／EXE 与 `RELEASE_SHA256SUMS.txt`，先核对 SHA-256；
+2. 核对 `SOURCE_MANIFEST.json`、`BUILD_MANIFEST.json`、`VALIDATION_SUMMARY.json` 与 `VALIDATION_RECEIPT.json` 的绑定；
+3. 在隔离目录解压候选，或在 Windows 测试机安装后启动；首次使用外部可选模型时另行登记环境、权重和许可证；
+4. 核对本地网关、FastAPI、账户登录、项目与 Review 深链，并确认页面没有把 Pages 合成回放写成业务后端结果；
+5. 任一必需文件、清单、凭据扫描、安装启动或哈希对账失败时，停止使用并保持 `RELEASE_HOLD`。
 
-步骤 3–4 是最终 ZIP 的独立 post-build smoke，不属于 Attestation schema。它失败时不改写
-`PASS_LOCAL_INTEGRITY` 这一摘要完整性结果，但提交与工作台就绪状态必须保持 HOLD，不能上传。
+本机已完成的安装/UIA/卸载验证不能替代独立第三方 clean-machine 证据。后者缺失时可将候选用于受限评审与复现，不能将其描述为生产就绪。
 
 本地通过不会自动升级官方状态。只有真实平台回执才能改变 `official_submission`，只有官方结果才能改变 `official_evaluation`，只有具名工厂授权与合格证据才能改变生产边界。

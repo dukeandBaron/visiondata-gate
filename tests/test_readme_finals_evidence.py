@@ -36,10 +36,13 @@ def test_readme_exposes_benchmark_denominators_and_boundaries() -> None:
         "24",
         "12 / 12",
         "6 / 6",
-        "2066 passed",
+        "2094 项收集",
+        "2070 passed",
+        "24 skipped",
         "不证明工业模型达标",
     ):
         assert token in text
+    assert "2066 passed / 27 skipped" not in text
 
 
 def test_reuse_catalogues_cover_actual_assets_and_license() -> None:
