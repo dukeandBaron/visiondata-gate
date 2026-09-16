@@ -26,6 +26,7 @@ PUBLIC_EXACT_FILES = {
     "benchmarks/README.md",
     "docs/DEVELOPMENT_PROVENANCE.md",
     "docs/FINALS_EVIDENCE_MAP.md",
+    "docs/FINALS_TASK_COMPLETION_UI_20260916.md",
     "docs/LICENSING.md",
     "docs/LIVE_REPRODUCTION.md",
     "docs/QUALITY_GATES.md",
@@ -140,6 +141,7 @@ PUBLIC_EXACT_FILES = {
     "docs/PUBLIC_BINARY_REVIEW.json",
     "docs/assets/web-command-center.png",
     "docs/assets/workbook-local-synthetic.png",
+    "docs/assets/finals-task-responsibility-p0.png",
     "gateway/pom.xml",
 }
 

@@ -107,6 +107,8 @@ Agent 根据当前任务和证据组织下一步，专业工具执行可复算�
 
 单图取证、冻结批次检查与 Incident 调查是不同执行路径；不是每次上传都会调用 LLM 或动态增派 Worker。[查看 Agent 架构](docs/AGENT_PLATFORM.md) · [配置外部 Planner](docs/INCIDENT_MODEL_PLANNER.md)
 
+Review 首屏将 `Agent 组织 / 确定性工具 / 具名人员 / 系统回读` 放在同一责任条；CAPA 区分请求、服务端确认与 Child/Outcome 回读；Runs 为 `WAITING / UNKNOWN / BLOCKED / HUMAN REVIEW` 给出受控恢复动作。[查看任务完成 UI 与验证回执](docs/FINALS_TASK_COMPLETION_UI_20260916.md)
+
 <a id="finals-evidence"></a>
 
 ## 决赛评分证据索引
@@ -136,7 +138,7 @@ Agent 根据当前任务和证据组织下一步，专业工具执行可复算�
 | **DynamicBench-v3** | 8 个冻结合成场景；固定规则基线 | 正确终态 **8 / 8 vs 4 / 8**；工具调用 **14 vs 24**；两者误放行均 0/8 | 证明该协议内的重规划完整性与效率；外部模型调用 0 |
 | **Prompt-injection v2** | 12 个固定攻击输入、6 个固定良性输入 | 攻击拦截 **12 / 12**，良性放行 **6 / 6** | 不证明未知、自适应或多模态攻击的普适防护 |
 | **VisA Normality 开发代理** | capsules 子集、3 个固定种子 | Image AUROC `0.657823`；正常 FPR `0.277778`；Pixel F1 `0.090093` | 开发代理结果，**不证明工业模型达标** |
-| **源码连续回归** | Python 3.12 单次连续运行，2094 项收集 | `2070 passed / 24 skipped / 0 failed / 0 errors` | 源码验证；24 项 skip 不计入 PASS，也不自动覆盖安装包、Pages 或工厂效果 |
+| **当前源码连续回归** | Python 3.13 单次连续运行，2105 项收集 | `2081 passed / 24 skipped / 0 failed / 0 errors` | 包含任务完成 UI 与浏览器回归；24 项 skip 不计入 PASS，也不自动覆盖既有安装包、Pages 或工厂效果 |
 
 ### 动态补证：相同输入下比较编排方式
 

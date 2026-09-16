@@ -1,9 +1,9 @@
 {
   "schema_version": "visiondata-gate.public-binary-review.v1",
   "review_basis": "VISUAL_PIXEL_AND_METADATA_INSPECTION",
-  "reviewed_on": "2026-09-15",
+  "reviewed_on": "2026-09-17",
   "reviewer_identity_included": false,
-  "reviewed_file_count": 24,
+  "reviewed_file_count": 25,
   "prohibited_content_checks": [
     "PERSONAL_IDENTITY",
     "CREDENTIAL_OR_SECRET",
@@ -23,6 +23,13 @@
       "path": "docs/assets/workbook-local-synthetic.png",
       "sha256": "92fd1295d81b9b147756b6de150bc29fa2af3c2fdf366e77115344d391c901a0",
       "size_bytes": 415574,
+      "category": "SYNTHETIC_WORKBENCH_SCREENSHOT",
+      "review_result": "PASS_NO_PRIVATE_CONTENT_OBSERVED"
+    },
+    {
+      "path": "docs/assets/finals-task-responsibility-p0.png",
+      "sha256": "0295fd221bad634d890e9db458f3409c8d187cc8d56f7e931b1a5e580b67f86a",
+      "size_bytes": 346052,
       "category": "SYNTHETIC_WORKBENCH_SCREENSHOT",
       "review_result": "PASS_NO_PRIVATE_CONTENT_OBSERVED"
     },
@@ -181,5 +188,5 @@
       "review_result": "PASS_NO_PRIVATE_CONTENT_OBSERVED"
     }
   ],
-  "manifest_sha256": "a4a0ddd5f4b5631bf23fed8ca424df722a3456c48fcc686e0ec7eb12b1efafe1"
+  "manifest_sha256": "981c619ecca3ee3389e5bfc8edfa82f81213f5cd029179defc3dbc550d1bb73f"
 }
