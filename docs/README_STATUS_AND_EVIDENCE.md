@@ -11,19 +11,19 @@
 | DynamicBench-v3 | 8 fixtures / 16 records；Dynamic 8/8、Fixed 4/8；双方 unsafe release 均 0 | 新报告封套与原冻结摘要 `6a2b107c20eac5f590d9e36a9bcdb835efd080dc9c456528d18e224831585455` 一致 |
 | DynamicBench-v4 | 4/4 实际 ProductService 案件通过；包含工具失败关闭 | 本地产品软件链路；外部模型调用 0 |
 | HTTP 学习参考流程 | 两轮完成、FINALIZED | NumPy 参考模型；模拟复核人，不是工业 RL/TTT |
-| 学习生命周期专项 | 14 项通过 | 独立复跑；此前大套运行的一次失败仍保留，不据此声称全套稳定 |
+| 全仓 Python 3.12 回归 | 2093 collected；2066 passed；27 skipped；0 failed；17 warnings；3422.65s | 单一连续运行，绑定源码 `9417f01216925b6912a1f2c9bdc994c9cf1f6ef9`；是本地源码回归，不是 Release Attestation |
 
-**全仓冻结回归尚未通过。** 旧参赛包测试依赖未公开的历史材料，部分测试仍需迁移，不能用当前源码临时伪造旧凭据。公开 CI 是明确定义的测试切片；失败日志和后续复跑分别保存，不把测试次数相加变成一次全量 PASS。见 [质量范围](QUALITY_GATES.md) 与 [现场复现](LIVE_REPRODUCTION.md)。
+**当前公开源码候选的全仓回归已连续运行到结束。** 27 项 skip 中，22 项依赖未分发的历史私有发行/评审材料，4 项需要当前 Windows 用户不具备的 symlink 权限，1 项需要显式外部 YOLO 运行授权；这些项目没有被写成 PASS。完整命令、分母和边界见 [9417f01 全仓回归记录](FULL_REGRESSION_9417F01_20260916.md)。公开 CI 仍是明确定义的多平台测试切片，不能用本地全量结果替代 GitHub CI。
 
 以下安装器记录属于 `ca1fa7b` 的已发布候选，本轮只是核对其现有文件、摘要与公开附件，没有把新文档和 Pages 更改声称为重新打包的 EXE。
 
 ## 2026-09-15 公开访问恢复
 
-唯一主仓为 [visiondata-gate](https://github.com/dukeandBaron/visiondata-gate)，[在线 Demo](https://dukeandbaron.github.io/visiondata-gate/) 已完成同仓 Pages 部署。最新核对的成功部署记录为 [34989043847](https://github.com/dukeandBaron/visiondata-gate/actions/runs/34989043847)，对应提交 `df907baa1a107d1d49142f708b20133a0ebe1d4c`；本轮再次读取 Demo 得到 HTTP 200。GitHub API 返回仓库为 Public；本机对 GitHub HTML 的一次匿名 curl 被连接重置，随后全新匿名浏览器实际打开仓库页面成功。这不是完整在线后端或新安装器的验收。
+唯一主仓为 [visiondata-gate](https://github.com/dukeandBaron/visiondata-gate)，[在线 Demo](https://dukeandbaron.github.io/visiondata-gate/) 已完成同仓 Pages 部署。当前公开 `main=b604a63bef10fe1160fe90ba9c21c92e428f6c7f` 的最新 Pages 成功记录为 [35002282200](https://github.com/dukeandBaron/visiondata-gate/actions/runs/35002282200)；本轮候选仍需在合入后由 GitHub 重新构建与匿名验收。这不是完整在线后端或新安装器的验收。
 
 发布前已备份历史并修正分支/标签提交邮箱，逐提交文件树保持一致。GitHub 旧 PR/提交缓存的彻底清除不在普通推送能力范围内。以下表格是此前基线的历史记录，其 Private/历史 HOLD 状态已由本节更新。
 
-本页把产品首页中的能力与其验证范围分开。核对日期：**2026-09-15**；最新 Windows 运行时代码基线：`ca1fa7b1727535014e8723e5bceb4d539272cf2b`。本页及后续发布文档可以位于更晚提交，但不会自动进入该二进制。后续安装器和实验应使用各自回执，不能沿用本页状态。
+本页把产品首页中的能力与其验证范围分开。核对日期：**2026-09-16**；最新已验证 Windows 运行时代码基线仍为 `ca1fa7b1727535014e8723e5bceb4d539272cf2b`，本轮源码回归锚点为 `9417f01216925b6912a1f2c9bdc994c9cf1f6ef9`。后者尚未生成新安装器，不能继承旧二进制的安装/UIA PASS。
 
 ## 源码、安装器与仓库访问
 
@@ -64,6 +64,7 @@ CodeQL 分析任务成功与公开 Security 页的告警状态不是同一回事
 | DynamicBench-v3 | Dynamic 正确终态 8/8，Fixed 4/8；工具调用 14 对 24 | 作者定义的固定合成编排场景，外部模型调用为 0；不是外部 Agent 排名或工厂准确率 |
 | 独立复杂冲突配对子集 | Dynamic 误放行 0/4，Fixed 4/4 | 独立的四案例子集，不能并入 v3 分母 |
 | VisA capsules Normality 开发代理 | 三种子 Image AUROC 均值 0.657823，正常图像 FPR 0.277778，Pixel F1 0.090093 | 开发代理实验；三种子不是三轮动态调优，当前结果不证明工业模型达标 |
+| 异常 Operating Point 源码组件 | `SOURCE_COMPONENT_TESTED / PRODUCT_API_NOT_CONNECTED` | calibration 与 heldout-development 合同和算法专项已测；fresh external run、产品 API、工业阈值与生产批准均未完成 |
 | 固定 prompt-injection v2 | 攻击拦截 12/12，良性放行 6/6 | 固定攻击集，不证明未知、自适应或多模态攻击的普适防护 |
 | 工厂级误放行／误拦截 | `NOT_MEASURED_PENDING_ADJUDICATION` | 尚不能填写经过独立真值裁决的工厂百分比 |
 

@@ -18,7 +18,7 @@
 | 为什么不直接生成 Mask？ | 当前监督检测路径使用 BBox；Normality 路径输出开发用 score/heatmap，公共参考 Mask 只用于权重更新之后的评估。没有经过人工裁定的自动 Mask 真值生成，因此不把热力图写成分割标签。 | YOLO backend、Normality model pack | 热力图或伪标签就是现场 Mask 真值 |
 | 大模型会不会编数字？ | 清晰度、dHash、标注偏移等事实由确定性工具产生；模型只能组织假设和计划，Frozen Policy Judge 以工具回执为准。 | Tool Receipt、Policy Judge | 模型判断等于测量事实 |
 | 工具失败怎么办？ | 主工具失败时只允许合同内 fallback；无法恢复就 HOLD。DynamicBench-v3 的两条故障夹具恢复 2/2，但这仍是冻结合成测试。 | Runs、DynamicBench-v3 | 所有现场故障已覆盖 |
-| 数据和密钥会上传吗？ | 公开 Pages 无后端和密钥入口；本地 BYOK 密钥只在本机服务端保管，原始来源默认只读，公共镜像经过隐私门禁。 | Publication Boundary、Settings、privacy gate | 公网生产 IAM 已完成 |
+| 数据和密钥会上传吗？ | 公开 Pages 无后端和密钥入口；本地 BYOK 密钥只在本机服务端保管，原始来源默认只读，唯一 GitHub 主仓的公开内容经过隐私门禁。 | Publication Boundary、Settings、privacy gate | 公网生产 IAM 已完成 |
 | 能接 MES、PLC、OPC UA 吗？ | 当前提供显式适配合同和未连接状态；没有真实身份与探测回执前，不能说已经在线接入。 | Integrations、Adapter SDK | 接口存在等于已经连接 |
 | 如何复现？ | 仓库提供锁文件、固定合成样本、运行入口、公开清单、测试和 SHA 校验；第三方 clean-clone 回执仍需外部完成。 | README、RUNNING、SBOM、public export | 本地通过等于第三方已复现 |
 | 你们属于哪个方向？ | 最新 9 页复赛排期把第 03 队 VisionDataGate 列为 `AI+其他`；项目应用领域仍是工业视觉与制造业数据治理。 | 最新复赛指南第 6 页 | 把历史分类冒充当前排期 |

@@ -32,7 +32,8 @@ commit、构建产物、验证分母和对应摘要。
 | Windows 候选 `windows-local-ce72604-20260914` | 将 React／Tauri／Spring／FastAPI 本地链打包；最终 NSIS 工件记录资源、HTTP 与两轮学习流程验证 | 证明可形成自包含 Windows 候选，而不是只有源码 | 未签名；该候选没有安装后原生 GUI、独立干净机或同版本升级验证 |
 | Windows 登录修复候选 `windows-local-dc3a4b-login-fix-20260915` | 修复 WebView CORS、桌面启动凭证与启动配置刷新；回执记录真实 Tauri WebView → IPC → Spring → FastAPI 的账户流程和 NSIS 安装／启动／卸载 | 解决“安装包登录注册卡住”的具体问题 | 仍未签名；独立干净机未运行；Torch、Ultralytics、权重和工业模型效果仍在包外／HOLD |
 | Windows 候选 `windows-local-ca1fa7b-20260915` | 将评审术语、YOLO 10–600 秒合同、同 split 字节/像素重复阻断、磁盘/retention、安装器旁附清单和发布版 UIA 验收工具冻结为 350 文件源码并重新打包 | 安装器完成 PYZ 源码匹配、120 次网关请求、两轮包内学习、真实安装启动和七步登录注册 GUI 验收 | 仍未签名；独立干净机和同版本覆盖升级未运行；工业模型效果、客户验收和生产放行保持 HOLD；详见 [候选记录](WINDOWS_CANDIDATE_CA1FA7B_20260915.md) |
-| `CURRENT_SOURCE_UNRELEASED` | 在该运行时代码提交之后继续更新候选证据、README、公开清单和部署状态 | GitHub 源码可以展示当前产品主线与诚实能力边界 | 文档/清单提交不会自动进入 `ca1fa7b` 二进制，也不产生 PyPI、工厂 KPI、客户验收或官方评测结果 |
+| 源码回归锚点 `9417f012…` | 合并唯一主仓链接、异常 Operating Point 源码组件、AgentTeams 路径控制字符防护、学习慢测隔离和公开/私有测试边界；连续回归 2066 passed、27 skipped、0 failed | 当前主仓候选可以展示更完整且可复算的源码与诚实验证分母 | 尚未重新生成 Windows 安装包；skip 能力、GitHub CI、Pages 新部署、工厂 KPI、客户验收和官方结果不由本地源码回归替代 |
+| `CURRENT_SOURCE_UNRELEASED` | 在已验证 Windows 运行时代码之后继续更新候选证据、README、公开清单和部署状态 | GitHub 源码可以展示当前产品主线与诚实能力边界 | 文档/清单提交不会自动进入 `ca1fa7b` 二进制，也不产生 PyPI、工厂 KPI、客户验收或官方评测结果 |
 
 ## 当前架构变化如何理解
 
@@ -62,14 +63,14 @@ TTT 和自动 Mask 生成仍分别保持 `PLANNED_NOT_CONNECTED` 或
 4. 若使用安装包，核对 Release tag、源 commit、`BUILD_MANIFEST.json`、
    `VALIDATION_RECEIPT.json` 和 `SHA256SUMS.txt`；
 5. 若核验证据，核对输入分母、运行 namespace、合同版本、JCS 摘要与回执状态；
-6. 若查看公开镜像，核对 `PUBLIC_MIRROR_MANIFEST.json` 的 source commit／tree，
+6. 若查看主仓公开版本，核对 `PUBLIC_MIRROR_MANIFEST.json`（兼容文件名）的 source commit／tree，
    不用网页可访问性替代版本一致性。
 
 ## 后续版本更新规则
 
 - 功能代码、README、公开模板和 `CHANGELOG.md` 在同一候选中更新；
 - 每个新安装包使用新的 build identity 与回执，不复用旧构建 PASS；
-- 先提交源码，再由已提交的 clean tree 生成并机械回填公开镜像 manifest；
+- 先提交源码，再由已提交的 clean tree 生成并机械回填主仓公开面 manifest；
 - GitHub source、GitHub Release、Windows 安装、官方提交、客户 shadow 和生产
   放行分别裁决；一个层级的成功不翻转其他层级；
 - 完整 Git 历史隐私仍按独立门禁处理，history-free snapshot PASS 不等于完整

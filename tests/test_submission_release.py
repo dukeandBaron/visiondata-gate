@@ -28,7 +28,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_RELEASE = PROJECT_ROOT / "evidence" / "submission" / DEFAULT_RELEASE_ID
 pytestmark = pytest.mark.skipif(
     not PUBLIC_RELEASE.is_dir(),
-    reason="SKIP_ARCHIVED_RC1_RELEASE_NOT_DISTRIBUTED",
+    reason="PRIVATE_RC1_RELEASE_NOT_DISTRIBUTED",
 )
 
 

@@ -890,6 +890,9 @@ def test_builder_excludes_historical_ui_screenshots(tmp_path: Path) -> None:
 
 
 def test_default_required_paths_cover_final_submission_anchors() -> None:
+    project_root = Path(__file__).resolve().parents[1]
+    if not (project_root / GOAL3_PUBLIC_ROOT).is_dir():
+        pytest.skip("PRIVATE_GOAL3_EVIDENCE_NOT_DISTRIBUTED")
     required = set(DEFAULT_SUBMISSION_REQUIRED_PATHS)
     stale_track_docs = {
         "docs/AGENT_EVALUATION_TOOLS_20260823.md",

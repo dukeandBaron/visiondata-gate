@@ -17,10 +17,11 @@ from visiondata_gate.product_models import (
     DataSourceKind,
 )
 from visiondata_gate.product_service import ProductService
+from visiondata_gate.release import DEFAULT_RELEASE_ID
 
 
 APP = Path(__file__).resolve().parents[1] / "app.py"
-ARCHIVED_REVIEW_RELEASE = APP.parent / "evidence/submission/vdg-20260816-rc1"
+ARCHIVED_REVIEW_RELEASE = APP.parent / "evidence" / "submission" / DEFAULT_RELEASE_ID
 ARCHIVED_REVIEW_SYNTHETIC = APP.parent / "07_results/frozen_demo_20260809"
 
 

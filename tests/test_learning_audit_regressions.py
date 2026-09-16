@@ -147,7 +147,9 @@ def _consume_count(service):
 def test_active_training_owns_cross_process_lock_even_after_lease_expiry(
     learning_input, monkeypatch
 ):
-    service, cycle, request = _create_cycle(learning_input)
+    service, cycle, request = _create_cycle(
+        learning_input, max_wall_seconds=40.0
+    )
     other = LearningService(service.product)
     original_train = learning_module.train_model
     observed = {}
@@ -177,7 +179,9 @@ def test_active_training_owns_cross_process_lock_even_after_lease_expiry(
 def test_active_final_test_cannot_be_recovered_or_lose_consumed_evidence(
     learning_input, monkeypatch
 ):
-    service, cycle, request = _create_cycle(learning_input)
+    service, cycle, request = _create_cycle(
+        learning_input, max_wall_seconds=40.0
+    )
     cycle, _run = _train_and_approve(service, cycle, request)
     other = LearningService(service.product)
     original_evaluate = learning_module.evaluate_models

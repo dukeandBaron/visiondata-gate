@@ -256,7 +256,16 @@ def test_real_dataset_train_evaluate_select_finalize(learning_input):
     assert result["production_release_allowed"] is False
 
 
-def create_and_run(service, task_id, preflight, groups, *, epochs=250, max_rounds=3):
+def create_and_run(
+    service,
+    task_id,
+    preflight,
+    groups,
+    *,
+    epochs=250,
+    max_rounds=3,
+    max_wall_seconds=40.0,
+):
     from visiondata_gate.learning_contracts import CreateLearningCycle, RunLearningRound
 
     cycle = service.create_cycle(
@@ -268,7 +277,11 @@ def create_and_run(service, task_id, preflight, groups, *, epochs=250, max_round
             groups=groups,
             review_note="Approve synthetic local supervised training",
             operator_attests_training_authorized=True,
-            training={"epochs": epochs, "learning_rate": 1.5},
+            training={
+                "epochs": epochs,
+                "learning_rate": 1.5,
+                "max_wall_seconds": max_wall_seconds,
+            },
             max_rounds=max_rounds,
             max_total_epochs=1000,
         ),

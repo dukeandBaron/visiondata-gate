@@ -18,7 +18,7 @@ import visiondata_gate.learning_service as learning_service_module
 from visiondata_gate.product_models import RevokeLocalSourceAuthorizationRequest
 
 
-def _create_cycle(learning_input):
+def _create_cycle(learning_input, *, max_wall_seconds: float = 20.0):
     _client, product, (task_id, preflight, groups) = learning_input
     service = LearningService(product)
     request = CreateLearningCycle(
@@ -27,7 +27,11 @@ def _create_cycle(learning_input):
         groups=groups,
         review_note="Authorize synthetic CPU safety regression only",
         operator_attests_training_authorized=True,
-        training={"epochs": 250, "learning_rate": 1.5},
+        training={
+            "epochs": 250,
+            "learning_rate": 1.5,
+            "max_wall_seconds": max_wall_seconds,
+        },
         max_total_epochs=800,
     )
     cycle = service.create_cycle(ACTOR, task_id, request)

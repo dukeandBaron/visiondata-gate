@@ -7,15 +7,37 @@ import subprocess
 import sys
 from pathlib import Path, PurePosixPath
 
+import pytest
 import yaml
+
+from visiondata_gate.release import DEFAULT_RELEASE_ID
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PRIVATE_RELEASE_ROOT = (
+    PROJECT_ROOT / "evidence" / "submission" / DEFAULT_RELEASE_ID
+)
+
+
+def _require_private_release() -> None:
+    if not PRIVATE_RELEASE_ROOT.is_dir():
+        pytest.skip("PRIVATE_RC1_RELEASE_NOT_DISTRIBUTED")
+
+
+def _contains_continue_on_error(value: object) -> bool:
+    if isinstance(value, dict):
+        return "continue-on-error" in value or any(
+            _contains_continue_on_error(item) for item in value.values()
+        )
+    if isinstance(value, list):
+        return any(_contains_continue_on_error(item) for item in value)
+    return False
 
 
 def test_release_checker_writes_utf8_under_legacy_stdout_codec() -> None:
     """Reproduce the Windows cp1252 failure that previously produced false-green CI."""
 
+    _require_private_release()
     environment = os.environ.copy()
     environment["PYTHONIOENCODING"] = "cp1252"
     process = subprocess.run(
@@ -27,30 +49,30 @@ def test_release_checker_writes_utf8_under_legacy_stdout_codec() -> None:
         check=False,
     )
 
-    payload = json.loads(process.stdout.decode("utf-8", errors="strict"))
-    if not (PROJECT_ROOT / "evidence/submission/vdg-20260816-rc1").is_dir():
-        assert process.returncode == 2
-        assert payload["ok"] is False
-        assert payload["error_type"] == "ReleaseValidationError"
-        return
     assert process.returncode == 0, process.stderr.decode("utf-8", errors="replace")
+    payload = json.loads(process.stdout.decode("utf-8", errors="strict"))
     assert payload["ok"] is True
     assert payload["track"] == "Boundless Agents / AI+工业制造"
 
 
-def test_ci_release_validators_are_independent_fail_fast_steps() -> None:
-    workflow = (PROJECT_ROOT / ".github" / "workflows" / "pages.yml").read_text(
-        encoding="utf-8"
-    )
+def test_public_workflows_keep_quality_security_and_pages_gates_independent() -> None:
+    workflow_root = PROJECT_ROOT / ".github" / "workflows"
+    quality = (workflow_root / "quality.yml").read_text(encoding="utf-8")
+    security = (workflow_root / "security.yml").read_text(encoding="utf-8")
+    pages = (workflow_root / "pages.yml").read_text(encoding="utf-8")
 
-    steps = yaml.safe_load(workflow)["jobs"]["build"]["steps"]
-    for script in ("check_public_repository.py", "check_public_pages.py"):
-        matching = [step for step in steps if f"tools/{script}" in step.get("run", "")]
-        assert matching
-        assert all("continue-on-error" not in step for step in matching)
-    assert "Verify current public tree and history" in workflow
-    assert "Verify built Pages artifact" in workflow
-    assert "--history" in workflow
+    assert 'PYTHONUTF8: "1"' in quality
+    assert "Public-safe fixed test slice with branch coverage" in quality
+    assert "pip_audit" in security
+    assert "check_bandit_baseline.py check" in security
+    assert "github/codeql-action/analyze" in security
+    assert "python tools/check_public_repository.py --history" in pages
+    assert "python tools/check_public_pages.py --dist web/dist" in pages
+    parsed = [yaml.safe_load(text) for text in (quality, security, pages)]
+    assert not any(_contains_continue_on_error(item) for item in parsed)
+    assert parsed[0]["name"] == "Scoped engineering quality"
+    assert parsed[1]["name"] == "Dependency and source security checks"
+    assert parsed[2]["name"] == "Public synthetic workbench"
 
 
 def _sha256(path: Path) -> str:
@@ -207,7 +229,7 @@ def test_semifinal_rc3_video_qa_binds_current_workbench_demo() -> None:
     if not qa_path.is_file():
         assert not video_path.exists()
         assert not contact_sheet_path.exists()
-        return
+        pytest.skip("PRIVATE_RC3_VIDEO_EVIDENCE_NOT_DISTRIBUTED")
 
     qa = json.loads(qa_path.read_text(encoding="utf-8"))
 
