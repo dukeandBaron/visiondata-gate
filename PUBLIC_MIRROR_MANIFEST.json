@@ -1,7 +1,7 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "911ef8ca36d82b9a96891c45a48dd1b4895e1db2",
-  "source_tree_oid": "28b1c12762fb7fc9506d84e3b53663a418449309",
+  "source_commit_oid": "2dd18ec44dbaee265ec18154c83f052ac4b2e088",
+  "source_tree_oid": "b06180c734062ea6126c7ea904df38b27886f601",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
@@ -9,7 +9,7 @@
   "personal_data_included": false,
   "tracked_source_only": true,
   "file_count": 745,
-  "snapshot_sha256": "dd52584d703037e3ba7e6d23008d5f448bb2c78b917e3dbbff1e674844a7d5b8",
+  "snapshot_sha256": "c6ff380fb2cb02171d7b283ea6a9ae492ffcd9399a67045c0d4c34328ac0e348",
   "files": [
     {
       "path": ".env.example",
@@ -515,8 +515,8 @@
     },
     {
       "path": "docs/WINDOWS_INSTALLER.md",
-      "sha256": "18a63b0139d5d04b41a723411e382c1a2b46c55154909d40849c036d9b15dd7a",
-      "size_bytes": 10196
+      "sha256": "9c36d2b4202853ee444e2d9e0c1ba450cec3d18bcb1b492922c121838d9ee020",
+      "size_bytes": 10516
     },
     {
       "path": "docs/assets/web-command-center.png",
@@ -1685,8 +1685,8 @@
     },
     {
       "path": "tests/test_app_source.py",
-      "sha256": "32f00c414802c68e0b9dc8bebfb0ec618c6f48c303be22fd3b4d363a16043155",
-      "size_bytes": 22598
+      "sha256": "addeb54de142f226db0bed3fc7b3a3cb50ca78a3e82f2ba89e27754968de0119",
+      "size_bytes": 23140
     },
     {
       "path": "tests/test_approved_experience.py",
@@ -1715,8 +1715,8 @@
     },
     {
       "path": "tests/test_build_learning_installer.py",
-      "sha256": "a45fc296c039b7c72ff0a79431fb4fdbc4ef97d18b14e54023a1fd68b3059a52",
-      "size_bytes": 21545
+      "sha256": "dba4c06f0b99eabe2f63f439ec1cd694e0ef9fbc337efe56f9f9d69ab7f7b411",
+      "size_bytes": 21986
     },
     {
       "path": "tests/test_build_semifinal_defense_kit.py",
@@ -1835,8 +1835,8 @@
     },
     {
       "path": "tests/test_evidence_package.py",
-      "sha256": "8f98384ffdbbf5cd650863593766bd3850d1e8b2d747857bd56ab57cdd25a1bd",
-      "size_bytes": 48955
+      "sha256": "3b693a4650cd6fa63f97ea8d7d4a3626965bc2149529ee3f69230add31fae6a5",
+      "size_bytes": 49289
     },
     {
       "path": "tests/test_evidence_state.py",
@@ -2320,18 +2320,18 @@
     },
     {
       "path": "tests/test_rc3_submission_index.py",
-      "sha256": "3a8abdbec2c1d826ce95bca3fab7ee266794e6cd1f6fc48d4f05cb7d38e61631",
-      "size_bytes": 4558
+      "sha256": "77e4234c2971e5464723f11a32bf4547f072b64bfec1a9f0c275c45c7bea300e",
+      "size_bytes": 4672
     },
     {
       "path": "tests/test_release_artifacts.py",
-      "sha256": "6994289b5dbafd8cf7ccc089e395b3276e1c408bb89d07eef0ce168a2634c290",
-      "size_bytes": 11260
+      "sha256": "da1dadcde8a7849a6ec5b776f1f88b6524dc776bc1643b162c48ecd7146d5f2d",
+      "size_bytes": 11324
     },
     {
       "path": "tests/test_release_attestation.py",
-      "sha256": "270e6450b90042a9024cc6c56de1cc56cb129de6f5e1f4e00f7b1e86fb199290",
-      "size_bytes": 29456
+      "sha256": "a4e646bc280195b667cfcddc469ade901ec02ebdd60fd90dae686d09fceb8a31",
+      "size_bytes": 29533
     },
     {
       "path": "tests/test_release_evidence.py",
@@ -2375,8 +2375,8 @@
     },
     {
       "path": "tests/test_reviewer_server.py",
-      "sha256": "e30b911aa1c749dbae8f7b4d51df28c7f9aec7163a8e301c56f54c34e5aff135",
-      "size_bytes": 6098
+      "sha256": "39eff17fd0681fc4c6fa53a864595be8266e9ff76565f9607ea924c277031e50",
+      "size_bytes": 6110
     },
     {
       "path": "tests/test_runtime_hardening_evaluation.py",
@@ -2435,8 +2435,8 @@
     },
     {
       "path": "tests/test_submission_release.py",
-      "sha256": "0e6aaada48565e3bde7ca9c7d88902d01484967833ec8bde6aa4bdbc3635674b",
-      "size_bytes": 6999
+      "sha256": "f07d31dd90998092bc6bec5a851086ad16a46aeb3d92cb6da7e5b5e735548768",
+      "size_bytes": 7123
     },
     {
       "path": "tests/test_submission_upload_bundle.py",
@@ -2500,8 +2500,8 @@
     },
     {
       "path": "tests/test_website_data.py",
-      "sha256": "5503833ca8b7a34db354f960ca76500a20d182d48d07814a8c2c694c19bc0ec6",
-      "size_bytes": 809
+      "sha256": "2cbd1b01e91865bd0ee095eda383553c05e3943f549979f0cb3177bcbe345bdf",
+      "size_bytes": 443
     },
     {
       "path": "tests/test_windows_installer_smoke.py",
@@ -2885,8 +2885,8 @@
     },
     {
       "path": "tools/smoke_desktop_identity_uia.ps1",
-      "sha256": "194f7a17334d7188c11aca16638c7188b5ac7e009aed94ba4ce38cff9ee6a92f",
-      "size_bytes": 15259
+      "sha256": "18477ffc4bb09a7ef5ea0010fe5876a51d8747fdce20009ebc191503e25c85b2",
+      "size_bytes": 15283
     },
     {
       "path": "tools/smoke_extracted_platform.py",
