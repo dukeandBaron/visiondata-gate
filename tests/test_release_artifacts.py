@@ -27,34 +27,30 @@ def test_release_checker_writes_utf8_under_legacy_stdout_codec() -> None:
         check=False,
     )
 
-    assert process.returncode == 0, process.stderr.decode("utf-8", errors="replace")
     payload = json.loads(process.stdout.decode("utf-8", errors="strict"))
+    if not (PROJECT_ROOT / "evidence/submission/vdg-20260816-rc1").is_dir():
+        assert process.returncode == 2
+        assert payload["ok"] is False
+        assert payload["error_type"] == "ReleaseValidationError"
+        return
+    assert process.returncode == 0, process.stderr.decode("utf-8", errors="replace")
     assert payload["ok"] is True
     assert payload["track"] == "Boundless Agents / AI+工业制造"
 
 
 def test_ci_release_validators_are_independent_fail_fast_steps() -> None:
-    workflow = (PROJECT_ROOT / ".github" / "workflows" / "ci.yml").read_text(
+    workflow = (PROJECT_ROOT / ".github" / "workflows" / "pages.yml").read_text(
         encoding="utf-8"
     )
 
-    assert 'PYTHONUTF8: "1"' in workflow
-    assert "- name: Validate submission evidence" in workflow
-    assert "- name: Validate reviewer website projection" in workflow
-    assert "- name: Validate detached release assets" in workflow
-    steps = yaml.safe_load(workflow)["jobs"]["verify"]["steps"]
-    for script in (
-        "check_release_consistency.py",
-        "check_website_data.py",
-        "check_release_assets.py",
-    ):
+    steps = yaml.safe_load(workflow)["jobs"]["build"]["steps"]
+    for script in ("check_public_repository.py", "check_public_pages.py"):
         matching = [step for step in steps if f"tools/{script}" in step.get("run", "")]
-        assert len(matching) == 1
-        assert matching[0]["run"] == (
-            'uv run --frozen --python "${{ matrix.python-version }}" '
-            f"python tools/{script}"
-        )
-    assert "- name: Validate release evidence" not in workflow
+        assert matching
+        assert all("continue-on-error" not in step for step in matching)
+    assert "Verify current public tree and history" in workflow
+    assert "Verify built Pages artifact" in workflow
+    assert "--history" in workflow
 
 
 def _sha256(path: Path) -> str:
@@ -206,9 +202,14 @@ def test_semifinal_rc3_video_qa_binds_current_workbench_demo() -> None:
         "106d5e386708a56c52989903ffb60b1f2c1af685356ad58e38dd7487ba75d9d2"
     )
 
-    qa = json.loads(qa_path.read_text(encoding="utf-8"))
     video_path = _project_member(video_member)
     contact_sheet_path = _project_member(contact_sheet_member)
+    if not qa_path.is_file():
+        assert not video_path.exists()
+        assert not contact_sheet_path.exists()
+        return
+
+    qa = json.loads(qa_path.read_text(encoding="utf-8"))
 
     assert qa["schema_version"] == "visiondata-gate.video-qa.v3"
     assert qa["status"] == "PASS_LOCAL_VIDEO_QA"

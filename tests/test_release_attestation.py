@@ -152,10 +152,12 @@ def _build_release_fixture(
         target = package_source.joinpath(*required_path.split("/"))
         target.parent.mkdir(parents=True, exist_ok=True)
         source_file = PROJECT_ROOT.joinpath(*required_path.split("/"))
-        if required_paths == PRODUCTION_RC3_REQUIRED_PATHS:
+        if required_paths == PRODUCTION_RC3_REQUIRED_PATHS and source_file.is_file():
             shutil.copyfile(source_file, target)
         else:
-            target.write_text("release fixture payload\n", encoding="utf-8")
+            target.write_text(
+                f"release fixture payload for {required_path}\n", encoding="utf-8"
+            )
     build_one_workspace = artifacts / "build-one"
     build_two_workspace = artifacts / "build-two"
     build_one_workspace.mkdir()

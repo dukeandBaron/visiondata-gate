@@ -12,10 +12,21 @@ import pytest
 
 
 TOOL = Path(__file__).resolve().parents[1] / "tools/build_learning_installer.py"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_builder_entrypoint_exists():
     assert TOOL.is_file(), "new-staging learning installer driver is missing"
+
+
+def test_release_uia_validation_declares_powershell_7_runtime() -> None:
+    script = (PROJECT_ROOT / "tools/smoke_desktop_identity_uia.ps1").read_text(
+        encoding="utf-8"
+    )
+    guide = (PROJECT_ROOT / "docs/WINDOWS_INSTALLER.md").read_text(encoding="utf-8")
+    assert script.startswith("#requires -Version 7.0\n")
+    assert "PowerShell 7" in guide
+    assert "pwsh" in guide
 
 
 def test_model_reproducibility_drivers_are_frozen_source_inputs(builder):

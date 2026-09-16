@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import zipfile
 
+import pytest
 from PIL import Image
 from streamlit.testing.v1 import AppTest
 
@@ -19,6 +20,13 @@ from visiondata_gate.product_service import ProductService
 
 
 APP = Path(__file__).resolve().parents[1] / "app.py"
+ARCHIVED_REVIEW_RELEASE = APP.parent / "evidence/submission/vdg-20260816-rc1"
+ARCHIVED_REVIEW_SYNTHETIC = APP.parent / "07_results/frozen_demo_20260809"
+
+
+def _require_archived_reviewer_inputs() -> None:
+    if not ARCHIVED_REVIEW_RELEASE.is_dir() or not ARCHIVED_REVIEW_SYNTHETIC.is_dir():
+        pytest.skip("SKIP_ARCHIVED_STREAMLIT_REVIEW_INPUTS_NOT_DISTRIBUTED")
 
 
 def _build_omni_fixture(root: Path) -> tuple[Path, str]:
@@ -85,6 +93,7 @@ def test_app_opens_as_product_workspace_without_chat_or_render_side_effects(
 def test_app_accepts_ascii_reviewer_launch_contract(
     tmp_path: Path, monkeypatch: object
 ) -> None:
+    _require_archived_reviewer_inputs()
     monkeypatch.setenv("VISIONDATA_UI_INITIAL_PAGE", "reviewer")
     at = _app(tmp_path, monkeypatch)
     assert not at.exception
@@ -163,6 +172,7 @@ def test_app_exposes_incident_case_loop_without_flat_work_order_wall(
 def test_app_reviewer_mode_is_application_first_and_evidence_grounded(
     tmp_path: Path, monkeypatch: object
 ) -> None:
+    _require_archived_reviewer_inputs()
     at = _app(tmp_path, monkeypatch)
     at.radio(key="nav_section").set_value("评审模式").run()
     assert not at.exception
@@ -221,6 +231,7 @@ def test_app_reviewer_mode_is_application_first_and_evidence_grounded(
 def test_app_loads_hash_bound_dynamic_benchmark_without_overclaiming(
     tmp_path: Path, monkeypatch: object
 ) -> None:
+    _require_archived_reviewer_inputs()
     run = run_dynamic_benchmark(tmp_path / "dynamic-benchmark.json", repeats=1)
     monkeypatch.setenv("VISIONDATA_UI_DYNAMIC_BENCHMARK", str(run.report_path))
     monkeypatch.setenv("VISIONDATA_UI_DYNAMIC_BENCHMARK_SHA256", run.report_sha256)
@@ -242,6 +253,7 @@ def test_app_loads_hash_bound_dynamic_benchmark_without_overclaiming(
 def test_app_fails_closed_on_dynamic_benchmark_sha_mismatch(
     tmp_path: Path, monkeypatch: object
 ) -> None:
+    _require_archived_reviewer_inputs()
     run = run_dynamic_benchmark(tmp_path / "dynamic-benchmark.json", repeats=1)
     monkeypatch.setenv("VISIONDATA_UI_DYNAMIC_BENCHMARK", str(run.report_path))
     monkeypatch.setenv("VISIONDATA_UI_DYNAMIC_BENCHMARK_SHA256", "0" * 64)

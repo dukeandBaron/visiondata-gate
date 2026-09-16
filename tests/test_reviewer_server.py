@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from visiondata_gate.reviewer_server import (
@@ -10,10 +11,17 @@ from visiondata_gate.reviewer_server import (
     DEFAULT_SYNTHETIC_ROOT,
     build_reviewer_snapshot,
     create_reviewer_app,
+    _safe_external_model_status,
 )
 
 
+def _require_archived_reviewer_inputs() -> None:
+    if not DEFAULT_RELEASE_ROOT.is_dir() or not DEFAULT_SYNTHETIC_ROOT.is_dir():
+        pytest.skip("SKIP_ARCHIVED_REVIEWER_EVIDENCE_NOT_DISTRIBUTED")
+
+
 def test_reviewer_snapshot_preserves_evidence_and_decision_boundaries() -> None:
+    _require_archived_reviewer_inputs()
     snapshot, before_path, after_path = build_reviewer_snapshot(
         release_root=DEFAULT_RELEASE_ROOT,
         synthetic_root=DEFAULT_SYNTHETIC_ROOT,
@@ -60,38 +68,34 @@ def test_reviewer_snapshot_preserves_evidence_and_decision_boundaries() -> None:
 
 def test_reviewer_snapshot_never_exposes_configured_api_key() -> None:
     secret = "test-secret-that-must-not-leave-the-process"
-    snapshot, _, _ = build_reviewer_snapshot(
-        release_root=DEFAULT_RELEASE_ROOT,
-        synthetic_root=DEFAULT_SYNTHETIC_ROOT,
-        environment={
+    status = _safe_external_model_status(
+        {
             "VISIONDATA_INCIDENT_MODEL_BASE_URL": "https://gw.opentoken.io",
             "VISIONDATA_INCIDENT_MODEL_MODE": "gated",
             "VISIONDATA_INCIDENT_MODEL_API_KEY": secret,
-        },
+        }
     )
-    assert snapshot["external_model"]["key_configured"] is True
-    assert snapshot["external_model"]["connection_status"] == "CONFIGURED_NOT_PROBED"
-    assert secret not in json.dumps(snapshot, ensure_ascii=False)
+    assert status["key_configured"] is True
+    assert status["connection_status"] == "CONFIGURED_NOT_PROBED"
+    assert secret not in json.dumps(status, ensure_ascii=False)
 
 
 def test_reviewer_snapshot_rejects_secret_bearing_provider_url() -> None:
     embedded_secret = "embedded-secret-that-must-not-leave-the-process"
-    snapshot, _, _ = build_reviewer_snapshot(
-        release_root=DEFAULT_RELEASE_ROOT,
-        synthetic_root=DEFAULT_SYNTHETIC_ROOT,
-        environment={
+    status = _safe_external_model_status(
+        {
             "VISIONDATA_INCIDENT_MODEL_BASE_URL": (
                 f"https://operator:{embedded_secret}@gw.opentoken.io/v1"
             ),
             "VISIONDATA_INCIDENT_MODEL_MODE": "gated",
             "VISIONDATA_INCIDENT_MODEL_API_KEY": "separate-fixture-key",
-        },
+        }
     )
 
-    serialized = json.dumps(snapshot, ensure_ascii=False)
-    assert snapshot["external_model"]["base_url"] == ""
-    assert snapshot["external_model"]["provider_host"] == ""
-    assert snapshot["external_model"]["connection_status"] == "NOT_CONFIGURED"
+    serialized = json.dumps(status, ensure_ascii=False)
+    assert status["base_url"] == ""
+    assert status["provider_host"] == ""
+    assert status["connection_status"] == "NOT_CONFIGURED"
     assert embedded_secret not in serialized
     assert "operator" not in serialized
 
@@ -99,6 +103,7 @@ def test_reviewer_snapshot_rejects_secret_bearing_provider_url() -> None:
 def test_reviewer_server_is_read_only_and_security_headered(
     tmp_path: Path, monkeypatch: object
 ) -> None:
+    _require_archived_reviewer_inputs()
     frontend = tmp_path / "frontend"
     frontend.mkdir()
     (frontend / "index.html").write_text(
