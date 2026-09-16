@@ -40,7 +40,13 @@ python tools\check_public_repository.py --history
 python tools\check_public_pages.py
 ```
 
-The public repository exposes only `PUBLIC_SYNTHETIC_REPLAY`. A successful public build is not customer acceptance, production deployment, or official competition evaluation.
+The static site exposes `PUBLIC_SYNTHETIC_REPLAY`; a source checkout can run the local writable application with its own account and workspace controls. A successful static build is not customer acceptance, production deployment, or official competition evaluation. Source licensing and repository visibility are separate; do not publish private data or unreviewed history through a contribution.
+
+## Reusable contributions
+
+Start with the [core map](src/visiondata_gate/README.md), [Skill catalogue](skills/README.md), [Schema catalogue](schemas/README.md) and [executable example](examples/reuse/README.md). A Skill/contract contribution should include a minimal synthetic input, expected output, exact version, failure case and verification method. A Markdown Skill alone is not an installed plugin or an authorization boundary.
+
+Document compatibility and migration using [VERSIONING](docs/VERSIONING.md). New optional fields also need consumer tests when strict field checking is used. Preserve applicable upstream notices and describe modifications according to [LICENSING](docs/LICENSING.md); this project does not add a CLA, mandatory DCO or new license restriction in this change.
 
 Changes intended for release should add an [Unreleased changelog entry](CHANGELOG.md)
 and pass the [release preparation checks](docs/RELEASE_PREPARATION.md). Existing

@@ -25,6 +25,8 @@ PUBLIC_PAGES_WORKFLOW = ".github/workflows/pages.yml"
 PUBLIC_EXACT_FILES = {
     "benchmarks/README.md",
     "docs/DEVELOPMENT_PROVENANCE.md",
+    "docs/FINALS_EVIDENCE_MAP.md",
+    "docs/LICENSING.md",
     "docs/LIVE_REPRODUCTION.md",
     "docs/QUALITY_GATES.md",
     ".github/ISSUE_TEMPLATE/bug_report.md",
@@ -87,6 +89,7 @@ PUBLIC_EXACT_FILES = {
     "docs/ENGINEERING_QUALITY_IMPLEMENTATION.md",
     "docs/TECHNICAL_TERMINOLOGY.md",
     "docs/VERSION_EVOLUTION.md",
+    "docs/VERSIONING.md",
     "docs/VISION_MODEL_API_CONTRACT.md",
     "docs/WINDOWS_CANDIDATE_CA1FA7B_20260915.md",
     "docs/WINDOWS_CANDIDATE_F7F31F7_20260916.md",

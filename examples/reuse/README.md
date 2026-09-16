@@ -11,4 +11,10 @@ uv run --no-sync python examples/reuse/metadata_skill.py --metadata-count 12 --o
 
 扩展方法：实现受审查的 Skill 类，声明输入、输出、权限和版本，显式注册，再调用固定版本。Markdown Skill 说明与可执行 Python 插件不同；注册器不是任意代码安全沙箱。
 
-[SDK 文档](../../docs/INDUSTRIAL_SKILL_SDK.md) · [开发来源与依赖](../../docs/DEVELOPMENT_PROVENANCE.md)
+重复输入会产生相同回执；内容变化会改变输入和回执摘要。接入真实测量时，受信 host 应先完成来源授权和测量，再构造路径无关的 `IndustrialSkillInvocation`；不能把这里的合成计数当作授权凭据。
+
+```text
+uv run --no-sync pytest -q tests/test_reuse_metadata_example.py tests/test_industrial_skills.py
+```
+
+[核心代码地图](../../src/visiondata_gate/README.md) · [文本 Skill 目录](../../skills/README.md) · [SDK 文档](../../docs/INDUSTRIAL_SKILL_SDK.md) · [版本兼容](../../docs/VERSIONING.md) · [许可证](../../docs/LICENSING.md)

@@ -3,9 +3,11 @@ Copyright 2026 VisionData Gate contributors
 
 This product is licensed under the Apache License, Version 2.0.
 
-Third-party Python packages are resolved by uv.lock. Source installations install
-them separately; desktop distributions may bundle runtime components. All remain
-subject to their respective licenses and required notices. Optional models and
-weights have separate licensing terms. See
-docs/THIRD_PARTY_NOTICES.md and docs/SBOM.cdx.json for the locked dependency
-inventory and attribution details.
+Third-party components remain subject to their own licenses. Source installations
+resolve them through the applicable lockfiles; desktop distributions may bundle
+Python, frontend, native and Java runtime components and must retain the notices
+and other materials required by their applicable licenses. Optional models,
+weights and external datasets are not relicensed by this project's Apache License.
+
+See docs/LICENSING.md, docs/THIRD_PARTY_NOTICES.md and docs/SBOM.cdx.json for
+scope, inventory and attribution guidance.

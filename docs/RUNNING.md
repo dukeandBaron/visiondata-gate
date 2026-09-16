@@ -198,7 +198,7 @@ production_release_allowed=false
 
 CVAT/FiftyOne 当前完成的是本地合同验证；真实外部连接需要只读可达、身份读取与响应哈希同时成立。外部模型同样必须提供端点、后端身份、真实响应与运行回执。OpenAI-compatible Gateway 的 Base URL 与本机 Key 配置见 [EXTERNAL_MODEL_CONFIGURATION.md](EXTERNAL_MODEL_CONFIGURATION.md)；Reviewer Workbench 只显示是否已配置，永不接收或返回 Key。
 
-连接方法见 [API_QUICKSTART.md](API_QUICKSTART.md) 和 [ECOSYSTEM_P0_UPGRADE.md](ECOSYSTEM_P0_UPGRADE.md)。没有这些回执时，状态必须保持 `NOT_CONNECTED`、`LOCAL_CONTRACT_ONLY` 或 `NOT_TESTED`。
+连接方法见 [API_QUICKSTART.md](API_QUICKSTART.md) 和 [AGENT_PLATFORM_OPERATIONS.md](AGENT_PLATFORM_OPERATIONS.md)。没有这些回执时，状态必须保持 `NOT_CONNECTED`、`LOCAL_CONTRACT_ONLY` 或 `NOT_TESTED`。
 
 ## 11. 分层测试与完整回归
 

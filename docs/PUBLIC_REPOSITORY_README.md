@@ -20,8 +20,11 @@
   <a href="https://dukeandbaron.github.io/visiondata-gate/">在线 Demo</a> ·
   <a href="https://dukeandbaron.github.io/visiondata-gate/#/workspace">试用图像工作簿</a> ·
   <a href="https://github.com/dukeandBaron/visiondata-gate/releases">Windows 下载</a> ·
+  <a href="#verification">Benchmark</a> ·
+  <a href="#finals-evidence">决赛证据</a> ·
+  <a href="#reuse">开放复用</a> ·
   <a href="#quickstart">本地运行</a> ·
-  <a href="#docs">开发文档</a>
+  <a href="#docs">文档</a>
 </p>
 
 **像代码合入前需要 CI，视觉模型训练与版本交付前也需要一个能拒绝放行的数据门禁。** VisionData Gate 帮助算法工程师、视觉方案商和数据质量负责人，把“一批数据有问题”推进到“问题有处理、修订有版本、结果有复验”。
@@ -104,11 +107,36 @@ Agent 根据当前任务和证据组织下一步，专业工具执行可复算�
 
 单图取证、冻结批次检查与 Incident 调查是不同执行路径；不是每次上传都会调用 LLM 或动态增派 Worker。[查看 Agent 架构](docs/AGENT_PLATFORM.md) · [配置外部 Planner](docs/INCIDENT_MODEL_PLANNER.md)
 
+<a id="finals-evidence"></a>
+
+## 决赛评分证据索引
+
+决赛以实际运行和可核验事实为准。下表按官方 100 分结构给出仓库入口，不预测得分，也不把未来计划按已实现能力计算。
+
+| 决赛维度 | 分值 | README / 仓库中的直接证据 | 仍然保持的缺口 |
+| --- | ---: | --- | --- |
+| **问题价值与实际影响** | 20 | 目标用户、数据返修流程、使用入口与 [行业场景说明](docs/INDUSTRY_SCENARIO_VALUE.md) | 客户时间／成本／质量改善和工厂 KPI `NOT_MEASURED` |
+| **创新性** | 25 | 固定 SOP 的负结论、证据缺口驱动重规划、双反馈、Parent/Human/Child 闭环 | 不以 API 调用、界面更换或角色数量冒充创新 |
+| **技术／研究深度** | 25 | 真实源码映射、ToolTrace、状态/预算、异常恢复、审计以及 [自研与第三方边界](docs/DEVELOPMENT_PROVENANCE.md) | VLM 预标注、Active Learning、TTT、自动 Mask 仍未实现或未连接 |
+| **完成度与可验证性** | 15 | 在线合成体验、[现场重跑](docs/LIVE_REPRODUCTION.md)、Windows 候选、连续全仓回归 | 独立干净机、签名、客户和生产验证仍为 HOLD |
+| **开源价值与复用** | 15 | 当前 **Public** 主仓、核心代码地图、Skill、Schema、SDK 示例、License、Quickstart、Issue/PR 模板和版本记录 | 独立第三方 clean-clone／部署成功记录尚未取得 |
+
+[查看 13 个二级考核点与证据/HOLD 对照](docs/FINALS_EVIDENCE_MAP.md)
+
 <a id="verification"></a>
 
 ## 用结果说明，而不是只展示一次成功
 
-[**Benchmark Suite：查看完整实验体系**](benchmarks/README.md) — 从固定流程与多 Agent 的架构对照，到调度稳定性、动态补证和真实产品运行时桥接。每项实验都有自己的验证问题、实现入口和结果口径。
+[**Benchmark Suite：查看完整实验体系**](benchmarks/README.md) — 每项实验都有自己的问题、输入、基线、分母和适用范围，不拼成一个“综合准确率”。
+
+| 证据 | 固定分母／基线 | 已记录结果 | 证明边界 |
+| --- | --- | --- | --- |
+| **ArchBench-v2** | 传统流程、单 Agent、多 Agent；288 条同协议记录 | 三种架构质量持平 | 固定 SOP 下不支持“多 Agent 必然更好” |
+| **DynamicBench-v2** | 24 fixtures × 4 输入顺序 × 3 repeats = 288 条 | 288/288 符合冻结排序；**24 / 24** 顺序不变、**24 / 24** 重复稳定 | 证明确定性选择语义，不是 Active Learning |
+| **DynamicBench-v3** | 8 个冻结合成场景；固定规则基线 | 正确终态 **8 / 8 vs 4 / 8**；工具调用 **14 vs 24**；两者误放行均 0/8 | 证明该协议内的重规划完整性与效率；外部模型调用 0 |
+| **Prompt-injection v2** | 12 个固定攻击输入、6 个固定良性输入 | 攻击拦截 **12 / 12**，良性放行 **6 / 6** | 不证明未知、自适应或多模态攻击的普适防护 |
+| **VisA Normality 开发代理** | capsules 子集、3 个固定种子 | Image AUROC `0.657823`；正常 FPR `0.277778`；Pixel F1 `0.090093` | 开发代理结果，**不证明工业模型达标** |
+| **源码连续回归** | Python 3.12 单次连续运行，2093 项收集 | `2066 passed / 27 skipped / 0 failed` | 源码验证；不自动覆盖安装包、Pages 或工厂效果 |
 
 ### 动态补证：相同输入下比较编排方式
 
@@ -195,11 +223,17 @@ flowchart TB
 
 图中为模块关系，不表示所有模型分支已在同一个案例中贯通；虚线表示交接、独立验收或演进接口。[完整技术路线：数据流、Agent、损失、参数更新与算力](docs/PROJECT_TECHNICAL_OVERVIEW.md)
 
-- **工作台**：React／TypeScript；Tauri 提供桌面外壳。
-- **业务服务**：FastAPI 承接领域逻辑；桌面 Spring WebFlux 网关处理本地代理与健康检查。
-- **数据与证据**：SQLite、文件工件、JCS 规范化与域分离 SHA-256。
-- **扩展入口**：REST API、Schema、Rule Pack、Adapter，以及显式版本注册的工业 Skill SDK。
-- **学习路径**：CPU 参考闭环、检测框训练、Normality 异常检测与持续学习验收各自说明范围；TTT／RL、VLM 预标注和 Active Learning 不作为已完成能力。
+| 技术层 | 项目内实现 | 可核验输出 |
+| --- | --- | --- |
+| **界面与桌面链路** | React/TypeScript 工作台；Tauri 外壳；Spring WebFlux 本地网关；FastAPI 业务服务 | 用户操作、API 结果、网关健康、桌面运行回执 |
+| **数据合同与状态** | `contracts.py`、`operator_snapshot.py`、`task_store.py` | 用途、样本、标注修订、任务和版本身份 |
+| **确定性检查** | `quality.py`、`duplicates.py`、`annotations.py`、`rulepack.py` | 测点、阈值、Finding、ToolReceipt |
+| **Agent 编排** | `incident_agent_kernel.py`、`worker_selection.py`、有界 Planner 模式 | 假设、证据缺口、选择/拒绝原因、预算、Trace |
+| **治理与复验** | `incident_interaction.py`、`capa.py`、`governed_outcome.py` | 具名决定、Parent/Derived/Child、持续/关闭/回归项 |
+| **模型开发** | `data_pool.py`、`learning_service.py`、`local_model_registry.py` | 数据/权重/反馈/评测绑定；候选不自动获得生产权限 |
+| **完整性与审计** | SQLite、JCS 规范化、域分离 SHA-256、读取时复核 | 可发现漂移的证据链；不是数字签名或可信时间戳 |
+
+框架、图像/数值库和可选模型属于第三方依赖；数据合同、编排、整改复验、证据绑定和产品闭环是项目内实现。[自研贡献与 AI 辅助开发说明](docs/DEVELOPMENT_PROVENANCE.md)
 
 [公共 API](docs/PUBLIC_API.md) · [工业 Skill SDK](docs/INDUSTRIAL_SKILL_SDK.md) · [可运行复用示例](examples/reuse/README.md) · [术语与合同](docs/TECHNICAL_TERMINOLOGY.md)
 
@@ -218,11 +252,35 @@ YOLO 训练预算在 API、Schema、Web 和执行器统一为 **10–600 秒**�
 
 </details>
 
+<a id="reuse"></a>
+
+## 开放复用：从一个组件开始
+
+第三方可以只运行一个 Skill、校验一份 Schema 或接入一个 Adapter，不必先部署整套桌面工作台。
+
+| 可复用资产 | 入口 | 真实边界 |
+| --- | --- | --- |
+| 核心代码与 API | [代码地图](src/visiondata_gate/README.md) · [公共 API](docs/PUBLIC_API.md) | 包根稳定面很小；模块/HTTP/CLI 分别绑定协议 |
+| Agent 工作流 | [5 份文本 Skill](skills/README.md) | 可改编工作流；Markdown 不等于已安装可执行插件 |
+| 可执行工业 Skill | [SDK](docs/INDUSTRIAL_SKILL_SDK.md) · [合成示例](examples/reuse/README.md) | 受信实例显式注册、精确版本调用；不是恶意代码沙箱 |
+| Schema 与规则 | [Schema 目录](schemas/README.md) · [规则包](rulepacks/industrial-v1.json) | 数据形状、权限、场景阈值和生产批准分别验证 |
+| 外部观察 | [Adapter SDK](src/visiondata_gate/adapter_sdk.py) | 离线 conformance 不代表目标系统已经连接 |
+
+最小 SDK 示例不需要模型、网络或工业数据：
+
+```text
+uv run --no-sync python examples/reuse/metadata_skill.py --metadata-count 12 --observed-count 14
+```
+
+它实际调用 `visiondata-gate.metadata-count-drift@1.0.0`，输出差值与可复核回执。详见 [复用指南](docs/OPEN_REUSE_CONTRACTS.md)、[版本兼容](docs/VERSIONING.md) 和 [贡献指南](CONTRIBUTING.md)。
+
+**公开状态与复现边界：**本轮核验 canonical GitHub 仓库为 Public，可匿名读取源码；但“公开可访问”不等于第三方已经按 README 部署成功。外部 clean-clone／运行回执仍需独立取得，完整 Git 历史的隐私边界也应继续核验。
+
 ## 数据、安全与许可证
 
 原始数据与业务记录保存在选定的本地目录；外部模型由用户显式配置。图像上传、具名审批和模型加载具有独立权限，设备写入和自动生产放行不属于本项目权限。
 
-项目原创代码使用 **[Apache-2.0](LICENSE)**，不是 MIT。允许按许可证条件使用、修改和分发，包括商业用途；应保留适用的许可证及版权声明。第三方库、模型和权重仍遵循各自协议，特别是可选 Ultralytics 的 AGPL／Enterprise 条款，不能由本项目许可证替代。
+项目原创代码使用 **[Apache-2.0](LICENSE)**，不是 MIT。遵守条款时可以使用、修改、分发和商业复用；应提供许可证、保留适用署名并标明修改。第三方库、模型、权重和数据不由本项目重新许可，特别是可选 Ultralytics 的 AGPL／Enterprise 条款不能由进程隔离或本项目许可证替代。[查看逐类许可与分发边界](docs/LICENSING.md)
 
 [安全报告](SECURITY.md) · [数据与公开边界](docs/PUBLICATION_BOUNDARY.md) · [第三方声明](docs/THIRD_PARTY_NOTICES.md) · [SBOM](docs/SBOM.cdx.json) · [NOTICE](NOTICE)
 
@@ -234,7 +292,7 @@ YOLO 训练预算在 API、Schema、Web 和执行器统一为 **10–600 秒**�
 
 同一公开源树完成一次连续全仓回归：2094 项收集、`2070 passed / 24 skipped / 0 failed / 0 errors / 17 warnings`；skip 能力没有计入 PASS。[查看完整回归边界](docs/FULL_REGRESSION_F7F31F7_20260916.md)
 
-软件版本、源码提交、模型版本和安装构建各自标识，不让旧结果替新版本背书。[版本演进](docs/VERSION_EVOLUTION.md) · [CHANGELOG](CHANGELOG.md) · [当前验证与交付状态](docs/README_STATUS_AND_EVIDENCE.md)
+软件版本、源码提交、模型版本和安装构建各自标识，不让旧结果替新版本背书。[版本演进](docs/VERSION_EVOLUTION.md) · [兼容与迁移规则](docs/VERSIONING.md) · [CHANGELOG](CHANGELOG.md) · [当前验证与交付状态](docs/README_STATUS_AND_EVIDENCE.md)
 
 <a id="docs"></a>
 

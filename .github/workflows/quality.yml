@@ -73,7 +73,7 @@ jobs:
           --coverage output/quality/coverage.json --junit output/quality/pytest.xml
           --profile quality/coverage-profile.json
       - name: Validate quality, startup and adoption contracts
-        run: uv run --no-sync python -m pytest tests/test_engineering_quality_tools.py tests/test_engineering_workflow_config.py tests/test_quality_gate_contracts.py tests/test_product_claim_boundaries.py tests/test_finals_reproduction.py tests/test_reuse_metadata_example.py tests/test_cross_platform_workbench.py tests/test_adoption_docs.py -q
+        run: uv run --no-sync python -m pytest tests/test_engineering_quality_tools.py tests/test_engineering_workflow_config.py tests/test_quality_gate_contracts.py tests/test_product_claim_boundaries.py tests/test_finals_reproduction.py tests/test_reuse_metadata_example.py tests/test_readme_finals_evidence.py tests/test_cross_platform_workbench.py tests/test_adoption_docs.py -q
       - name: Preserve check evidence, including failures
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
