@@ -10,6 +10,13 @@ competition artifact tags are not a claim of a matching PyPI package version.
 
 ### Added
 
+- A finals-facing evidence index and README benchmark summary that bind each
+  metric to its denominator, baseline, scope and unresolved evidence gap.
+- Discoverable core-code, text Skill and Schema catalogues, with version,
+  compatibility and licensing guidance for third-party reuse.
+- Focused README tests that keep the five finals dimensions, benchmark boundaries
+  and reusable entry points visible as the project evolves.
+
 - Explicit per-sample acceptance and named annotation-version review before
   freezing an operator project; metadata-only offline compute handoff.
 - Local reference-learning lifecycle and React `/learning` integration: frozen

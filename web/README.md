@@ -2,7 +2,7 @@
 
 VisionData Gate Web 是项目的新一代多页面工业工作台。它复用同一套证据合同、案件语义和失败关闭边界，不是单张大屏，也不是聊天框套壳。
 
-当前新增的本地账户、模型管理、数据池与训练入口见 [本地 Agent 平台工作流程](../docs/PRIVATE_AGENT_PLATFORM_WORKFLOW.md)。下列 RC3 状态只描述历史冻结候选，不为当前共享源码新增功能、安装包或提交状态背书。
+当前本地账户、模型管理、数据池与训练入口见 [Agent 平台操作说明](../docs/AGENT_PLATFORM_OPERATIONS.md) 和 [项目技术总览](../docs/PROJECT_TECHNICAL_OVERVIEW.md)。下列 RC3 状态只描述历史冻结候选，不为当前源码、安装包或提交状态背书。
 
 ```text
 ui_implementation=PASS_LOCAL_UI

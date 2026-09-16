@@ -1,5 +1,11 @@
 # Third-party notices
 
+For a content-by-content reuse and distribution guide, see
+[Licensing scope](LICENSING.md). This package list describes the Python inventory;
+review the combined SBOM, Cargo notices and actual Maven/JRE/installer contents
+within their stated scope. A source installation and a bundled desktop binary do
+not have identical distribution obligations.
+
 VisionData Gate is licensed under Apache-2.0. Its source submission ZIP does
 not vendor the Python distributions listed below, model weights, or external
 datasets. The packages are resolved by `uv.lock` and installed separately by

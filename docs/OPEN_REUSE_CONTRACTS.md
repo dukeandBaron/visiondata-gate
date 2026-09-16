@@ -1,13 +1,17 @@
-# 开放复用合同｜Rule Pack、Evidence Schema 与 Adapter SDK
+# 开放复用｜核心代码、Skill、Schema 与 Adapter
 
-状态：`PUBLIC_SOURCE_AVAILABLE / EXTERNAL_CLEAN_CLONE_REPRO_PENDING`
+状态：`PUBLIC_SOURCE_AVAILABLE / EXTERNAL_CLEAN_CLONE_PENDING`
 
-项目只维护一个对外 GitHub 主仓 `dukeandBaron/visiondata-gate`。本地私有工作区保留不可公开的数据和回执；主仓已经提供经隐私审查的可复用源码、锁文件、Schema、Rule Pack、Skills、Adapter、示例和文档。在取得第三方 clean-clone 回执前，仍不能把“代码公开”写成“外部评委已复现”。
+项目只维护一个 canonical GitHub 仓 `dukeandBaron/visiondata-gate`，本地工作区保留不可公开的数据和回执。本次核验仓库为 Public，项目自有源码已有复用合同与许可证；但公开可读不等于第三方已经 clean-clone、部署或验证成功，也不授权公开客户数据和私域回执。
 
 ## 1. 可复用资产
 
 | 资产 | 入口 | 用途 |
 |---|---|---|
+| 核心代码地图 | [`src/visiondata_gate/README.md`](../src/visiondata_gate/README.md) | 按数据合同、检查、编排、整改、学习和服务层选择入口 |
+| 文本 Skill 规范 | [`skills/README.md`](../skills/README.md) | 5 份版本化工作流说明；不是一键安装插件 |
+| Schema 目录 | [`schemas/README.md`](../schemas/README.md) | 区分独立 JSON Schema、生成模型 Schema 和 Schema 集合 |
+| 可执行 SDK 示例 | [`examples/reuse/`](../examples/reuse/README.md) | 无模型、无网络的真实 Skill 注册/调用/回执验证 |
 | Industrial Rule Pack v1 | `rulepacks/industrial-v1.json` | 冻结五类规则、三类动态触发和默认失败关闭边界 |
 | Rule Pack Schema | `schemas/rulepack.schema.json` | 校验规则 ID、版本、优先级、动作和发布边界 |
 | Evidence Finding Schema | `schemas/evidence-finding.schema.json` | 统一 finding、evidence span、reason trace 和 source refs |
@@ -47,6 +51,14 @@ Industrial Skill example：
 
 ## 3. 复验命令
 
+先运行一个真实 SDK 示例：
+
+```text
+uv run --no-sync python examples/reuse/metadata_skill.py --metadata-count 12 --observed-count 14
+```
+
+它使用合成计数，实际调用 `visiondata-gate.metadata-count-drift@1.0.0` 并验证回执；不读取图像、模型或工厂数据。
+
 ```powershell
 .\.venv\Scripts\python.exe -m visiondata_gate.cli rulepack-verify `
   --rulepack rulepacks\industrial-v1.json `
@@ -70,4 +82,6 @@ uv run --frozen pytest -q tests\test_industrial_skills.py
 - 当前 Registry 是显式调用扩展点；只有内置 Metadata Skill 存在固定 Worker 集成，
   不声称任意第三方 Skill 会被 Dynamic Leader 自动发现或安全调度。
 - 原始数据、密钥、绝对路径、模型权重和私有运行数据库不进入示例或开源包。
-- 主仓公开面必须通过完整历史隐私扫描、Pages 构建扫描和 source commit/tree 绑定；仍需独立 clean-clone 与第三方复验，才能把开放贡献状态从“已公开”升级为“外部已复现”。
+- 若开放仓库或导出快照，必须分别通过历史隐私、当前树、Pages 和 source commit/tree 绑定；仍需独立 clean-clone/部署回执才能声明外部复现。
+
+[版本兼容](VERSIONING.md) · [许可证范围](LICENSING.md) · [贡献指南](../CONTRIBUTING.md)

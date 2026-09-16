@@ -67,8 +67,8 @@ production_release_allowed=false
 
 ## 公开核验入口
 
-- 官方规则来源区分：[`GOAI_BOUNDLESS_AGENTS_HANDBOOK_20260825.md`](GOAI_BOUNDLESS_AGENTS_HANDBOOK_20260825.md)
-- 评分与证据矩阵：[`GOAI_requirements_matrix.md`](GOAI_requirements_matrix.md)
-- 提交操作清单：[`SUBMISSION_CHECKLIST.md`](SUBMISSION_CHECKLIST.md)
+- 赛事规则与项目评价边界：[`GOAI_COMPETITION_EVALUATION.md`](GOAI_COMPETITION_EVALUATION.md)
+- 决赛评分与证据矩阵：[`FINALS_EVIDENCE_MAP.md`](FINALS_EVIDENCE_MAP.md)
+- 现场运行与复现清单：[`LIVE_REPRODUCTION.md`](LIVE_REPRODUCTION.md)
 - DynamicBench-v3 协议：[`DYNAMICBENCH_V3.md`](DYNAMICBENCH_V3.md)
-- 冻结配对对照：[`../10_reports/dynamic_vs_fixed_rule_paired_comparison.json`](../10_reports/dynamic_vs_fixed_rule_paired_comparison.json)
+- 冻结 DynamicBench-v3 报告：[`../benchmarks/DYNAMICBENCH_V3_REPLANNING_20260829.json`](../benchmarks/DYNAMICBENCH_V3_REPLANNING_20260829.json)
