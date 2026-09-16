@@ -35,6 +35,10 @@ import {
   selectControlledCapaPlan,
 } from "../data/capaApi";
 import { ActionButton, Modal, Panel, StatusBadge } from "./ui";
+import {
+  CapaRequestReadbackRail,
+  type CapaRequestReadbackPhase,
+} from "./FinalsTaskRails";
 import "../styles/capa-delivery.css";
 
 interface ScopedCapaCase {
@@ -107,6 +111,7 @@ export function ControlledCapaWorkbench() {
   const [partialFailureCount, setPartialFailureCount] = useState(0);
   const [deliveryFailureCount, setDeliveryFailureCount] = useState(0);
   const [focusNotice, setFocusNotice] = useState<string>();
+  const [writeOutcomeUnknown, setWriteOutcomeUnknown] = useState(false);
   const [error, setError] = useState<string>();
   const [dialog, setDialog] = useState<CapaDialog>();
   const [actorName, setActorName] = useState("");
@@ -118,6 +123,7 @@ export function ControlledCapaWorkbench() {
   const [outcomeState, setOutcomeState] = useState<"IDLE" | "LOADING" | "VERIFIED" | "ASSESSMENT_VERIFIED" | "UNAVAILABLE">("IDLE");
   const requestRef = useRef(0);
   const mutationRequestRef = useRef(0);
+  const unknownMutationTaskRef = useRef("");
   const scopeKey = `${activeWorkspace?.workspace_id ?? ""}::${activeProject?.project_id ?? ""}`;
   const scopeIdentityRef = useRef({ key: scopeKey, generation: 0 });
   if (scopeIdentityRef.current.key !== scopeKey) {
@@ -155,6 +161,7 @@ export function ControlledCapaWorkbench() {
       const tasks = await listAgentTasks(workspaceId, projectId);
       const next: ScopedCapaCase[] = [];
       const nextDeliveries: ScopedDelivery[] = [];
+      const reconciledTaskIds = new Set<string>();
       let failed = 0;
       let failedDeliveries = 0;
       for (let offset = 0; offset < tasks.length; offset += 12) {
@@ -175,6 +182,7 @@ export function ControlledCapaWorkbench() {
             failed += 1;
             return;
           }
+          reconciledTaskIds.add(result.value.task.task_id);
           result.value.cases.forEach((capa) => next.push({ task: result.value.task, capa }));
         });
         deliveryResults.forEach((result) => {
@@ -193,6 +201,10 @@ export function ControlledCapaWorkbench() {
       if (!requestIsCurrent()) return;
       setEntries(next);
       setDeliveries(nextDeliveries);
+      if (unknownMutationTaskRef.current && reconciledTaskIds.has(unknownMutationTaskRef.current)) {
+        unknownMutationTaskRef.current = "";
+        setWriteOutcomeUnknown(false);
+      }
       setPartialFailureCount(failed);
       setDeliveryFailureCount(failedDeliveries);
       const requested = next.find((entry) => {
@@ -247,6 +259,8 @@ export function ControlledCapaWorkbench() {
     setSelectedKey("");
     setSelectedDeliveryTaskId("");
     setDialog(undefined);
+    unknownMutationTaskRef.current = "";
+    setWriteOutcomeUnknown(false);
     mutationRequestRef.current += 1;
     setMutating(false);
     void refresh();
@@ -390,6 +404,10 @@ export function ControlledCapaWorkbench() {
       if (isUnknownMutationOutcome(caught)) {
         setDialog(undefined);
         setAttested(false);
+        unknownMutationTaskRef.current = submittedDialog.kind === "CREATE"
+          ? submittedDialog.delivery.task.task_id
+          : submittedDialog.entry.task.task_id;
+        setWriteOutcomeUnknown(true);
         setFocusNotice(unknownMutationNotice(submittedDialog.kind));
       } else {
         setError(caught instanceof Error ? caught.message : "受控 CAPA 操作失败");
@@ -405,6 +423,15 @@ export function ControlledCapaWorkbench() {
   const dialogResourceId = dialog
     ? dialog.kind === "CREATE" ? dialog.delivery.task.task_id : dialog.entry.capa.case_id
     : "";
+  const selectedReadbackTaskId = selected?.task.task_id ?? selectedDelivery?.task.task_id ?? "";
+  const capaReadbackPhase: CapaRequestReadbackPhase = writeOutcomeUnknown
+    && unknownMutationTaskRef.current === selectedReadbackTaskId
+    ? "REQUEST_UNKNOWN"
+    : selected?.capa.recovery && (outcomeState === "VERIFIED" || outcomeState === "ASSESSMENT_VERIFIED")
+      ? "READBACK_VERIFIED"
+      : selected
+        ? "SERVER_VERIFIED"
+        : "NOT_REQUESTED";
 
   if (!activeWorkspace || !activeProject) {
     return <div className="controlled-capa-empty"><LockKeyhole size={22} /><strong>先选择真实项目</strong><p>受控 CAPA 必须绑定 workspace、project 与 parent task。</p></div>;
@@ -468,6 +495,7 @@ export function ControlledCapaWorkbench() {
         </Panel>
 
         <main className="controlled-capa-main">
+          {selected || selectedDelivery ? <CapaRequestReadbackRail phase={capaReadbackPhase} /> : null}
           {!selected && selectedDelivery ? (
             <>
               <header className="controlled-capa-case-head">
@@ -546,16 +574,6 @@ export function ControlledCapaWorkbench() {
                 <div><span>{selected.capa.case_id}</span><h2>{selected.capa.selection.plan.title}</h2><p>{selected.capa.selection.plan.objective}</p></div>
                 <StatusBadge tone={capaTone(selected.capa.status)}>{selected.capa.status}</StatusBadge>
               </header>
-              <div className="controlled-capa-flow">
-                {[
-                  ["PLAN", true],
-                  ["APPROVAL", Boolean(selected.capa.approval)],
-                  ["DERIVED COPY", Boolean(selected.capa.derived_version)],
-                  ["CHILD RUN", Boolean(selected.capa.execution)],
-                  ["OUTCOME", Boolean(selected.capa.recovery)],
-                ].map(([label, complete], index) => <span className={complete ? "is-complete" : ""} key={String(label)}><i>{complete ? <CheckCircle2 size={11} /> : index + 1}</i>{label}</span>)}
-              </div>
-
               <section className="controlled-capa-plan">
                 <header><span>SELECTED PLAN</span><code>{shortDigest(selected.capa.selection.plan.plan_sha256)}</code></header>
                 <div className="controlled-capa-plan-metrics">

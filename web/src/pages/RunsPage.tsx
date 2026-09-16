@@ -31,6 +31,7 @@ import type {
   AgentTaskEvent,
 } from "../agentDomain";
 import { EmptyState, StatusBadge } from "../components/ui";
+import { RunRecoveryRail } from "../components/FinalsTaskRails";
 import {
   getAgentReleaseReadiness,
   getAgentTask,
@@ -83,8 +84,8 @@ function readableError(error: unknown): string {
 function statusTone(value: string | null | undefined): StatusTone {
   const status = (value ?? "").toUpperCase();
   if (/FAILED|ERROR|BLOCKED|REJECT|RECAPTURE|HOLD/.test(status)) return "danger";
-  if (/COMPLETED|SUCCEEDED|PASS|VERIFIED|READY/.test(status)) return "success";
-  if (/PLANNED|PENDING|WAIT|HUMAN|REVIEW/.test(status)) return "warning";
+  if (/COMPLETED|SUCCEEDED|PASS|VERIFIED/.test(status)) return "success";
+  if (/PLANNED|PENDING|WAIT|HUMAN|REVIEW|READY/.test(status)) return "warning";
   if (/CANCELLED|ARCHIVED|NOT_APPLICABLE/.test(status)) return "locked";
   return "info";
 }
@@ -503,6 +504,61 @@ export function RunsPage() {
     if (next && next === before) await loadDetail(next, false);
     setRefreshing(false);
   };
+  const runRecovery = (() => {
+    if (!detail) return undefined;
+    const taskId = encodeURIComponent(detail.task.task_id);
+    if (detail.unavailable.length > 0) return {
+      state: "UNKNOWN" as const,
+      title: "部分状态尚未核实",
+      detail: "已返回事实继续保留；缺失项只允许重新 GET，不会补写上次结果。",
+      actionLabel: "重新读取当前任务",
+      onAction: () => void refresh(),
+    };
+    if (isActiveTask(detail.task)) return {
+      state: "WAITING" as const,
+      title: "等待服务端任务回读",
+      detail: "任务仍在执行；刷新事件，不创建重复任务。",
+      actionLabel: "刷新运行状态",
+      onAction: () => void refresh(),
+    };
+    if (detail.task.execution_status === "FAILED") return {
+      state: "BLOCKED" as const,
+      title: "任务执行已失败",
+      detail: "前往平台核验执行归属；只有 INTERRUPTED 才允许具名创建替代任务。",
+      actionLabel: "核验中断与恢复资格",
+      href: `/platform?task=${taskId}`,
+    };
+    const readiness = detail.releaseReadiness?.overall_status;
+    if (readiness === "READY_FOR_HUMAN_REVIEW") return {
+      state: "HUMAN_REVIEW" as const,
+      title: "等待具名人工终审",
+      detail: "规则已通过，但仍无生产放行权。",
+      actionLabel: "打开人工终审",
+      href: `/command-center?task=${taskId}`,
+    };
+    if (readiness === "BLOCKED_GATE_DECISION") return {
+      state: "BLOCKED" as const,
+      title: "整改责任仍未闭环",
+      detail: "进入 CAPA 核对责任人、派生版本与 Child Run。",
+      actionLabel: "打开 CAPA 责任队列",
+      href: `/capa?task=${taskId}`,
+    };
+    if (readiness === "BLOCKED_SOURCE_STALE") return {
+      state: "BLOCKED" as const,
+      title: "数据来源已过期",
+      detail: "旧任务结论不能沿用；重新核验当前来源授权。",
+      actionLabel: "检查来源授权",
+      href: "/integrations",
+    };
+    if (readiness === "BLOCKED_EVIDENCE_INTEGRITY") return {
+      state: "BLOCKED" as const,
+      title: "证据完整性未通过",
+      detail: "先核对工具回执与摘要，不重新执行写操作。",
+      actionLabel: "检查证据清单",
+      href: `/evidence?task=${taskId}`,
+    };
+    return undefined;
+  })();
 
   if (workspaceLoading) {
     return <div className="live-runs-page live-runs-page--center"><LoaderCircle className="is-spinning" size={18} /> 正在读取工作范围…</div>;
@@ -627,6 +683,8 @@ export function RunsPage() {
                   <small>进程完成不自动授予生产放行权</small>
                 </article>
               </section>
+
+              {runRecovery ? <RunRecoveryRail {...runRecovery} /> : null}
 
               {detail.task.execution_status === "FAILED" || detail.task.error_code ? (
                 <section className="live-runs-task-failure">

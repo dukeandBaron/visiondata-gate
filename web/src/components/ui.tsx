@@ -229,13 +229,13 @@ export function ClaimBoundary({
 }) {
   const Icon = tone === "danger" ? ShieldAlert : AlertTriangle;
   return (
-    <aside className={`claim-boundary claim-boundary--${tone}`}>
+    <section className={`claim-boundary claim-boundary--${tone}`} role="note">
       <Icon size={17} aria-hidden="true" />
       <div>
         <strong>{title}</strong>
         <p>{children}</p>
       </div>
-    </aside>
+    </section>
   );
 }
 

@@ -57,6 +57,7 @@ import { IncidentReviewProjectionPanel } from "../components/IncidentReviewProje
 import { ReviewSyntheticAssetProof } from "../components/ReviewSyntheticAssetProof";
 import { EvaluationEvidencePanel } from "../components/EvaluationEvidencePanel";
 import { SemifinalManifestEvidence } from "../components/SemifinalManifestEvidence";
+import { TaskResponsibilityRail } from "../components/FinalsTaskRails";
 import type {
   GovernanceRateMetric,
   ProjectGovernanceEffectivenessSummary,
@@ -828,6 +829,44 @@ export function ReviewPage() {
     navigate(checkpoint.href);
   };
   const workerSelection = incident?.worker_selection_receipt;
+  const responsibilityItems = [
+    {
+      id: "agent" as const,
+      label: "Agent 组织",
+      state: workerSelection ? "OBSERVED" as const : live.incidentsPending || taskStillRunning ? "WAITING" as const : "UNKNOWN" as const,
+      summary: workerSelection
+        ? `${workerSelection.selected_worker_ids.length}/${workerSelection.worker_budget} Workers`
+        : live.incidentsPending || taskStillRunning ? "等待路由回执" : "UNKNOWN",
+      detail: workerSelection
+        ? `${workerSelection.ranking.filter((entry) => !entry.selected).length} 个 Worker 未入选`
+        : "未观察到选择、排除与预算事实",
+      href: taskHref("/command-center"),
+    },
+    {
+      id: "tool" as const,
+      label: "确定性工具",
+      state: eventsUnavailable ? "UNKNOWN" as const : completedToolEvents > 0 ? "OBSERVED" as const : taskStillRunning ? "WAITING" as const : "UNKNOWN" as const,
+      summary: eventsUnavailable ? "UNKNOWN" : completedToolEvents > 0 ? `${completedToolEvents} 次成功调用` : taskStillRunning ? "等待工具事件" : "UNKNOWN",
+      detail: eventsUnavailable ? "事件索引不可用" : `${live.events.length} 条服务端阶段事件`,
+      href: taskHref("/runs"),
+    },
+    {
+      id: "human" as const,
+      label: "具名人员",
+      state: interventionsUnavailable ? "UNKNOWN" as const : humanReviewReceipt ? "OBSERVED" as const : "WAITING" as const,
+      summary: interventionsUnavailable ? "UNKNOWN" : humanReviewReceipt ? `回执 #${humanReviewReceipt.sequence}` : "等待人工决定",
+      detail: humanReviewReceipt ? `${humanReviewReceipt.actor_user_id} · ${humanReviewReceipt.action}` : "Agent 无权代替终审",
+      href: taskHref("/command-center"),
+    },
+    {
+      id: "readback" as const,
+      label: "系统回读",
+      state: readinessUnavailable ? "UNKNOWN" as const : live.readiness ? "OBSERVED" as const : taskStillRunning || supplementalPending ? "WAITING" as const : "UNKNOWN" as const,
+      summary: readinessUnavailable ? "UNKNOWN" : live.readiness?.overall_status ?? (taskStillRunning || supplementalPending ? "等待结果回读" : "UNKNOWN"),
+      detail: live.readiness ? `production=false · ${live.readiness.open_work_order_count} 张开放工单` : "未取得当前发布边界",
+      href: taskHref("/lineage"),
+    },
+  ];
   const selectedWorkerEvidence = (workerSelection?.selected_worker_ids ?? []).map((workerId) => ({
     workerId,
     candidate: workerSelection?.candidates.find((candidate) => candidate.worker_id === workerId),
@@ -931,6 +970,8 @@ export function ReviewPage() {
           </div>
         </header>
 
+        <TaskResponsibilityRail items={responsibilityItems} />
+
         <div className="review-evidence-runway">
           <SemifinalManifestEvidence enabled={connection.api === "CONNECTED"} />
           {focusStageReady && live.task && activeWorkspace && activeProject ? (
@@ -955,7 +996,7 @@ export function ReviewPage() {
               )}
             </div>
 
-            <aside className="review-case-briefing" aria-label="六问案件简报">
+            <section className="review-case-briefing" aria-label="六问案件简报">
               <header>
                 <div>
                   <span>CASE BRIEF · SIX QUESTIONS</span>
@@ -1033,7 +1074,7 @@ export function ReviewPage() {
                   </div>
                 ) : <p>{live.incidentsPending ? "正在读取 Incident v5/v6 补证回执。" : "当前 Task 没有可引用的 Worker Selection Receipt；页面不会补写路由理由。"}</p>}
               </section>
-            </aside>
+            </section>
 
             <div className="review-source-contract" aria-label="当前证据来源合同">
               <span><strong>READ PATH</strong><em>{source === "LIVE_API" ? "LOCAL API LIVE · READ ONLY" : "NOT CONNECTED"}</em></span>
