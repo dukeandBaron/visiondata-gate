@@ -1,7 +1,7 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "7025a4b8282542fd3d73ecd66f081e78d9654b57",
-  "source_tree_oid": "7a222c5358b3e6b1a746182607715d7852cb4f76",
+  "source_commit_oid": "453c37e94a7154c0dcf52092e73ab6b09280cf82",
+  "source_tree_oid": "ab181bdf5db6e9b7819d52dff1fe497c7938e741",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
@@ -9,7 +9,7 @@
   "personal_data_included": false,
   "tracked_source_only": true,
   "file_count": 762,
-  "snapshot_sha256": "2ce9f24ad1f02aa2dada2bf6630b78a0872c48559c3bdd2268edbbb0f2c8cd47",
+  "snapshot_sha256": "bf8d92156d0b4ab6c6e1b5d56e8866dec58a6c8f9f18e2f8d528c8fd5033e1c5",
   "files": [
     {
       "path": ".env.example",
@@ -2635,8 +2635,8 @@
     },
     {
       "path": "tests/web_finals_review.test.mjs",
-      "sha256": "5aefa73c01fee6939a15fd7deb45a8ddb5a7bfd3dac7774a5a2e054da36ca89c",
-      "size_bytes": 1839
+      "sha256": "6be0c1bc1828d5ef23eda1e631f218ae05cda9318ebc4ee8eaa85a78aa7f17ed",
+      "size_bytes": 2463
     },
     {
       "path": "tests/web_identity.browser.mjs",
@@ -3455,8 +3455,8 @@
     },
     {
       "path": "web/src/finalsReview.ts",
-      "sha256": "73c132e5bdb053122ff79d062e949cef403796a5740ead7d8c25b7ed07ab4378",
-      "size_bytes": 3421
+      "sha256": "f19cd3804a0889169b3c3d090d200f6577dd076e71f3021a0fe05810c7273e83",
+      "size_bytes": 3474
     },
     {
       "path": "web/src/governanceDomain.ts",
