@@ -1,9 +1,9 @@
 # Windows 候选 `f7f31f7` 构建与验收记录
 
-日期：2026-09-16  
-包版本：`0.1.0`  
-构建身份：`windows-local-f7f31f7-finals-20260916`  
-源码提交：`f7f31f7048b14b79990a445f285946f46d3bc41f`  
+- 日期：2026-09-16
+- 包版本：`0.1.0`
+- 构建身份：`windows-local-f7f31f7-finals-20260916`
+- 源码提交：`f7f31f7048b14b79990a445f285946f46d3bc41f`
 Release：[`windows-local-f7f31f7-finals-20260916`](https://github.com/dukeandBaron/visiondata-gate/releases/tag/windows-local-f7f31f7-finals-20260916)
 
 ## 结论
