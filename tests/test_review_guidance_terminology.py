@@ -200,7 +200,7 @@ def test_version_evolution_separates_milestones_packages_builds_and_evidence() -
         "v0.4.0-goai-semifinal-rc4",
         "windows-local-ce72604-20260914",
         "windows-local-dc3a4b-login-fix-20260915",
-        "CURRENT_SOURCE_UNRELEASED",
+        "CURRENT_SOURCE_DOCUMENTATION",
         "production_release_allowed=false",
     ):
         assert identifier in document
@@ -238,7 +238,7 @@ def test_product_docs_surface_latest_model_and_installer_boundaries() -> None:
         assert artifact in installer
 
 
-def test_final_windows_candidate_is_sha_bound_without_widening_release_claims() -> None:
+def test_historical_ca1fa7b_candidate_remains_auditable() -> None:
     report_path = "docs/WINDOWS_CANDIDATE_CA1FA7B_20260915.md"
     release_url = (
         "https://github.com/dukeandBaron/visiondata-gate/releases/tag/"
@@ -257,6 +257,34 @@ def test_final_windows_candidate_is_sha_bound_without_widening_release_claims() 
         "production_release_allowed=false",
     ):
         assert token in report
+    evolution = _read("docs/VERSION_EVOLUTION.md")
+    assert "windows-local-ca1fa7b-20260915" in evolution
+    assert "WINDOWS_CANDIDATE_CA1FA7B_20260915.md" in evolution
+    assert release_url in report
+    assert "new_windows_installer_for_current_source=NOT_BUILT" not in _read(
+        "docs/VERSION_EVOLUTION.md"
+    )
+
+
+def test_latest_finals_windows_candidate_is_the_product_download_target() -> None:
+    report_path = "docs/WINDOWS_CANDIDATE_F7F31F7_20260916.md"
+    release_tag = "windows-local-f7f31f7-finals-20260916"
+    installer_sha = "e32b10cf7e6ac8a9cdeca06b00973c29ff08acec2ae193fbf80c9d0d9a48e826"
+    assert _selected(report_path)
+    report = _read(report_path)
+    for token in (
+        "f7f31f7048b14b79990a445f285946f46d3bc41f",
+        installer_sha,
+        "2070 passed",
+        "24 skipped",
+        "PASS_EXTRACTED_PLATFORM_HTTP_SMOKE",
+        "PASS_PACKAGED_LEARNING",
+        "PASS_LOCAL_INSTALLED_SMOKE",
+        "PASS_REAL_DESKTOP_IDENTITY_UIA",
+        "clean_machine_validation=NOT_RUN",
+        "production_release_allowed=false",
+    ):
+        assert token in report
     for path in (
         "README.md",
         "docs/PUBLIC_REPOSITORY_README.md",
@@ -264,15 +292,6 @@ def test_final_windows_candidate_is_sha_bound_without_widening_release_claims() 
         "docs/VERSION_EVOLUTION.md",
     ):
         document = _read(path)
-        assert "windows-local-ca1fa7b-20260915" in document
-        assert "WINDOWS_CANDIDATE_CA1FA7B_20260915.md" in document
-    for path in (
-        "README.md",
-        "docs/PUBLIC_REPOSITORY_README.md",
-        "docs/README_STATUS_AND_EVIDENCE.md",
-        report_path,
-    ):
-        assert release_url in _read(path)
-    assert "new_windows_installer_for_current_source=NOT_BUILT" not in _read(
-        "docs/VERSION_EVOLUTION.md"
-    )
+        assert release_tag in document
+        assert "WINDOWS_CANDIDATE_F7F31F7_20260916.md" in document
+        assert installer_sha in document

@@ -35,6 +35,12 @@ competition artifact tags are not a claim of a matching PyPI package version.
   without enabling DevTools in the shipped desktop. The `ca1fa7b` runtime source
   produced a SHA-bound local Windows candidate; signing, clean-machine and
   industrial-effectiveness gates remain open.
+- Final review candidate `windows-local-f7f31f7-finals-20260916` binds the public
+  source commit to a fresh Windows installer, 113 packaged HTTP checks, two
+  packaged-learning rounds, NSIS install/start/uninstall, seven-step release
+  WebView UIA, and one continuous 2070-passed repository regression. Signing,
+  independent clean-machine, same-version upgrade, customer and industrial gates
+  remain open.
 - A bounded anomaly operating-point component now selects score channel and
   threshold on calibration members only, evaluates on disjoint held-out
   development members, and keeps deployment/production authorization disabled.

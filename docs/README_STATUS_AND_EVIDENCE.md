@@ -11,19 +11,19 @@
 | DynamicBench-v3 | 8 fixtures / 16 records；Dynamic 8/8、Fixed 4/8；双方 unsafe release 均 0 | 新报告封套与原冻结摘要 `6a2b107c20eac5f590d9e36a9bcdb835efd080dc9c456528d18e224831585455` 一致 |
 | DynamicBench-v4 | 4/4 实际 ProductService 案件通过；包含工具失败关闭 | 本地产品软件链路；外部模型调用 0 |
 | HTTP 学习参考流程 | 两轮完成、FINALIZED | NumPy 参考模型；模拟复核人，不是工业 RL/TTT |
-| 全仓 Python 3.12 回归 | 2093 collected；2066 passed；27 skipped；0 failed；17 warnings；3422.65s | 单一连续运行，绑定源码 `9417f01216925b6912a1f2c9bdc994c9cf1f6ef9`；是本地源码回归，不是 Release Attestation |
+| 全仓 Python 3.12 回归 | 2094 collected；2070 passed；24 skipped；0 failed；0 errors；17 warnings；3067.57s | 单一连续运行，绑定源码 `f7f31f7048b14b79990a445f285946f46d3bc41f`；是本地源码回归，不是外部认证 |
 
-**当前公开源码候选的全仓回归已连续运行到结束。** 27 项 skip 中，22 项依赖未分发的历史私有发行/评审材料，4 项需要当前 Windows 用户不具备的 symlink 权限，1 项需要显式外部 YOLO 运行授权；这些项目没有被写成 PASS。完整命令、分母和边界见 [9417f01 全仓回归记录](FULL_REGRESSION_9417F01_20260916.md)。公开 CI 仍是明确定义的多平台测试切片，不能用本地全量结果替代 GitHub CI。
+**当前公开源码候选的全仓回归已连续运行到结束。** 24 项 skip 中，19 项依赖未分发的历史私有发行/评审材料，4 项需要当前 Windows 用户不具备的 symlink 权限，1 项需要显式外部 YOLO 运行授权；这些项目没有被写成 PASS。完整命令、分母和边界见 [f7f31f7 全仓回归记录](FULL_REGRESSION_F7F31F7_20260916.md)。公开 CI 仍是明确定义的多平台测试切片，不能用本地全量结果替代 GitHub CI。
 
-以下安装器记录属于 `ca1fa7b` 的已发布候选，本轮只是核对其现有文件、摘要与公开附件，没有把新文档和 Pages 更改声称为重新打包的 EXE。
+以下安装器记录属于最终公开源树 `f7f31f7` 的重新构建与重新验收；没有继承旧 `ca1fa7b` 候选的 PASS。
 
 ## 2026-09-15 公开访问恢复
 
-唯一主仓为 [visiondata-gate](https://github.com/dukeandBaron/visiondata-gate)，[在线 Demo](https://dukeandbaron.github.io/visiondata-gate/) 已完成同仓 Pages 部署。当前公开 `main=b604a63bef10fe1160fe90ba9c21c92e428f6c7f` 的最新 Pages 成功记录为 [35002282200](https://github.com/dukeandBaron/visiondata-gate/actions/runs/35002282200)；本轮候选仍需在合入后由 GitHub 重新构建与匿名验收。这不是完整在线后端或新安装器的验收。
+唯一主仓为 [visiondata-gate](https://github.com/dukeandBaron/visiondata-gate)，[在线 Demo](https://dukeandbaron.github.io/visiondata-gate/) 已完成同仓 Pages 部署。公开源码 `f7f31f7048b14b79990a445f285946f46d3bc41f` 的 Pages、工程质量和安全工作流均为 success；Pages 成功记录为 [35064604403](https://github.com/dukeandBaron/visiondata-gate/actions/runs/35064604403)。这仍不是完整在线业务后端。
 
 发布前已备份历史并修正分支/标签提交邮箱，逐提交文件树保持一致。GitHub 旧 PR/提交缓存的彻底清除不在普通推送能力范围内。以下表格是此前基线的历史记录，其 Private/历史 HOLD 状态已由本节更新。
 
-本页把产品首页中的能力与其验证范围分开。核对日期：**2026-09-16**；最新已验证 Windows 运行时代码基线仍为 `ca1fa7b1727535014e8723e5bceb4d539272cf2b`，本轮源码回归锚点为 `9417f01216925b6912a1f2c9bdc994c9cf1f6ef9`。后者尚未生成新安装器，不能继承旧二进制的安装/UIA PASS。
+本页把产品首页中的能力与其验证范围分开。核对日期：**2026-09-16**；最新已验证 Windows 运行时代码与全仓回归均绑定 `f7f31f7048b14b79990a445f285946f46d3bc41f`。其后的文档或清单提交不自动进入该二进制。
 
 ## 源码、安装器与仓库访问
 
@@ -31,7 +31,7 @@
 | --- | --- | --- |
 | GitHub 仓库 | 唯一主仓已恢复 Public；仓库和静态 Demo 已有匿名 HTTP 200 证据 | 完整在线后端、当前最新提交已部署或所有外部缓存均已清除 |
 | 基线源码 CI | scoped Linux／Windows × Python 3.12／3.13、依赖审计、Bandit、两种语言 CodeQL 分析任务成功；type-debt 为按配置跳过 | 全仓静态类型已通过、所有漏洞均已排除 |
-| Windows 候选 | `ca1fa7b` 本地候选已完成构建、提取态、安装启动和发布版登录注册验收；具体摘要见下节 | 正式生产发行、独立干净机或同版本升级验证 |
+| Windows 候选 | `f7f31f7` 已完成构建、113/113 提取态检查、两轮包内学习、安装启动、七步 UIA 和卸载；具体摘要见下节 | 正式生产发行、独立干净机、同版本升级或代码签名 |
 | 完整 Git 历史隐私 | 公开恢复提交已通过历史重写与 Pages 门禁；后续提交仍需 CI 重新核验 | 一次历史 PASS 可以永久替代后续提交的门禁 |
 | 无历史导出快照 | 需要以当前 SHA 绑定的清单独立核验 | 可绕过授权公开私域数据或完整 Git 历史 |
 | 工厂、客户与模型效果 | 工业效果／客户验收仍 HOLD；生产放行 false | 客户 ROI、产线 NG 改善、模型达到工业精度 |
@@ -40,20 +40,20 @@ CodeQL 分析任务成功与公开 Security 页的告警状态不是同一回事
 
 ## 最新核对的 Windows 候选
 
-最新候选 prerelease 为 [`windows-local-ca1fa7b-20260915`](https://github.com/dukeandBaron/visiondata-gate/releases/tag/windows-local-ca1fa7b-20260915)，源码绑定 `ca1fa7b1727535014e8723e5bceb4d539272cf2b`。完整记录见 [Windows 候选 ca1fa7b](WINDOWS_CANDIDATE_CA1FA7B_20260915.md)。
+最新候选 prerelease 为 [`windows-local-f7f31f7-finals-20260916`](https://github.com/dukeandBaron/visiondata-gate/releases/tag/windows-local-f7f31f7-finals-20260916)，源码绑定 `f7f31f7048b14b79990a445f285946f46d3bc41f`。完整记录见 [Windows 候选 f7f31f7](WINDOWS_CANDIDATE_F7F31F7_20260916.md)。
 
 该候选的原始验收实际执行并记录：
 
-- 冻结 350 个源码文件；安装器 SHA-256 为 `09468a0d148017717b2932fc940f17caa378e46fef88ededf582accfea6d05f0`。
+- 冻结 355 个源码文件；安装器 SHA-256 为 `e32b10cf7e6ac8a9cdeca06b00973c29ff08acec2ae193fbf80c9d0d9a48e826`。
 - 26 个 PyInstaller PYZ 运行模块与冻结 staged source 匹配。
-- 提取态 Spring → FastAPI 请求 `120/120`，两轮 packaged-learning 完成，未使用源码回退。
+- 提取态 Spring → FastAPI 请求 `113/113`，两轮 packaged-learning 完成，未使用源码回退。
 - NSIS 安装／应用启动／卸载退出码均为 0，SQLite integrity 为 `ok`，卸载收敛完成。
 - 正式 Release 构建保持 DevTools 关闭；通过 Windows UI Automation 完成管理员初始化、错误密码恢复、待审批注册、管理员批准、成员登录、重启登录与退出。
 - 未签名；独立干净机 `NOT_RUN`；可选 Python／Torch／Ultralytics／权重仍为外部依赖；工厂效果、客户验收和生产放行未取得通过。
 
 内部候选 ZIP、直装 EXE、构建/源码清单、验证摘要/回执和 Release 校验表已经作为同一主仓的 prerelease 附件公开；Release 仍保持 `limited review / RELEASE_HOLD`，不等于正式生产发行。安装步骤和 WebView2 前提见 [Windows 安装说明](WINDOWS_INSTALLER.md)。
 
-此前 `windows-local-dc3a4b-login-fix-20260915` 仍是独立旧候选；它的回执不能替代 `ca1fa7b`，反之亦然。
+此前 `ca1fa7b`、`dc3a4b` 和 `ce72604` 均为独立历史候选；其回执不能替代 `f7f31f7`，反之亦然。
 
 已记录的 `GHSA-wrw7-89jp-8q8g` 位于 Tauri 的 Linux GTK 依赖链：Windows 目标不编译该依赖，Linux 桌面验证仍保留 HOLD。当前状态以 [质量工具说明](../quality/README.md) 和安全公告为准。
 

@@ -33,7 +33,8 @@ commit、构建产物、验证分母和对应摘要。
 | Windows 登录修复候选 `windows-local-dc3a4b-login-fix-20260915` | 修复 WebView CORS、桌面启动凭证与启动配置刷新；回执记录真实 Tauri WebView → IPC → Spring → FastAPI 的账户流程和 NSIS 安装／启动／卸载 | 解决“安装包登录注册卡住”的具体问题 | 仍未签名；独立干净机未运行；Torch、Ultralytics、权重和工业模型效果仍在包外／HOLD |
 | Windows 候选 `windows-local-ca1fa7b-20260915` | 将评审术语、YOLO 10–600 秒合同、同 split 字节/像素重复阻断、磁盘/retention、安装器旁附清单和发布版 UIA 验收工具冻结为 350 文件源码并重新打包 | 安装器完成 PYZ 源码匹配、120 次网关请求、两轮包内学习、真实安装启动和七步登录注册 GUI 验收 | 仍未签名；独立干净机和同版本覆盖升级未运行；工业模型效果、客户验收和生产放行保持 HOLD；详见 [候选记录](WINDOWS_CANDIDATE_CA1FA7B_20260915.md) |
 | 源码回归锚点 `9417f012…` | 合并唯一主仓链接、异常 Operating Point 源码组件、AgentTeams 路径控制字符防护、学习慢测隔离和公开/私有测试边界；连续回归 2066 passed、27 skipped、0 failed | 当前主仓候选可以展示更完整且可复算的源码与诚实验证分母 | 尚未重新生成 Windows 安装包；skip 能力、GitHub CI、Pages 新部署、工厂 KPI、客户验收和官方结果不由本地源码回归替代 |
-| `CURRENT_SOURCE_UNRELEASED` | 在已验证 Windows 运行时代码之后继续更新候选证据、README、公开清单和部署状态 | GitHub 源码可以展示当前产品主线与诚实能力边界 | 文档/清单提交不会自动进入 `ca1fa7b` 二进制，也不产生 PyPI、工厂 KPI、客户验收或官方评测结果 |
+| Windows 决赛评审候选 `windows-local-f7f31f7-finals-20260916` | 将决赛五维事实源、技术路线、异常 Operating Point 组件、历史档案测试边界和最终锁定依赖冻结为355文件并重新构建 | 绑定同一公开提交，完成26个PYZ模块匹配、113/113提取态检查、两轮包内学习、NSIS实装、七步UIA、卸载和2070 passed全仓回归 | 仍未签名；独立干净机和同版本升级未运行；工业效果、客户验收、hosted业务后端和生产放行保持HOLD；详见 [候选记录](WINDOWS_CANDIDATE_F7F31F7_20260916.md) |
+| `CURRENT_SOURCE_DOCUMENTATION` | 在已验证 Windows 运行时代码之后更新候选记录、README、公开清单和下载链接 | GitHub 首页可以指向已验候选及真实边界 | 文档/清单提交不会自动进入 `f7f31f7` 二进制，也不产生 PyPI、工厂 KPI、客户验收或官方评测结果 |
 
 ## 当前架构变化如何理解
 
@@ -77,9 +78,10 @@ TTT 和自动 Mask 生成仍分别保持 `PLANNED_NOT_CONNECTED` 或
   历史已获准公开。
 
 ```text
-latest_windows_runtime_source=ca1fa7b1727535014e8723e5bceb4d539272cf2b
+latest_windows_runtime_source=f7f31f7048b14b79990a445f285946f46d3bc41f
 latest_windows_candidate=PASS_LOCAL_WINDOWS_CANDIDATE_RELEASE_HOLD
-candidate_evidence=docs/WINDOWS_CANDIDATE_CA1FA7B_20260915.md
+candidate_evidence=docs/WINDOWS_CANDIDATE_F7F31F7_20260916.md
+installer_sha256=e32b10cf7e6ac8a9cdeca06b00973c29ff08acec2ae193fbf80c9d0d9a48e826
 factory_shadow_metrics=NOT_MEASURED_PENDING_ADJUDICATION
 official_evaluation=NOT_EVALUATED
 production_release_allowed=false

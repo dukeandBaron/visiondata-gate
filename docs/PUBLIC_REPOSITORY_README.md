@@ -164,7 +164,7 @@ uv run python tools/run_cross_platform_workbench.py
 
 [下载带版本说明与验证回执的 Windows 候选包](https://github.com/dukeandBaron/visiondata-gate/releases)。核心工作台内嵌运行组件；可选 Python／Torch／Ultralytics／权重需另行登记。安装器未签名，WebView2 为前提，干净机与升级验收按具体包记录。[安装指南](docs/WINDOWS_INSTALLER.md)
 
-最新本地候选身份为 [`windows-local-ca1fa7b-20260915`](https://github.com/dukeandBaron/visiondata-gate/releases/tag/windows-local-ca1fa7b-20260915)，安装器 SHA-256 为 `09468a0d148017717b2932fc940f17caa378e46fef88ededf582accfea6d05f0`。它已完成构建/PYZ 绑定、提取态 120 次网关请求、两轮 packaged-learning、实际安装启动、SQLite 检查，以及不启用 DevTools 的 Tauri 登录注册 GUI 验收；独立干净机、签名和工业效果仍为 HOLD。[查看完整候选证据](docs/WINDOWS_CANDIDATE_CA1FA7B_20260915.md)
+最新本地候选为 [`windows-local-f7f31f7-finals-20260916`](https://github.com/dukeandBaron/visiondata-gate/releases/tag/windows-local-f7f31f7-finals-20260916)，源码绑定 `f7f31f7048b14b79990a445f285946f46d3bc41f`，安装器 SHA-256 为 `e32b10cf7e6ac8a9cdeca06b00973c29ff08acec2ae193fbf80c9d0d9a48e826`。它完成 26 个 PYZ 模块源码匹配、113/113 提取态 HTTP 检查、两轮 packaged-learning、实际安装启动、SQLite、七步 Tauri UIA 与卸载验收；独立干净机、同版本升级、签名和工业效果仍为 HOLD。[查看完整候选证据](docs/WINDOWS_CANDIDATE_F7F31F7_20260916.md)
 
 <a id="architecture"></a>
 
@@ -212,7 +212,7 @@ YOLO 训练预算在 API、Schema、Web 和执行器统一为 **10–600 秒**�
 
 安装构建器将 `BUILD_MANIFEST.json`、`SOURCE_MANIFEST.json`、`DELIVERY_STATUS.json` 和 `SHA256SUMS.txt` 与安装器放在同一目录。构建完成与安装验收是不同状态。
 
-源码 `ca1fa7b1727535014e8723e5bceb4d539272cf2b` 已据此生成并验证 Windows 候选；后续 README 或发布清单提交不会自动进入该二进制。
+源码 `f7f31f7048b14b79990a445f285946f46d3bc41f` 已据此生成并验证 Windows 候选；后续 README 或发布清单提交不会自动进入该二进制。
 
 [视觉模型合同](docs/VISION_MODEL_API_CONTRACT.md) · [任务存储与保留](docs/MODEL_JOB_RETENTION.md)
 
@@ -230,9 +230,9 @@ YOLO 训练预算在 API、Schema、Web 和执行器统一为 **10–600 秒**�
 
 ## 持续演进
 
-项目从批次质量检查，演进到案件补证与派生复验，再扩展到图像工作簿、模型反馈和桌面交付。近期 `windows-local-ca1fa7b-20260915` 已把训练输入去重、预算一致性、任务存储保护、安装器源码绑定和发布版 UIA 登录验收收口到同一候选；证据见 [ca1fa7b Windows 候选](docs/WINDOWS_CANDIDATE_CA1FA7B_20260915.md)。
+项目从批次质量检查，演进到案件补证与派生复验，再扩展到图像工作簿、模型反馈、异常阈值治理和桌面交付。`windows-local-f7f31f7-finals-20260916` 已把最终公开源码、锁定依赖、安装器、提取态、包内学习、安装/UIA/卸载和版本回执绑定到同一候选；证据见 [f7f31f7 Windows 候选](docs/WINDOWS_CANDIDATE_F7F31F7_20260916.md)。
 
-2026-09-16 的源码候选完成一次连续全仓回归：2093 项收集、2066 passed、27 项带理由 skip、0 failed；该结果不表示新安装包已构建。[查看完整回归边界](docs/FULL_REGRESSION_9417F01_20260916.md)
+同一公开源树完成一次连续全仓回归：2094 项收集、`2070 passed / 24 skipped / 0 failed / 0 errors / 17 warnings`；skip 能力没有计入 PASS。[查看完整回归边界](docs/FULL_REGRESSION_F7F31F7_20260916.md)
 
 软件版本、源码提交、模型版本和安装构建各自标识，不让旧结果替新版本背书。[版本演进](docs/VERSION_EVOLUTION.md) · [CHANGELOG](CHANGELOG.md) · [当前验证与交付状态](docs/README_STATUS_AND_EVIDENCE.md)
 
