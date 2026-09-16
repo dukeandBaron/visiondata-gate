@@ -1,7 +1,7 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "e662e5225d7b751d806eb5d2b36a6201d22f382f",
-  "source_tree_oid": "f3f28858b83044b7cda9689198bb1cf69c7061da",
+  "source_commit_oid": "5a18dffdfb0550d421e67c78b15d9d6ff7f6fc07",
+  "source_tree_oid": "8c85813422e4f4541285b3717528077c4008f063",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
@@ -9,7 +9,7 @@
   "personal_data_included": false,
   "tracked_source_only": true,
   "file_count": 755,
-  "snapshot_sha256": "95bdf1be8638b2b1e66d51ac5e03ede0a0f8d8c7be9f27dd723d426e62ba19d8",
+  "snapshot_sha256": "eae3e62bdb8fb62df1f49322fe761a4bb13e64abcc18157bc6e2574b1a0d5388",
   "files": [
     {
       "path": ".env.example",
@@ -530,7 +530,7 @@
     },
     {
       "path": "docs/WINDOWS_CANDIDATE_F7F31F7_20260916.md",
-      "sha256": "840ef06bce68402349a90837a897a6e0bc9da8bc59c5a35c4da053095a96281d",
+      "sha256": "a8688f40559e356296ea390683e03760d19eab922eb6d2d53c959fd7ace9b28e",
       "size_bytes": 4837
     },
     {
