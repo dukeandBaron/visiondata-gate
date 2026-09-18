@@ -274,3 +274,26 @@ def test_expected_archive_digest_is_checked(tool, repository, tmp_path):
     assert tool.verify_bundle(path, expected_sha256=digest)["zip_sha256"] == digest
     with pytest.raises(tool.BundleError, match="digest"):
         tool.verify_bundle(path, expected_sha256="0" * 64)
+
+
+def test_git_uses_external_absolute_executable_not_repository_or_cwd(tool, repository, monkeypatch):
+    calls = []
+    monkeypatch.chdir(repository)
+    monkeypatch.setenv("PATH", str(repository) + os.pathsep + "." + os.pathsep + os.environ["PATH"])
+    (repository / ("git.exe" if os.name == "nt" else "git")).write_bytes(b"not a trusted tool")
+    monkeypatch.setattr(tool.subprocess, "check_output", lambda command, **kwargs: calls.append((command, kwargs)) or b"ok")
+    assert tool.git(repository, "rev-parse", "HEAD") == b"ok"
+    executable = Path(calls[0][0][0])
+    assert executable.is_absolute()
+    assert not executable.is_relative_to(repository)
+    assert calls[0][1]["shell"] is False
+    assert calls[0][1]["timeout"] == 60
+
+
+def test_git_refuses_only_repository_and_relative_search_paths(tool, repository, monkeypatch):
+    monkeypatch.chdir(repository)
+    monkeypatch.setenv("PATH", str(repository) + os.pathsep + ".")
+    (repository / ("git.exe" if os.name == "nt" else "git")).write_bytes(b"untrusted")
+    monkeypatch.setattr(tool.subprocess, "check_output", lambda *args, **kwargs: pytest.fail("Must not launch repository executable"))
+    with pytest.raises(tool.BundleError, match="Git"):
+        tool.git(repository, "rev-parse", "HEAD")

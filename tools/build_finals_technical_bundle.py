@@ -102,7 +102,29 @@ def check_regular(path: Path) -> None:
 
 
 def git(root: Path, *args: str) -> bytes:
-    return subprocess.check_output(["git", "-C", str(root), *args], stderr=subprocess.PIPE)
+    # Packaging trusts the operator's external toolchain, never a binary in the input tree.
+    root = root.resolve()
+    executable = None
+    for entry in os.get_exec_path():
+        directory = Path(entry)
+        if not directory.is_absolute():
+            continue
+        directory = directory.resolve()
+        if directory.is_relative_to(root) or directory == Path.cwd().resolve():
+            continue
+        candidate = (directory / ("git.exe" if os.name == "nt" else "git")).resolve()
+        if candidate.is_relative_to(root) or not candidate.is_file():
+            continue
+        if os.name != "nt" and not os.access(candidate, os.X_OK):
+            continue
+        executable = candidate
+        break
+    if executable is None:
+        raise BundleError("Git executable absent from trusted external absolute PATH")
+    return subprocess.check_output(
+        [str(executable), "-c", "core.fsmonitor=false", "-C", str(root), *args],
+        stderr=subprocess.PIPE, shell=False, timeout=60,
+    )
 
 
 def public_text(name: str, data: bytes) -> None:
@@ -307,7 +329,7 @@ def main() -> int:
             result = verify_bundle(args.target, expected_sha256=args.expected_sha256)
         print(encode(result).decode("utf-8"))
         return 0
-    except (BundleError, OSError, subprocess.CalledProcessError, zipfile.BadZipFile) as exc:
+    except (BundleError, OSError, subprocess.SubprocessError, zipfile.BadZipFile) as exc:
         print(json.dumps({"integrity_status": "HOLD", "error_type": type(exc).__name__}))
         return 1
 

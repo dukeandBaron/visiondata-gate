@@ -2,19 +2,19 @@
   "bandit_version": "1.9.4",
   "baseline_schema_version": "visiondata-gate.bandit-baseline.v1",
   "errors": [],
-  "findings_sha256": "e6cca25c830c30d6615493cbfd239c208259bf2f66e2c7646f3c62d2cde0ca18",
-  "generated_at": "2026-09-14T09:25:54Z",
+  "findings_sha256": "21004f57ed7723fbf1077e6d90ad6b8e3e1350ce854dbb489c5e723e018a89a9",
+  "generated_at": "2026-09-18T14:42:07Z",
   "metrics": {
     "_totals": {
-      "CONFIDENCE.HIGH": 202,
+      "CONFIDENCE.HIGH": 204,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 24,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 226,
+      "SEVERITY.LOW": 228,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 116889,
+      "loc": 117189,
       "nosec": 0,
       "skipped_tests": 1
     },
@@ -1861,6 +1861,19 @@
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
       "loc": 54,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "tools\\build_finals_technical_bundle.py": {
+      "CONFIDENCE.HIGH": 2,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 2,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 300,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -6287,6 +6300,26 @@
       "test_name": "blacklist"
     },
     {
+      "code": "12 import stat\n13 import subprocess\n14 import tarfile\n",
+      "col_offset": 0,
+      "end_col_offset": 17,
+      "filename": "tools/build_finals_technical_bundle.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Consider possible security implications associated with the subprocess module.",
+      "line_number": 13,
+      "line_range": [
+        13
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess",
+      "test_id": "B404",
+      "test_name": "blacklist"
+    },
+    {
       "code": "180                     \"message\": str(error),\n181                     \"secret_exposure_status\": \"UNKNOWN\",\n182                 },\n183                 ensure_ascii=False,\n184                 indent=2,\n185             )\n186         )\n187         return 2\n",
       "col_offset": 20,
       "end_col_offset": 44,
@@ -7617,6 +7650,29 @@
       "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html",
       "test_id": "B105",
       "test_name": "hardcoded_password_string"
+    },
+    {
+      "code": "125         [str(executable), \"-c\", \"core.fsmonitor=false\", \"-C\", str(root), *args],\n126         stderr=subprocess.PIPE, shell=False, timeout=60,\n127     )\n128 \n129 \n130 def public_text(name: str, data: bytes) -> None:\n",
+      "col_offset": 11,
+      "end_col_offset": 5,
+      "filename": "tools/build_finals_technical_bundle.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "subprocess call - check for execution of untrusted input.",
+      "line_number": 126,
+      "line_range": [
+        124,
+        125,
+        126,
+        127
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html",
+      "test_id": "B603",
+      "test_name": "subprocess_without_shell_equals_true"
     },
     {
       "code": "561                 uninstaller = helpers[\"find_uninstaller\"](extracted)\n562                 uninstalled = subprocess.run(\n563                     [str(uninstaller), \"/S\"],\n564                     env=environment,\n565                     stdin=subprocess.DEVNULL,\n566                     stdout=subprocess.PIPE,\n567                     stderr=subprocess.PIPE,\n568                     timeout=240,\n569                     check=False,\n570                 )\n571                 uninstall_exit = uninstalled.returncode\n",

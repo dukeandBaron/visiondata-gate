@@ -13,6 +13,8 @@ python tools/build_finals_technical_bundle.py verify ../VisionData-Gate-Technica
 
 默认只导出 HEAD 中经过路径过滤的受 Git 管理文件，不包含 `.git`、环境、运行数据库、日志、模型权重下载、视频、PPT、安装器和私有 output。未跟踪文件不会被偷偷加入。默认拒绝已跟踪源码的未提交修改；必要时显式 `--allow-dirty`，产物标记 `PATCHED_WORKTREE`，不冒充某个提交的精确内容。
 
+构包应在操作者已审查、Git 配置可信的本地仓库运行，不是执行不可信 Git 配置的沙箱。Git 只从仓库之外的绝对 PATH 目录解析；拒绝当前目录、相对 PATH 或输入仓库中的同名程序，不使用 shell，关闭 fsmonitor，并限制每次 Git 调用为 60 秒。外部 PATH 目录及 Git 配置仍属于操作者负责的可信工具链。
+
 外部回执必须逐个选入，不能传整个材料目录：
 
 ```text

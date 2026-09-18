@@ -1,15 +1,15 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "44a719f6c90f6f7608daca8fecf202004d487b54",
-  "source_tree_oid": "7d6ebcb628bcfd08f45a98da2175638785a01234",
+  "source_commit_oid": "460a632e5a47994f2156fbee99de94a3646bb10f",
+  "source_tree_oid": "202d142b0708421d5d62a1d33e6bc83e8ea9f23f",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
   "customer_data_included": false,
   "personal_data_included": false,
   "tracked_source_only": true,
-  "file_count": 773,
-  "snapshot_sha256": "608a7c2b82f3c530c259f6a789fa7e6a8e2f14a888cbd797d7e545a499300c4a",
+  "file_count": 774,
+  "snapshot_sha256": "ad7acb299547c5f1d1660d977d1cf33ab2b7db72c37d00af1e2fa5bfa9648d14",
   "files": [
     {
       "path": ".env.example",
@@ -510,8 +510,8 @@
     },
     {
       "path": "docs/TECHNICAL_SUBMISSION_BUNDLE.md",
-      "sha256": "f56a49875772f32217306e76cf3291459e8dba1b7eb750851f9c32b35ba156da",
-      "size_bytes": 3144
+      "sha256": "e0fbac3ccba21a8f956c909304ae01facbd42a2ef80a92b673a3cad4814f72a3",
+      "size_bytes": 3537
     },
     {
       "path": "docs/TECHNICAL_TERMINOLOGY.md",
@@ -734,14 +734,19 @@
       "size_bytes": 1856
     },
     {
+      "path": "quality/BANDIT_TECHNICAL_BUNDLE_REVIEW.md",
+      "sha256": "cb13428a77cee869b18d207b3f3b70b45153a4611c390ce74a2a0c1ee45f88cf",
+      "size_bytes": 2152
+    },
+    {
       "path": "quality/README.md",
       "sha256": "86c46c89c07ef7c85b65450f00a4bb6d85f87d4f29af4b7c71a24f1a30781ec3",
       "size_bytes": 4405
     },
     {
       "path": "quality/bandit-baseline.json",
-      "sha256": "cf4bd18584cb1fa85eb85112bf00733d07ac47de5a32ed71469ad0b9d31b671f",
-      "size_bytes": 293360
+      "sha256": "8bbeac506e8315fc062c72a51eaddb05a7eb257de9a6f9f665ff83f96282e34c",
+      "size_bytes": 295364
     },
     {
       "path": "quality/coverage-profile.json",
@@ -1940,8 +1945,8 @@
     },
     {
       "path": "tests/test_finals_technical_bundle.py",
-      "sha256": "b23fd4efd27aac9eefa9cd8007786be1a3d6ae933686b89753ec7be32a2b6c2b",
-      "size_bytes": 11833
+      "sha256": "080e7a5abe5283157e725dc256046a73c7ae8ecdb2bd160b39084502518f14ae",
+      "size_bytes": 13102
     },
     {
       "path": "tests/test_generator_quality.py",
@@ -2800,8 +2805,8 @@
     },
     {
       "path": "tools/build_finals_technical_bundle.py",
-      "sha256": "76f47f6fa337c25127c5cbc8bf81c1a49cfec5fc1ec4e4a23e481aab45fcd15b",
-      "size_bytes": 14510
+      "sha256": "06f4dfa0844ba5ea8cfa7241672c91e42784b478cd07a2464a60be28d1df9d3b",
+      "size_bytes": 15429
     },
     {
       "path": "tools/build_gateway_runtime.ps1",
