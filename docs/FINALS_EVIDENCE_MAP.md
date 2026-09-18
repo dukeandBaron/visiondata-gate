@@ -16,7 +16,7 @@
 | --- | ---: | --- | --- |
 | Agent 任务范式或交互机制 | 10 | [三阶段、五功能和双反馈](TECHNICAL_TERMINOLOGY.md)；工作簿到案件/整改的交互 | 不是用角色数量证明创新 |
 | Agent 闭环与解决方式 | 10 | Parent/Human/Derived/Child；诊断修订与整改修订；失败/中断恢复 | 完成执行不等于 Gate PASS 或生产批准 |
-| 相对同类方案差异 | 5 | 固定 SOP 负结论、DynamicBench-v3、[开源方案比较](AGENT_PLATFORM_COMPARISON.md) | 未实跑的外部框架不写成对照结果 |
+| 相对同类方案差异 | 5 | 固定 SOP 负结论、DynamicBench-v3 编排对照、v4 产品运行链；[开源方案比较](AGENT_PLATFORM_COMPARISON.md) | v3/v4 分母与证明对象不同；未实跑的外部框架不写成对照结果 |
 
 ## 三、技术与研究深度 25 分
 
@@ -31,7 +31,7 @@
 | 二级考核点 | 分值 | 当前证据 | HOLD |
 | --- | ---: | --- | --- |
 | 核心任务闭环与稳定性 | 8 | [现场重跑](LIVE_REPRODUCTION.md)、DynamicBench、全仓回归、Windows 候选回执 | 评委指定陌生输入仍需现场实跑；独立干净机未验证 |
-| 产品体验与结果一致性 | 7 | 在线合成体验、本地工作台、源码/安装器/回执绑定 | PPT/Demo/代码最终封版需逐版本对账 |
+| 产品体验与结果一致性 | 7 | 在线合成体验、本地工作台、[逐模块能力状态](CAPABILITY_STATUS.md)、源码/安装器/回执身份 | 技术包可独立冻结；PPT 尚未定稿，不据此阻塞技术修复，也不提前声明已对齐 |
 
 ## 五、开源价值与复用 15 分
 
@@ -41,6 +41,20 @@
 | 文档、部署、版本、第三方验证 | 8 | README、Quickstart、License、版本/兼容、Issue/PR 模板、发布记录 | 独立第三方 clean-clone/部署成功记录尚未取得 |
 
 ## 封版前必须处理的公开复用风险
+
+### 可以直接抽查的代码与测试
+
+| 要核实的能力 | 实际入口 | 可重跑的验证 |
+| --- | --- | --- |
+| 输入与人工标注是否真正进入检查 | `operator_snapshot.py`、`product_runs.py` | `tests/test_operator_snapshot_source.py`；覆盖版本漂移、越权和源文件变化 |
+| 整改是否真的改变派生数据 | `capa.py` | 同文件中 `test_exact_duplicate_capa_removes_only_derived_copy_and_child_rechecks`；核对父不变、子减少、重新测量 |
+| 失败恢复是否只是重播成功结果 | `capa.py` 与 Web 对账锁 | `test_exact_duplicate_capa_resumes_published_subset_and_verifies_binding`；`tests/web_vision_model_workbench.browser.mjs` |
+| Agent 是否实际调用与保存状态 | `incident_agent_kernel.py`、`worker_selection.py` | `tools/run_dynamic_benchmark_v4.py` 新目录运行，读取同一 Case 的 Worker 与 DecisionPacket |
+| 模型路线是否混写 | `learning_service.py`、`local_model_registry.py` | `tools/run_learning_demo.py` 为 NumPy 参考闭环；Normality/YOLO 另按各自 API 与环境验收 |
+| 前端是否只靠静态样例 | 模型中心的登记/批准/推理表单 | Node 合同测试与真实浏览器测试验证界面；替身 API 不作真实模型推理证据；真实后端另由 Python/API 测试核验 |
+| 来源和发布物是否一致 | `tools/build_finals_technical_bundle.py` | 双构包、ZIP/解压清单核验、独立保存 SHA；完整性不等于功能或安装验收 |
+
+既有测试记录有各自源码范围。本轮新增的运行回执应随提交包按清单绑定；未跑的测试和未重建的二进制不能引用别轮 PASS。[技术包说明](TECHNICAL_SUBMISSION_BUNDLE.md)
 
 决赛规则明确将“仓库公开可访问”列为核心组件开放的重点证据，并要求第三方能理解、部署、运行、复用和继续开发。当前仓库已经 Public，但尚无独立第三方 clean-clone／部署成功记录；这部分不能仅凭维护者自测写成完成。公开状态也不授权暴露客户数据、密钥、私域回执或未审查历史。
 

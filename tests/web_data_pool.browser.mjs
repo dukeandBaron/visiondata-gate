@@ -182,6 +182,7 @@ test('integrated save requires an explicit GET reconciliation; an unknown write 
 test('all-qualified derivation is a reference, never a fake new source or auto Gate',async()=>{
   const {page,errors}=await scenario();await fillIntegratedReview(page);await page.getByRole('button',{name:'保存数据池审核版本',exact:true}).click();
   await page.getByText('已通过 GET 核验原请求结果；未重发写入。',{exact:true}).waitFor();
+  assert.equal(await page.getByRole('link',{name:'带当前审核版本进入模型中心',exact:true}).getAttribute('href'),'/models?tab=vision&pool=pool_test&version=poolv_test');
   await page.getByLabel('数据池派生说明',{exact:true}).fill('Reference the complete reviewed frozen snapshot.');await page.getByLabel('确认数据池派生',{exact:true}).check();
   await page.getByRole('button',{name:'派生已复核候选来源',exact:true}).click();
   await page.getByText('全部成员引用原快照 · 未制造新数据版本',{exact:true}).waitFor();

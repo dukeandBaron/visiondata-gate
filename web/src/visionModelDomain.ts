@@ -2,9 +2,10 @@ import { canonicalizeJcs, sha256HexUtf8 } from './data/jcs.ts';
 
 /** Local visual-model contracts, deliberately separate from LLM providers. */
 export interface VisionScope { workspaceId: string; projectId: string; actorId: string }
-export type VisionKind = 'model' | 'runtime' | 'dataset' | 'run';
-export type VisionOperation = 'register_model' | 'register_runtime' | 'register_dataset' | 'register_pool_dataset' | 'create_training_run'
-  | `probe_runtime:${string}` | `cancel:${string}` | `recover:${string}` | `selection:${string}`;
+export type VisionKind = 'model' | 'runtime' | 'dataset' | 'run' | 'inference_asset' | 'inference';
+export type VisionOperation = 'register_model' | 'register_normality_model_pack' | 'register_runtime' | 'register_dataset' | 'register_pool_dataset'
+  | 'register_inference_asset' | 'create_training_run' | `probe_runtime:${string}` | `cancel:${string}` | `recover:${string}` | `selection:${string}`
+  | `approve_normality_model_pack:${string}` | `run_normality_inference:${string}`;
 export type VisionMutationOperation = VisionOperation | `triage_feedback:${string}`;
 export interface VisionPending { operation: VisionMutationOperation; requestKey: string }
 export interface VisionApproval { request_key: string; reviewer_identity: string; note: string }
@@ -14,12 +15,27 @@ export interface VisionBase {
   reviewer_identity: string; created_at: string; receipt_sha256: string;
   production_release_allowed: false; machine_write_permitted: false;
 }
-export interface VisionModel extends VisionBase {
-  model_id: string; display_name: string; task_type: 'detect' | 'segment'; weights_sha256: string;
+export interface VisionModelBase extends VisionBase {
+  model_id: string; display_name: string; weights_sha256: string; format: 'pt' | 'onnx' | 'safetensors';
+  license_id: string; license_status: string; loaded: false;
+}
+export interface VisionDetectionModel extends VisionModelBase {
+  task_type: 'detect' | 'segment';
   file_bytes: number; format: 'pt' | 'onnx' | 'safetensors'; license_id: string; license_status: string;
   status: 'REGISTERED_NOT_LOADED' | 'CANDIDATE_REQUIRES_HUMAN_REVIEW' | 'APPROVE_SANDBOX' | 'REJECT'; loaded: false;
   source_description: string; training_run_id?: string;
 }
+export interface VisionNormalityModel extends VisionModelBase {
+  model_kind: 'YOLO26_NORMALITY_MODEL_PACK'; task_type: 'normality'; format: 'pt'; model_pack_schema_version: 'visiondata-gate.yolo26-normality-model-pack.v2';
+  model_pack_sha256: string; backbone_weights_sha256: string; source_binding_sha256: string; source_index_sha256: string;
+  architecture: string; feature_layers: number[]; split_seed: number; model_seed: 20260913; stability_schema_version: 'visiondata-gate.model-stability.v4';
+  verification_implementation: { stability_module_sha256: string; outcome_policy_module_sha256: string; outcome_policy_function: 'classify_experiment_outcome' };
+  stability_run_artifact_sha256: Record<string, Record<string, string>>; stability_status: 'PUBLIC_PROXY_STABLE' | 'MODEL_PROMOTION_HOLD'; stability_eligible: boolean;
+  stability_blockers: string[]; evidence_file_sha256: Record<string, string>; status: 'MODEL_PACK_EVIDENCE_VERIFIED' | 'RESEARCH_ONLY_HOLD' | 'APPROVE_SANDBOX' | 'REJECT';
+  usage_scope: 'SANDBOX_CANDIDATE' | 'RESEARCH_ONLY' | 'LOCAL_SANDBOX_ONLY'; sandbox_eligible: boolean; sandbox_runtime_id: string | null; sandbox_runtime_sha256: string | null;
+  sandbox_validation?: Record<string, unknown>; storage_scope: 'REGISTRY_OWNED_CONTENT_ADDRESSED';
+}
+export type VisionModel = VisionDetectionModel | VisionNormalityModel;
 export interface VisionRuntime extends VisionBase {
   runtime_id: string; display_name: string; executable_sha256: string; runtime_sha256: string;
   status: string; probe: { status: 'ready' | 'unavailable'; import_status: 'NOT_RUN' | 'PASSED' | 'FAILED';
@@ -67,6 +83,18 @@ export interface VisionRun extends VisionBase {
   responds_to_feedback_ids?: string[]; feedback_ids?: string[];
   feedback_status?: 'NOT_EVALUATED' | 'NOT_AVAILABLE_LEGACY_RESULT' | 'VAL_DISAGREEMENTS_REQUIRE_HUMAN_REVIEW' | 'NO_VAL_DISAGREEMENT_AT_FIXED_PROTOCOL';
 }
+export interface VisionInferenceAsset extends VisionBase {
+  schema_version: 'visiondata-gate.vision_inference_asset.v1'; asset_id: string; display_name: string; image_sha256: string; image_bytes: number;
+  image_width: number; image_height: number; format: 'png' | 'jpg' | 'jpeg' | 'bmp'; storage_scope: 'REGISTRY_OWNED_CONTENT_ADDRESSED'; status: 'FROZEN_LOCAL_INFERENCE_ASSET';
+}
+export interface VisionHeatmap { sha256: string; bytes: number; width: number; height: number; format: 'png' }
+export interface VisionInference extends VisionBase {
+  schema_version: 'visiondata-gate.vision_inference.v1'; inference_id: string; model_id: string; asset_id: string; runtime_id: string;
+  model_pack_sha256: string; backbone_weights_sha256: string; source_binding_sha256: string; source_index_sha256: string; runtime_sha256: string;
+  inference_backend_sha256: string; image_sha256: string; status: 'COMPLETED_LOCAL_SANDBOX_INFERENCE'; image_score: number; image_threshold: number;
+  pixel_threshold: number; predicted_anomaly: boolean; positive_pixel_fraction: number; heatmap_artifact_id: string; heatmap: VisionHeatmap; device: 'cpu';
+  decision_scope: 'MODEL_SIGNAL_ONLY_NOT_GATE_OR_PRODUCTION_DECISION'; review_required: true; gate_decision: 'NOT_ISSUED';
+}
 export type VisionFeedbackClassification = 'MODEL_ERROR' | 'LABEL_REVIEW_REQUIRED' | 'HARD_SAMPLE' | 'UNKNOWN';
 export interface FeedbackBox { class_id: number; xyxy: [number, number, number, number]; confidence?: number }
 export interface FeedbackDetail {
@@ -81,12 +109,14 @@ export interface VisionFeedback {
   status: 'PENDING_HUMAN_REVIEW' | 'TRIAGED_FOR_REVIEW'; classification: VisionFeedbackClassification | null;
   issue_closed: false; label_truth_authority: false; training_ingestion_allowed: false; production_release_allowed: false;
 }
-export type VisionRecord = VisionModel | VisionRuntime | VisionDataset | VisionRun | VisionFeedback;
+export type VisionRecord = VisionModel | VisionRuntime | VisionDataset | VisionRun | VisionInferenceAsset | VisionInference | VisionFeedback;
 export interface VisionCapabilities {
   schema_version: string; project_id: string; receipt_sha256: string; model_domain: 'LOCAL_VISUAL_MODELS';
-  llm_provider_managed: false; training_device: 'CPU_ONLY'; executable_training_tasks: ['detect'];
+  llm_provider_managed: false; training_device: 'CPU_ONLY'; executable_training_tasks: ['detect']; executable_inference_tasks: ['normality'];
+  supported_registration_tasks: ('detect' | 'segment' | 'normality')[]; normality_runtime: 'EXTERNAL_RUNTIME_REQUIRED';
   ttt_status: 'DISABLED_NOT_IMPLEMENTED'; weight_download_allowed: false; training_ready: boolean;
   registered_model_count: number; registered_runtime_count: number; registered_dataset_count: number;
+  sandbox_approved_normality_model_count: number; registered_inference_asset_count: number; completed_normality_inference_count: number;
   production_release_allowed: false; industrial_effectiveness_status: 'NOT_EVALUATED'; training_authorization_required: true;
 }
 export interface VisionOperationReceipt {
@@ -96,6 +126,28 @@ export interface VisionOperationReceipt {
 export interface RegisterModelRequest extends VisionApproval {
   display_name: string; weights_path: string; expected_weights_sha256: string; task_type: 'detect' | 'segment';
   license_id: string; source_description: string; operator_attests_read_authorized: true;
+}
+export interface RegisterNormalityModelPackRequest extends VisionApproval {
+  display_name: string; model_pack_path: string; expected_model_pack_sha256: string; run_directory: string; stability_run_directories: string[];
+  target_model_seed: 20260913; stability_summary_path: string; expected_stability_summary_sha256: string; source_binding_path: string;
+  expected_source_binding_file_sha256: string; expected_source_binding_sha256: string; source_index_path: string; expected_source_index_file_sha256: string;
+  expected_source_index_sha256: string; backbone_weights_path: string; expected_backbone_weights_sha256: string; operator_attests_read_authorized: true;
+  operator_attests_weights_only_load_authorized: true; ultralytics_license_acknowledged: true;
+}
+export interface ApproveNormalityModelPackRequest extends VisionApproval {
+  action: 'APPROVE_SANDBOX' | 'REJECT'; expected_model_receipt_sha256: string; expected_model_pack_sha256: string; expected_backbone_weights_sha256: string;
+  expected_source_binding_sha256: string; expected_source_index_sha256: string; runtime_id: string; expected_runtime_sha256: string; operator_attests_reviewed: true;
+  operator_attests_trusted_runtime: true; operator_attests_execution_authorized: true; operator_attests_trusted_weights: true;
+  operator_attests_weights_only_load_authorized: true; ultralytics_license_acknowledged: true;
+}
+export interface RegisterVisionInferenceAssetRequest extends VisionApproval {
+  display_name: string; image_path: string; expected_image_sha256: string; operator_attests_read_authorized: true;
+}
+export interface RunNormalityInferenceRequest extends VisionApproval {
+  expected_model_receipt_sha256: string; expected_model_pack_sha256: string; expected_backbone_weights_sha256: string; expected_source_binding_sha256: string;
+  expected_source_index_sha256: string; expected_runtime_sha256: string; asset_id: string; expected_asset_receipt_sha256: string; expected_image_sha256: string;
+  max_seconds: number; operator_attests_execution_authorized: true; operator_attests_trusted_runtime: true; operator_attests_trusted_weights: true;
+  operator_attests_weights_only_load_authorized: true;
 }
 export interface RegisterRuntimeRequest extends VisionApproval {
   display_name: string; executable_path: string; expected_executable_sha256: string;
@@ -149,8 +201,9 @@ function privatePath(value: unknown) {
 }
 export function validateVisionScope(scope: VisionScope) { visionId(scope.workspaceId); visionId(scope.projectId); visionId(scope.actorId); }
 export function validateVisionOperation(operation: unknown): asserts operation is VisionMutationOperation {
-  visionEnsure(typeof operation === 'string' && (/^(register_model|register_runtime|register_dataset|register_pool_dataset|create_training_run)$/.test(operation)
-    || /^(probe_runtime|cancel|recover|selection):[A-Za-z0-9_-]{1,120}$/.test(operation) || /^triage_feedback:vfeedback_[0-9a-f]{24}$/.test(operation)));
+  visionEnsure(typeof operation === 'string' && (/^(register_model|register_normality_model_pack|register_runtime|register_dataset|register_pool_dataset|register_inference_asset|create_training_run)$/.test(operation)
+    || /^(probe_runtime|cancel|recover|selection|approve_normality_model_pack|run_normality_inference):[A-Za-z0-9_-]{1,120}$/.test(operation)
+    || /^triage_feedback:vfeedback_[0-9a-f]{24}$/.test(operation)));
 }
 export function visionPendingStorageKey(scope: VisionScope): string { validateVisionScope(scope); return `vision-model:pending:${scope.actorId}:${scope.workspaceId}:${scope.projectId}`; }
 export function parseVisionPending(raw: string): VisionPending {
@@ -162,7 +215,10 @@ export async function visionDigest(value: unknown): Promise<string> { try { retu
 function noPrivateFields(value: unknown) {
   if (Array.isArray(value)) { value.forEach(noPrivateFields); return; }
   if (value && typeof value === 'object') for (const [key, item] of Object.entries(value)) {
-    visionEnsure(!['weights_path', 'executable_path', 'source_root', 'dataset_root', 'private_body', 'access_token', 'authorization', 'session_token'].includes(key.toLowerCase()));
+    visionEnsure(!['weights_path', 'executable_path', 'source_root', 'dataset_root', 'model_pack_path', 'run_directory', 'stability_run_directories',
+      'stability_summary_path', 'source_binding_path', 'source_index_path', 'backbone_weights_path', 'cas_path', 'output_root', 'heatmap_path',
+      'private_body', 'access_token', 'authorization', 'session_token'].includes(key.toLowerCase()));
+    if (key.toLowerCase() === 'image_path' && typeof item === 'string') visionEnsure(!(/^[A-Za-z]:[\\/]/.test(item) || /^\//.test(item) || /^\\\\/.test(item)));
     noPrivateFields(item);
   }
 }
@@ -225,13 +281,44 @@ export async function validateVisionRecord(value: unknown, scope: VisionScope, k
   visionEnsure(v.project_id === scope.projectId && v.production_release_allowed === false && v.machine_write_permitted === false);
   visionId(v.resource_id); visionId(v.created_by); text(v.reviewer_identity, 2, 160); text(v.created_at); visionEnsure(Number.isFinite(Date.parse(v.created_at)));
   if (expectedId !== undefined) visionEnsure(v.resource_id === expectedId);
-  const kinds: Record<string, VisionKind> = { 'visiondata-gate.vision_model.v1': 'model', 'visiondata-gate.vision_runtime.v1': 'runtime', 'visiondata-gate.vision_dataset.v1': 'dataset', 'visiondata-gate.vision_run.v1': 'run' };
+  const kinds: Record<string, VisionKind> = { 'visiondata-gate.vision_model.v1': 'model', 'visiondata-gate.vision_runtime.v1': 'runtime', 'visiondata-gate.vision_dataset.v1': 'dataset',
+    'visiondata-gate.vision_run.v1': 'run', 'visiondata-gate.vision_inference_asset.v1': 'inference_asset', 'visiondata-gate.vision_inference.v1': 'inference' };
   const actual = kinds[String(v.schema_version)]; visionEnsure(actual && (!kind || kind === actual));
-  visionEnsure(v[`${actual === 'run' ? 'run' : actual}_id`] === v.resource_id);
+  const idField = actual === 'run' ? 'run_id' : actual === 'inference_asset' ? 'asset_id' : `${actual}_id`;
+  visionEnsure(v[idField] === v.resource_id);
   if (actual === 'model') {
-    text(v.display_name, 1, 120); visionEnsure(['detect', 'segment'].includes(String(v.task_type)) && ['pt', 'onnx', 'safetensors'].includes(String(v.format)));
-    visionSha(v.weights_sha256); integer(v.file_bytes, 1, Number.MAX_SAFE_INTEGER); text(v.license_id, 1, 120); text(v.license_status); text(v.source_description, 4, 500);
-    visionEnsure(v.loaded === false && ['REGISTERED_NOT_LOADED', 'CANDIDATE_REQUIRES_HUMAN_REVIEW', 'APPROVE_SANDBOX', 'REJECT'].includes(String(v.status)));
+    text(v.display_name, 1, 120); visionSha(v.weights_sha256); text(v.license_id, 1, 120); text(v.license_status); visionEnsure(v.loaded === false);
+    if (v.task_type === 'normality') {
+      visionEnsure(v.model_kind === 'YOLO26_NORMALITY_MODEL_PACK' && v.format === 'pt' && v.model_pack_schema_version === 'visiondata-gate.yolo26-normality-model-pack.v2');
+      for (const key of ['model_pack_sha256', 'backbone_weights_sha256', 'source_binding_sha256', 'source_index_sha256']) visionSha(v[key]);
+      visionEnsure(v.model_pack_sha256 === v.weights_sha256); text(v.architecture, 1, 120);
+      visionEnsure(Array.isArray(v.feature_layers) && v.feature_layers.length > 0 && new Set(v.feature_layers).size === v.feature_layers.length); v.feature_layers.forEach(layer => integer(layer, 0, 1000));
+      integer(v.split_seed, 0, 2147483647); visionEnsure(v.model_seed === 20260913 && v.stability_schema_version === 'visiondata-gate.model-stability.v4');
+      const verifier = visionObject(v.verification_implementation); fields(verifier, ['stability_module_sha256', 'outcome_policy_module_sha256', 'outcome_policy_function']);
+      visionSha(verifier.stability_module_sha256); visionSha(verifier.outcome_policy_module_sha256); visionEnsure(verifier.outcome_policy_function === 'classify_experiment_outcome');
+      const runs = visionObject(v.stability_run_artifact_sha256); visionEnsure(Object.keys(runs).length === 3);
+      for (const [label, artifacts] of Object.entries(runs)) { metadata(label); const bound = visionObject(artifacts); visionEnsure(Object.keys(bound).length > 0); Object.values(bound).forEach(visionSha); }
+      visionEnsure(['PUBLIC_PROXY_STABLE', 'MODEL_PROMOTION_HOLD'].includes(String(v.stability_status)) && typeof v.stability_eligible === 'boolean' && Array.isArray(v.stability_blockers));
+      v.stability_blockers.forEach(blocker => metadata(blocker, 500)); const evidence = visionObject(v.evidence_file_sha256); visionEnsure(Object.keys(evidence).length >= 5); Object.values(evidence).forEach(visionSha);
+      visionEnsure(['MODEL_PACK_EVIDENCE_VERIFIED', 'RESEARCH_ONLY_HOLD', 'APPROVE_SANDBOX', 'REJECT'].includes(String(v.status))
+        && ['SANDBOX_CANDIDATE', 'RESEARCH_ONLY', 'LOCAL_SANDBOX_ONLY'].includes(String(v.usage_scope)) && typeof v.sandbox_eligible === 'boolean'
+        && v.storage_scope === 'REGISTRY_OWNED_CONTENT_ADDRESSED');
+      if (v.status === 'APPROVE_SANDBOX' || (v.status === 'REJECT' && v.sandbox_runtime_id !== null)) {
+        visionId(v.sandbox_runtime_id); visionSha(v.sandbox_runtime_sha256);
+        visionEnsure(v.status === 'APPROVE_SANDBOX' ? v.usage_scope === 'LOCAL_SANDBOX_ONLY' && v.sandbox_eligible === true : v.usage_scope === 'RESEARCH_ONLY' && v.sandbox_eligible === false);
+        const validation = visionObject(v.sandbox_validation); visionEnsure(validation.status === 'VALIDATED_FOR_LOCAL_SANDBOX' && validation.production_release_allowed === false
+          && validation.model_pack_schema_version === v.model_pack_schema_version && validation.model_pack_sha256 === v.model_pack_sha256
+          && validation.backbone_weights_sha256 === v.backbone_weights_sha256 && validation.source_binding_sha256 === v.source_binding_sha256
+          && validation.source_index_sha256 === v.source_index_sha256 && validation.runtime_sha256 === v.sandbox_runtime_sha256);
+        visionSha(validation.inference_backend_sha256);
+      } else {
+        visionEnsure(v.sandbox_runtime_id === null && v.sandbox_runtime_sha256 === null && v.sandbox_validation === undefined);
+      }
+    } else {
+      visionEnsure(['detect', 'segment'].includes(String(v.task_type)) && ['pt', 'onnx', 'safetensors'].includes(String(v.format)));
+      integer(v.file_bytes, 1, Number.MAX_SAFE_INTEGER); text(v.source_description, 4, 500);
+      visionEnsure(['REGISTERED_NOT_LOADED', 'CANDIDATE_REQUIRES_HUMAN_REVIEW', 'APPROVE_SANDBOX', 'REJECT'].includes(String(v.status)));
+    }
   } else if (actual === 'runtime') {
     text(v.display_name, 1, 120); visionSha(v.executable_sha256); visionSha(v.runtime_sha256); text(v.status);
     const p = visionObject(v.probe); visionEnsure(['ready', 'unavailable'].includes(String(p.status)) && ['NOT_RUN', 'PASSED', 'FAILED'].includes(String(p.import_status)));
@@ -257,6 +344,20 @@ export async function validateVisionRecord(value: unknown, scope: VisionScope, k
       visionEnsure(Object.keys(groups).length === samples.length && samples.every(sample => groups[sample.sample_id] === sample.group_id));
       visionEnsure(Array.isArray(b.normal_sample_ids) && await visionDigest([...b.normal_sample_ids].sort()) === await visionDigest(samples.filter(sample => sample.normal_attested).map(sample => sample.sample_id).sort()));
     }
+  } else if (actual === 'inference_asset') {
+    text(v.display_name, 1, 120); visionSha(v.image_sha256); integer(v.image_bytes, 1, 64 * 1024 * 1024); integer(v.image_width, 1, 8192); integer(v.image_height, 1, 8192);
+    visionEnsure(['png', 'jpg', 'jpeg', 'bmp'].includes(String(v.format)) && v.storage_scope === 'REGISTRY_OWNED_CONTENT_ADDRESSED' && v.status === 'FROZEN_LOCAL_INFERENCE_ASSET');
+  } else if (actual === 'inference') {
+    for (const key of ['model_id', 'asset_id', 'runtime_id']) visionId(v[key]);
+    for (const key of ['model_pack_sha256', 'backbone_weights_sha256', 'source_binding_sha256', 'source_index_sha256', 'runtime_sha256', 'inference_backend_sha256', 'image_sha256']) visionSha(v[key]);
+    visionEnsure(v.status === 'COMPLETED_LOCAL_SANDBOX_INFERENCE' && v.device === 'cpu' && v.decision_scope === 'MODEL_SIGNAL_ONLY_NOT_GATE_OR_PRODUCTION_DECISION'
+      && v.review_required === true && v.gate_decision === 'NOT_ISSUED');
+    for (const key of ['image_score', 'image_threshold', 'pixel_threshold', 'positive_pixel_fraction']) visionEnsure(typeof v[key] === 'number' && Number.isFinite(v[key]) && v[key] >= 0);
+    const imageScore = v.image_score as number, imageThreshold = v.image_threshold as number, positivePixelFraction = v.positive_pixel_fraction as number;
+    visionEnsure(positivePixelFraction <= 1 && typeof v.predicted_anomaly === 'boolean' && v.predicted_anomaly === (imageScore >= imageThreshold));
+    visionEnsure(typeof v.heatmap_artifact_id === 'string' && /^normality_heatmap_[0-9a-f]{24}$/.test(v.heatmap_artifact_id));
+    const heatmap = visionObject(v.heatmap); fields(heatmap, ['sha256', 'bytes', 'width', 'height', 'format']); visionSha(heatmap.sha256);
+    integer(heatmap.bytes, 1, Number.MAX_SAFE_INTEGER); integer(heatmap.width, 1, 8192); integer(heatmap.height, 1, 8192); visionEnsure(heatmap.format === 'png');
   } else {
     visionEnsure(['QUEUED', 'RUNNING', 'SUCCEEDED_CANDIDATE', 'FAILED', 'CANCELLED', 'TIMED_OUT', 'INTERRUPTED_HOLD'].includes(String(v.status)));
     visionId(v.runtime_id); visionSha(v.runtime_sha256); visionId(v.dataset_id); visionSha(v.dataset_receipt_sha256); visionSha(v.authorization_sha256);
@@ -292,18 +393,23 @@ export async function validateVisionList(value: unknown, scope: VisionScope, kin
 export async function validateVisionCapabilities(value: unknown, scope: VisionScope, etag: string | null, contentSha: string | null): Promise<VisionCapabilities> {
   validateVisionScope(scope); const v = await verifyVisionSeal(value, etag, contentSha);
   visionEnsure(v.schema_version === 'visiondata-gate.vision-capabilities.v1' && v.project_id === scope.projectId && v.model_domain === 'LOCAL_VISUAL_MODELS' && v.llm_provider_managed === false);
-  visionEnsure(v.training_device === 'CPU_ONLY' && Array.isArray(v.executable_training_tasks) && v.executable_training_tasks.length === 1 && v.executable_training_tasks[0] === 'detect');
+  visionEnsure(v.training_device === 'CPU_ONLY' && Array.isArray(v.supported_registration_tasks) && JSON.stringify(v.supported_registration_tasks) === JSON.stringify(['detect', 'segment', 'normality'])
+    && Array.isArray(v.executable_training_tasks) && v.executable_training_tasks.length === 1 && v.executable_training_tasks[0] === 'detect'
+    && Array.isArray(v.executable_inference_tasks) && v.executable_inference_tasks.length === 1 && v.executable_inference_tasks[0] === 'normality' && v.normality_runtime === 'EXTERNAL_RUNTIME_REQUIRED');
   visionEnsure(v.ttt_status === 'DISABLED_NOT_IMPLEMENTED' && v.weight_download_allowed === false && v.production_release_allowed === false && v.training_authorization_required === true && v.industrial_effectiveness_status === 'NOT_EVALUATED' && typeof v.training_ready === 'boolean');
-  for (const key of ['registered_model_count', 'registered_runtime_count', 'registered_dataset_count']) integer(v[key], 0, Number.MAX_SAFE_INTEGER);
+  for (const key of ['registered_model_count', 'registered_runtime_count', 'registered_dataset_count', 'sandbox_approved_normality_model_count', 'registered_inference_asset_count', 'completed_normality_inference_count']) integer(v[key], 0, Number.MAX_SAFE_INTEGER);
   return v as unknown as VisionCapabilities;
 }
 export async function validateVisionOperationReceipt(value: unknown, scope: VisionScope, pending: VisionPending, etag: string | null, contentSha: string | null): Promise<VisionOperationReceipt> {
   const v = await verifyVisionSeal(value, etag, contentSha); validateVisionOperation(pending.operation);
   visionEnsure(v.schema_version === 'visiondata-gate.vision-operation.v1' && v.project_id === scope.projectId && v.operation === pending.operation && v.request_key === pending.requestKey && v.auto_replayed === false);
   visionId(v.resource_id); const resource = await validateVisionRecord(v.resource, scope, undefined, v.resource_id);
-  const expectedKinds: Record<string, string> = { register_model: 'model', register_runtime: 'runtime', register_dataset: 'dataset', register_pool_dataset: 'dataset', create_training_run: 'run', probe_runtime: 'runtime', cancel: 'run', recover: 'run', selection: 'run' };
+  const expectedKinds: Record<string, string> = { register_model: 'model', register_normality_model_pack: 'model', approve_normality_model_pack: 'model',
+    register_runtime: 'runtime', register_dataset: 'dataset', register_pool_dataset: 'dataset', register_inference_asset: 'inference_asset',
+    run_normality_inference: 'inference', create_training_run: 'run', probe_runtime: 'runtime', cancel: 'run', recover: 'run', selection: 'run' };
   visionEnsure(resource.schema_version === (pending.operation.startsWith('triage_feedback:') ? 'visiondata-gate.vision-feedback.v1' : `visiondata-gate.vision_${expectedKinds[pending.operation.split(':')[0] ?? '']}.v1`));
-  if (pending.operation.includes(':')) visionEnsure(resource.resource_id === pending.operation.split(':')[1]);
+  if (/^(probe_runtime|cancel|recover|selection|approve_normality_model_pack|triage_feedback):/.test(pending.operation)) visionEnsure(resource.resource_id === pending.operation.split(':')[1]);
+  if (pending.operation.startsWith('run_normality_inference:')) visionEnsure('inference_id' in resource && resource.model_id === pending.operation.split(':')[1]);
   return v as unknown as VisionOperationReceipt;
 }
 export async function validateVisionRequest(operation: VisionMutationOperation, value: unknown): Promise<Record<string, unknown>> {
@@ -314,6 +420,35 @@ export async function validateVisionRequest(operation: VisionMutationOperation, 
     fields(v, [...common, 'display_name', 'weights_path', 'expected_weights_sha256', 'task_type', 'license_id', 'source_description', 'operator_attests_read_authorized']);
     text(v.display_name, 1, 120); privatePath(v.weights_path); visionSha(v.expected_weights_sha256); text(v.license_id, 1, 120); text(v.source_description, 4, 500);
     visionEnsure(['detect', 'segment'].includes(String(v.task_type)) && v.operator_attests_read_authorized === true);
+  } else if (name === 'register_normality_model_pack') {
+    fields(v, [...common, 'display_name', 'model_pack_path', 'expected_model_pack_sha256', 'run_directory', 'stability_run_directories', 'target_model_seed',
+      'stability_summary_path', 'expected_stability_summary_sha256', 'source_binding_path', 'expected_source_binding_file_sha256', 'expected_source_binding_sha256',
+      'source_index_path', 'expected_source_index_file_sha256', 'expected_source_index_sha256', 'backbone_weights_path', 'expected_backbone_weights_sha256',
+      'operator_attests_read_authorized', 'operator_attests_weights_only_load_authorized', 'ultralytics_license_acknowledged']);
+    text(v.display_name, 1, 120); for (const key of ['model_pack_path', 'run_directory', 'stability_summary_path', 'source_binding_path', 'source_index_path', 'backbone_weights_path']) privatePath(v[key]);
+    for (const key of ['expected_model_pack_sha256', 'expected_stability_summary_sha256', 'expected_source_binding_file_sha256', 'expected_source_binding_sha256',
+      'expected_source_index_file_sha256', 'expected_source_index_sha256', 'expected_backbone_weights_sha256']) visionSha(v[key]);
+    visionEnsure(Array.isArray(v.stability_run_directories) && v.stability_run_directories.length === 3 && new Set(v.stability_run_directories).size === 3);
+    v.stability_run_directories.forEach(privatePath); visionEnsure(v.stability_run_directories.includes(v.run_directory) && v.target_model_seed === 20260913
+      && v.operator_attests_read_authorized === true && v.operator_attests_weights_only_load_authorized === true && v.ultralytics_license_acknowledged === true);
+  } else if (name === 'approve_normality_model_pack') {
+    fields(v, [...common, 'action', 'expected_model_receipt_sha256', 'expected_model_pack_sha256', 'expected_backbone_weights_sha256', 'expected_source_binding_sha256',
+      'expected_source_index_sha256', 'runtime_id', 'expected_runtime_sha256', 'operator_attests_reviewed', 'operator_attests_trusted_runtime',
+      'operator_attests_execution_authorized', 'operator_attests_trusted_weights', 'operator_attests_weights_only_load_authorized', 'ultralytics_license_acknowledged']);
+    visionEnsure(['APPROVE_SANDBOX', 'REJECT'].includes(String(v.action))); for (const key of ['expected_model_receipt_sha256', 'expected_model_pack_sha256', 'expected_backbone_weights_sha256', 'expected_source_binding_sha256', 'expected_source_index_sha256', 'expected_runtime_sha256']) visionSha(v[key]);
+    visionId(v.runtime_id); visionEnsure(v.operator_attests_reviewed === true && v.operator_attests_trusted_runtime === true && v.operator_attests_execution_authorized === true
+      && v.operator_attests_trusted_weights === true && v.operator_attests_weights_only_load_authorized === true && v.ultralytics_license_acknowledged === true);
+  } else if (name === 'register_inference_asset') {
+    fields(v, [...common, 'display_name', 'image_path', 'expected_image_sha256', 'operator_attests_read_authorized']); text(v.display_name, 1, 120); privatePath(v.image_path);
+    visionSha(v.expected_image_sha256); visionEnsure(v.operator_attests_read_authorized === true);
+  } else if (name === 'run_normality_inference') {
+    fields(v, [...common, 'expected_model_receipt_sha256', 'expected_model_pack_sha256', 'expected_backbone_weights_sha256', 'expected_source_binding_sha256',
+      'expected_source_index_sha256', 'expected_runtime_sha256', 'asset_id', 'expected_asset_receipt_sha256', 'expected_image_sha256', 'max_seconds',
+      'operator_attests_execution_authorized', 'operator_attests_trusted_runtime', 'operator_attests_trusted_weights', 'operator_attests_weights_only_load_authorized']);
+    for (const key of ['expected_model_receipt_sha256', 'expected_model_pack_sha256', 'expected_backbone_weights_sha256', 'expected_source_binding_sha256',
+      'expected_source_index_sha256', 'expected_runtime_sha256', 'expected_asset_receipt_sha256', 'expected_image_sha256']) visionSha(v[key]);
+    visionId(v.asset_id); integer(v.max_seconds, 5, 300); visionEnsure(v.operator_attests_execution_authorized === true && v.operator_attests_trusted_runtime === true
+      && v.operator_attests_trusted_weights === true && v.operator_attests_weights_only_load_authorized === true);
   } else if (name === 'register_runtime') {
     fields(v, [...common, 'display_name', 'executable_path', 'expected_executable_sha256', 'operator_attests_trusted_runtime', 'operator_attests_execution_authorized']);
     text(v.display_name, 1, 120); privatePath(v.executable_path); visionSha(v.expected_executable_sha256); visionEnsure(v.operator_attests_trusted_runtime === true && v.operator_attests_execution_authorized === true);

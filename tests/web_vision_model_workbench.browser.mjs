@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
-import { scope, sha, model, runtime, dataset, run, manifest, capabilities, poolProjection, poolDataset, feedbackFixture, newDetectionDataset } from './web_vision_model_fixtures.mjs';
+import { scope, sha, model, normalityModel, inferenceAsset, normalityInference, runtime, dataset, run, manifest, capabilities, poolProjection, poolDataset, feedbackFixture, newDetectionDataset } from './web_vision_model_fixtures.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url)), webRoot = path.join(root, 'web');
 const require = createRequire(path.join(webRoot, 'package.json'));
 const { build, transformWithOxc } = await import(pathToFileURL(require.resolve('vite')).href);
@@ -29,7 +29,7 @@ export async function operatorFetch(path,init={}){
  if(method==='GET'){
    if(suffix==='vision-capabilities')return response(db.capabilities);
    if(suffix.startsWith('vision-training-runs/')&&suffix.endsWith('/feedback')){const id=suffix.split('/')[1];return response({schema_version:'visiondata-gate.vision-list.v1',project_id:window.__scope.projectId,run_id:id,items:(db.feedback||[]).filter(item=>item.run_id===id)});}
-   for(const [route,key] of Object.entries({'vision-models':'models','vision-runtimes':'runtimes','vision-datasets':'datasets','vision-training-runs':'runs'})){
+   for(const [route,key] of Object.entries({'vision-models':'models','vision-runtimes':'runtimes','vision-datasets':'datasets','vision-training-runs':'runs','vision-inference-assets':'inferenceAssets','vision-inferences':'inferences'})){
     if(suffix===route)return response({schema_version:'visiondata-gate.vision-list.v1',project_id:window.__scope.projectId,items:db[key]});
     if(suffix.startsWith(route+'/')){const item=db[key].find(v=>v.resource_id===suffix.slice(route.length+1));if(item)return response(item);}
    }
@@ -39,6 +39,10 @@ export async function operatorFetch(path,init={}){
  }
  let resource,operation;
  if(suffix==='vision-models'){operation='register_model';resource=await sealed({...db.modelTemplate,resource_id:'vision_model_new',model_id:'vision_model_new',display_name:request.display_name,weights_sha256:request.expected_weights_sha256,task_type:request.task_type});db.models.push(resource);}
+ else if(suffix==='vision-model-packs'){operation='register_normality_model_pack';resource=await sealed({...db.normalityModelTemplate,display_name:request.display_name,model_pack_sha256:request.expected_model_pack_sha256,weights_sha256:request.expected_model_pack_sha256,backbone_weights_sha256:request.expected_backbone_weights_sha256,source_binding_sha256:request.expected_source_binding_sha256,source_index_sha256:request.expected_source_index_sha256});db.models.push(resource);}
+ else if(suffix.startsWith('vision-models/')&&suffix.endsWith('/sandbox-approval')){const id=suffix.split('/')[1];operation='approve_normality_model_pack:'+id;const index=db.models.findIndex(v=>v.resource_id===id);resource=await sealed({...db.approvedNormalityTemplate,resource_id:id,model_id:id,display_name:db.models[index].display_name,receipt_sha256:undefined});db.models[index]=resource;}
+ else if(suffix==='vision-inference-assets'){operation='register_inference_asset';resource=await sealed({...db.inferenceAssetTemplate,display_name:request.display_name,image_sha256:request.expected_image_sha256});db.inferenceAssets.push(resource);}
+ else if(suffix.startsWith('vision-models/')&&suffix.endsWith('/inferences')){const id=suffix.split('/')[1];operation='run_normality_inference:'+id;resource=await sealed({...db.inferenceTemplate,model_id:id,asset_id:request.asset_id,model_pack_sha256:request.expected_model_pack_sha256,backbone_weights_sha256:request.expected_backbone_weights_sha256,source_binding_sha256:request.expected_source_binding_sha256,source_index_sha256:request.expected_source_index_sha256,runtime_sha256:request.expected_runtime_sha256,image_sha256:request.expected_image_sha256});db.inferences.push(resource);}
  else if(suffix==='vision-runtimes'){operation='register_runtime';resource=await sealed({...db.runtimeTemplate,resource_id:'vision_runtime_new',runtime_id:'vision_runtime_new',display_name:request.display_name,executable_sha256:request.expected_executable_sha256,probe:{...db.runtimeTemplate.probe,executable_sha256:request.expected_executable_sha256}});db.runtimes.push(resource);}
  else if(suffix.startsWith('vision-runtimes/')&&suffix.endsWith('/probe')){const id=suffix.split('/')[1];operation='probe_runtime:'+id;const index=db.runtimes.findIndex(v=>v.resource_id===id);resource=await sealed({...db.runtimes[index],probe:{...db.runtimes[index].probe,import_status:request.import_check?'PASSED':'NOT_RUN'}});db.runtimes[index]=resource;}
  else if(suffix==='vision-datasets'){operation='register_dataset';resource=db.datasetTemplate;db.datasets=[resource];}
@@ -78,16 +82,17 @@ before(async () => {
   browser = await chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
 });
 after(async () => { await browser?.close(); });
-async function openPage({ unknown = false, unsupported = false, pending = null, query = '', width = 1400 } = {}) {
+async function openPage({ unknown = false, unsupported = false, pending = null, query = '', width = 1400, importedRuntime = false } = {}) {
   const page = await browser.newPage({ viewport: { width, height: 1100 } }); page.setDefaultTimeout(7000);
   await page.route('http://localhost:43441/**', route => route.fulfill({ body: '<!doctype html><html><head></head><body><div id="root"></div></body></html>', contentType: 'text/html' }));
   await page.goto(`http://localhost:43441/models?tab=vision${query}`);
-  const m = await model(), r = await runtime(), d = await dataset(), tr = await run();
+  const m = await model(), n = await normalityModel(), na = await normalityModel('APPROVE_SANDBOX'), ia = await inferenceAsset(), ni = await normalityInference(), r = await runtime(importedRuntime ? 'PASSED' : 'NOT_RUN'), d = await dataset(), tr = await run();
   await page.evaluate(({ scope, db, unknown, unsupported, pending }) => {
     window.__scope = scope; window.__db = db; window.__calls = []; window.__ledger = {}; window.__unknownPost = unknown; window.__unsupported = unsupported;
     window.__product = { activeWorkspace: { workspace_id: scope.workspaceId }, activeProject: { project_id: scope.projectId, name: '合成项目' }, registerScopeChangeGuard: () => () => {} };
     if (pending) localStorage.setItem(`vision-model:pending:${scope.actorId}:${scope.workspaceId}:${scope.projectId}`, JSON.stringify(pending));
-  }, { scope, db: { models: [m], runtimes: [r], datasets: [d], runs: [], modelTemplate: m, runtimeTemplate: r, datasetTemplate: d, runTemplate: tr, capabilities: await capabilities(), poolProjection: await poolProjection(), poolDataset: await poolDataset() }, unknown, unsupported, pending });
+  }, { scope, db: { models: [m], runtimes: [r], datasets: [d], runs: [], inferenceAssets: [], inferences: [], modelTemplate: m, normalityModelTemplate: n, approvedNormalityTemplate: na,
+    inferenceAssetTemplate: ia, inferenceTemplate: ni, runtimeTemplate: r, datasetTemplate: d, runTemplate: tr, capabilities: await capabilities(), poolProjection: await poolProjection(), poolDataset: await poolDataset() }, unknown, unsupported, pending });
   await page.addStyleTag({ content: `*{box-sizing:border-box}body{margin:0;background:#090c10;padding:24px}${css}` });
   await page.addScriptTag({ content: bundle });
   await page.getByRole('heading', { name: '把模型放进可复核的训练流程' }).waitFor();
@@ -279,5 +284,57 @@ test('unknown triage reconciles the actual feedback operation by GET and keeps i
     const calls = await page.evaluate(() => window.__calls.filter(call => call.path.includes('/vision-operations/')));
     assert.equal(calls.length, 1); assert.ok(calls[0].path.includes(`/triage_feedback%3A${fixture.feedback.feedback_id}/`)); assert.equal(calls[0].method, 'GET');
     assert.equal(await page.evaluate(() => window.__db.feedback[0].issue_closed), false); assert.equal(await page.evaluate(() => Object.keys(localStorage).length), 0);
+  } finally { await page.close(); }
+});
+
+test('normality surface is truthful when the current workspace has no pack, asset or inference', async () => {
+  const page = await openPage(); try {
+    await tab(page, 'Normality 推理'); const target = page.locator('.vision-models__form-panel');
+    assert.match(await target.innerText(), /HOLD：当前项目没有已批准的 Normality 模型包/);
+    assert.match(await target.innerText(), /CONNECTOR_NOT_CONFIGURED/);
+    assert.equal((await writes(page)).length, 0);
+    assert.equal(await target.getByRole('button', { name: '执行一次本地沙箱推理' }).isEnabled(), false);
+  } finally { await page.close(); }
+});
+
+test('normality pack registration and sandbox approval are separate explicit operations', async () => {
+  const page = await openPage({ importedRuntime: true }); try {
+    await tab(page, 'Normality 推理'); const pack = page.locator('.vision-models__normality-pack');
+    await pack.getByLabel('模型包名称').fill('登记的 Normality 包');
+    await pack.getByLabel('模型包绝对路径').fill('C:/synthetic/normality/model-pack.pt'); await pack.getByLabel('模型包 SHA-256').fill(sha('a'));
+    await pack.getByLabel('目标运行目录').fill('C:/synthetic/normality/seed_20260913');
+    for (const [index, value] of ['seed_20260911', 'seed_20260912', 'seed_20260913'].entries()) await pack.getByLabel(`稳定性运行目录 ${index + 1}`).fill(`C:/synthetic/normality/${value}`);
+    await pack.getByLabel('稳定性摘要 JSON').fill('C:/synthetic/normality/model_stability_summary.json'); await pack.getByLabel('稳定性摘要 SHA-256').fill(sha('4'));
+    await pack.getByLabel('来源绑定 JSON').fill('C:/synthetic/normality/source_binding.json'); await pack.getByLabel('来源绑定文件 SHA-256').fill(sha('5')); await pack.getByLabel('来源绑定内容 SHA-256').fill(sha('c'));
+    await pack.getByLabel('来源索引 JSON').fill('C:/synthetic/normality/source_index.json'); await pack.getByLabel('来源索引文件 SHA-256').fill(sha('6')); await pack.getByLabel('来源索引内容 SHA-256').fill(sha('d'));
+    await pack.getByLabel('Backbone 权重绝对路径').fill('C:/synthetic/normality/backbone.pt'); await pack.getByLabel('Backbone 权重 SHA-256').fill(sha('b'));
+    await review(pack); await checked(pack, '我授权读取上述本地证据'); await checked(pack, '我仅授权 weights-only'); await checked(pack, '我已核查 Ultralytics');
+    await pack.getByRole('button', { name: '核验并登记 Normality 模型包' }).click(); await page.getByRole('button', { name: /登记的 Normality 包/ }).waitFor();
+    await page.getByRole('button', { name: /登记的 Normality 包/ }).click(); const approval = page.locator('.vision-models__normality-approval');
+    await approval.getByLabel('沙箱运行环境').selectOption('vision_runtime_test'); await review(approval);
+    for (const label of ['我已复核模型包证据', '我信任所选运行环境', '我授权执行模型包验证', '我信任绑定的权重', '我仅授权 weights-only', '我已核查 Ultralytics']) await checked(approval, label);
+    await approval.getByRole('button', { name: '批准为本地沙箱模型' }).click(); await page.getByText('LOCAL_SANDBOX_ONLY', { exact: true }).waitFor();
+    const posts = await writes(page); assert.equal(posts.length, 2); assert.ok(posts[0].path.endsWith('/vision-model-packs')); assert.ok(posts[1].path.endsWith('/sandbox-approval'));
+  } finally { await page.close(); }
+});
+
+test('approved normality model runs against a frozen asset and only creates a local human-review draft', async () => {
+  const page = await openPage({ importedRuntime: true }); try {
+    const approved = await normalityModel('APPROVE_SANDBOX'); await page.evaluate(approved => { window.__db.models.push(approved); }, approved);
+    await page.getByRole('button', { name: '刷新状态（仅 GET）' }).click(); await tab(page, 'Normality 推理');
+    const asset = page.locator('.vision-models__normality-asset'); await asset.getByLabel('输入图像名称').fill('待判定图像'); await asset.getByLabel('输入图像绝对路径').fill('C:/synthetic/images/part.png');
+    await asset.getByLabel('输入图像 SHA-256').fill(sha('8')); await review(asset); await checked(asset, '我授权读取该本地图像');
+    await asset.getByRole('button', { name: '冻结为推理输入资产' }).click(); await page.getByText(/FROZEN_LOCAL_INFERENCE_ASSET/).waitFor();
+    const inference = page.locator('.vision-models__normality-inference'); await inference.getByLabel('Normality 模型包').selectOption('vision_normality_model_test');
+    await inference.getByLabel('冻结输入资产').selectOption('vision_inference_asset_test'); await review(inference);
+    for (const label of ['我授权本次本地 CPU 推理', '我信任沙箱运行环境', '我信任绑定的权重', '我仅授权 weights-only']) await checked(inference, label);
+    await inference.getByRole('button', { name: '执行一次本地沙箱推理' }).click(); await page.getByRole('button', { name: /异常信号/ }).waitFor();
+    await page.getByRole('button', { name: /异常信号/ }).click(); const details = page.locator('.vision-models__details');
+    assert.match(await details.innerText(), /0\.750000/); assert.match(await details.innerText(), /0\.500000/); assert.match(await details.innerText(), /预览 HOLD：后端未提供 heatmap 像素读取合同/);
+    assert.equal(await details.locator('img').count(), 0); const writesBeforeDraft = (await writes(page)).length;
+    const draft = details.locator('.vision-models__normality-review'); await draft.getByLabel('人工信号分类').selectOption('NEEDS_LABEL_REVIEW'); await review(draft);
+    await checked(draft, '我确认这只是本地复核草稿'); await draft.getByRole('button', { name: '生成本地复核草稿' }).click();
+    await details.getByText('LOCAL_DRAFT_NOT_SUBMITTED', { exact: true }).waitFor(); assert.equal((await writes(page)).length, writesBeforeDraft);
+    assert.equal(await page.evaluate(() => JSON.stringify(localStorage).includes('NEEDS_LABEL_REVIEW')), false);
   } finally { await page.close(); }
 });
