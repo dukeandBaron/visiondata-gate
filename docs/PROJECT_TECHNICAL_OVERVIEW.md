@@ -120,7 +120,7 @@ flowchart LR
 ### 持续学习、TTT 与 RL 的准确位置
 
 - 现有持续学习模块能校验父／候选模型、保留集、学习顺序和提交的阶段指标矩阵，并计算平均遗忘、最坏物件与最终门槛；它是**验收和选模门禁**，不是自动多任务训练器。
-- TTT／持续适应当前只有“新工况筛选→适应目标→Head／Adapter 更新→旧物件复验”的设计位置；真实顺序适应实验未完成。
+- [Normality 单次 TTT](NORMALITY_TTT.md) 在外部 CPU 运行时执行真实自监督梯度更新，使用冻结 teacher replay、参数锚定、独立 guard 和回滚；每次从父模型重置。它不是永久顺序适应，也不证明全部旧物件不遗忘。
 - RL 当前只有“状态=证据／缺口／预算，动作=检查／补证／标注／停止”的研究位置；没有奖励驱动策略训练，不把人工反馈称为 RLHF。
 
 详见[持续学习验收](CONTINUAL_LEARNING_RETENTION.md)和[学习反馈工作台](QUALITY_LEARNING_WORKBENCH.md)。
@@ -154,7 +154,8 @@ flowchart LR
 | 参考学习与 detect 训练路径 | `PASS_LOCAL_BOUNDED` | 支持的本地训练任务能执行并保留模型／数据绑定 |
 | Normality 完整反馈续训 | `PARTIAL` | 模型分支存在；同一链的 CAPA→训练闭环尚未验证 |
 | 持续学习遗忘验收 | `CONTRACT_AND_EVALUATOR_ONLY` | 能检查给定阶段矩阵；不证明真实连续训练发生 |
-| TTT／RL 策略学习 | `NOT_IMPLEMENTED` | 仅保留研究位置，不进入已实现功能 |
+| Normality 单次 TTT | `EPISODIC_CPU_SANDBOX` | 有界 student 更新、像素隔离、独立 guard 与回滚；实际采纳以当次回执为准，不是工业收益 |
+| RL 策略学习 | `NOT_IMPLEMENTED` | 普通梯度训练和确定性 Worker 调度不能冒充 RL |
 | Windows 候选 | `HOLD_LIMITED_REVIEW_ONLY` | 本地安装与 UIA 验收存在；未签名、独立干净机未测 |
 | 工厂独立真值、客户 ROI、生产部署 | `NOT_MEASURED / NOT_RUN` | 不能从合成基准或授权离线试跑外推 |
 

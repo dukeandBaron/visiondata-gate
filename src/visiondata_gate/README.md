@@ -12,11 +12,14 @@
 | 可执行测量 Skill | [industrial_skills.py](industrial_skills.py) | 受信实例显式注册、精确版本调用、回执复核；不是任意代码沙箱 |
 | 外部观察适配 | [adapter_sdk.py](adapter_sdk.py) | 对 Adapter manifest/observation 做离线 conformance；不代表外部服务已连接 |
 | 数据池与学习 | [data_pool.py](data_pool.py)、[learning_service.py](learning_service.py)、[local_model_registry.py](local_model_registry.py) | 保留 Gate、数据划分、父模型、反馈和评测身份 |
+| Normality 单次适应 | [normality_ttt.py](normality_ttt.py)、[normality_adaptation_service.py](normality_adaptation_service.py)、[normality_adaptation_api.py](normality_adaptation_api.py) | 当前会话更新克隆 student；父包、主干和阈值冻结，独立 Guard 可拒绝或回滚；不是永久在线学习 |
+| 模型信号转人工待办 | [normality_followup_service.py](normality_followup_service.py)、[normality_followup_api.py](normality_followup_api.py)、[operator_workspace.py](operator_workspace.py) | 反馈先导入工作簿，人保存真实框后再创建 OPEN 工单；不自动确立标签真值或训练资格 |
 | HTTP 与产品服务 | [api.py](api.py)、[product_service.py](product_service.py) | 完整集成优先使用现有 API/服务边界，不绕过权限和持久化 |
 
 ## 三个起点
 
 - [运行一个真实 SDK 示例](../../examples/reuse/README.md)
+- [运行统一开放复用验收](../../docs/ADOPTION_GUIDE.md)
 - [公共 API 与兼容边界](../../docs/PUBLIC_API.md)
 - [选择最小复用组件](../../docs/OPEN_REUSE_CONTRACTS.md)
 

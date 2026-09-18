@@ -527,6 +527,37 @@ def test_registration_internalizes_pack_and_evidence_in_content_addressed_storag
     assert _sha(verified["model_pack"]) == model["model_pack_sha256"]
 
 
+def test_registration_rebuild_equality_covers_exact_source_migration_receipts(tmp_path, monkeypatch):
+    import copy
+    from visiondata_gate import model_stability
+
+    module = importlib.import_module("visiondata_gate.local_model_registry")
+    evidence = _real_evidence(tmp_path / "migration-evidence", pack_schema="visiondata-gate.yolo26-normality-model-pack.v2", stable=True)
+    expected = json.loads(evidence["summary"].read_text("utf-8"))
+    expected["verification_implementation"] = model_stability._verification_implementation()
+    expected["outcome_policy_compatibility_receipts"] = [
+        model_stability._outcome_policy_source_compatibility(
+            "c2d9b28ed86724d1fdee8e47629fa5282c06e29528e0ec5d1f5796401b9bb30c",
+            expected["verification_implementation"], run_label=evidence["run"].name,
+            model_seed=20260913,
+        )
+    ]
+    _write_json(evidence["summary"], expected)
+    monkeypatch.setattr(module, "_rebuild_normality_stability_summary", lambda _directories: copy.deepcopy(expected))
+    request = _real_pack_request(module, evidence, request_key="normality-migration-equality-0001")
+    verified = module._verify_normality_pack_registration_evidence(request)
+    assert verified["verification_implementation"] == expected["verification_implementation"]
+    altered = copy.deepcopy(expected)
+    receipt = altered["outcome_policy_compatibility_receipts"][0]
+    receipt["training_identity_rewritten"] = True
+    receipt.pop("receipt_sha256")
+    receipt["receipt_sha256"] = hashlib.sha256(canonical_jcs_bytes(receipt)).hexdigest()
+    _write_json(evidence["summary"], altered)
+    request = _real_pack_request(module, evidence, request_key="normality-migration-tampered-0001")
+    with pytest.raises(module.VisionModelError, match="MODEL_STABILITY_SUMMARY_NOT_REPRODUCIBLE"):
+        module._verify_normality_pack_registration_evidence(request)
+
+
 def test_cas_copy_rejects_junction_before_writing_digest_path(
     tmp_path, monkeypatch
 ):
@@ -711,6 +742,144 @@ def test_stable_v2_pack_requires_named_runtime_validation_before_sandbox_approva
     assert len(validation_calls) == 1
     assert _sha(validation_calls[0]["model_pack"]) == request.expected_model_pack_sha256
     assert validation_calls[0]["model_pack"].is_relative_to(service.root)
+
+    # An implementation upgrade invalidates the old backend binding. A new
+    # named approval must execute validation again, with the current receipt.
+    inference_backend_sha = "8" * 64
+    monkeypatch.setattr(module, "_normality_backend_sha256", lambda: inference_backend_sha)
+    reapproval = approval_request.model_copy(update={
+        "request_key": "normality-sandbox-reapproval-0001",
+        "expected_model_receipt_sha256": approved["receipt_sha256"],
+    })
+    with pytest.raises(module.VisionModelError, match="STALE_OR_UNSUPPORTED_MODEL_PACK"):
+        service.approve_normality_model_pack(
+            actor, project_id, model["model_id"], reapproval.model_copy(update={
+                "expected_model_receipt_sha256": model["receipt_sha256"],
+            }),
+        )
+    with pytest.raises(ValueError):
+        service.approve_normality_model_pack(
+            actor, project_id, model["model_id"], reapproval.model_copy(update={
+                "operator_attests_weights_only_load_authorized": False,
+            }),
+        )
+    assert len(validation_calls) == 1
+    reapproved = service.approve_normality_model_pack(
+        actor, project_id, model["model_id"], reapproval,
+    )
+    assert reapproved["sandbox_validation"]["inference_backend_sha256"] == inference_backend_sha
+    assert reapproved["receipt_sha256"] != approved["receipt_sha256"]
+    assert reapproved["production_release_allowed"] is False
+    assert reapproved["machine_write_permitted"] is False
+    assert len(validation_calls) == 2
+    assert service.approve_normality_model_pack(
+        actor, project_id, model["model_id"], reapproval,
+    ) == reapproved
+    assert len(validation_calls) == 2
+    for index, changes in enumerate((
+        {"status": "REJECT", "usage_scope": "RESEARCH_ONLY"},
+        {"status": "RESEARCH_ONLY_HOLD", "usage_scope": "RESEARCH_ONLY"},
+        {"status": "APPROVE_SANDBOX", "usage_scope": "RESEARCH_ONLY"},
+    )):
+        with product.store._connection(immediate=True) as conn:
+            held = service._put(conn, reapproved | changes, "model", replace=True)
+        with pytest.raises(module.VisionModelError, match="MODEL_PACK_NOT_SANDBOX_ELIGIBLE"):
+            service.approve_normality_model_pack(
+                actor, project_id, model["model_id"], reapproval.model_copy(update={
+                    "request_key": f"normality-reapproval-forbidden-{index:04d}",
+                    "expected_model_receipt_sha256": held["receipt_sha256"],
+                }),
+            )
+    assert len(validation_calls) == 2
+
+
+@pytest.mark.parametrize("initially_approved", [False, True])
+def test_slow_sandbox_approval_cannot_overwrite_interleaved_rejection(
+    product_scope, tmp_path, monkeypatch, initially_approved
+):
+    """Different authorized request keys interleave at the slow worker boundary."""
+    module = importlib.import_module("visiondata_gate.local_model_registry")
+    inference = importlib.import_module("visiondata_gate.normality_inference")
+    product, actor, project = product_scope
+    evidence = _real_evidence(
+        tmp_path / "approval-race-evidence",
+        pack_schema="visiondata-gate.yolo26-normality-model-pack.v2",
+        stable=True,
+    )
+    _stub_stability_rebuild(module, evidence, monkeypatch)
+    service = module.LocalVisionModelService(product)
+    model = service.register_normality_model_pack(
+        actor, project, _real_pack_request(module, evidence, request_key="race-register-0001")
+    )
+    runtime_file = tmp_path / "runtime.exe"
+    runtime_file.write_bytes(b"never execute: approval interleaving contract fixture")
+    runtime = {
+        "resource_id": "vision_runtime_" + "f" * 24,
+        "runtime_id": "vision_runtime_" + "f" * 24,
+        "project_id": project,
+        "executable_sha256": _sha(runtime_file),
+        "runtime_sha256": "9" * 64,
+        "status": "PROBED",
+        "probe": {"status": "ready", "import_status": "PASSED"},
+    }
+    with product.store._connection(immediate=True) as conn:
+        service._put(conn, runtime, "runtime", {"executable_path": str(runtime_file)})
+    request = module.ApproveNormalityModelPack(
+        request_key="race-approval-first-0001", reviewer_identity="Named reviewer",
+        note="Approve the exact frozen fixture only after bounded validation",
+        action="APPROVE_SANDBOX", expected_model_receipt_sha256=model["receipt_sha256"],
+        **{f"expected_{key}": model[key] for key in (
+            "model_pack_sha256", "backbone_weights_sha256",
+            "source_binding_sha256", "source_index_sha256")},
+        runtime_id=runtime["runtime_id"], expected_runtime_sha256=runtime["runtime_sha256"],
+        operator_attests_reviewed=True, operator_attests_trusted_runtime=True,
+        operator_attests_execution_authorized=True, operator_attests_trusted_weights=True,
+        operator_attests_weights_only_load_authorized=True,
+        ultralytics_license_acknowledged=True,
+    )
+
+    def validation(**_kwargs):
+        return {
+            "status": "VALIDATED_FOR_LOCAL_SANDBOX",
+            **{key: model[key] for key in (
+                "model_pack_sha256", "backbone_weights_sha256",
+                "source_binding_sha256", "source_index_sha256", "model_pack_schema_version")},
+            "runtime_sha256": runtime["runtime_sha256"],
+            "inference_backend_sha256": module._normality_backend_sha256(),
+            "production_release_allowed": False,
+        }
+
+    monkeypatch.setattr(inference, "validate_normality_model_pack", validation)
+    if initially_approved:
+        model = service.approve_normality_model_pack(actor, project, model["model_id"], request)
+    pending = request.model_copy(update={
+        "request_key": "race-slow-approval-0001",
+        "expected_model_receipt_sha256": model["receipt_sha256"],
+    })
+    rejection = pending.model_copy(update={
+        "request_key": "race-concurrent-reject-0001", "action": "REJECT",
+    })
+    rejected = {}
+
+    def reject_during_validation(**kwargs):
+        rejected.update(service.approve_normality_model_pack(
+            actor, project, model["model_id"], rejection
+        ))
+        return validation(**kwargs)
+
+    monkeypatch.setattr(inference, "validate_normality_model_pack", reject_during_validation)
+    with pytest.raises(module.VisionModelError, match="MODEL_PACK_CHANGED_DURING_APPROVAL"):
+        service.approve_normality_model_pack(actor, project, model["model_id"], pending)
+    current = service.get_model(actor, project, model["model_id"])
+    assert current == rejected
+    assert current["status"] == "REJECT"
+    assert current["sandbox_eligible"] is False
+    with product.store._connection() as conn:
+        remembered = conn.execute(
+            "SELECT COUNT(*) FROM vision_requests WHERE project_id=? AND actor=? AND request_key=?",
+            (project, actor, pending.request_key),
+        ).fetchone()[0]
+    assert remembered == 0
 
 
 def test_inference_asset_is_frozen_in_registry_without_exposing_source_path(

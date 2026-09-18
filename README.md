@@ -86,7 +86,7 @@ VisionData Gate 位于工业图像采集、标注与模型训练交付之间，�
 
 ## 项目如何形成产业闭环
 
-VisionData Gate 把数据质量工作组织为一条可重复的业务链。系统首先冻结任务用途与数据版本，再完成确定性检查；只有遇到证据冲突、工具故障或未知异常时，Agent 才会补充规划。
+VisionData Gate 把数据质量工作组织为一条可重复的业务链。系统首先冻结任务用途与数据版本，再完成确定性检查；上传快照 Gate 使用固定确定性工具；需要调查冲突、工具故障或未知异常时，另行创建 Incident 案件，由受控 Agent 组织补证。
 
 高影响动作必须由具名人员批准。CAPA 只作用于派生版本，Child Run 按同一合同重新检查，并把责任项标记为关闭、持续开放或新增回归。
 
@@ -145,9 +145,9 @@ DynamicBench-v3 在相同输入、工具与 Fail-Closed Judge 下记录：动态
 
 ### 1. 证据缺口驱动的选择性 Agent 编排
 
-系统不会在问题出现后无条件调用更多 Agent。它先判断缺少什么证据、哪些假设仍无法区分，再按资格、严重度、区分能力、测量成本、稳定 Worker ID 和冻结预算选择专项 Worker。
+系统不会在问题出现后无条件调用更多 Agent。它先判断缺少什么证据、哪些假设仍无法区分，再按资格、严重度、假设区分信息、证据质量、成本桶、稳定 Worker ID 和冻结预算选择专项 Worker。成本桶不是已经实测的最优信息增益；未知成本保留为未知。
 
-每次选择同时保存 `selected / rejected / reason / budget / triggering evidence`。只有补查能够改变当前结论，并满足预算与策略约束时，Agent 才值得行动。
+每次选择同时保存 `selected / rejected / reason / budget / triggering evidence`。选择策略用于判断下一项检查是否有补证价值，并受预算与策略约束；实际结果仍以调用回执为准，不预先保证补查会改变结论。
 
 **可演示证据：**命令中心中的 Worker 选择与拒绝、竞争假设、预算、六阶段 Trace，以及 DynamicBench-v3 的固定基线对照。
 
@@ -163,7 +163,9 @@ Finding 数量减少不能直接关闭责任。系统必须逐项核对已关闭
   <sub>本地隔离合成环境中的真实任务评审界面。责任条、CAPA 与 Child/Outcome 均由持久化事实生成。</sub>
 </p>
 
-授权离线试跑包含 **180 张图像、60 个 Mask**。Child Finding 从 **49 降至 33**，逐项责任核验只确认 **6 条关闭、43 条继续开放**，最终状态仍为 `HOLD`。这个负结果证明系统不会把“Finding 变少”包装成“生产恢复”。
+全量来源画像记录 **4,464 张图像、1,439 个 Mask**，治理闭环则采用固定子集：派生版本包含 **180 张图像、60 个 Mask**。两者分母不同，全量画像不等于全量训练或全量整改验收。Child Finding 从 **49 降至 33**，逐项责任核验只确认 **6 条关闭、43 条继续开放**，最终状态仍为 `HOLD`。这个负结果证明系统不会把“Finding 变少”包装成“生产恢复”。
+
+上传快照目前可自动执行的修复是：人工批准后，在派生版本排除同划分、同身份的精确重复，且保留覆盖下限。跨划分、近重复、标注冲突不能盲目删除；重拍、返标和补采需要人工提交新证据。像素工单与 CAPA 责任账本也不会自动合并关闭数量。[逐模块能力表](docs/CAPABILITY_STATUS.md)
 
 [任务完成 UI 验证回执](docs/FINALS_TASK_COMPLETION_UI_20260916.md) · [证据与实验边界](docs/EVIDENCE_AND_BENCHMARKS.md)
 
@@ -198,6 +200,8 @@ Finding 数量减少不能直接关闭责任。系统必须逐项核对已关闭
 ## 架构、安全与责任边界
 
 系统采用一个受控 Agent 内核、两条版本化闭环和一套共享证据底座。数据治理闭环负责数据准入与整改复验；模型开发闭环负责可选训练、独立评测和人工分类后的反馈回流。
+
+从用户任务看，三阶段依次是：**人机协同数据集冷启动 → Agent 编排的数据质量治理 → 受控模型开发与反馈回流**。它们共享任务与版本身份，但保留各模型分支的独立验收条件。[术语与执行合同](docs/TECHNICAL_TERMINOLOGY.md)
 
 | 技术层 | 项目内实现 | 评委可以核验什么 |
 | --- | --- | --- |
@@ -241,10 +245,12 @@ Finding 数量减少不能直接关闭责任。系统必须逐项核对已关闭
 | 证据 | 已记录结果 | 能证明什么 | 不能证明什么 |
 | --- | --- | --- | --- |
 | **ArchBench-v2** | 传统流程、单 Agent、多 Agent；288 条同协议记录；质量持平 | 固定 SOP 下不支持“多 Agent 必然更好” | 不评价异常条件下的动态重规划 |
+| **DynamicBench-v2** | 24 个夹具 × 4 种顺序 × 3 次重复，共 288 条；顺序不变与重复稳定均 `24/24` | 冻结 Worker 选择规则的确定性 | 不是主动学习或已测最优调度 |
 | **DynamicBench-v3** | 正确终态 `8/8 vs 4/8`；工具调用 `14 vs 24`；双方误放行 `0/8` | 冻结合成协议内的重规划完整性与效率 | 外部模型调用为 0；不是工厂准确率 |
 | **DynamicBench-v4** | 4/4 实际 ProductService 案件通过，包含工具失败关闭 | Agent 合同进入本地产品服务链路 | 不是客户环境或外部模型评测 |
 | **Prompt Injection v2** | 固定攻击 `12/12` 拦截；固定良性输入 `6/6` 放行 | 对已知固定文本攻击集的策略行为 | 未知、自适应或多模态攻击的普适防护 |
 | **授权离线试跑** | 180 图像、60 Mask；Finding `49 → 33`；`6 closed / 43 open`；最终 HOLD | 整改、派生版本和 Child Run 能保留真实负结果 | 不是客户 KPI、工厂在线 Shadow Test 或 ROI |
+| **VisA Normality 开发代理** | capsules 子集、3 个固定种子；Image AUROC `0.657823`、正常 FPR `0.277778`、Pixel F1 `0.090093` | 指定开发代理上的异常信号与评测记录 | 不证明工业模型达标，不是客户现场准确率 |
 | **公开候选源码回归** | 2094 collected；`2070 passed / 24 skipped / 0 failed / 0 errors` | `f7f31f7` 在锁定 Python 3.12 环境中的一次连续全仓回归 | 不是外部认证，不自动升级安装器或工厂效果 |
 
 [Benchmark Suite](benchmarks/README.md) · [完整回归边界](docs/FULL_REGRESSION_F7F31F7_20260916.md) · [当前状态与事实源](docs/README_STATUS_AND_EVIDENCE.md)
@@ -272,6 +278,18 @@ uv run python tools/run_cross_platform_workbench.py
 
 首次打开时创建管理员，再建立工作区和项目，并从 [公开合成样本](sample_data/README.md) 开始。确定性数据检查不要求 GPU 或外部模型 Key。[启动与排错](docs/CROSS_PLATFORM_QUICKSTART.md)
 
+Windows 也可使用 `./run_demo.ps1 -Check` 检查环境，再运行 `./run_demo.ps1`；这是同一个真实 API/Web 启动器，不依赖旧私域快照。
+
+### 模型中心：训练和推理分别授权
+
+检测训练支持有界 CPU 监督训练；Normality 页支持证据包登记、独立沙箱批准、图像资产冻结与推理回执。运行环境与合法权重由用户明确提供，不静默下载或加载，模型信号不直接变成标签真值。
+
+YOLO 训练预算为 **10–600 秒**；输入冻结拒绝**同一分区的字节重复或解码像素重复**，失败、取消与超时保留证据。[模型 API 合同](docs/VISION_MODEL_API_CONTRACT.md) · [任务保留与恢复](docs/MODEL_JOB_RETENTION.md)
+
+参考 NumPy 学习闭环与 YOLO/Normality 分支分别验收。Normality 支持真实 PNG 热图、具名反馈保存与回读，以及**单次自监督适应（TTT）**：冻结主干和阈值，只更新当前会话的重建模块，独立参考组检查后采用或回滚，不覆盖父模型。
+
+在已有 VisA 模型包上，真实 CPU 执行完成 3 步更新；16 张开发参考的 TP/TN/FP/FN 更新前后均为 `5/6/2/3`。这证明更新与复验链路已执行，**尚未证明检测质量提升**。参考组基线全漏检的另一轮在更新前被拒绝。永久在线学习、RL 与自动语义标注不因单次 TTT 而获得实现声明。[执行方法与复现](docs/NORMALITY_TTT.md) · [能力、接口与未完成连接](docs/CAPABILITY_STATUS.md)
+
 ### Windows 候选
 
 最新公开 prerelease 为 [`windows-local-f7f31f7-finals-20260916`](https://github.com/dukeandBaron/visiondata-gate/releases/tag/windows-local-f7f31f7-finals-20260916)，绑定源码 `f7f31f7048b14b79990a445f285946f46d3bc41f`，状态为 `limited review / RELEASE_HOLD`。
@@ -280,6 +298,8 @@ uv run python tools/run_cross_platform_workbench.py
 <summary><strong>查看候选验证结果与未决项</strong></summary>
 
 候选完成 113/113 提取态 HTTP 检查、两轮包内学习、实际安装启动、SQLite、七步 Tauri UI Automation 和卸载验收。
+
+安装器旁附 `BUILD_MANIFEST.json`、`SOURCE_MANIFEST.json`、`DELIVERY_STATUS.json` 和 `SHA256SUMS.txt`。该已发布候选的安装器 SHA-256 为 `e32b10cf7e6ac8a9cdeca06b00973c29ff08acec2ae193fbf80c9d0d9a48e826`；后续源码更新不会自动进入这个二进制。
 
 安装器尚未签名，独立干净机和同版本升级尚未验证，因此不是生产发行。[Windows 安装说明](docs/WINDOWS_INSTALLER.md) · [完整候选记录](docs/WINDOWS_CANDIDATE_F7F31F7_20260916.md)
 
@@ -305,13 +325,32 @@ uv run python tools/run_cross_platform_workbench.py
 uv run --no-sync python examples/reuse/metadata_skill.py --metadata-count 12 --observed-count 14
 ```
 
-[复用合同](docs/OPEN_REUSE_CONTRACTS.md) · [版本兼容](docs/VERSIONING.md) · [贡献指南](CONTRIBUTING.md)
+### 五分钟开放复用验收
+
+下面这一条路径把真实 Skill SDK、Rule Pack 校验和 Adapter conformance 串成一个离线回执；不需要模型权重、GPU、网络或私域数据：
+
+```bash
+uv sync --extra qa --locked
+uv run --no-sync python -c "from pathlib import Path; Path('output/open-reuse').mkdir(parents=True, exist_ok=True)"
+uv run --no-sync python tools/run_open_reuse_smoke.py --output-root output/open-reuse/run-01
+uv run --no-sync python -m pytest tests/test_open_reuse_smoke.py tests/test_reuse_contracts.py -q
+```
+
+成功时读取 `output/open-reuse/run-01/OPEN_REUSE_RECEIPT.json`，状态为 `PASS_OPEN_REUSE_SMOKE`。回执分别绑定 Skill、Rule Pack 和 Adapter 的实际输出，并固定 `production_release_allowed=false`。每次复验使用新的输出目录；工具拒绝覆盖旧结果。
+
+GitHub 的 Windows／Linux 维护者 CI 也从 clean checkout 执行同一条路径，但**维护者 CI 不等于第三方复现**。在独立用户提交可核验记录前，状态保持 `THIRD_PARTY_REPRODUCTION_PENDING`。
+
+[采用指南](docs/ADOPTION_GUIDE.md) · [开放成熟度与证据](docs/OPEN_SOURCE_READINESS.md) · [复用合同](docs/OPEN_REUSE_CONTRACTS.md) · [第三方复现模板](docs/THIRD_PARTY_REPRODUCTION.md) · [版本兼容](docs/VERSIONING.md) · [贡献指南](CONTRIBUTING.md)
+
+[五份工作流 Skill](skills/README.md) 可按合同改编；文本 Skill 不等于已经安装的可执行插件。
 
 <a id="finals-evidence"></a>
 
 ## 决赛评分证据索引
 
 下表对应 GOAI 2026 赛道二决赛的 100 分结构。它提供可核验入口，不预测得分，也不把计划或模拟实验升级为已实现的客户价值。
+
+五个维度依次为 **20 / 25 / 25 / 15 / 15 分**；二级考核点分值逐项列出。
 
 | 一级维度 | 二级考核点 | 分值 | README / 仓库中的直接证据 | 当前缺口 |
 | --- | --- | ---: | --- | --- |
@@ -326,8 +365,8 @@ uv run --no-sync python examples/reuse/metadata_skill.py --metadata-count 12 --o
 |  | 安全、合规与可追溯 | 7 | 权限、人类闸门、Fail-Closed、数据边界、血缘和审计封套 | 签名、可信时间戳和生产 IAM 未实现 |
 | **完成度与可验证性** | 核心任务闭环与稳定性 | 8 | 现场重跑、DynamicBench-v4、全仓回归、Windows 候选 | 评委陌生输入仍需现场运行 |
 |  | 产品体验与结果一致性 | 7 | 在线体验、本地工作台、源码／安装器／回执绑定 | 最终 PPT、Demo 与封版 SHA 需再次对账 |
-| **开源价值与复用** | 核心组件、Workflow、Skill 开放 | 7 | Public 主仓、代码地图、Skill、Schema、SDK、Benchmark | 私域数据和外部模型不属于开放范围 |
-|  | 文档、部署、复用与第三方验证 | 8 | README、Quickstart、License、示例、版本记录、Issue／PR 模板 | 独立第三方部署成功记录尚未取得 |
+| **开源价值与复用** | 核心组件、Workflow、Skill 开放 | 7 | Public 主仓、代码地图、Skill、Schema、SDK、Benchmark、三组件开放复用回执 | 私域数据和外部模型不属于开放范围 |
+|  | 文档、部署、复用与第三方验证 | 8 | README、采用指南、Quickstart、License、示例、clean-checkout CI、版本记录、Issue／PR 模板 | 独立第三方部署成功记录仍为 `THIRD_PARTY_REPRODUCTION_PENDING` |
 
 [查看完整 13 项证据／HOLD 对照](docs/FINALS_EVIDENCE_MAP.md)
 
@@ -336,7 +375,7 @@ uv run --no-sync python examples/reuse/metadata_skill.py --metadata-count 12 --o
 - 在线站点是静态体验，没有业务后端、账户持久化或真实生产写入。
 - 公开 Agent 案件是 SHA 绑定的合成回放，不声称处理当前上传图片。
 - Windows 候选未签名，独立干净机、客户验收和工厂效果仍为 HOLD。
-- 异常 Operating Point 处于 `SOURCE_COMPONENT_TESTED / PRODUCT_API_NOT_CONNECTED`。
+- [异常阈值治理](docs/ANOMALY_OPERATING_POINT.md)处于 `SOURCE_COMPONENT_TESTED / PRODUCT_API_NOT_CONNECTED`，不生成可部署阈值。
 - 授权离线试跑证明整改和复验结构，不替代客户采用记录，也不赋予原数据再分发权。
 - 未绑定分母和原始记录的运营百分比不作为项目的已实现证据。
 
@@ -351,3 +390,5 @@ uv run --no-sync python examples/reuse/metadata_skill.py --metadata-count 12 --o
 欢迎贡献数据格式适配、工业 Skill、标注往返、失败恢复与可复现实验。请通过 [Issues](https://github.com/dukeandBaron/visiondata-gate/issues) 提交最小合成案例，或阅读 [贡献指南](CONTRIBUTING.md)。请勿在 Issue、PR 或公开附件中上传客户图像、个人信息、密钥或私有运行回执。
 
 [复现实验](docs/BENCHMARK_REPRODUCIBILITY.md) · [工程质量](docs/ENGINEERING_QUALITY_IMPLEMENTATION.md) · [版本演进](docs/VERSION_EVOLUTION.md) · [CHANGELOG](CHANGELOG.md) · [软件引用](CITATION.cff)
+
+[技术提交包构建与完整性核验](docs/TECHNICAL_SUBMISSION_BUNDLE.md)

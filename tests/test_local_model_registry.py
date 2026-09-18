@@ -110,7 +110,9 @@ def test_capabilities_keep_visual_and_llm_adaptation_boundaries(product_scope):
     assert result["supported_registration_tasks"] == ["detect", "segment", "normality"]
     assert result["executable_inference_tasks"] == ["normality"]
     assert result["normality_runtime"] == "EXTERNAL_RUNTIME_REQUIRED"
-    assert result["ttt_status"] == "DISABLED_NOT_IMPLEMENTED"
+    assert result["ttt_status"] == "NORMALITY_EPISODIC_AVAILABLE"
+    assert result["ttt_scope"] == "NORMALITY_ONLY_EPISODIC_NO_PERSISTENCE"
+    assert module.CreateVisionTrainingRun.model_fields["adaptation"].default == "OFF"
     assert result["weight_download_allowed"] is False
     assert result["registered_model_count"] == 0
     assert result["registered_runtime_count"] == 0

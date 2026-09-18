@@ -10,6 +10,19 @@ competition artifact tags are not a claim of a matching PyPI package version.
 
 ### Added
 
+- A deterministic `open-reuse` workflow composes the real Industrial Skill SDK,
+  Rule Pack verifier and Adapter conformance APIs into one offline, hash-bound
+  synthetic receipt. `ADOPTION_GUIDE` and the reproduction template keep
+  maintainer clean-checkout CI distinct from `THIRD_PARTY_REPRODUCTION_PENDING`.
+- A complete custom exposure-range Skill example demonstrates the reviewed
+  `BaseIndustrialSkill` subclass, manifest, frozen parameters, evidence spans,
+  explicit Registry version and fail-closed missing-input behavior without
+  dynamic plugin discovery.
+- Normality TTT now performs bounded CPU student updates with frozen parent,
+  backbone and thresholds, independent guard evaluation and rollback. Actual PNG
+  heatmaps, persistent named feedback, workbook import and human-box-bound OPEN
+  work orders are connected without granting label truth or production authority.
+
 - A finals-facing evidence index and README benchmark summary that bind each
   metric to its denominator, baseline, scope and unresolved evidence gap.
 - Discoverable core-code, text Skill and Schema catalogues, with version,
@@ -59,8 +72,9 @@ competition artifact tags are not a claim of a matching PyPI package version.
 - Stale read results no longer authorize learning actions. Same-project
   connection refreshes preserve unfinished review forms.
 - Product, defense and workbench copy now separates initial dataset candidates,
-  governed dataset candidates, supervised BBox detection, Normality development,
-  human-adjudicated hard-example candidates and unimplemented VLM/TTT routes.
+  governed dataset candidates, supervised BBox detection, Normality episodic TTT,
+  human-adjudicated hard-example candidates and the still-unimplemented VLM,
+  detect-TTT, persistent online adaptation and automatic Mask routes.
 - Public documentation and Pages examples now use only the canonical
   `dukeandBaron/visiondata-gate` repository and `/visiondata-gate/` base path.
 - Slow learning lifecycle tests use explicit test-only wall-time headroom and
