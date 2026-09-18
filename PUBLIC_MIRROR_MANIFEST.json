@@ -1,7 +1,7 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "460a632e5a47994f2156fbee99de94a3646bb10f",
-  "source_tree_oid": "202d142b0708421d5d62a1d33e6bc83e8ea9f23f",
+  "source_commit_oid": "85ded302a7669a45e1b0127a9b15a630dce114d7",
+  "source_tree_oid": "a126dbebc5c40cb58a807a406dc746415dea6f0f",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
@@ -9,7 +9,7 @@
   "personal_data_included": false,
   "tracked_source_only": true,
   "file_count": 774,
-  "snapshot_sha256": "ad7acb299547c5f1d1660d977d1cf33ab2b7db72c37d00af1e2fa5bfa9648d14",
+  "snapshot_sha256": "e9a8e74476549019eb55c7e273f9a18b3bbf6225474534cd656d5280eebf1864",
   "files": [
     {
       "path": ".env.example",
@@ -99,8 +99,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "e6547fb42af84962672c8fe03487ccc0ec4498a3bc527770c100f92fa2d873d1",
-      "size_bytes": 26905,
+      "sha256": "3adac4dcd85b85d16a0ba5c1fd3134a6ec870361c23b8a2aeb8c1e5fc400d3d7",
+      "size_bytes": 27743,
       "source": "docs/PUBLIC_REPOSITORY_README.md"
     },
     {
@@ -455,8 +455,8 @@
     },
     {
       "path": "docs/PUBLIC_REPOSITORY_README.md",
-      "sha256": "e6547fb42af84962672c8fe03487ccc0ec4498a3bc527770c100f92fa2d873d1",
-      "size_bytes": 26905
+      "sha256": "3adac4dcd85b85d16a0ba5c1fd3134a6ec870361c23b8a2aeb8c1e5fc400d3d7",
+      "size_bytes": 27743
     },
     {
       "path": "docs/QUALITY_GATES.md",

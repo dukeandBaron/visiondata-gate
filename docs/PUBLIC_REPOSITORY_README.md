@@ -201,6 +201,8 @@ Finding 数量减少不能直接关闭责任。系统必须逐项核对已关闭
 
 系统采用一个受控 Agent 内核、两条版本化闭环和一套共享证据底座。数据治理闭环负责数据准入与整改复验；模型开发闭环负责可选训练、独立评测和人工分类后的反馈回流。
 
+从用户任务看，三阶段依次是：**人机协同数据集冷启动 → Agent 编排的数据质量治理 → 受控模型开发与反馈回流**。它们共享任务与版本身份，但保留各模型分支的独立验收条件。[术语与执行合同](docs/TECHNICAL_TERMINOLOGY.md)
+
 | 技术层 | 项目内实现 | 评委可以核验什么 |
 | --- | --- | --- |
 | **交互与任务入口** | React 工作台、Tauri 桌面外壳、Spring WebFlux 本地网关、FastAPI 服务 | 同一工作空间、项目、任务与版本作用域 |
@@ -282,6 +284,8 @@ Windows 也可使用 `./run_demo.ps1 -Check` 检查环境，再运行 `./run_dem
 
 检测训练支持有界 CPU 监督训练；Normality 页支持证据包登记、独立沙箱批准、图像资产冻结与推理回执。运行环境与合法权重由用户明确提供，不静默下载或加载，模型信号不直接变成标签真值。
 
+YOLO 训练预算为 **10–600 秒**；输入冻结拒绝**同一分区的字节重复或解码像素重复**，失败、取消与超时保留证据。[模型 API 合同](docs/VISION_MODEL_API_CONTRACT.md) · [任务保留与恢复](docs/MODEL_JOB_RETENTION.md)
+
 参考 NumPy 学习闭环与 YOLO/Normality 分支分别验收。Normality 热图目前只展示工件摘要，人工复核仅为未提交的页面草稿；TTT、RL 与自动语义标注不列为已执行功能。[能力、接口与未完成连接](docs/CAPABILITY_STATUS.md)
 
 ### Windows 候选
@@ -292,6 +296,8 @@ Windows 也可使用 `./run_demo.ps1 -Check` 检查环境，再运行 `./run_dem
 <summary><strong>查看候选验证结果与未决项</strong></summary>
 
 候选完成 113/113 提取态 HTTP 检查、两轮包内学习、实际安装启动、SQLite、七步 Tauri UI Automation 和卸载验收。
+
+安装器旁附 `BUILD_MANIFEST.json`、`SOURCE_MANIFEST.json`、`DELIVERY_STATUS.json` 和 `SHA256SUMS.txt`。该已发布候选的安装器 SHA-256 为 `e32b10cf7e6ac8a9cdeca06b00973c29ff08acec2ae193fbf80c9d0d9a48e826`；后续源码更新不会自动进入这个二进制。
 
 安装器尚未签名，独立干净机和同版本升级尚未验证，因此不是生产发行。[Windows 安装说明](docs/WINDOWS_INSTALLER.md) · [完整候选记录](docs/WINDOWS_CANDIDATE_F7F31F7_20260916.md)
 
