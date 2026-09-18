@@ -162,7 +162,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
       - name: Install locked core and QA dependencies
-        run: uv sync --extra qa --locked --python "${{ matrix.python-version }}"
+        run: uv sync --extra api --extra qa --locked --python "${{ matrix.python-version }}"
       - name: Prepare a new receipt parent
         run: python -c "from pathlib import Path; Path('output/open-reuse').mkdir(parents=True, exist_ok=True)"
       - name: Execute the actual offline open-reuse workflow

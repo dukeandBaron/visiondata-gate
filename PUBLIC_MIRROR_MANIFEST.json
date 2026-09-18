@@ -1,7 +1,7 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "9c1047dcd2678c057938cab9db059302ac0ddbbc",
-  "source_tree_oid": "940cb85fcc4092868a3107991faa33e361b23067",
+  "source_commit_oid": "32071c52fa760dc89efb02a509d319cb4a685a16",
+  "source_tree_oid": "c15258f6acb2e0de01143834ae803da4090ebf8c",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
@@ -9,7 +9,7 @@
   "personal_data_included": false,
   "tracked_source_only": true,
   "file_count": 804,
-  "snapshot_sha256": "823a73a0b36841996fac14c65e416f3d98df7075bb7f32361c42295885f78f31",
+  "snapshot_sha256": "79b7b7d16467fb559d5d2344a3e8c86996cdfe90c3c99cc2c1f65e286262101b",
   "files": [
     {
       "path": ".env.example",
@@ -49,8 +49,8 @@
     },
     {
       "path": ".github/workflows/quality.yml",
-      "sha256": "a9275dcac87fcccd43729e9a7dcd8531e47ef8d229df58f7d35f699a5f9eb4a8",
-      "size_bytes": 10677
+      "sha256": "f9421a95decff150ac68b3851bb92ce8ba49d5afb4e27b9648edb0413940b72c",
+      "size_bytes": 10689
     },
     {
       "path": ".github/workflows/security.yml",
@@ -2425,8 +2425,8 @@
     },
     {
       "path": "tests/test_open_source_workflow_config.py",
-      "sha256": "b0c703dc76ae10b9c955347ec781cceb3d5b7d531273a33833f47c8d7b9345e5",
-      "size_bytes": 4599
+      "sha256": "b848ded874c9909f7d06873d192b4323a384925c650b8bc590bf30829949dd0f",
+      "size_bytes": 4611
     },
     {
       "path": "tests/test_operator_snapshot_acceptance_requirements.py",

@@ -69,7 +69,7 @@ def test_open_reuse_job_uses_only_pinned_reviewed_actions_and_locked_dependencie
     assert found["astral-sh/setup-uv"]["with"]["version"] == "0.11.8"
     commands = " ".join(_runs(job).split())
     assert (
-        'uv sync --extra qa --locked --python "${{ matrix.python-version }}"'
+        'uv sync --extra api --extra qa --locked --python "${{ matrix.python-version }}"'
         in commands
     )
     assert "pip install" not in commands.lower()
