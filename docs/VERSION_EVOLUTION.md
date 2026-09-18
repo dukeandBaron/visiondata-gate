@@ -65,10 +65,11 @@ TTT 冻结父包、主干与阈值，仅更新当前会话 student，独立参�
 执行，以保证“建议权”和“执行权”不混在一个组件里。完整定义见
 [TECHNICAL_TERMINOLOGY](TECHNICAL_TERMINOLOGY.md)。
 
-模型侧当前只把有界监督 BBox detector 与 Normality development proxy 作为已
-存在的本地开发路径。VLM 辅助预标注、样本级 Top-K 挖掘、Active Learning、
-TTT 和自动 Mask 生成仍分别保持 `PLANNED_NOT_CONNECTED` 或
-`NOT_IMPLEMENTED`，不能从架构图反推为已上线。
+模型侧当前把有界监督 BBox detector、Normality development proxy 和单次
+Normality TTT 作为已存在的本地开发路径。后者只更新当前 episode 的克隆
+student，并不持久替换父模型。VLM 辅助预标注、样本级 Top-K 挖掘、Active
+Learning、detect-TTT、永久在线适应和自动 Mask 生成仍分别保持
+`PLANNED_NOT_CONNECTED` 或 `NOT_IMPLEMENTED`，不能从架构图反推为已上线。
 
 ## 如何确认手中的版本
 

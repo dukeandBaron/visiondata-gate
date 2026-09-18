@@ -1,15 +1,15 @@
 {
   "schema_version": "visiondata-gate.public-mirror.v2",
-  "source_commit_oid": "f733fc163c532412cf364758b0897290f783cd8b",
-  "source_tree_oid": "439e61bcbda48b7ceb6e4ba339de88ad67a5971c",
+  "source_commit_oid": "9c1047dcd2678c057938cab9db059302ac0ddbbc",
+  "source_tree_oid": "940cb85fcc4092868a3107991faa33e361b23067",
   "source_worktree_clean": true,
   "source_history_included": false,
   "private_release_evidence_included": false,
   "customer_data_included": false,
   "personal_data_included": false,
   "tracked_source_only": true,
-  "file_count": 794,
-  "snapshot_sha256": "fa6916cdea4cf6b7425b702230db18419f9375f006dda872bdfc645446290e9c",
+  "file_count": 804,
+  "snapshot_sha256": "823a73a0b36841996fac14c65e416f3d98df7075bb7f32361c42295885f78f31",
   "files": [
     {
       "path": ".env.example",
@@ -28,8 +28,8 @@
     },
     {
       "path": ".github/ISSUE_TEMPLATE/reproduction.md",
-      "sha256": "920a5555871ff7a8121b42d15bc77e0382c5ced58604e097ca895df3d8809afa",
-      "size_bytes": 434
+      "sha256": "2bc8da2700a6c1d690e5bcec1be23eb1f56b9cfdff96c27162c3790c8c289f76",
+      "size_bytes": 2697
     },
     {
       "path": ".github/dependabot.yml",
@@ -38,8 +38,8 @@
     },
     {
       "path": ".github/pull_request_template.md",
-      "sha256": "400d02bef27f2686116ce261672b1d71a84099a8cac53e9659de172443730686",
-      "size_bytes": 761
+      "sha256": "7788ce083c05175166a18bbd649b4d015ca8c9817f665974d124e9435cad273b",
+      "size_bytes": 1838
     },
     {
       "path": ".github/workflows/pages.yml",
@@ -49,8 +49,8 @@
     },
     {
       "path": ".github/workflows/quality.yml",
-      "sha256": "f84be1ff1b17644beb03e5915f9e57a455e73f5579fd251ff9cb21f9eaf061ac",
-      "size_bytes": 7860
+      "sha256": "a9275dcac87fcccd43729e9a7dcd8531e47ef8d229df58f7d35f699a5f9eb4a8",
+      "size_bytes": 10677
     },
     {
       "path": ".github/workflows/security.yml",
@@ -69,8 +69,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "b9f5ef0e72b3e5d22cad749b6ace8bbbfdefae98fd1d87715c287eb60c2b63c4",
-      "size_bytes": 6198
+      "sha256": "0c1511032d315378dda1e94741dcea93905bbe931a96f775fcfb53121dd2b7a0",
+      "size_bytes": 7159
     },
     {
       "path": "CITATION.cff",
@@ -84,8 +84,8 @@
     },
     {
       "path": "CONTRIBUTING.md",
-      "sha256": "4b2d6fcc6d702257811b6fc0a57fe77a9b2eace81edb9196ab1e7d1768327b32",
-      "size_bytes": 3925
+      "sha256": "5c3aeb47c6c0873b2cd93f6557d092dbe49d91b2071d13071a11b0ed6b6abff4",
+      "size_bytes": 5565
     },
     {
       "path": "LICENSE",
@@ -99,8 +99,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "04b5cabe2d563fa4edd095103518439168173090ad8996f7ab0c9d9883ac2ba6",
-      "size_bytes": 28240,
+      "sha256": "caf9c79d6c659c59f0bc03e330f848d4dce0b7196083d3668510b2e390779ed6",
+      "size_bytes": 29562,
       "source": "docs/PUBLIC_REPOSITORY_README.md"
     },
     {
@@ -160,8 +160,8 @@
     },
     {
       "path": "benchmarks/README.md",
-      "sha256": "56411b1a6d161498fe23dca45ba70dff2b41bd678d14e7453259cbdb43b1e201",
-      "size_bytes": 3773
+      "sha256": "87b07d0e4f6cb08f479a0b7ca634196ddc045f31884a6f6c4a221d632c4c3a82",
+      "size_bytes": 4448
     },
     {
       "path": "build_windows_installer.ps1",
@@ -187,6 +187,11 @@
       "path": "docs/00_OVERVIEW.md",
       "sha256": "4d32d22047c4b366f80443b3c06a8c1778e44583e64da5e9a650fc061ca116ce",
       "size_bytes": 2392
+    },
+    {
+      "path": "docs/ADOPTION_GUIDE.md",
+      "sha256": "c8484fe1c713b5e9f80b3bd6e05d4254b9b11415eca6266ce249fe7247a17d76",
+      "size_bytes": 6308
     },
     {
       "path": "docs/AGENT_PLATFORM.md",
@@ -215,8 +220,8 @@
     },
     {
       "path": "docs/API_QUICKSTART.md",
-      "sha256": "264492ec86820c3629fdcfd1999b0aff90a7b440e4037e32a8221c6a00b4cfc1",
-      "size_bytes": 27525
+      "sha256": "9621f837ef47b1e3b93256188a0ffc493426443c3a778b32abf658fabc333154",
+      "size_bytes": 13466
     },
     {
       "path": "docs/AUDIT_TRUST_BOUNDARY.md",
@@ -320,8 +325,8 @@
     },
     {
       "path": "docs/FINALS_EVIDENCE_MAP.md",
-      "sha256": "3a16ff1ac7a2d971d02f46650a710ab8e863d84c863664f31b60a71d6bb3503e",
-      "size_bytes": 6458
+      "sha256": "e6a2cd9f2410537df06b401ee7654caa306e8c1f910f97c787102ba703028d8a",
+      "size_bytes": 7157
     },
     {
       "path": "docs/FINALS_TASK_COMPLETION_UI_20260916.md",
@@ -425,8 +430,13 @@
     },
     {
       "path": "docs/OPEN_REUSE_CONTRACTS.md",
-      "sha256": "544e4d4cb894e0d1f63bf5d793ef3244a842bf7a76534d536309625808e0f63d",
-      "size_bytes": 5511
+      "sha256": "2a5120e77dcb3d7c767b340683ae911f8b3b03e872d336c58f5e58ab894aab92",
+      "size_bytes": 6557
+    },
+    {
+      "path": "docs/OPEN_SOURCE_READINESS.md",
+      "sha256": "6ab16e01333ca1985363143a30b648732da5dddcd2d4282cc4b251c48a5766df",
+      "size_bytes": 12056
     },
     {
       "path": "docs/PRODUCT_KERNEL_CLI.md",
@@ -465,8 +475,8 @@
     },
     {
       "path": "docs/PUBLIC_REPOSITORY_README.md",
-      "sha256": "04b5cabe2d563fa4edd095103518439168173090ad8996f7ab0c9d9883ac2ba6",
-      "size_bytes": 28240
+      "sha256": "caf9c79d6c659c59f0bc03e330f848d4dce0b7196083d3668510b2e390779ed6",
+      "size_bytes": 29562
     },
     {
       "path": "docs/QUALITY_GATES.md",
@@ -539,6 +549,11 @@
       "size_bytes": 5530
     },
     {
+      "path": "docs/THIRD_PARTY_REPRODUCTION.md",
+      "sha256": "a3414fb2d6603709072070c8ad015d35a2292432c03880915d3c0dd041f527f3",
+      "size_bytes": 4239
+    },
+    {
       "path": "docs/TOOLS_AND_MCP_CONTRACT.md",
       "sha256": "9fefb68419d3e11da29505b1b5e7a5503a521a5a64079e0ba05373f65d071cdf",
       "size_bytes": 2632
@@ -555,8 +570,8 @@
     },
     {
       "path": "docs/VERSION_EVOLUTION.md",
-      "sha256": "25d4dc3a9af838bb474e636e9e54904e22b5ce6fa4faba08abf444f2b6015ef4",
-      "size_bytes": 9588
+      "sha256": "5a468331b34bb8a66980700b0cc0af8906fca035346b29c48f5c4b2b48d77e64",
+      "size_bytes": 9712
     },
     {
       "path": "docs/VISION_MODEL_API_CONTRACT.md",
@@ -625,8 +640,13 @@
     },
     {
       "path": "examples/reuse/README.md",
-      "sha256": "8e4ed885a0e1f2df16ee5d7d473fecc7b7dccc150d8d15f330baf837e3c08fa1",
-      "size_bytes": 1458
+      "sha256": "c1732fadf44b0a6c1cb322dd28b5d7904685e66db229e261d1d226090734d78f",
+      "size_bytes": 5245
+    },
+    {
+      "path": "examples/reuse/custom_range_skill.py",
+      "sha256": "ccf84db0e2af41f325162e2f68200f4966d42a5dd06a9782b80838b11c8fd6de",
+      "size_bytes": 11684
     },
     {
       "path": "examples/reuse/metadata_skill.py",
@@ -985,8 +1005,8 @@
     },
     {
       "path": "src/visiondata_gate/README.md",
-      "sha256": "b6f51377cde56a68f272fb1284dba363dc1a7335fa69772a547a0f119873dbe0",
-      "size_bytes": 2478
+      "sha256": "7a18907a0a6d799e5ddedaae30886174ba3fb3ba9a00cc801c36c305d7cc30f8",
+      "size_bytes": 3188
     },
     {
       "path": "src/visiondata_gate/__init__.py",
@@ -1770,8 +1790,8 @@
     },
     {
       "path": "tests/test_adoption_docs.py",
-      "sha256": "f8525e53310454229ba5a39731baf595a6283e8f6f64c09441fcec8f8eacd0fc",
-      "size_bytes": 3237
+      "sha256": "767b35b4fb750edfc11ee1a2b81cec7ca8c5fed766ea3d16d0cc6a823e58c0c1",
+      "size_bytes": 10157
     },
     {
       "path": "tests/test_agent_core.py",
@@ -1912,6 +1932,11 @@
       "path": "tests/test_cross_platform_workbench.py",
       "sha256": "9c7205f995540018847c57e0312549a87881547c2a232e0c535beffbb0752f43",
       "size_bytes": 12332
+    },
+    {
+      "path": "tests/test_custom_skill_example.py",
+      "sha256": "b69afacb8d62b704d60f8a33406656f3d98bcc97b4fd09695e9e2b415e64b667",
+      "size_bytes": 10121
     },
     {
       "path": "tests/test_data_pool.py",
@@ -2389,6 +2414,21 @@
       "size_bytes": 26307
     },
     {
+      "path": "tests/test_open_reuse_smoke.py",
+      "sha256": "8f8da228c74b8dcc0ccbb12f1c3e93612632bbbfd11c8ae4bf6ea8789fb484d2",
+      "size_bytes": 11126
+    },
+    {
+      "path": "tests/test_open_source_readiness.py",
+      "sha256": "fc59f099fc7b73bd7e8758f187cf3cad54304beba034d6f329fa82cf351513d7",
+      "size_bytes": 6136
+    },
+    {
+      "path": "tests/test_open_source_workflow_config.py",
+      "sha256": "b0c703dc76ae10b9c955347ec781cceb3d5b7d531273a33833f47c8d7b9345e5",
+      "size_bytes": 4599
+    },
+    {
       "path": "tests/test_operator_snapshot_acceptance_requirements.py",
       "sha256": "e8038c8dc67cc2f7614702e6c080ef4cc056cebc47af40c2dcdf3c8310d195e0",
       "size_bytes": 19629
@@ -2522,6 +2562,11 @@
       "path": "tests/test_readme_finals_evidence.py",
       "sha256": "c5955b2665b6b54d2f6c3cc0fc04725e383643b0821aa7d552b77881d6515f1f",
       "size_bytes": 3409
+    },
+    {
+      "path": "tests/test_readme_open_reuse.py",
+      "sha256": "3d32de4f15fb3042cb2c64153e09e93e6839916860c64e6cd5e00a9c50b883b3",
+      "size_bytes": 2405
     },
     {
       "path": "tests/test_release_artifacts.py",
@@ -3005,8 +3050,8 @@
     },
     {
       "path": "tools/export_public_repository.py",
-      "sha256": "2cabe684fe2528ce58d129dc74f56e78861d3e9b560d9b4252a615321385ccca",
-      "size_bytes": 15793
+      "sha256": "4e47785b56d8674943beaf0d67167304f17df5228db34eb0c4ce9dfd116d7b7c",
+      "size_bytes": 15970
     },
     {
       "path": "tools/generate_cargo_license_snapshot.py",
@@ -3092,6 +3137,11 @@
       "path": "tools/run_normality_ttt_synthetic.py",
       "sha256": "11451dba89d0827865c5e4faced7e52673325d10b0158a0840eb53009caa8e76",
       "size_bytes": 7086
+    },
+    {
+      "path": "tools/run_open_reuse_smoke.py",
+      "sha256": "e062aa582a0170e7ce62b8cd1fdabf9f4afe1c16f6b2c96700b2d7f972a35ca3",
+      "size_bytes": 10473
     },
     {
       "path": "tools/run_pool_vision_loop_smoke.py",

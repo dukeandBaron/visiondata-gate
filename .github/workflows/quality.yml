@@ -140,6 +140,63 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
 
+  open-reuse:
+    name: Open reuse clean checkout (maintainer CI, not third-party adoption) / ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.12"]
+    env:
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONNOUSERSITE: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install locked Python toolchain
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: "0.11.8"
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - name: Install locked core and QA dependencies
+        run: uv sync --extra qa --locked --python "${{ matrix.python-version }}"
+      - name: Prepare a new receipt parent
+        run: python -c "from pathlib import Path; Path('output/open-reuse').mkdir(parents=True, exist_ok=True)"
+      - name: Execute the actual offline open-reuse workflow
+        run: >-
+          uv run --no-sync python tools/run_open_reuse_smoke.py
+          --output-root output/open-reuse/run
+      - name: Verify bounded adoption semantics
+        run: >-
+          uv run --no-sync python -c "import json;
+          from pathlib import Path;
+          p=Path('output/open-reuse/run/OPEN_REUSE_RECEIPT.json');
+          r=json.loads(p.read_text(encoding='utf-8'));
+          assert r['status']=='PASS_OPEN_REUSE_SMOKE';
+          assert r['evidence_scope']=='MAINTAINER_CI_CLEAN_CHECKOUT_NOT_THIRD_PARTY_ADOPTION';
+          assert r['third_party_reproduction_status']=='THIRD_PARTY_REPRODUCTION_PENDING';
+          assert r['production_release_allowed'] is False;
+          print('PASS_OPEN_REUSE_SMOKE; MAINTAINER_CI_CLEAN_CHECKOUT_NOT_THIRD_PARTY_ADOPTION; THIRD_PARTY_REPRODUCTION_PENDING; production_release_allowed=false')"
+      - name: Verify reuse, documentation and workflow contracts
+        run: >-
+          uv run --no-sync python -m pytest
+          tests/test_open_reuse_smoke.py tests/test_open_source_readiness.py
+          tests/test_adoption_docs.py tests/test_reuse_contracts.py
+          tests/test_reuse_metadata_example.py tests/test_custom_skill_example.py
+          tests/test_open_source_workflow_config.py
+          -q -p no:cacheprovider --junitxml=output/open-reuse/pytest.xml
+      - name: Preserve synthetic receipts and failures
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: open-reuse-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: output/open-reuse/
+          retention-days: 14
+          if-no-files-found: warn
+
   type-debt:
     # Explicit diagnostic lane. Its nonzero result is a visible HOLD, not hidden
     # with continue-on-error. It is not represented as the scoped gate's PASS.

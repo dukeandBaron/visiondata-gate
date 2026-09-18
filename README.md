@@ -325,7 +325,22 @@ YOLO 训练预算为 **10–600 秒**；输入冻结拒绝**同一分区的字�
 uv run --no-sync python examples/reuse/metadata_skill.py --metadata-count 12 --observed-count 14
 ```
 
-[复用合同](docs/OPEN_REUSE_CONTRACTS.md) · [版本兼容](docs/VERSIONING.md) · [贡献指南](CONTRIBUTING.md)
+### 五分钟开放复用验收
+
+下面这一条路径把真实 Skill SDK、Rule Pack 校验和 Adapter conformance 串成一个离线回执；不需要模型权重、GPU、网络或私域数据：
+
+```bash
+uv sync --extra qa --locked
+uv run --no-sync python -c "from pathlib import Path; Path('output/open-reuse').mkdir(parents=True, exist_ok=True)"
+uv run --no-sync python tools/run_open_reuse_smoke.py --output-root output/open-reuse/run-01
+uv run --no-sync python -m pytest tests/test_open_reuse_smoke.py tests/test_reuse_contracts.py -q
+```
+
+成功时读取 `output/open-reuse/run-01/OPEN_REUSE_RECEIPT.json`，状态为 `PASS_OPEN_REUSE_SMOKE`。回执分别绑定 Skill、Rule Pack 和 Adapter 的实际输出，并固定 `production_release_allowed=false`。每次复验使用新的输出目录；工具拒绝覆盖旧结果。
+
+GitHub 的 Windows／Linux 维护者 CI 也从 clean checkout 执行同一条路径，但**维护者 CI 不等于第三方复现**。在独立用户提交可核验记录前，状态保持 `THIRD_PARTY_REPRODUCTION_PENDING`。
+
+[采用指南](docs/ADOPTION_GUIDE.md) · [开放成熟度与证据](docs/OPEN_SOURCE_READINESS.md) · [复用合同](docs/OPEN_REUSE_CONTRACTS.md) · [第三方复现模板](docs/THIRD_PARTY_REPRODUCTION.md) · [版本兼容](docs/VERSIONING.md) · [贡献指南](CONTRIBUTING.md)
 
 [五份工作流 Skill](skills/README.md) 可按合同改编；文本 Skill 不等于已经安装的可执行插件。
 
@@ -350,8 +365,8 @@ uv run --no-sync python examples/reuse/metadata_skill.py --metadata-count 12 --o
 |  | 安全、合规与可追溯 | 7 | 权限、人类闸门、Fail-Closed、数据边界、血缘和审计封套 | 签名、可信时间戳和生产 IAM 未实现 |
 | **完成度与可验证性** | 核心任务闭环与稳定性 | 8 | 现场重跑、DynamicBench-v4、全仓回归、Windows 候选 | 评委陌生输入仍需现场运行 |
 |  | 产品体验与结果一致性 | 7 | 在线体验、本地工作台、源码／安装器／回执绑定 | 最终 PPT、Demo 与封版 SHA 需再次对账 |
-| **开源价值与复用** | 核心组件、Workflow、Skill 开放 | 7 | Public 主仓、代码地图、Skill、Schema、SDK、Benchmark | 私域数据和外部模型不属于开放范围 |
-|  | 文档、部署、复用与第三方验证 | 8 | README、Quickstart、License、示例、版本记录、Issue／PR 模板 | 独立第三方部署成功记录尚未取得 |
+| **开源价值与复用** | 核心组件、Workflow、Skill 开放 | 7 | Public 主仓、代码地图、Skill、Schema、SDK、Benchmark、三组件开放复用回执 | 私域数据和外部模型不属于开放范围 |
+|  | 文档、部署、复用与第三方验证 | 8 | README、采用指南、Quickstart、License、示例、clean-checkout CI、版本记录、Issue／PR 模板 | 独立第三方部署成功记录仍为 `THIRD_PARTY_REPRODUCTION_PENDING` |
 
 [查看完整 13 项证据／HOLD 对照](docs/FINALS_EVIDENCE_MAP.md)
 

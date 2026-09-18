@@ -59,3 +59,32 @@ independently locked `quality/` tool environment. Validate contributor hooks wit
 `uv run --no-sync --with-requirements quality/requirements.txt pre-commit validate-config .pre-commit-config.yaml`.
 Installing those hooks is explicit; this change does not install them automatically.
 Type-debt and Bandit findings remain visible HOLDs, not silently ignored checks.
+
+## Reproduction and open-source evidence
+
+Use the [open-source readiness map](docs/OPEN_SOURCE_READINESS.md) to distinguish
+public source, documented reusable contracts, actual execution, publication, and
+independent third-party reproduction. The official 7+8 criteria are not a score
+awarded by this repository; Stars, Forks and download counters do not establish
+successful adoption.
+
+Submit results with the [reproduction issue template](.github/ISSUE_TEMPLATE/reproduction.md).
+Include the exact commit/tree, environment and lockfile, commands actually run,
+exit status, public output hashes, failures and unrun steps. Declare whether you
+are a maintainer, a teammate or an independent third-party executor, and whether
+the maintainer operated any steps for you. Do not create or solicit fabricated
+adoption reports; an honest partial or failed run is useful evidence. A template
+or maintainer rerun is not an external clean-clone receipt.
+
+Reusable changes should include one runnable synthetic input/output example, a
+failure case, compatibility or migration notes, and applicable third-party
+license/distribution details. Keep private data and unauthorized weights outside
+public materials. Never bypass authentication, human authority or the history
+privacy gate to make a reproduction or deployment appear successful.
+
+For changes to these documents and templates, run the bounded checks below and
+record any additional feature tests separately:
+
+```text
+uv run --no-sync python -m pytest tests/test_open_source_readiness.py tests/test_adoption_docs.py tests/test_public_api_surface.py tests/test_reuse_metadata_example.py -q
+```

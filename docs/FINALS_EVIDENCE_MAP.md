@@ -37,8 +37,8 @@
 
 | 二级考核点 | 分值 | 当前证据 | 当前缺口 |
 | --- | ---: | --- | --- |
-| 核心组件、Workflow、Skill 开放 | 7 | 当前 Public 主仓、[核心代码地图](../src/visiondata_gate/README.md)、[Skill](../skills/README.md)、[Schema](../schemas/README.md)、[复用示例](../examples/reuse/README.md) | 核心自有代码已可访问；外部模型/权重和私域材料不属于开放范围 |
-| 文档、部署、版本、第三方验证 | 8 | README、Quickstart、License、版本/兼容、Issue/PR 模板、发布记录 | 独立第三方 clean-clone/部署成功记录尚未取得 |
+| 核心组件、Workflow、Skill 开放 | 7 | Public 主仓、[核心代码地图](../src/visiondata_gate/README.md)、[Skill](../skills/README.md)、[Schema](../schemas/README.md)、[复用示例](../examples/reuse/README.md)、三组件 `open-reuse` 聚合回执 | 核心自有代码已可访问；外部模型/权重和私域材料不属于开放范围，文本 Skill 不冒充已安装插件 |
+| 文档、部署、版本、第三方验证 | 8 | README、[采用指南](ADOPTION_GUIDE.md)、Quickstart、License、接口文档、贡献/Issue/PR 模板、版本记录，以及 Windows/Linux clean-checkout 维护者 CI | 维护者 CI 不等于外部采用；独立第三方结果保持 `THIRD_PARTY_REPRODUCTION_PENDING`，按[复现模板](THIRD_PARTY_REPRODUCTION.md)验收 |
 
 ## 封版前必须处理的公开复用风险
 
@@ -59,5 +59,7 @@
 既有测试记录有各自源码范围。本轮新增的运行回执应随提交包按清单绑定；未跑的测试和未重建的二进制不能引用别轮 PASS。[技术包说明](TECHNICAL_SUBMISSION_BUNDLE.md)
 
 决赛规则明确将“仓库公开可访问”列为核心组件开放的重点证据，并要求第三方能理解、部署、运行、复用和继续开发。当前仓库已经 Public，但尚无独立第三方 clean-clone／部署成功记录；这部分不能仅凭维护者自测写成完成。公开状态也不授权暴露客户数据、密钥、私域回执或未审查历史。
+
+`open-reuse` 的 GitHub Actions 从新的 checkout 执行 Skill、Rule Pack 和 Adapter 三条公共合同，属于“公开材料可由维护者 CI 重建”的证据。只有与维护者独立的人员或机构，按照模板提交精确 commit/tree、环境、命令、退出状态和输出摘要，才能把第三方复现状态从 PENDING 改为成功或部分成功。Star、Fork 和仓库创建时间不单独替代这份证据。
 
 规则同时要求 PPT、Demo、代码、运行结果和陈述一致，并允许评委改变输入现场重跑。封版时应保存：唯一 commit/tree、安装器/视频/PPT/一页纸摘要、现场 Run/Case 身份和失败恢复证据。
