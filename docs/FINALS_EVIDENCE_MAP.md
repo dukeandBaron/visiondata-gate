@@ -51,6 +51,8 @@
 | 失败恢复是否只是重播成功结果 | `capa.py` 与 Web 对账锁 | `test_exact_duplicate_capa_resumes_published_subset_and_verifies_binding`；`tests/web_vision_model_workbench.browser.mjs` |
 | Agent 是否实际调用与保存状态 | `incident_agent_kernel.py`、`worker_selection.py` | `tools/run_dynamic_benchmark_v4.py` 新目录运行，读取同一 Case 的 Worker 与 DecisionPacket |
 | 模型路线是否混写 | `learning_service.py`、`local_model_registry.py` | `tools/run_learning_demo.py` 为 NumPy 参考闭环；Normality/YOLO 另按各自 API 与环境验收 |
+| TTT 是否真的更新参数 | `normality_ttt.py`、`normality_adaptation_service.py` | [损失、参数与参考组协议](NORMALITY_TTT.md)；真实 pack 完成 3 步、16 图前后结果不变，不能外推质量提升 |
+| 模型反馈是否能转成待办 | `normality_followup_service.py`、真实工作簿与工单存储 | `tests/test_normality_followup.py`；独立授权导入、人工框保存、OPEN 工单及中断对账，不自动关闭责任 |
 | 前端是否只靠静态样例 | 模型中心的登记/批准/推理表单 | Node 合同测试与真实浏览器测试验证界面；替身 API 不作真实模型推理证据；真实后端另由 Python/API 测试核验 |
 | 来源和发布物是否一致 | `tools/build_finals_technical_bundle.py` | 双构包、ZIP/解压清单核验、独立保存 SHA；完整性不等于功能或安装验收 |
 

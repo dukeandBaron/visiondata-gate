@@ -2615,11 +2615,13 @@ def create_app(
     from .learning_api import install_learning_routes
     from .identity_api import install_identity_routes
     from .vision_model_api import install_vision_model_routes
+    from .normality_followup_api import install_normality_followup_routes
     from .data_pool_api import install_data_pool_routes
 
     install_learning_routes(app, authenticated_actor, service_dep)
     install_identity_routes(app, authenticated_actor, identity_dep, require_startup_capability)
     install_vision_model_routes(app, authenticated_actor, service_dep)
+    install_normality_followup_routes(app, authenticated_actor, service_dep, operator_store_dep)
     install_data_pool_routes(app, authenticated_actor, service_dep)
 
     return app

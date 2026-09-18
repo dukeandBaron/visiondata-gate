@@ -339,6 +339,67 @@ def test_environment_never_inherits_provider_tokens_or_proxy(tmp_path, monkeypat
     assert environment["PYTHONDONTWRITEBYTECODE"] == "1"
 
 
+def test_worker_has_anonymous_username_without_personal_environment(tmp_path, monkeypatch):
+    for key in ("LOGNAME", "USER", "LNAME", "USERNAME"):
+        monkeypatch.setenv(key, "private-test-user-do-not-forward")
+    before = dict(os.environ)
+    environment = backend._child_environment(tmp_path)
+    assert environment.get("USERNAME") == "visiondata-worker"
+    assert not {"LOGNAME", "USER", "LNAME"} & environment.keys()
+    assert "private-test-user-do-not-forward" not in environment.values()
+    assert dict(os.environ) == before
+    assert environment["CUDA_VISIBLE_DEVICES"] == ""
+
+
+def test_explicit_import_backend_under_actual_isolated_environment(tmp_path):
+    selected = os.environ.get("VISIONDATA_TEST_TORCH_PYTHON")
+    if not selected:
+        pytest.skip("explicit trusted Torch/Ultralytics runtime required")
+    code = """
+import getpass, json, runpy, socket, subprocess, sys
+backend = runpy.run_path(sys.argv[1])
+backend['_package_paths']()
+backend['_deny_network_and_children']()
+torch, torchvision, ultralytics = backend['_import_backend']()
+assert getpass.getuser() == 'visiondata-worker'
+for action, expected_code in (
+    (lambda: socket.getaddrinfo('localhost', 80), 'VISION_NETWORK_DISABLED'),
+    (lambda: subprocess.run([sys.executable, '-c', 'pass']),
+     'VISION_NETWORK_OR_CHILD_PROCESS_DISABLED'),
+):
+    try:
+        action()
+    except OSError as error:
+        assert str(error) == expected_code
+    else:
+        raise AssertionError('isolation unexpectedly weakened')
+print(json.dumps({'username': getpass.getuser(), 'torch': torch.__version__,
+                  'ultralytics': ultralytics.__version__, 'status': 'PASSED'}))
+"""
+    compile(code, "<isolated-backend-smoke>", "exec")
+    completed = subprocess.run(
+        [selected, "-B", "-I", "-S", "-c", code, str(Path(backend.__file__).resolve())],
+        env=backend._child_environment(tmp_path / "isolated"), cwd=tmp_path,
+        capture_output=True, text=True, timeout=90,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert json.loads(completed.stdout.splitlines()[-1])["status"] == "PASSED"
+
+
+def test_explicit_runtime_probe_import_check_roundtrip(tmp_path):
+    selected = os.environ.get("VISIONDATA_TEST_TORCH_PYTHON")
+    if not selected:
+        pytest.skip("explicit trusted Torch/Ultralytics runtime required")
+    executable = Path(selected)
+    result = backend.probe_vision_runtime(
+        executable, backend._sha(executable), tmp_path / "probe", import_check=True
+    )
+    assert result["status"] == "ready", result
+    assert result["import_status"] == "PASSED", result
+    assert len(result["runtime_sha256"]) == 64
+    assert str(executable) not in json.dumps(result)
+
+
 def test_external_runtime_command_disables_bytecode_residue(tmp_path):
     command = backend._command(
         tmp_path / "python.exe",

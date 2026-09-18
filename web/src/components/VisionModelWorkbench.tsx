@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Activity, Cpu, Database, FileCheck2, RefreshCw, ShieldCheck, SlidersHorizontal } from 'lucide-react';
 import { useProduct } from '../ProductContext';
 import { getIdentityActorId } from '../identitySession.ts';
 import { getVisionCapabilities, listVisionRecords, getVisionRun, getVisionModel, getVisionInferenceAsset, getVisionInference, getVisionOperation, getVisionFeedback,
-  getVisionPool, prepareVisionMutation, sendVisionMutation, visionWriteKnownRejected, visionErrorMessage } from '../data/visionModelApi.ts';
-import { parseDetectionManifest, parseVisionPending, visionPendingStorageKey, visionStatusLabel } from '../visionModelDomain.ts';
+  getVisionPool, getVisionHeatmap, getNormalityFeedback, getNormalityFollowup, getNormalityFollowupAnnotations, getVisionTttCapabilities, prepareVisionMutation, sendVisionMutation, visionWriteKnownRejected, visionErrorMessage } from '../data/visionModelApi.ts';
+import { parseDetectionManifest, parseVisionPending, visionPendingStorageKey, visionStatusLabel, visionEnsure } from '../visionModelDomain.ts';
 import type { VisionScope, VisionPending, VisionMutationOperation, VisionRecord, VisionModel, VisionNormalityModel, VisionRuntime, VisionDataset, VisionRun,
   VisionInferenceAsset, VisionInference, VisionCapabilities, VisionApproval, VisionBudget, DetectionManifest, CreateVisionRunRequest, VisionFeedback,
-  VisionFeedbackClassification, RegisterNormalityModelPackRequest, ApproveNormalityModelPackRequest, RegisterVisionInferenceAssetRequest, RunNormalityInferenceRequest } from '../visionModelDomain.ts';
+  VisionFeedbackClassification, NormalityFeedback, NormalityFeedbackClassification, NormalityFollowupImport, NormalityFollowupWorkOrder, NormalityFollowupList, NormalityFollowupAnnotations, VisionTttCapabilities, VisionTttFailure, VisionTttBudget, VisionTttReport, RegisterNormalityModelPackRequest, ApproveNormalityModelPackRequest, RegisterVisionInferenceAssetRequest, RunNormalityInferenceRequest } from '../visionModelDomain.ts';
 import type { DataPoolProjection } from '../dataPoolDomain.ts';
 import '../styles/vision-models.css';
 
@@ -36,6 +36,7 @@ function ApprovalFields({ value, onChange }: { value: ApprovalState; onChange: (
 }
 function Sha({ label, value }: { label: string; value: string }) { return <div className="vision-models__sha"><span>{label}</span><code>{value}</code></div>; }
 function Empty({ children }: { children: ReactNode }) { return <p className="vision-models__empty">{children}</p>; }
+function isFollowupRecord(record: VisionRecord): record is NormalityFollowupImport | NormalityFollowupWorkOrder { return record.schema_version === 'visiondata-gate.normality-followup-import.v1' || record.schema_version === 'visiondata-gate.normality-followup-work-order.v1'; }
 
 export function VisionModelWorkbench() {
   const { activeProject, activeWorkspace } = useProduct();
@@ -56,6 +57,8 @@ function ScopedVisionWorkbench({ scope, projectName }: { scope: VisionScope; pro
   const [datasets, setDatasets] = useState<VisionDataset[]>([]), [runs, setRuns] = useState<VisionRun[]>([]);
   const [inferenceAssets, setInferenceAssets] = useState<VisionInferenceAsset[]>([]), [inferences, setInferences] = useState<VisionInference[]>([]);
   const [feedback, setFeedback] = useState<VisionFeedback[]>([]);
+  const [feedbackRevision, setFeedbackRevision] = useState(0);
+  const [tttFailures, setTttFailures] = useState<VisionTttFailure[]>([]);
   const [selected, setSelected] = useState<VisionRecord>(); const selectedRef = useRef<VisionRecord | undefined>(undefined); selectedRef.current = selected;
   const storageKey = visionPendingStorageKey(scope);
   const [lock, setLock] = useState(() => readPending(storageKey)); const lockRef = useRef(lock); lockRef.current = lock;
@@ -75,11 +78,12 @@ function ScopedVisionWorkbench({ scope, projectName }: { scope: VisionScope; pro
     try {
       const [c, m, r, d, tr, assets, results] = await Promise.all([getVisionCapabilities(scope), listVisionRecords(scope, 'model'), listVisionRecords(scope, 'runtime'),
         listVisionRecords(scope, 'dataset'), listVisionRecords(scope, 'run'), listVisionRecords(scope, 'inference_asset'), listVisionRecords(scope, 'inference')]);
+      const failures = c.ttt_status === 'NORMALITY_EPISODIC_AVAILABLE' ? await listVisionRecords(scope, 'ttt_failure') : [];
       if (!validScope()) return;
       // Counts are advisory; concurrent training may add a candidate between GETs.
-      setCapabilities(c); setModels(m); setRuntimes(r); setDatasets(d); setRuns(tr); setInferenceAssets(assets); setInferences(results);
+      setCapabilities(c); setModels(m); setRuntimes(r); setDatasets(d); setRuns(tr); setInferenceAssets(assets); setInferences(results); setTttFailures(failures);
       const chosen = selectedRef.current;
-      if (chosen) setSelected([...m, ...r, ...d, ...tr, ...assets, ...results].find(item => item.resource_id === chosen.resource_id));
+      if (chosen) setSelected([...m, ...r, ...d, ...tr, ...assets, ...results, ...failures].find(item => item.resource_id === chosen.resource_id));
       setFresh(true);
     } catch (failure) { if (validScope()) { setError(visionErrorMessage(failure)); setCapabilities(undefined); } }
     finally { reading.current = false; if (validScope()) setBusy(false); }
@@ -91,6 +95,11 @@ function ScopedVisionWorkbench({ scope, projectName }: { scope: VisionScope; pro
     return () => { mounted.current = false; window.removeEventListener('storage', onStorage); };
   }, [refresh, storageKey]);
   useEffect(() => registerScopeChangeGuard(() => !writing.current), [registerScopeChangeGuard]);
+  const readFollowupBinding = async (row: NormalityFollowupImport | NormalityFollowupWorkOrder) => {
+    const inference = await getVisionInference(scope, row.inference_id), feedback = (await getNormalityFeedback(scope, inference)).find(item => item.feedback_id === row.feedback_id && item.receipt_sha256 === row.feedback_sha256);
+    visionEnsure(feedback); const persisted = await getNormalityFollowup(scope, feedback);
+    visionEnsure([...persisted.imports, ...persisted.work_orders].some(item => item.resource_id === row.resource_id && item.receipt_sha256 === row.receipt_sha256)); return inference;
+  };
   const executeOwned: Execute = async (operation, build, context) => {
     if (!validScope() || writing.current || reading.current || !fresh || lockRef.current.pending || lockRef.current.corrupt) return false;
     writing.current = true; setBusy(true); setError(''); setNotice('');
@@ -107,9 +116,17 @@ function ScopedVisionWorkbench({ scope, projectName }: { scope: VisionScope; pro
       catch { setLock({ pending: null, corrupt: true }); lockRef.current = { pending: null, corrupt: true }; setError('HOLD：无法保存最小对账标识；操作未发送。'); return false; }
       lockRef.current = { pending, corrupt: false }; setLock(lockRef.current);
       const result = await sendVisionMutation(prepared);
+      let reviewedInference: VisionInference | undefined;
+      if (result.schema_version === 'visiondata-gate.normality-feedback.v1') {
+        const item = result as NormalityFeedback; reviewedInference = await getVisionInference(scope, item.inference_id);
+        const persisted = await getNormalityFeedback(scope, reviewedInference);
+        visionEnsure(persisted.some(row => row.feedback_id === item.feedback_id && row.receipt_sha256 === item.receipt_sha256));
+      }
+      if (isFollowupRecord(result)) reviewedInference = await readFollowupBinding(result);
       clearLock(pending); success = true;
       if (validScope()) {
-        if ('feedback_id' in result) setFeedback(current => [...current.filter(item => item.feedback_id !== result.feedback_id), result]);
+        if (reviewedInference) { setSelected(reviewedInference); setFeedbackRevision(value => value + 1); }
+        else if (result.schema_version === 'visiondata-gate.vision-feedback.v1') { const item = result as VisionFeedback; setFeedback(current => [...current.filter(row => row.feedback_id !== item.feedback_id), item]); }
         else setSelected(result);
         setNotice('操作已收到完整性验证回执。请依据实际状态复核，不代表精度通过或生产放行。'); setFresh(false);
       }
@@ -138,11 +155,18 @@ function ScopedVisionWorkbench({ scope, projectName }: { scope: VisionScope; pro
     try {
       const receipt = await getVisionOperation(scope, pending);
       if (!validScope()) return;
-      clearLock(pending);
-      if ('feedback_id' in receipt.resource) {
-        const item = receipt.resource; setFeedback(current => [...current.filter(row => row.feedback_id !== item.feedback_id), item]);
+      if (isFollowupRecord(receipt.resource)) {
+        const inference = await readFollowupBinding(receipt.resource); if (!validScope()) return; setSelected(inference); setFeedbackRevision(value => value + 1);
+      } else if (receipt.resource.schema_version === 'visiondata-gate.normality-feedback.v1') {
+        const item = receipt.resource as NormalityFeedback, inference = await getVisionInference(scope, item.inference_id);
+        const persisted = await getNormalityFeedback(scope, inference);
+        visionEnsure(persisted.some(row => row.feedback_id === item.feedback_id && row.receipt_sha256 === item.receipt_sha256));
+        if (!validScope()) return; setSelected(inference); setFeedbackRevision(value => value + 1);
+      } else if (receipt.resource.schema_version === 'visiondata-gate.vision-feedback.v1') {
+        const item = receipt.resource as VisionFeedback; setFeedback(current => [...current.filter(row => row.feedback_id !== item.feedback_id), item]);
         setSelected(await getVisionRun(scope, item.run_id));
       } else setSelected(receipt.resource);
+      clearLock(pending);
       confirmed = true;
       setNotice('原请求已由 GET 对账确认。没有重发 POST，也没有重新训练。');
     } catch (failure) { if (validScope()) setError(`原操作尚未得到可验证回执，锁仍保留。${visionErrorMessage(failure)}`); }
@@ -153,7 +177,7 @@ function ScopedVisionWorkbench({ scope, projectName }: { scope: VisionScope; pro
     if (busy || !validScope()) return;
     setBusy(true); setError('');
     try {
-      const next = 'inference_id' in record ? await getVisionInference(scope, record.inference_id) : 'asset_id' in record ? await getVisionInferenceAsset(scope, record.asset_id)
+      const next = 'failure_id' in record ? record : 'inference_id' in record ? await getVisionInference(scope, record.inference_id) : 'asset_id' in record ? await getVisionInferenceAsset(scope, record.asset_id)
         : 'run_id' in record ? await getVisionRun(scope, record.run_id) : 'model_id' in record ? await getVisionModel(scope, record.model_id) : record;
       if (validScope()) setSelected(next);
     } catch (failure) { if (validScope()) { setFresh(false); setError(visionErrorMessage(failure)); } }
@@ -161,32 +185,32 @@ function ScopedVisionWorkbench({ scope, projectName }: { scope: VisionScope; pro
   };
   const canAct = fresh && Boolean(capabilities) && !busy && !lock.pending && !lock.corrupt;
   const normalityModels = models.filter((item): item is VisionNormalityModel => item.task_type === 'normality');
-  const records: VisionRecord[] = tab === 'normality' ? [...normalityModels, ...inferenceAssets, ...inferences] : { runtime: runtimes, model: models.filter(item => item.task_type !== 'normality'), dataset: datasets, run: runs }[tab];
+  const records: VisionRecord[] = tab === 'normality' ? [...normalityModels, ...inferenceAssets, ...inferences, ...tttFailures] : { runtime: runtimes, model: models.filter(item => item.task_type !== 'normality'), dataset: datasets, run: runs }[tab];
   return <section className="vision-models" aria-label="本地视觉模型工作台">
     <header className="vision-models__header"><div><p>LOCAL VISION / {projectName}</p><h2>把模型放进可复核的训练流程</h2><span>权重、数据与运行环境各自绑定 SHA-256。每次执行都需要独立授权。</span></div>
       <button type="button" onClick={() => void refresh()} disabled={busy}><RefreshCw size={15} />刷新状态（仅 GET）</button></header>
-    <div className="vision-models__boundary"><ShieldCheck size={18} /><p><strong>当前执行边界：本地 CPU · detect 训练 + Normality 沙箱推理</strong><span>不自动下载权重、不外发数据；GPU 未运行；TTT 关闭（未实现）；远程算力 CONNECTOR_NOT_CONFIGURED；工业效果 NOT_EVALUATED；不接生产。</span></p></div>
+    <div className="vision-models__boundary"><ShieldCheck size={18} /><p><strong>当前执行边界：本地 CPU · detect 训练 + Normality 沙箱推理</strong><span>不自动下载权重、不外发数据；GPU 未运行；{capabilities?.ttt_status === 'NORMALITY_EPISODIC_AVAILABLE' ? 'Normality 单次 TTT 可单独授权；不持久学习；detect TTT 关闭' : 'TTT 关闭（未实现）'}；远程算力 CONNECTOR_NOT_CONFIGURED；工业效果 NOT_EVALUATED；不接生产。</span></p></div>
     {error && <div className="vision-models__alert" role="alert">{error}</div>}
     {notice && <div className="vision-models__notice" role="status">{notice}</div>}
     {lock.corrupt && <div className="vision-models__alert" role="alert">HOLD：本浏览器对账锁无法读取或存储不可用。所有写入已阻止；请先通过服务端操作记录核查，不要通过清除锁来重跑训练。</div>}
     {lock.pending && <div className="vision-models__alert" role="status"><strong>写入结果待确认 · UNKNOWN</strong><p>只保存当前账号与项目的操作名和请求标识。关页后保留，不保存路径、复核说明或令牌。</p><code>{lock.pending.operation} · {lock.pending.requestKey}</code>
       <button type="button" onClick={() => void reconcile()} disabled={busy}>使用原 request_key 仅 GET 对账</button></div>}
-    <nav className="vision-models__tabs" aria-label="视觉模型流程">{tabs.map(({ id, title, icon: Icon }) => <button type="button" key={id} aria-current={tab === id ? 'page' : undefined} onClick={() => { setTab(id); setSelected(undefined); }}><Icon size={16} />{title}<span>{id === 'normality' ? normalityModels.length + inferenceAssets.length + inferences.length : ({ runtime: runtimes, model: models.filter(item => item.task_type !== 'normality'), dataset: datasets, run: runs }[id]).length}</span></button>)}</nav>
+    <nav className="vision-models__tabs" aria-label="视觉模型流程">{tabs.map(({ id, title, icon: Icon }) => <button type="button" key={id} aria-current={tab === id ? 'page' : undefined} onClick={() => { setTab(id); setSelected(undefined); }}><Icon size={16} />{title}<span>{id === 'normality' ? normalityModels.length + inferenceAssets.length + inferences.length + tttFailures.length : ({ runtime: runtimes, model: models.filter(item => item.task_type !== 'normality'), dataset: datasets, run: runs }[id]).length}</span></button>)}</nav>
     <div className="vision-models__layout"><div className="vision-models__form-panel">
       {tab === 'runtime' && <RuntimeForm canAct={canAct} execute={execute} />}
       {tab === 'model' && <ModelForm canAct={canAct} execute={execute} />}
       {tab === 'dataset' && <>{poolId ? <><PoolDatasetForm key={`${poolId}:${params.get('version') ?? ''}`} scope={scope} poolId={poolId} expectedVersionId={params.get('version')} canAct={canAct} execute={execute} />
         <details className="vision-models__external"><summary>也可登记外部检测 JSON 清单</summary><DatasetForm canAct={canAct} execute={execute} /></details></> : <DatasetForm canAct={canAct} execute={execute} />}</>}
       {tab === 'run' && <TrainingForm canAct={canAct} execute={execute} runtimes={runtimes} datasets={datasets} models={models.filter(item => item.task_type !== 'normality')} feedback={feedback} activeRun={runs.some(run => ['QUEUED', 'RUNNING'].includes(run.status))} />}
-      {tab === 'normality' && <NormalityWorkbench canAct={canAct} execute={execute} models={normalityModels} runtimes={runtimes} assets={inferenceAssets} />}
+      {tab === 'normality' && <NormalityWorkbench scope={scope} tttAvailable={capabilities?.ttt_status === 'NORMALITY_EPISODIC_AVAILABLE'} canAct={canAct} execute={execute} models={normalityModels} runtimes={runtimes} assets={inferenceAssets} />}
     </div><div className="vision-models__records"><h3>{tabs.find(item => item.id === tab)?.title}记录</h3>
       {!records.length && <Empty>{fresh ? '当前项目还没有记录。登记完成后才能在下一阶段选择。' : '尚未读取到可验证记录；不会显示虚构样例。'}</Empty>}
       {records.map(record => <button className="vision-models__record" type="button" key={record.resource_id} disabled={busy} onClick={() => void details(record)} aria-pressed={selected?.resource_id === record.resource_id}>
-        <strong>{'inference_id' in record ? `${record.predicted_anomaly ? '异常信号' : '未越阈值'} · ${record.image_score.toFixed(4)}` : 'display_name' in record ? record.display_name : 'training' in record ? visionStatusLabel(record.status) : 'dataset_receipt' in record ? record.dataset_receipt.source_version : record.resource_id}</strong>
-        <code>{record.resource_id}</code><span>{record.status}</span>{'runtime_id' in record && 'probe' in record && <small>库导入：{record.probe.import_status}</small>}
+        <strong>{'image_score' in record ? `${record.predicted_anomaly ? '异常信号' : '未越阈值'} · ${record.image_score.toFixed(4)}` : 'display_name' in record ? record.display_name : 'training' in record ? visionStatusLabel(record.status) : 'dataset_receipt' in record ? record.dataset_receipt.source_version : record.resource_id}</strong>
+        <code>{record.resource_id}</code><span>{record.status}</span>{'runtime_id' in record && 'probe' in record && <small>库导入：{record.probe.status === 'failed' ? '失败 · metadata NOT_MEASURED' : record.probe.import_status}</small>}
       </button>)}
-      {selected && (('inference_id' in selected) || ('asset_id' in selected) || ('model_id' in selected && selected.task_type === 'normality')
-        ? <NormalityRecordDetails key={selected.receipt_sha256} record={selected as VisionNormalityModel | VisionInferenceAsset | VisionInference} canAct={canAct} execute={execute} runtimes={runtimes} />
+      {selected && ('failure_id' in selected ? <TttFailureDetails failure={selected} /> : ('inference_id' in selected) || ('asset_id' in selected) || ('task_type' in selected && selected.task_type === 'normality')
+        ? <NormalityRecordDetails key={`${selected.receipt_sha256}:${feedbackRevision}`} scope={scope} record={selected as VisionNormalityModel | VisionInferenceAsset | VisionInference} canAct={canAct} execute={execute} runtimes={runtimes} />
         : <RecordDetails key={selected.receipt_sha256} record={selected} scope={scope} canAct={canAct} execute={execute} feedback={feedback} onFeedback={(runId, items) => setFeedback(current => [...current.filter(row => row.run_id !== runId), ...items])} />)}
     </div></div>
   </section>;
@@ -230,14 +254,22 @@ function ModelForm({ canAct, execute }: { canAct: boolean; execute: Execute }) {
   </fieldset></form>;
 }
 
-function NormalityWorkbench({ canAct, execute, models, runtimes, assets }: { canAct: boolean; execute: Execute; models: VisionNormalityModel[]; runtimes: VisionRuntime[]; assets: VisionInferenceAsset[] }) {
+function NormalityWorkbench({ scope, tttAvailable, canAct, execute, models, runtimes, assets }: { scope: VisionScope; tttAvailable: boolean; canAct: boolean; execute: Execute; models: VisionNormalityModel[]; runtimes: VisionRuntime[]; assets: VisionInferenceAsset[] }) {
   const approved = models.filter(model => model.status === 'APPROVE_SANDBOX' && model.usage_scope === 'LOCAL_SANDBOX_ONLY');
+  const [ttt, setTtt] = useState<VisionTttCapabilities>(), [error, setError] = useState(''), [loading, setLoading] = useState(false); const alive = useRef(true);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  const readTtt = async () => { if (loading) return; setLoading(true); setTtt(undefined); setError('');
+    try { const result = await getVisionTttCapabilities(scope); if (alive.current && getIdentityActorId() === scope.actorId) setTtt(result); }
+    catch (failure) { if (alive.current) setError(visionErrorMessage(failure)); } finally { if (alive.current) setLoading(false); } };
   return <div className="vision-models__normality-workbench">
     <div className="vision-models__inline-hold"><strong>本机证据边界</strong><p>这里只执行已登记、已核验并由人工批准的 Normality 模型包。推理是模型信号，不是标签真值、Gate 决策或生产放行。</p><small>远程训练 / moxin：PREPARED_NOT_SUBMITTED · CONNECTOR_NOT_CONFIGURED。本页没有远程提交按钮。</small></div>
     {approved.length === 0 && <p className="vision-models__inline-hold">HOLD：当前项目没有已批准的 Normality 模型包。可以先登记 pack，再由具名人员单独批准沙箱执行。</p>}
     <details className="vision-models__external" open={models.length === 0}><summary>1 · 登记 Normality 模型包与冻结证据</summary><NormalityPackForm canAct={canAct} execute={execute} /></details>
     <details className="vision-models__external" open={assets.length === 0}><summary>2 · 登记本地推理输入图像</summary><NormalityAssetForm canAct={canAct} execute={execute} /></details>
     <NormalityInferenceForm canAct={canAct} execute={execute} models={approved} assets={assets} runtimes={runtimes} />
+    {tttAvailable && <section aria-label="独立 TTT 授权"><h3>4 · 单次 TTT（独立授权）</h3><p>只更新本次学生副本；以独立人工 guard 检查遗忘，退化就回滚。不会更新原模型包，也不会持续学习。</p>
+      <button type="button" disabled={loading} onClick={() => void readTtt()}>读取 TTT 能力（仅 GET）</button>{error && <p role="alert">{error}</p>}
+      {ttt && <NormalityInferenceForm key={ttt.receipt_sha256} ttt={ttt} canAct={canAct} execute={execute} models={approved} assets={assets} runtimes={runtimes} />}</section>}
   </div>;
 }
 
@@ -300,31 +332,47 @@ function NormalityAssetForm({ canAct, execute }: { canAct: boolean; execute: Exe
       <button type="submit" disabled={!ready}>冻结为推理输入资产</button></fieldset></form>;
 }
 
-function NormalityInferenceForm({ canAct, execute, models, assets, runtimes }: { canAct: boolean; execute: Execute; models: VisionNormalityModel[]; assets: VisionInferenceAsset[]; runtimes: VisionRuntime[] }) {
+function NormalityInferenceForm({ canAct, execute, models, assets, runtimes, ttt }: { canAct: boolean; execute: Execute; models: VisionNormalityModel[]; assets: VisionInferenceAsset[]; runtimes: VisionRuntime[]; ttt?: VisionTttCapabilities }) {
   const [modelId, setModelId] = useState(''), [assetId, setAssetId] = useState(''), [maxSeconds, setMaxSeconds] = useState(120);
   const [review, setReview] = useState<ApprovalState>({ reviewer: '', note: '' }); const [execution, setExecution] = useState(false), [runtimeTrusted, setRuntimeTrusted] = useState(false);
   const [weightsTrusted, setWeightsTrusted] = useState(false), [weightsOnly, setWeightsOnly] = useState(false);
+  const [roles, setRoles] = useState<Record<string, 'adaptation' | 'replay' | 'guard_normal' | 'guard_anomaly' | ''>>({});
+  const [tttAuthorized, setTttAuthorized] = useState(false), [replayNormal, setReplayNormal] = useState(false), [guardReviewed, setGuardReviewed] = useState(false);
+  const [budget, setBudget] = useState<VisionTttBudget>({ steps: 2, learning_rate: .001, max_seconds: 30, seed: 0 });
   const model = models.find(item => item.model_id === modelId), asset = assets.find(item => item.asset_id === assetId);
   const runtime = runtimes.find(item => item.runtime_id === model?.sandbox_runtime_id); const runtimeReady = runtime?.probe.status === 'ready' && runtime.probe.import_status === 'PASSED' && runtime.runtime_sha256 === model?.sandbox_runtime_sha256;
-  useEffect(() => { setExecution(false); setRuntimeTrusted(false); setWeightsTrusted(false); setWeightsOnly(false); }, [modelId, assetId, model?.receipt_sha256, asset?.receipt_sha256]);
-  const ready = Boolean(model && asset && runtimeReady && maxSeconds >= 5 && maxSeconds <= 300 && execution && runtimeTrusted && weightsTrusted && weightsOnly && approvalReady(review));
-  return <form className="vision-models__normality-inference" onSubmit={event => { event.preventDefault(); if (!model || !asset || !ready) return;
-    void execute(`run_normality_inference:${model.model_id}`, key => ({ ...approval(review, key), expected_model_receipt_sha256: model.receipt_sha256,
+  useEffect(() => { setExecution(false); setRuntimeTrusted(false); setWeightsTrusted(false); setWeightsOnly(false); setTttAuthorized(false); setReplayNormal(false); setGuardReviewed(false); }, [modelId, assetId, model?.receipt_sha256, asset?.receipt_sha256, roles, budget, maxSeconds, ttt?.receipt_sha256, assets]);
+  const refs = (role: string) => assets.filter(row => row.asset_id !== assetId && roles[row.asset_id] === role).map(row => ({ asset_id: row.asset_id, expected_asset_receipt_sha256: row.receipt_sha256, expected_image_sha256: row.image_sha256 }));
+  const adaptation = refs('adaptation'), replay = refs('replay'), guard = [...refs('guard_normal').map(row => ({ ...row, reference_label: 'normal' })), ...refs('guard_anomaly').map(row => ({ ...row, reference_label: 'anomaly' }))];
+  const hashes = [asset?.image_sha256, ...[...adaptation, ...replay, ...guard].map(row => row.expected_image_sha256)];
+  const tttReady = !ttt || (tttAuthorized && replayNormal && guardReviewed && adaptation.length <= 7 && replay.length >= 1 && replay.length <= 8 && guard.length >= 2 && guard.length <= 16
+    && guard.some(row => row.reference_label === 'normal') && guard.some(row => row.reference_label === 'anomaly') && new Set(hashes).size === hashes.length
+    && Number.isInteger(budget.steps) && budget.steps >= 1 && budget.steps <= 8 && budget.learning_rate >= .00001 && budget.learning_rate <= .01 && Number.isInteger(budget.max_seconds)
+    && budget.max_seconds >= 5 && budget.max_seconds <= 120 && budget.max_seconds <= maxSeconds && Number.isInteger(budget.seed) && budget.seed >= 0 && budget.seed <= 2147483647);
+  const ready = Boolean(model && asset && runtimeReady && maxSeconds >= 5 && maxSeconds <= 300 && execution && runtimeTrusted && weightsTrusted && weightsOnly && approvalReady(review) && tttReady);
+  return <form className={ttt ? 'vision-models__normality-ttt' : 'vision-models__normality-inference'} onSubmit={event => { event.preventDefault(); if (!model || !asset || !ready) return;
+    void execute(`${ttt ? 'run_normality_ttt' : 'run_normality_inference'}:${model.model_id}`, key => ({ ...approval(review, key), expected_model_receipt_sha256: model.receipt_sha256,
       expected_model_pack_sha256: model.model_pack_sha256, expected_backbone_weights_sha256: model.backbone_weights_sha256, expected_source_binding_sha256: model.source_binding_sha256,
       expected_source_index_sha256: model.source_index_sha256, expected_runtime_sha256: model.sandbox_runtime_sha256!, asset_id: asset.asset_id,
       expected_asset_receipt_sha256: asset.receipt_sha256, expected_image_sha256: asset.image_sha256, max_seconds: maxSeconds, operator_attests_execution_authorized: execution,
-      operator_attests_trusted_runtime: runtimeTrusted, operator_attests_trusted_weights: weightsTrusted, operator_attests_weights_only_load_authorized: weightsOnly } as RunNormalityInferenceRequest)).then(ok => { if (ok) { setExecution(false); setRuntimeTrusted(false); setWeightsTrusted(false); setWeightsOnly(false); } }); }}>
-    <h3>3 · 执行一次本地沙箱推理</h3><p>只有 `APPROVE_SANDBOX` 的 pack 和 `PASSED` 的绑定运行环境可选。输出永远保持 `NOT_ISSUED`，必须由人继续复核。</p>
+      operator_attests_trusted_runtime: runtimeTrusted, operator_attests_trusted_weights: weightsTrusted, operator_attests_weights_only_load_authorized: weightsOnly,
+      ...(ttt ? { expected_ttt_implementation_sha256: ttt.implementation_sha256, adaptation_assets: adaptation, replay_assets: replay, guard_assets: guard, budget,
+        operator_attests_ttt_authorized: tttAuthorized, operator_attests_replay_normal: replayNormal, operator_attests_guard_labels_reviewed: guardReviewed } : {}) } as RunNormalityInferenceRequest)).then(ok => { if (ok) { setExecution(false); setRuntimeTrusted(false); setWeightsTrusted(false); setWeightsOnly(false); setTttAuthorized(false); setReplayNormal(false); setGuardReviewed(false); } }); }}>
+    <h3>{ttt ? '单次 TTT 输入、预算与授权' : '3 · 执行一次本地沙箱推理'}</h3><p>只有 `APPROVE_SANDBOX` 的 pack 和 `PASSED` 的绑定运行环境可选。输出永远保持 `NOT_ISSUED`，必须由人继续复核。</p>
     <fieldset disabled={!canAct}><label>Normality 模型包<select aria-label="Normality 模型包" value={modelId} onChange={event => setModelId(event.target.value)} required><option value="">选择已批准模型包</option>{models.map(item => <option key={item.model_id} value={item.model_id}>{item.display_name} · {item.status}</option>)}</select></label>
       <label>冻结输入资产<select aria-label="冻结输入资产" value={assetId} onChange={event => setAssetId(event.target.value)} required><option value="">选择已冻结图像</option>{assets.map(item => <option key={item.asset_id} value={item.asset_id}>{item.display_name} · {item.image_width}×{item.image_height}</option>)}</select></label>
       <label>最长执行秒数<input aria-label="最长执行秒数" type="number" min={5} max={300} value={maxSeconds} onChange={event => setMaxSeconds(event.target.valueAsNumber)} /></label>
+      {ttt && <><Sha label="TTT 实现 SHA-256" value={ttt.implementation_sha256} /><p>query 自动参与 adaptation；replay 必须是正常旧参考；guard 必须由人复核且包含正常与异常，三个集合按图像 SHA 隔离。guard 只检查，不参与梯度更新。</p>
+        {assets.filter(row => row.asset_id !== assetId).map(row => <label key={row.asset_id}>{row.display_name}<select aria-label={`TTT 用途 ${row.asset_id}`} value={roles[row.asset_id] ?? ''} onChange={event => setRoles(current => ({ ...current, [row.asset_id]: event.target.value as typeof roles[string] }))}><option value="">不参与</option><option value="adaptation">额外适应图（不使用标签）</option><option value="replay">正常 replay（人工确认）</option><option value="guard_normal">独立 guard · 正常（人工标签）</option><option value="guard_anomaly">独立 guard · 异常（人工标签）</option></select></label>)}
+        <div className="vision-models__budget">{([{ key: 'steps', label: 'TTT 步数', min: 1, max: 8, step: 1 }, { key: 'learning_rate', label: 'TTT 学习率', min: .00001, max: .01, step: .00001 }, { key: 'max_seconds', label: 'TTT 最长秒数', min: 5, max: 120, step: 1 }, { key: 'seed', label: 'TTT Seed', min: 0, max: 2147483647, step: 1 }] as const).map(field => <label key={field.key}>{field.label}<input aria-label={field.label} type="number" min={field.min} max={field.max} step={field.step} value={budget[field.key]} onChange={event => setBudget(current => ({ ...current, [field.key]: event.target.valueAsNumber }))} /></label>)}</div></>}
       {model && <><Sha label="模型包 SHA-256" value={model.model_pack_sha256} /><Sha label="绑定运行环境 SHA-256" value={model.sandbox_runtime_sha256!} />{!runtimeReady && <p className="vision-models__inline-hold">HOLD：批准时绑定的运行环境不在当前项目，或实际库导入不是 PASSED。</p>}</>}
       {asset && <Sha label="输入图像 SHA-256" value={asset.image_sha256} />}<ApprovalFields value={review} onChange={setReview} />
       <Check label="我授权本次本地 CPU 推理；结果只作为模型信号。" checked={execution} onChange={setExecution} />
       <Check label="我信任沙箱运行环境，并确认绑定 SHA 未变。" checked={runtimeTrusted} onChange={setRuntimeTrusted} />
       <Check label="我信任绑定的权重与证据来源。" checked={weightsTrusted} onChange={setWeightsTrusted} />
       <Check label="我仅授权 weights-only 加载模型包。" checked={weightsOnly} onChange={setWeightsOnly} />
-      <button type="submit" disabled={!ready}>执行一次本地沙箱推理</button>
+      {ttt && <><Check label="我单独授权本次有界 TTT，仅改变本次学生副本；结束即重置，不持久训练原模型。" checked={tttAuthorized} onChange={setTttAuthorized} /><Check label="我确认 replay 图像是经人工核查的正常旧参考，不由文件名或模型预测推定。" checked={replayNormal} onChange={setReplayNormal} /><Check label="我已具名复核 guard 的正常与异常标签，授权它们仅用于独立遗忘与回滚检查。" checked={guardReviewed} onChange={setGuardReviewed} /></>}
+      <button type="submit" disabled={!ready}>{ttt ? '按独立授权执行一次 TTT' : '执行一次本地沙箱推理'}</button>
     </fieldset></form>;
 }
 
@@ -459,8 +507,8 @@ function TrainingForm({ canAct, execute, runtimes, datasets, models, feedback, a
     </fieldset></form>;
 }
 
-function NormalityRecordDetails({ record, canAct, execute, runtimes }: { record: VisionNormalityModel | VisionInferenceAsset | VisionInference; canAct: boolean; execute: Execute; runtimes: VisionRuntime[] }) {
-  if ('inference_id' in record) return <NormalityInferenceDetails inference={record} />;
+function NormalityRecordDetails({ record, scope, canAct, execute, runtimes }: { record: VisionNormalityModel | VisionInferenceAsset | VisionInference; scope: VisionScope; canAct: boolean; execute: Execute; runtimes: VisionRuntime[] }) {
+  if ('inference_id' in record) return <NormalityInferenceDetails inference={record} scope={scope} canAct={canAct} execute={execute} />;
   if ('asset_id' in record) return <article className="vision-models__details"><h4>冻结推理输入资产</h4><code>{record.asset_id}</code><Sha label="资产回执 SHA-256" value={record.receipt_sha256} />
     <Sha label="图像 SHA-256" value={record.image_sha256} /><dl><dt>尺寸</dt><dd>{record.image_width} × {record.image_height}</dd><dt>格式 / 字节</dt><dd>{record.format} · {record.image_bytes.toLocaleString()}</dd>
       <dt>存储</dt><dd>{record.storage_scope}</dd><dt>标签真值</dt><dd>未声明；文件名和目录不作为真值</dd><dt>生产放行</dt><dd>禁止 · false</dd></dl></article>;
@@ -468,7 +516,7 @@ function NormalityRecordDetails({ record, canAct, execute, runtimes }: { record:
     <Sha label="模型包 SHA-256" value={record.model_pack_sha256} /><Sha label="Backbone SHA-256" value={record.backbone_weights_sha256} />
     <dl><dt>状态</dt><dd>{record.status}</dd><dt>使用范围</dt><dd>{record.usage_scope}</dd><dt>稳定性证据</dt><dd>{record.stability_status} · 3 个绑定运行</dd>
       <dt>执行设备</dt><dd>尚未加载；批准后仅绑定本地 CPU 运行环境</dd><dt>生产放行</dt><dd>禁止 · false</dd></dl>
-    {record.status === 'MODEL_PACK_EVIDENCE_VERIFIED' && <NormalityApprovalForm model={record} runtimes={runtimes} canAct={canAct} execute={execute} />}
+    {['MODEL_PACK_EVIDENCE_VERIFIED', 'APPROVE_SANDBOX'].includes(record.status) && <NormalityApprovalForm model={record} runtimes={runtimes} canAct={canAct} execute={execute} />}
     {record.status === 'APPROVE_SANDBOX' && <><Sha label="沙箱运行环境 SHA-256" value={record.sandbox_runtime_sha256!} /><p>已批准为本地沙箱模型；这不是工业精度、标签真值或生产发布批准。</p></>}
     {record.status === 'REJECT' && <p className="vision-models__inline-hold">该模型包已被具名人员拒绝，不可执行推理。</p>}
   </article>;
@@ -492,34 +540,137 @@ function NormalityApprovalForm({ model, runtimes, canAct, execute }: { model: Vi
     <Check label="我已复核模型包证据和当前回执 SHA。" checked={reviewed} onChange={setReviewed} /><Check label="我信任所选运行环境。" checked={trustedRuntime} onChange={setTrustedRuntime} />
     <Check label="我授权执行模型包验证。" checked={execution} onChange={setExecution} /><Check label="我信任绑定的权重。" checked={trustedWeights} onChange={setTrustedWeights} />
     <Check label="我仅授权 weights-only 加载。" checked={weightsOnly} onChange={setWeightsOnly} /><Check label="我已核查 Ultralytics 许可适用性。" checked={license} onChange={setLicense} />
-    <div className="vision-models__actions"><button type="button" disabled={!ready} onClick={() => submit('APPROVE_SANDBOX')}>批准为本地沙箱模型</button><button type="button" disabled={!ready} onClick={() => submit('REJECT')}>拒绝模型包</button></div>
+    <div className="vision-models__actions"><button type="button" disabled={!ready} onClick={() => submit('APPROVE_SANDBOX')}>{model.status === 'APPROVE_SANDBOX' ? '重新核验沙箱批准' : '批准为本地沙箱模型'}</button><button type="button" disabled={!ready} onClick={() => submit('REJECT')}>拒绝模型包</button></div>
   </fieldset></form>;
 }
 
-function NormalityInferenceDetails({ inference }: { inference: VisionInference }) {
-  const [classification, setClassification] = useState<'MODEL_SIGNAL_CONFIRMED' | 'LIKELY_FALSE_POSITIVE' | 'NEEDS_LABEL_REVIEW' | 'INSUFFICIENT_EVIDENCE'>('INSUFFICIENT_EVIDENCE');
-  const [review, setReview] = useState<ApprovalState>({ reviewer: '', note: '' }), [attested, setAttested] = useState(false), [draft, setDraft] = useState<{ classification: string; reviewer: string; note: string }>();
+function NormalityInferenceDetails({ inference, scope, canAct, execute }: { inference: VisionInference; scope: VisionScope; canAct: boolean; execute: Execute }) {
+  const [classification, setClassification] = useState<NormalityFeedbackClassification>('INSUFFICIENT_EVIDENCE');
+  const [review, setReview] = useState<ApprovalState>({ reviewer: '', note: '' }), [attested, setAttested] = useState(false);
+  const [preview, setPreview] = useState(''), [previewBusy, setPreviewBusy] = useState(false), [previewError, setPreviewError] = useState('');
+  const [items, setItems] = useState<NormalityFeedback[]>([]), [feedbackError, setFeedbackError] = useState(''), [feedbackBusy, setFeedbackBusy] = useState(false);
+  const alive = useRef(false), url = useRef(''), request = useRef<AbortController | null>(null), readingFeedback = useRef(false);
+  const valid = () => alive.current && getIdentityActorId() === scope.actorId;
+  const readFeedback = async () => {
+    if (!valid() || readingFeedback.current) return; readingFeedback.current = true; setFeedbackBusy(true); setFeedbackError('');
+    try { const rows = await getNormalityFeedback(scope, inference); if (valid()) setItems(rows); }
+    catch (failure) { if (valid()) { setItems([]); setFeedbackError(visionErrorMessage(failure)); } }
+    finally { readingFeedback.current = false; if (valid()) setFeedbackBusy(false); }
+  };
+  useEffect(() => {
+    alive.current = true; void readFeedback();
+    return () => { alive.current = false; request.current?.abort(); if (url.current) { URL.revokeObjectURL(url.current); url.current = ''; } };
+  }, [scope.actorId, scope.workspaceId, scope.projectId, inference.inference_id, inference.receipt_sha256]);
+  const loadPreview = async () => {
+    if (!valid() || previewBusy) return; request.current?.abort(); const controller = new AbortController(); request.current = controller;
+    if (url.current) { URL.revokeObjectURL(url.current); url.current = ''; } setPreview(''); setPreviewBusy(true); setPreviewError('');
+    try {
+      const blob = await getVisionHeatmap(scope, inference, controller.signal);
+      if (!valid() || controller.signal.aborted || request.current !== controller) return;
+      url.current = URL.createObjectURL(blob); setPreview(url.current);
+    } catch (failure) { if (valid() && !controller.signal.aborted) setPreviewError(visionErrorMessage(failure)); }
+    finally { if (valid() && request.current === controller) setPreviewBusy(false); }
+  };
   return <article className="vision-models__details"><h4>Normality 推理回执</h4><code>{inference.inference_id}</code><Sha label="推理回执 SHA-256" value={inference.receipt_sha256} />
     <div className="vision-models__splits"><span>图像分数<b>{inference.image_score.toFixed(6)}</b></span><span>图像阈值<b>{inference.image_threshold.toFixed(6)}</b></span><span>异常信号<b>{inference.predicted_anomaly ? '是' : '否'}</b></span><span>阳性像素占比<b>{inference.positive_pixel_fraction.toFixed(6)}</b></span></div>
     <Sha label="输入图像 SHA-256" value={inference.image_sha256} /><Sha label="模型包 SHA-256" value={inference.model_pack_sha256} /><Sha label="运行环境 SHA-256" value={inference.runtime_sha256} />
     <dl><dt>状态</dt><dd>{inference.status}</dd><dt>决策范围</dt><dd>{inference.decision_scope}</dd><dt>Gate 决策</dt><dd>{inference.gate_decision}</dd><dt>生产放行</dt><dd>禁止 · false</dd></dl>
+    {inference.ttt && <TttReportDetails report={inference.ttt} />}
     <section className="vision-models__heatmap-evidence"><h4>Heatmap 工件证据</h4><Sha label="Heatmap SHA-256" value={inference.heatmap.sha256} /><p>{inference.heatmap.width} × {inference.heatmap.height} · {inference.heatmap.format} · {inference.heatmap.bytes.toLocaleString()} bytes</p>
-      <p className="vision-models__inline-hold">预览 HOLD：后端未提供 heatmap 像素读取合同。这里不根据摘要伪造热力图，也不暴露本地文件路径。</p></section>
-    <form className="vision-models__normality-review" onSubmit={event => { event.preventDefault(); if (!attested || !approvalReady(review)) return; setDraft({ classification, reviewer: review.reviewer.trim(), note: review.note.trim() }); }}>
-      <h4>具名人工信号复核</h4><p>当前后端没有 Normality feedback 写入合同。本表只生成页面内草稿，不改变标签、模型状态、Gate 或训练数据。</p>
+      <p>仅从当前项目读取 PNG，核对实际字节、尺寸、SHA-256 与强 ETag 后显示；切换记录或账号会撤销预览。</p>
+      <button type="button" disabled={previewBusy} onClick={() => void loadPreview()}>读取并校验热图（仅 GET）</button>
+      {previewError && <p className="vision-models__inline-hold" role="alert">{previewError}</p>}
+      {preview && <figure><img src={preview} alt="已校验的 Normality 热图" style={{ maxWidth: '100%', maxHeight: 480, objectFit: 'contain' }} onError={() => { if (url.current) URL.revokeObjectURL(url.current); url.current = ''; setPreview(''); setPreviewError('HOLD：PNG 无法解码；没有接受预览。'); }} /><figcaption>真实工件 · SHA-256 已核验；颜色是模型信号，不是缺陷真值。</figcaption></figure>}</section>
+    <form className="vision-models__normality-review" onSubmit={event => { event.preventDefault(); if (!canAct || !attested || !approvalReady(review)) return;
+      void execute(`review_normality_inference:${inference.inference_id}`, key => ({ ...approval(review, key), expected_inference_sha256: inference.receipt_sha256, operator_attests_reviewed: attested, classification })); }}>
+      <h4>具名人工信号复核</h4><p>明确提交到服务端并 GET 回读，绑定当前推理摘要。已保存反馈不等于标签真值，也不表示已进入训练或创建工单；问题保持开放。</p><fieldset disabled={!canAct}>
       <label>人工信号分类<select aria-label="人工信号分类" value={classification} onChange={event => { setClassification(event.target.value as typeof classification); setAttested(false); }}><option value="INSUFFICIENT_EVIDENCE">证据不足</option><option value="MODEL_SIGNAL_CONFIRMED">确认模型信号候选</option><option value="LIKELY_FALSE_POSITIVE">疑似误报 · 待复核</option><option value="NEEDS_LABEL_REVIEW">需要标签复核</option></select></label>
-      <ApprovalFields value={review} onChange={setReview} /><Check label="我确认这只是本地复核草稿，尚未提交服务端；不会自动确立标签真值或进入训练。" checked={attested} onChange={setAttested} />
-      <button type="submit" disabled={!attested || !approvalReady(review)}>生成本地复核草稿</button>
-      {draft && <div className="vision-models__inline-hold"><strong>LOCAL_DRAFT_NOT_SUBMITTED</strong><p>{draft.classification} · {draft.reviewer}</p><small>草稿只存在当前页面内存；服务端没有收到反馈，问题保持开放。</small></div>}
+      <ApprovalFields value={review} onChange={setReview} /><Check label="我已阅读推理与热图证据，授权保存这次具名人工反馈；不会自动确立标签真值、关闭问题或进入训练。" checked={attested} onChange={setAttested} />
+      <button type="submit" disabled={!attested || !approvalReady(review)}>保存具名复核反馈</button></fieldset>
     </form>
+    <section aria-label="已保存的 Normality 人工反馈"><h4>已保存的人工反馈</h4><button type="button" disabled={feedbackBusy} onClick={() => void readFeedback()}>读取人工反馈（仅 GET）</button>
+      {feedbackError && <p role="alert" className="vision-models__inline-hold">{feedbackError}</p>}
+      {items.map(item => <article key={item.feedback_id} className="vision-models__feedback-card"><strong>已保存并回读 · RECORDED_FOR_HUMAN_FOLLOWUP</strong><p>{item.classification} · {item.reviewer_identity}</p><p>{item.note}</p><code>{item.feedback_id}</code><Sha label="人工反馈回执 SHA-256" value={item.receipt_sha256} /><p>建议后续：{item.followup_work_item_type}；这条原始反馈本身不创建工单、关闭问题、认证标签或进入训练。真实后续以独立血缘回执为准。</p>
+        {['NEEDS_LABEL_REVIEW', 'LIKELY_FALSE_POSITIVE'].includes(item.classification) && <NormalityFollowupCard scope={scope} feedback={item} inference={inference} canAct={canAct} execute={execute} />}</article>)}
+    </section>
   </article>;
+}
+
+function NormalityFollowupCard({ scope, feedback, inference, canAct, execute }: { scope: VisionScope; feedback: NormalityFeedback; inference: VisionInference; canAct: boolean; execute: Execute }) {
+  const [asset, setAsset] = useState<VisionInferenceAsset>(), [projection, setProjection] = useState<NormalityFollowupList>(), [importId, setImportId] = useState('');
+  const [annotations, setAnnotations] = useState<NormalityFollowupAnnotations>(), [annotationId, setAnnotationId] = useState('');
+  const [busy, setBusy] = useState(false), [error, setError] = useState(''); const alive = useRef(true);
+  const [importReview, setImportReview] = useState<ApprovalState>({ reviewer: '', note: '' }), [importAllowed, setImportAllowed] = useState(false), [importBoundary, setImportBoundary] = useState(false);
+  const [orderReview, setOrderReview] = useState<ApprovalState>({ reviewer: '', note: '' }), [assignee, setAssignee] = useState(''), [orderAllowed, setOrderAllowed] = useState(false), [evidenceRead, setEvidenceRead] = useState(false), [orderBoundary, setOrderBoundary] = useState(false);
+  const valid = () => alive.current && getIdentityActorId() === scope.actorId;
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  const imported = projection?.imports.find(row => row.import_id === importId), manual = annotations?.annotations.filter(row => row.source === 'MANUAL') ?? [];
+  const hasLinkedOrder = Boolean(imported && projection?.work_orders.some(row => row.import_id === imported.import_id));
+  useEffect(() => { setAnnotationId(''); setOrderAllowed(false); setEvidenceRead(false); setOrderBoundary(false); }, [importId, annotations?.revision, annotations?.document_sha256]);
+  const load = async () => {
+    if (busy || !valid()) return; setBusy(true); setError(''); setAnnotations(undefined); setImportAllowed(false); setImportBoundary(false);
+    try {
+      const [source, state] = await Promise.all([getVisionInferenceAsset(scope, inference.asset_id), getNormalityFollowup(scope, feedback)]);
+      visionEnsure(source.image_sha256 === feedback.image_sha256 && state.imports.every(row => row.vision_asset_sha256 === source.receipt_sha256 && row.image_width === source.image_width && row.image_height === source.image_height));
+      if (valid()) { setAsset(source); setProjection(state); setImportId(current => state.imports.some(row => row.import_id === current) ? current : state.imports[0]?.import_id ?? ''); }
+    } catch (failure) { if (valid()) { setAsset(undefined); setProjection(undefined); setError(visionErrorMessage(failure)); } }
+    finally { if (valid()) setBusy(false); }
+  };
+  const readAnnotations = async () => {
+    if (!imported || busy || !valid()) return; setBusy(true); setError(''); setAnnotations(undefined);
+    try { const state = await getNormalityFollowupAnnotations(scope, imported); if (valid()) setAnnotations(state); }
+    catch (failure) { if (valid()) setError(visionErrorMessage(failure)); } finally { if (valid()) setBusy(false); }
+  };
+  const common = { expected_feedback_sha256: feedback.receipt_sha256, expected_inference_sha256: inference.receipt_sha256, expected_asset_sha256: asset?.receipt_sha256, expected_image_sha256: feedback.image_sha256 };
+  return <section className="vision-models__normality-followup"><h4>真实后续 · 导入工作簿 → 人工框 → 复核工单</h4><p>不自动生成框或标签。两步分别授权，原始反馈保持不可变；同一 request_key 只对账，不重复导入或发单。</p>
+    <button type="button" disabled={busy || !canAct} onClick={() => void load()}>读取真实后续状态（仅 GET）</button>{error && <p role="alert" className="vision-models__inline-hold">{error}</p>}
+    {asset && projection && projection.imports.length === 0 && <form className="vision-models__followup-import" onSubmit={event => { event.preventDefault(); if (!canAct || !importAllowed || !importBoundary || !approvalReady(importReview)) return;
+      void execute(`import_normality_followup:${feedback.feedback_id}`, key => ({ ...approval(importReview, key), ...common, operator_attests_import_authorized: importAllowed, operator_attests_no_label_or_training_authority: importBoundary })); }}><h5>第一步 · 工作簿原图导入</h5><fieldset disabled={!canAct || busy}>
+      <Sha label="待导入原图 SHA-256" value={asset.image_sha256} /><p>后端只读取本项目已验封 CAS 原图，并导入当前账号的真实工作簿。EXIF 非 identity 会 HOLD，需规范化为新版本重新推理。</p><ApprovalFields value={importReview} onChange={setImportReview} />
+      <Check label="我授权把这条推理的已验封原图导入当前账号、项目的真实工作簿。" checked={importAllowed} onChange={setImportAllowed} /><Check label="本次导入不创建标签、不发工单、不关闭问题、不进入训练。" checked={importBoundary} onChange={setImportBoundary} />
+      <button type="submit" disabled={!importAllowed || !importBoundary || !approvalReady(importReview)}>具名导入到真实工作簿</button></fieldset></form>}
+    {projection && projection.imports.length > 0 && <><label>已导入血缘<select value={importId} onChange={event => { setImportId(event.target.value); setAnnotations(undefined); }}>{projection.imports.map(row => <option key={row.import_id} value={row.import_id}>{row.operator_asset_id} · {row.status}</option>)}</select></label>
+      {imported && <><p>{hasLinkedOrder ? '此导入血缘已关联真实人工框和 OPEN 工单；原始导入阶段状态保持不可变。' : '原图已实际导入；尚待人工选择并保存真实框。'}{imported.coordinate_frame}</p><Sha label="导入血缘回执 SHA-256" value={imported.receipt_sha256} />
+        <Link to={`/workspace?asset=${encodeURIComponent(imported.operator_asset_id)}`}>{hasLinkedOrder ? '打开真实工作簿资产' : '打开真实待标注资产'}</Link><p>{hasLinkedOrder ? '下方独立工单血缘是实际发单证据；本页不会修改已有标注。' : '请在工作簿手工标注并保存，再返回这里读取；本页不会调用标注写入。'}</p>
+        <button type="button" disabled={busy} onClick={() => void readAnnotations()}>读取已保存人工框（仅 GET）</button>
+        {annotations && manual.length === 0 && <p className="vision-models__inline-hold">HOLD：尚无已保存人工框；不会补造全图框或把热图当标签。</p>}
+        {annotations && manual.length > 0 && <form className="vision-models__followup-order" onSubmit={event => { event.preventDefault(); if (!canAct || !annotationId || !orderAllowed || !evidenceRead || !orderBoundary || !assignee.trim() || !approvalReady(orderReview)) return;
+          void execute(`create_normality_followup_work_order:${feedback.feedback_id}`, key => ({ ...approval(orderReview, key), ...common, import_id: imported.import_id, expected_import_sha256: imported.receipt_sha256,
+            annotation_id: annotationId, expected_annotation_revision: annotations.revision, expected_annotation_document_sha256: annotations.document_sha256, assignee: assignee.trim(), operator_attests_create_work_order: orderAllowed, operator_attests_reviewed_evidence: evidenceRead, operator_attests_no_label_or_training_authority: orderBoundary })); }}>
+          <h5>第二步 · 对已有人工框发真实工单</h5><fieldset disabled={!canAct || busy}><label>已保存人工框<select aria-label="已保存人工框" value={annotationId} onChange={event => { setAnnotationId(event.target.value); setEvidenceRead(false); setOrderAllowed(false); }}><option value="">选择已保存的 MANUAL 框</option>{manual.map(row => <option key={row.annotation_id} value={row.annotation_id}>{row.label} · {row.annotation_id}</option>)}</select></label>
+          <p>当前标注版本：{annotations.revision}。{manual.find(row => row.annotation_id === annotationId) && <span>框坐标（原图归一化）：{(['x', 'y', 'width', 'height'] as const).map(key => manual.find(row => row.annotation_id === annotationId)![key].toFixed(4)).join(', ')}</span>}</p><Sha label="人工标注文档 SHA-256" value={annotations.document_sha256} />
+          <label>复核工单负责人<input aria-label="复核工单负责人" value={assignee} maxLength={120} onChange={event => setAssignee(event.target.value)} /></label><ApprovalFields value={orderReview} onChange={setOrderReview} />
+          <Check label="我授权为上述已有人工框创建真实 OPEN 工单，并指定负责人。" checked={orderAllowed} onChange={setOrderAllowed} /><Check label="我已复核原图、人工框与当前标注版本，确认这次发单证据。" checked={evidenceRead} onChange={setEvidenceRead} /><Check label="本次发单不修改标签、不关闭问题、不自动进入 CAPA 或训练，也不放行生产。" checked={orderBoundary} onChange={setOrderBoundary} />
+          <button type="submit" disabled={!annotationId || !orderAllowed || !evidenceRead || !orderBoundary || !assignee.trim() || !approvalReady(orderReview)}>具名创建真实复核工单</button></fieldset></form>}
+      </>}
+    </>}
+    {projection?.work_orders.map(row => <article className="vision-models__feedback-card" key={row.binding_id}><strong>真实工单已建立 · OPEN</strong><p>{row.assignee} · {row.work_order_id}</p><Sha label="工单血缘回执 SHA-256" value={row.receipt_sha256} /><Sha label="真实工单文档 SHA-256" value={row.work_order_document_sha256} /><Sha label="人工框裁剪 SHA-256" value={row.crop_sha256} /><p>绑定人工标注版本 {row.annotation_revision}；问题保持开放，未认证标签真值、未进入训练。</p></article>)}
+  </section>;
+}
+
+function TttFailureDetails({ failure }: { failure: VisionTttFailure }) {
+  return <article className="vision-models__details vision-models__ttt-failure"><h4>TTT 已失败关闭 · FAILED_CLOSED</h4><code>{failure.failure_id}</code>
+    <p>本次 worker 未能提供可核验测量，没有分数、热图、参数变化或 guard 结果；不会伪造基线，也不会自动重试。</p>
+    <dl><dt>受控失败代码</dt><dd>{failure.failure_code}</dd><dt>测量可用</dt><dd>false · NOT_MEASURED</dd><dt>重试策略</dt><dd>NEW_EXPLICIT_AUTHORIZATION_REQUIRED</dd><dt>生产放行</dt><dd>禁止 · false</dd></dl>
+    <Sha label="失败回执 SHA-256" value={failure.receipt_sha256} /><Sha label="本次授权 SHA-256" value={failure.authorization_sha256} /><Sha label="TTT 实现 SHA-256" value={failure.ttt_backend_sha256} />
+    <p>原 request_key 只用于 GET 对账，不重跑。若排查后仍要执行，必须在独立 TTT 表单重新确认输入、预算和全部授权，生成新的请求。</p></article>;
+}
+function TttReportDetails({ report }: { report: VisionTttReport }) {
+  return <section className="vision-models__ttt-result"><h4>单次 TTT 测量回执</h4><strong>{report.status}</strong><p>{report.status === 'ROLLED_BACK' ? `已回滚：${report.rollback_reason}；当前分数与热图使用原模型。` : '本次学生副本通过局部 guard，当前分数与热图来自本次适应副本。'}本次接受、loss 下降不等于工业效果提升。</p>
+    <p>已执行 {report.steps_completed} / {report.budget.steps} 步；结束即重置；原 pack、Backbone 与阈值保持不变；persistent_learning=false。</p>
+    <dl><dt>更新前真实目标值</dt><dd>{report.objective_before === null ? 'NOT_MEASURED' : report.objective_before.toFixed(6)}</dd><dt>最后一次更新后重算目标值</dt><dd>{report.objective_after === null ? 'NOT_MEASURED' : report.objective_after.toFixed(6)}</dd></dl><p>下面 loss 曲线在每步更新前测量，不冒充最终候选目标值；接受还要求最终目标严格下降和独立 guard 通过。</p>
+    <Sha label="适应前参数 SHA-256" value={report.parameter_sha256_before} /><Sha label="尝试后参数 SHA-256" value={report.attempted_parameter_sha256} /><Sha label="实际生效参数 SHA-256" value={report.effective_parameter_sha256} />
+    <div className="vision-models__table"><table><caption>独立人工 guard · 非工业效果评测</caption><thead><tr><th>阶段</th><th>TP</th><th>TN</th><th>FP</th><th>FN</th></tr></thead><tbody>{([['适应前', report.guard_before], ['尝试后', report.guard_after], ['实际生效', report.effective_guard]] as const).map(([label, matrix]) => <tr key={label}><th>{label}</th>{matrix ? <><td>{matrix.tp}</td><td>{matrix.tn}</td><td>{matrix.fp}</td><td>{matrix.fn}</td></> : <td colSpan={4}>NOT_MEASURED</td>}</tr>)}</tbody></table></div>
+    <div className="vision-models__table"><table><caption>实际优化损失</caption><thead><tr><th>步数</th><th>总 loss</th><th>重建</th><th>Replay</th><th>参数锚定</th></tr></thead><tbody>{report.loss_curve.map(row => <tr key={row.step}><th>{row.step}</th><td>{row.loss.toFixed(6)}</td><td>{row.reconstruction_loss.toFixed(6)}</td><td>{row.replay_loss.toFixed(6)}</td><td>{row.anchor_loss.toFixed(6)}</td></tr>)}</tbody></table></div></section>;
 }
 
 function RecordDetails({ record, scope, canAct, execute, feedback, onFeedback }: { record: VisionRecord; scope: VisionScope; canAct: boolean; execute: Execute; feedback: VisionFeedback[]; onFeedback: (runId: string, items: VisionFeedback[]) => void }) {
   return <article className="vision-models__details"><h4>已验封详情</h4><code>{record.resource_id}</code><Sha label="记录回执 SHA-256" value={record.receipt_sha256} />
     <dl><dt>项目</dt><dd>{record.project_id}</dd><dt>当前状态</dt><dd>{record.status}</dd><dt>生产放行</dt><dd>禁止 · false</dd></dl>
     {'model_id' in record && 'task_type' in record && record.task_type !== 'normality' && <><Sha label="权重 SHA-256" value={record.weights_sha256} /><dl><dt>文件字节数</dt><dd>{record.file_bytes.toLocaleString()}</dd><dt>任务 / 格式</dt><dd>{record.task_type} / {record.format}</dd><dt>许可声明</dt><dd>{record.license_id}</dd><dt>已加载</dt><dd>否；登记不等于加载授权</dd></dl></>}
-    {'runtime_id' in record && 'probe' in record && <><Sha label="运行环境指纹" value={record.runtime_sha256} /><dl><dt>Python</dt><dd>{record.probe.python_version.join('.')}</dd>{Object.entries(record.probe.packages).map(([name, version]) => <div className="vision-models__kv" key={name}><dt>{name}</dt><dd>{version ?? '未安装'}</dd></div>)}<dt>实际导入检查</dt><dd>{record.probe.import_status}</dd></dl><ProbeForm runtime={record} canAct={canAct} execute={execute} /></>}
+    {'runtime_id' in record && 'probe' in record && <><Sha label="运行环境指纹" value={record.runtime_sha256} />{record.probe.status === 'failed'
+      ? <><p className="vision-models__inline-hold">导入失败 · UNAVAILABLE。Python 与依赖版本为 NOT_MEASURED，不继承旧 metadata 或视为 PASSED；本环境不能用于训练或 TTT。</p><dl><dt>受控失败代码</dt><dd>{record.probe.error_code}</dd><dt>受控错误类型</dt><dd>{record.probe.error_type}</dd></dl></>
+      : <dl><dt>Python</dt><dd>{record.probe.python_version.join('.')}</dd>{Object.entries(record.probe.packages).map(([name, version]) => <div className="vision-models__kv" key={name}><dt>{name}</dt><dd>{version ?? '未安装'}</dd></div>)}<dt>实际导入检查</dt><dd>{record.probe.import_status}</dd></dl>}<ProbeForm runtime={record} canAct={canAct} execute={execute} /></>}
     {'dataset_receipt' in record && <><Sha label="数据冻结回执 SHA-256" value={record.dataset_receipt_sha256} /><div className="vision-models__splits">{Object.entries(record.dataset_receipt.split_counts).map(([split, count]) => <span key={split}>{split}<b>{count}</b></span>)}</div><p>固定 {record.dataset_receipt.class_names.length} 个类别。验证 / 测试样本不回灌训练。</p>
       {record.pool_binding && <><Sha label="来源池绑定回执 SHA-256" value={record.pool_binding.receipt_sha256} /><code>{record.pool_binding.pool_id} · {record.pool_binding.version_id}</code><p>已绑定原始标注坐标系与来源版本；再次训练仍重新核验池、快照和标注。不是独立标签真值认证。</p></>}</>}
     {'training' in record && <><RunDetails run={record} canAct={canAct} execute={execute} /><FeedbackPanel run={record} scope={scope} canAct={canAct} execute={execute} feedback={feedback.filter(item => item.run_id === record.run_id)} onFeedback={onFeedback} /></>}

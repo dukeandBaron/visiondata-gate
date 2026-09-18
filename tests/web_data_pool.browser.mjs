@@ -9,8 +9,7 @@ import path from 'node:path';
 const root = fileURLToPath(new URL('..', import.meta.url)), webRoot = path.join(root, 'web');
 const require = createRequire(path.join(webRoot, 'package.json'));
 const { build, transformWithOxc } = await import(pathToFileURL(require.resolve('vite')).href);
-const cached = 'D:/Users/living/.npm-cache/_npx/31e32ef8478fbf80/node_modules/playwright-core/index.mjs';
-const modulePath = process.env.VDG_PLAYWRIGHT_MODULE || (existsSync(cached) ? cached : require.resolve('playwright'));
+const modulePath = process.env.VDG_PLAYWRIGHT_MODULE || require.resolve('playwright');
 const { chromium } = await import(pathToFileURL(modulePath).href);
 let browser, bundle;
 const modules = new Map([

@@ -36,6 +36,62 @@ export async function normalityInference() { const identifier = 'vision_inferenc
   status: 'COMPLETED_LOCAL_SANDBOX_INFERENCE', image_score: 0.75, image_threshold: 0.5, pixel_threshold: 1.5, predicted_anomaly: true, positive_pixel_fraction: 0.125,
   heatmap_artifact_id: 'normality_heatmap_0123456789abcdef01234567', heatmap: { sha256: sha('9'), bytes: 4096, width: 64, height: 64, format: 'png' }, device: 'cpu',
   decision_scope: 'MODEL_SIGNAL_ONLY_NOT_GATE_OR_PRODUCTION_DECISION', review_required: true, gate_decision: 'NOT_ISSUED' }); }
+// A real, tiny PNG for transport-integrity and browser decoding tests; no user pixels.
+export const normalityPngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Zl1sAAAAASUVORK5CYII=';
+export async function previewInference() {
+  const bytes = Uint8Array.from(Buffer.from(normalityPngBase64, 'base64'));
+  const hash = Buffer.from(await crypto.subtle.digest('SHA-256', bytes)).toString('hex');
+  return seal({ ...await normalityInference(), heatmap: { sha256: hash, bytes: bytes.length, width: 1, height: 1, format: 'png' } });
+}
+export async function normalityFeedback(inference = undefined, classification = 'NEEDS_LABEL_REVIEW') {
+  const value = inference ?? await normalityInference(); const id = 'nfeedback_0123456789abcdef01234567';
+  return seal({ schema_version: 'visiondata-gate.normality-feedback.v1', resource_id: id, feedback_id: id, project_id: scope.projectId,
+    inference_id: value.inference_id, model_id: value.model_id, asset_id: value.asset_id, inference_sha256: value.receipt_sha256,
+    image_sha256: value.image_sha256, model_pack_sha256: value.model_pack_sha256, heatmap_sha256: value.heatmap.sha256, heatmap_artifact_id: value.heatmap_artifact_id,
+    created_by: scope.actorId, reviewer_identity: approval.reviewer_identity, note: approval.note, created_at: '2026-09-19T00:00:00Z', classification,
+    status: 'RECORDED_FOR_HUMAN_FOLLOWUP', followup_work_item_type: { MODEL_SIGNAL_CONFIRMED: 'MODEL_SIGNAL_REVIEW', LIKELY_FALSE_POSITIVE: 'FALSE_POSITIVE_INVESTIGATION', NEEDS_LABEL_REVIEW: 'LABEL_REVIEW', INSUFFICIENT_EVIDENCE: 'EVIDENCE_COLLECTION' }[classification],
+    followup_work_item_created: false, issue_closed: false, label_truth_authority: false, training_ingestion_allowed: false, production_release_allowed: false, machine_write_permitted: false });
+}
+export const guardPolicy = { min_true_positive: 1, min_true_negative: 1, max_fp_increase: 0, max_fn_increase: 0 };
+export async function tttCapabilities() { return seal({ schema_version: 'visiondata-gate.normality-ttt-capabilities.v1', project_id: scope.projectId, strategy: 'EPISODIC_MASKED_STUDENT', implementation_sha256: sha('e'), max_steps: 8, max_learning_rate: .01, min_learning_rate: .00001, max_seconds: 120, max_adaptation_assets: 7, max_replay_assets: 8, max_guard_assets: 16, production_release_allowed: false, machine_write_permitted: false, persistent_learning: false, industrial_benefit_validated: false, guard_policy: guardPolicy }); }
+export async function tttRequest() { const ref = (name, digit) => ({ asset_id: name, expected_asset_receipt_sha256: sha(digit), expected_image_sha256: sha(digit) });
+  return { ...await runNormalityInferenceRequest(), expected_ttt_implementation_sha256: sha('e'), adaptation_assets: [], replay_assets: [ref('replay_1', '1')],
+    guard_assets: [{ ...ref('guard_normal', '2'), reference_label: 'normal' }, { ...ref('guard_anomaly', '3'), reference_label: 'anomaly' }],
+    budget: { steps: 2, learning_rate: .001, max_seconds: 30, seed: 0 }, operator_attests_ttt_authorized: true, operator_attests_replay_normal: true, operator_attests_guard_labels_reviewed: true }; }
+export async function tttInference(status = 'ACCEPTED_EPISODIC') {
+  const matrix = { tp: 1, tn: 1, fp: 0, fn: 0 }, request = await tttRequest();
+  return seal({ ...await previewInference(), ttt_backend_sha256: sha('e'), ttt: {
+    schema_version: 'visiondata-gate.normality-ttt.v1', strategy: 'EPISODIC_MASKED_STUDENT', status,
+    rollback_reason: status === 'ROLLED_BACK' ? 'TTT_GUARD_REGRESSION' : null, steps_completed: 2, objective_before: 2, objective_after: .9,
+    parameter_sha256_before: sha('4'), parameter_sha256_after: sha('5'), attempted_parameter_sha256: sha('5'), effective_parameter_sha256: sha(status === 'ROLLED_BACK' ? '4' : '5'),
+    backbone_sha256_before: sha('6'), backbone_sha256_after: sha('6'), guard_before: matrix, guard_after: status === 'ROLLED_BACK' ? { tp: 0, tn: 1, fp: 0, fn: 1 } : matrix, effective_guard: matrix,
+    reset_after_episode: true, persistent_learning: false, parent_pack_unchanged: true, thresholds_unchanged: true, industrial_benefit_validated: false, guard_policy: guardPolicy,
+    budget: request.budget, loss_curve: [2, 1].map((loss, index) => ({ step: index + 1, loss, reconstruction_loss: loss, replay_loss: 0, anchor_loss: 0, gradient_norm: 1 })),
+    loss_weights: { masked_reconstruction: 1, teacher_replay: 1, parameter_anchor: .1 }, mask_fraction: .25, elapsed_seconds: .2,
+    implementation_sha256: sha('e'), input_groups: { adaptation: { count: 1, sha256: [sha('8')] }, replay: { count: 1, sha256: [sha('1')] }, guard: { count: 2, sha256: [sha('2'), sha('3')] } },
+  } });
+}
+export async function tttFailure() { const request = await tttRequest(), id = 'vision_ttt_failure_0123456789abcdef01234567'; return seal({ ...inferenceBase('vision_ttt_failure', id), failure_id: id,
+  model_id: 'vision_normality_model_test', asset_id: request.asset_id, model_pack_sha256: request.expected_model_pack_sha256, image_sha256: request.expected_image_sha256,
+  authorization_sha256: await digest(request), ttt_backend_sha256: request.expected_ttt_implementation_sha256, status: 'FAILED_CLOSED', failure_code: 'TTT_WORKER_TIMEOUT', measurements_available: false, retry_policy: 'NEW_EXPLICIT_AUTHORIZATION_REQUIRED' }); }
+export async function normalityFollowupImport() {
+  const inference = await previewInference(), asset = await inferenceAsset(), feedback = await normalityFeedback(inference), id = 'normality_import_0123456789abcdef01234567';
+  return seal({ ...inferenceBase('normality-followup-import', id), import_id: id, workspace_id: scope.workspaceId, note: approval.note,
+    feedback_id: feedback.feedback_id, feedback_sha256: feedback.receipt_sha256, inference_id: inference.inference_id, inference_sha256: inference.receipt_sha256,
+    vision_asset_id: asset.asset_id, vision_asset_sha256: asset.receipt_sha256, image_sha256: asset.image_sha256, operator_asset_id: 'img_followup_synthetic', operator_source_sha256: asset.image_sha256,
+    image_width: asset.image_width, image_height: asset.image_height, coordinate_frame: 'DECODED_PIXELS_EXIF_IDENTITY', status: 'ASSET_IMPORTED_AWAITING_HUMAN_ANNOTATION', annotation_created: false, work_order_created: false,
+    issue_closed: false, label_truth_authority: false, training_ingestion_allowed: false });
+}
+export async function normalityFollowupWorkOrder(imported = undefined) {
+  const value = imported ?? await normalityFollowupImport(), id = 'normality_binding_0123456789abcdef01234567'; const { import_id, ...common } = value;
+  return seal({ ...common, schema_version: 'visiondata-gate.normality-followup-work-order.v1', resource_id: id, binding_id: id, import_id,
+    import_sha256: value.receipt_sha256, annotation_id: 'manual_box_1', annotation_revision: 1, annotation_document_sha256: sha('1'), work_order_id: 'wo_followup_synthetic', work_order_document_sha256: sha('2'), crop_sha256: sha('3'), assignee: 'Human reviewer', status: 'OPEN', work_order_created: true });
+}
+export async function followupRequest(order = false) {
+  const imported = await normalityFollowupImport(); return { ...approval, expected_feedback_sha256: imported.feedback_sha256, expected_inference_sha256: imported.inference_sha256,
+    expected_asset_sha256: imported.vision_asset_sha256, expected_image_sha256: imported.image_sha256, operator_attests_no_label_or_training_authority: true,
+    ...(order ? { import_id: imported.import_id, expected_import_sha256: imported.receipt_sha256, annotation_id: 'manual_box_1', expected_annotation_revision: 1, expected_annotation_document_sha256: sha('1'), assignee: 'Human reviewer', operator_attests_create_work_order: true, operator_attests_reviewed_evidence: true } : { operator_attests_import_authorized: true }) };
+}
 export function registerNormalityPackRequest() { return { ...approval, display_name: 'Bound normality pack', model_pack_path: 'C:/synthetic/normality/model-pack.pt', expected_model_pack_sha256: sha('a'),
   run_directory: 'C:/synthetic/normality/seed_20260913', stability_run_directories: ['C:/synthetic/normality/seed_20260911', 'C:/synthetic/normality/seed_20260912', 'C:/synthetic/normality/seed_20260913'],
   target_model_seed: 20260913, stability_summary_path: 'C:/synthetic/normality/model_stability_summary.json', expected_stability_summary_sha256: sha('4'),

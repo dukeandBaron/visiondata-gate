@@ -5,12 +5,11 @@ import { createRequire } from 'node:module';
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
-import { scope, sha, model, normalityModel, inferenceAsset, normalityInference, runtime, dataset, run, manifest, capabilities, poolProjection, poolDataset, feedbackFixture, newDetectionDataset } from './web_vision_model_fixtures.mjs';
+import { scope, sha, model, normalityModel, inferenceAsset, normalityInference, normalityPngBase64, previewInference, normalityFeedback, normalityFollowupImport, normalityFollowupWorkOrder, tttCapabilities, tttInference, tttFailure, seal, runtime, dataset, run, manifest, capabilities, poolProjection, poolDataset, feedbackFixture, newDetectionDataset } from './web_vision_model_fixtures.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url)), webRoot = path.join(root, 'web');
 const require = createRequire(path.join(webRoot, 'package.json'));
 const { build, transformWithOxc } = await import(pathToFileURL(require.resolve('vite')).href);
-const cached = 'D:/Users/living/.npm-cache/_npx/31e32ef8478fbf80/node_modules/playwright-core/index.mjs';
-const { chromium } = await import(pathToFileURL(process.env.VDG_PLAYWRIGHT_MODULE || (existsSync(cached) ? cached : require.resolve('playwright'))).href);
+const { chromium } = await import(pathToFileURL(process.env.VDG_PLAYWRIGHT_MODULE || require.resolve('playwright')).href);
 let browser, bundle, css;
 const mock = `
 import {canonicalizeJcs,sha256HexUtf8} from '/src/data/jcs.ts';
@@ -28,21 +27,39 @@ export async function operatorFetch(path,init={}){
  const suffix=decodeURIComponent(path.slice(prefix.length)),db=window.__db;
  if(method==='GET'){
    if(suffix==='vision-capabilities')return response(db.capabilities);
+   if(suffix==='vision-ttt-capabilities')return response(db.tttCapabilities);
+   if(suffix==='vision-ttt-failures')return response({schema_version:'visiondata-gate.vision-list.v1',project_id:window.__scope.projectId,items:db.tttFailures||[]});
+   if(suffix.startsWith('normality-feedback/')&&suffix.endsWith('/followup'))return response({schema_version:'visiondata-gate.normality-followup-list.v1',project_id:window.__scope.projectId,feedback_id:suffix.split('/')[1],imports:db.followupImports||[],work_orders:db.followupOrders||[],issue_closed:false,label_truth_authority:false,training_ingestion_allowed:false,production_release_allowed:false,machine_write_permitted:false,annotation_created:false});
+   if(suffix.startsWith('normality-feedback/')&&suffix.endsWith('/annotations')){const imported=db.followupImports.find(row=>row.import_id===suffix.split('/')[3]);return response({schema_version:'visiondata-gate.normality-followup-annotations.v1',project_id:window.__scope.projectId,workspace_id:window.__scope.workspaceId,feedback_id:imported.feedback_id,import_id:imported.import_id,operator_asset_id:imported.operator_asset_id,asset_sha256:imported.image_sha256,revision:db.manualAnnotations?.length?1:0,document_sha256:'1'.repeat(64),annotations:db.manualAnnotations||[],issue_closed:false,label_truth_authority:false,training_ingestion_allowed:false,production_release_allowed:false,machine_write_permitted:false,annotation_created:false});}
+   if(suffix.startsWith('vision-inferences/')&&suffix.endsWith('/heatmap')){
+     if(window.__delayHeatmap)await new Promise(resolve=>{window.__releaseHeatmap=resolve;});
+     if(init.signal?.aborted)throw new DOMException('cancelled','AbortError');
+     const item=db.inferences.find(item=>item.inference_id===suffix.split('/')[1]);
+     const bytes=Uint8Array.from(atob(db.png),c=>c.charCodeAt(0));
+     return new Response(bytes,{headers:{'Content-Type':'image/png','Content-Length':String(bytes.length),ETag:'"'+item.heatmap.sha256+'"','X-Content-SHA256':window.__corruptHeatmap?'0'.repeat(64):item.heatmap.sha256}});
+   }
+   if(suffix.startsWith('vision-inferences/')&&suffix.endsWith('/feedback'))return response({schema_version:'visiondata-gate.vision-list.v1',project_id:window.__scope.projectId,inference_id:suffix.split('/')[1],items:db.normalityFeedback||[]});
    if(suffix.startsWith('vision-training-runs/')&&suffix.endsWith('/feedback')){const id=suffix.split('/')[1];return response({schema_version:'visiondata-gate.vision-list.v1',project_id:window.__scope.projectId,run_id:id,items:(db.feedback||[]).filter(item=>item.run_id===id)});}
    for(const [route,key] of Object.entries({'vision-models':'models','vision-runtimes':'runtimes','vision-datasets':'datasets','vision-training-runs':'runs','vision-inference-assets':'inferenceAssets','vision-inferences':'inferences'})){
     if(suffix===route)return response({schema_version:'visiondata-gate.vision-list.v1',project_id:window.__scope.projectId,items:db[key]});
     if(suffix.startsWith(route+'/')){const item=db[key].find(v=>v.resource_id===suffix.slice(route.length+1));if(item)return response(item);}
    }
-   if(suffix.startsWith('vision-operations/')){const [,operation,request_key]=suffix.split('/');const item=window.__ledger[operation+':'+request_key];if(!item)throw new OperatorApiError('HTTP_404','not found',404);
+   if(suffix.startsWith('vision-operations/')||suffix.startsWith('normality-followup-operations/')){const [,operation,request_key]=suffix.split('/');const item=window.__ledger[operation+':'+request_key];if(!item)throw new OperatorApiError('HTTP_404','not found',404);
     return response({schema_version:'visiondata-gate.vision-operation.v1',project_id:window.__scope.projectId,operation,request_key,resource_id:item.resource_id,resource:item,auto_replayed:false});}
    throw new OperatorApiError('HTTP_404','not found',404);
  }
  let resource,operation;
- if(suffix==='vision-models'){operation='register_model';resource=await sealed({...db.modelTemplate,resource_id:'vision_model_new',model_id:'vision_model_new',display_name:request.display_name,weights_sha256:request.expected_weights_sha256,task_type:request.task_type});db.models.push(resource);}
+ if(suffix.startsWith('normality-feedback/')&&suffix.endsWith('/followup-import')){operation='import_normality_followup:'+suffix.split('/')[1];resource=await sealed({...db.followupImportTemplate,reviewer_identity:request.reviewer_identity,note:request.note});db.followupImports=[resource];}
+ else if(suffix.startsWith('normality-feedback/')&&suffix.endsWith('/followup-work-orders')){operation='create_normality_followup_work_order:'+suffix.split('/')[1];const imported=db.followupImports.find(row=>row.import_id===request.import_id);resource=await sealed({...db.followupOrderTemplate,import_sha256:imported.receipt_sha256,annotation_id:request.annotation_id,annotation_revision:request.expected_annotation_revision,annotation_document_sha256:request.expected_annotation_document_sha256,reviewer_identity:request.reviewer_identity,note:request.note,assignee:request.assignee});db.followupOrders=[resource];}
+ else if(suffix==='vision-models'){operation='register_model';resource=await sealed({...db.modelTemplate,resource_id:'vision_model_new',model_id:'vision_model_new',display_name:request.display_name,weights_sha256:request.expected_weights_sha256,task_type:request.task_type});db.models.push(resource);}
  else if(suffix==='vision-model-packs'){operation='register_normality_model_pack';resource=await sealed({...db.normalityModelTemplate,display_name:request.display_name,model_pack_sha256:request.expected_model_pack_sha256,weights_sha256:request.expected_model_pack_sha256,backbone_weights_sha256:request.expected_backbone_weights_sha256,source_binding_sha256:request.expected_source_binding_sha256,source_index_sha256:request.expected_source_index_sha256});db.models.push(resource);}
  else if(suffix.startsWith('vision-models/')&&suffix.endsWith('/sandbox-approval')){const id=suffix.split('/')[1];operation='approve_normality_model_pack:'+id;const index=db.models.findIndex(v=>v.resource_id===id);resource=await sealed({...db.approvedNormalityTemplate,resource_id:id,model_id:id,display_name:db.models[index].display_name,receipt_sha256:undefined});db.models[index]=resource;}
  else if(suffix==='vision-inference-assets'){operation='register_inference_asset';resource=await sealed({...db.inferenceAssetTemplate,display_name:request.display_name,image_sha256:request.expected_image_sha256});db.inferenceAssets.push(resource);}
  else if(suffix.startsWith('vision-models/')&&suffix.endsWith('/inferences')){const id=suffix.split('/')[1];operation='run_normality_inference:'+id;resource=await sealed({...db.inferenceTemplate,model_id:id,asset_id:request.asset_id,model_pack_sha256:request.expected_model_pack_sha256,backbone_weights_sha256:request.expected_backbone_weights_sha256,source_binding_sha256:request.expected_source_binding_sha256,source_index_sha256:request.expected_source_index_sha256,runtime_sha256:request.expected_runtime_sha256,image_sha256:request.expected_image_sha256});db.inferences.push(resource);}
+ else if(suffix.startsWith('vision-models/')&&suffix.endsWith('/ttt-inferences')){operation='run_normality_ttt:'+suffix.split('/')[1];
+   if(window.__tttFail){resource=await sealed({...db.tttFailure,authorization_sha256:await hash(request)});db.tttFailures=[resource];}
+   else {resource=await sealed({...db.tttInference,ttt:{...db.tttInference.ttt,budget:request.budget}});db.inferences=[resource];}}
+ else if(suffix.startsWith('vision-inferences/')&&suffix.endsWith('/feedback')){const id=suffix.split('/')[1],item=db.inferences.find(v=>v.inference_id===id);operation='review_normality_inference:'+id;resource=await sealed({...db.normalityFeedbackTemplate,inference_id:id,inference_sha256:item.receipt_sha256,classification:request.classification,reviewer_identity:request.reviewer_identity,note:request.note,followup_work_item_type:{MODEL_SIGNAL_CONFIRMED:'MODEL_SIGNAL_REVIEW',LIKELY_FALSE_POSITIVE:'FALSE_POSITIVE_INVESTIGATION',NEEDS_LABEL_REVIEW:'LABEL_REVIEW',INSUFFICIENT_EVIDENCE:'EVIDENCE_COLLECTION'}[request.classification]});db.normalityFeedback=[resource];}
  else if(suffix==='vision-runtimes'){operation='register_runtime';resource=await sealed({...db.runtimeTemplate,resource_id:'vision_runtime_new',runtime_id:'vision_runtime_new',display_name:request.display_name,executable_sha256:request.expected_executable_sha256,probe:{...db.runtimeTemplate.probe,executable_sha256:request.expected_executable_sha256}});db.runtimes.push(resource);}
  else if(suffix.startsWith('vision-runtimes/')&&suffix.endsWith('/probe')){const id=suffix.split('/')[1];operation='probe_runtime:'+id;const index=db.runtimes.findIndex(v=>v.resource_id===id);resource=await sealed({...db.runtimes[index],probe:{...db.runtimes[index].probe,import_status:request.import_check?'PASSED':'NOT_RUN'}});db.runtimes[index]=resource;}
  else if(suffix==='vision-datasets'){operation='register_dataset';resource=db.datasetTemplate;db.datasets=[resource];}
@@ -86,13 +103,13 @@ async function openPage({ unknown = false, unsupported = false, pending = null, 
   const page = await browser.newPage({ viewport: { width, height: 1100 } }); page.setDefaultTimeout(7000);
   await page.route('http://localhost:43441/**', route => route.fulfill({ body: '<!doctype html><html><head></head><body><div id="root"></div></body></html>', contentType: 'text/html' }));
   await page.goto(`http://localhost:43441/models?tab=vision${query}`);
-  const m = await model(), n = await normalityModel(), na = await normalityModel('APPROVE_SANDBOX'), ia = await inferenceAsset(), ni = await normalityInference(), r = await runtime(importedRuntime ? 'PASSED' : 'NOT_RUN'), d = await dataset(), tr = await run();
+  const m = await model(), n = await normalityModel(), na = await normalityModel('APPROVE_SANDBOX'), ia = await inferenceAsset(), ni = await previewInference(), r = await runtime(importedRuntime ? 'PASSED' : 'NOT_RUN'), d = await dataset(), tr = await run();
   await page.evaluate(({ scope, db, unknown, unsupported, pending }) => {
     window.__scope = scope; window.__db = db; window.__calls = []; window.__ledger = {}; window.__unknownPost = unknown; window.__unsupported = unsupported;
     window.__product = { activeWorkspace: { workspace_id: scope.workspaceId }, activeProject: { project_id: scope.projectId, name: '合成项目' }, registerScopeChangeGuard: () => () => {} };
     if (pending) localStorage.setItem(`vision-model:pending:${scope.actorId}:${scope.workspaceId}:${scope.projectId}`, JSON.stringify(pending));
   }, { scope, db: { models: [m], runtimes: [r], datasets: [d], runs: [], inferenceAssets: [], inferences: [], modelTemplate: m, normalityModelTemplate: n, approvedNormalityTemplate: na,
-    inferenceAssetTemplate: ia, inferenceTemplate: ni, runtimeTemplate: r, datasetTemplate: d, runTemplate: tr, capabilities: await capabilities(), poolProjection: await poolProjection(), poolDataset: await poolDataset() }, unknown, unsupported, pending });
+    inferenceAssetTemplate: ia, inferenceTemplate: ni, png: normalityPngBase64, normalityFeedbackTemplate: await normalityFeedback(ni), followupImportTemplate: await normalityFollowupImport(), followupOrderTemplate: await normalityFollowupWorkOrder(), tttCapabilities: await tttCapabilities(), tttInference: await tttInference(), tttFailure: await tttFailure(), runtimeTemplate: r, datasetTemplate: d, runTemplate: tr, capabilities: await capabilities(), poolProjection: await poolProjection(), poolDataset: await poolDataset() }, unknown, unsupported, pending });
   await page.addStyleTag({ content: `*{box-sizing:border-box}body{margin:0;background:#090c10;padding:24px}${css}` });
   await page.addScriptTag({ content: bundle });
   await page.getByRole('heading', { name: '把模型放进可复核的训练流程' }).waitFor();
@@ -318,7 +335,7 @@ test('normality pack registration and sandbox approval are separate explicit ope
   } finally { await page.close(); }
 });
 
-test('approved normality model runs against a frozen asset and only creates a local human-review draft', async () => {
+test('approved normality model previews verified pixels and persists named feedback with GET readback (synthetic API)', async () => {
   const page = await openPage({ importedRuntime: true }); try {
     const approved = await normalityModel('APPROVE_SANDBOX'); await page.evaluate(approved => { window.__db.models.push(approved); }, approved);
     await page.getByRole('button', { name: '刷新状态（仅 GET）' }).click(); await tab(page, 'Normality 推理');
@@ -330,11 +347,152 @@ test('approved normality model runs against a frozen asset and only creates a lo
     for (const label of ['我授权本次本地 CPU 推理', '我信任沙箱运行环境', '我信任绑定的权重', '我仅授权 weights-only']) await checked(inference, label);
     await inference.getByRole('button', { name: '执行一次本地沙箱推理' }).click(); await page.getByRole('button', { name: /异常信号/ }).waitFor();
     await page.getByRole('button', { name: /异常信号/ }).click(); const details = page.locator('.vision-models__details');
-    assert.match(await details.innerText(), /0\.750000/); assert.match(await details.innerText(), /0\.500000/); assert.match(await details.innerText(), /预览 HOLD：后端未提供 heatmap 像素读取合同/);
-    assert.equal(await details.locator('img').count(), 0); const writesBeforeDraft = (await writes(page)).length;
+    assert.match(await details.innerText(), /0\.750000/); assert.match(await details.innerText(), /0\.500000/);
+    await details.getByRole('button', { name: '读取并校验热图（仅 GET）' }).click();
+    const img = details.getByRole('img', { name: '已校验的 Normality 热图' }); await img.waitFor();
+    await page.waitForFunction(() => document.querySelector('.vision-models__heatmap-evidence img')?.naturalWidth === 1);
+    assert.match(await img.getAttribute('src'), /^blob:/); const writesBeforeDraft = (await writes(page)).length;
     const draft = details.locator('.vision-models__normality-review'); await draft.getByLabel('人工信号分类').selectOption('NEEDS_LABEL_REVIEW'); await review(draft);
-    await checked(draft, '我确认这只是本地复核草稿'); await draft.getByRole('button', { name: '生成本地复核草稿' }).click();
-    await details.getByText('LOCAL_DRAFT_NOT_SUBMITTED', { exact: true }).waitFor(); assert.equal((await writes(page)).length, writesBeforeDraft);
+    await checked(draft, '我已阅读推理与热图证据'); await draft.getByRole('button', { name: '保存具名复核反馈' }).click();
+    await details.getByText('已保存并回读 · RECORDED_FOR_HUMAN_FOLLOWUP', { exact: true }).waitFor(); assert.equal((await writes(page)).length, writesBeforeDraft + 1);
+    assert.equal(await page.evaluate(() => window.__calls.some(call => call.method === 'GET' && call.path.endsWith('/vision-inferences/vision_inference_test/feedback'))), true);
     assert.equal(await page.evaluate(() => JSON.stringify(localStorage).includes('NEEDS_LABEL_REVIEW')), false);
+  } finally { await page.close(); }
+});
+
+async function openInference() {
+  const page = await openPage();
+  await page.evaluate(() => { window.__db.inferences = [window.__db.inferenceTemplate]; window.__createdUrls = []; window.__revokedUrls = [];
+    const create = URL.createObjectURL.bind(URL), revoke = URL.revokeObjectURL.bind(URL);
+    URL.createObjectURL = blob => { const url = create(blob); window.__createdUrls.push(url); return url; };
+    URL.revokeObjectURL = url => { window.__revokedUrls.push(url); revoke(url); }; });
+  await page.getByRole('button', { name: '刷新状态（仅 GET）' }).click(); await tab(page, 'Normality 推理');
+  await page.getByRole('button', { name: /异常信号/ }).click(); return page;
+}
+test('normality preview URLs are revoked on record change and late cancelled responses cannot recreate them (synthetic API)', async () => {
+  const page = await openInference(); try {
+    await page.getByRole('button', { name: '读取并校验热图（仅 GET）' }).click(); await page.getByRole('img', { name: '已校验的 Normality 热图' }).waitFor();
+    await tab(page, '训练'); assert.equal(await page.evaluate(() => window.__revokedUrls.length), 1);
+    await tab(page, 'Normality 推理'); await page.getByRole('button', { name: /异常信号/ }).click();
+    await page.evaluate(() => { window.__delayHeatmap = true; }); await page.getByRole('button', { name: '读取并校验热图（仅 GET）' }).click();
+    await page.waitForFunction(() => Boolean(window.__releaseHeatmap)); await tab(page, '训练'); await page.evaluate(() => window.__releaseHeatmap());
+    await page.waitForFunction(() => window.__createdUrls.length === window.__revokedUrls.length);
+    assert.equal(await page.getByRole('img').count(), 0); assert.equal(await page.evaluate(() => window.__createdUrls.length), 1);
+  } finally { await page.close(); }
+});
+test('corrupt PNG stays HOLD and unknown feedback is reconciled by GET without a second POST (synthetic API)', async () => {
+  const page = await openInference(); try {
+    await page.evaluate(() => { window.__corruptHeatmap = true; }); await page.getByRole('button', { name: '读取并校验热图（仅 GET）' }).click();
+    await page.locator('.vision-models__heatmap-evidence').getByRole('alert').waitFor(); assert.equal(await page.getByRole('img').count(), 0);
+    const form = page.locator('.vision-models__normality-review'); await review(form); await checked(form, '我已阅读推理与热图证据');
+    await page.evaluate(() => { window.__unknownPost = true; }); await form.getByRole('button', { name: '保存具名复核反馈' }).click();
+    await page.getByText('写入结果待确认 · UNKNOWN', { exact: true }).waitFor(); assert.equal((await writes(page)).length, 1);
+    assert.equal(await form.getByRole('button', { name: '保存具名复核反馈' }).isEnabled(), false);
+    await page.getByRole('button', { name: '使用原 request_key 仅 GET 对账' }).click();
+    await page.getByText('已保存并回读 · RECORDED_FOR_HUMAN_FOLLOWUP', { exact: true }).waitFor(); assert.equal((await writes(page)).length, 1);
+  } finally { await page.close(); }
+});
+test('already-approved normality packs expose an independently authorized revalidation action (synthetic API)', async () => {
+  const page = await openPage({ importedRuntime: true }); try {
+    await page.evaluate(() => { window.__db.models.push(window.__db.approvedNormalityTemplate); });
+    await page.getByRole('button', { name: '刷新状态（仅 GET）' }).click(); await tab(page, 'Normality 推理');
+    await page.getByRole('button', { name: /Bound normality pack/ }).click();
+    const form = page.locator('.vision-models__normality-approval'), submit = form.getByRole('button', { name: '重新核验沙箱批准' });
+    assert.equal(await submit.isEnabled(), false); assert.equal((await writes(page)).length, 0);
+    await form.getByLabel('沙箱运行环境').selectOption('vision_runtime_test'); await review(form);
+    for (const label of ['我已复核模型包证据', '我信任所选运行环境', '我授权执行模型包验证', '我信任绑定的权重', '我仅授权 weights-only', '我已核查 Ultralytics']) await checked(form, label);
+    await submit.click(); await page.getByRole('status').filter({ hasText: '操作已收到' }).waitFor(); assert.equal((await writes(page)).length, 1);
+  } finally { await page.close(); }
+});
+
+test('TTT has a separate explicitly authorized bounded form and measured outcome, with no implicit adaptation (synthetic API)', async () => {
+  const page = await openPage({ importedRuntime: true }); try {
+    const base = await inferenceAsset(), extra = await Promise.all([['replay_1', '1'], ['guard_normal', '2'], ['guard_anomaly', '3']].map(async ([id, digit]) => seal({ ...base, asset_id: id, resource_id: id, display_name: id, image_sha256: sha(digit) })));
+    await page.evaluate(extra => { window.__db.models.push(window.__db.approvedNormalityTemplate); window.__db.inferenceAssets = [window.__db.inferenceAssetTemplate, ...extra]; window.__db.capabilities.ttt_status = 'NORMALITY_EPISODIC_AVAILABLE'; window.__db.capabilities.ttt_scope = 'NORMALITY_ONLY_EPISODIC_NO_PERSISTENCE'; }, extra);
+    await page.getByRole('button', { name: '刷新状态（仅 GET）' }).click(); await tab(page, 'Normality 推理');
+    await page.getByRole('button', { name: '读取 TTT 能力（仅 GET）' }).click(); const form = page.locator('.vision-models__normality-ttt');
+    const submit = form.getByRole('button', { name: '按独立授权执行一次 TTT' }); assert.equal(await submit.isEnabled(), false); assert.equal((await writes(page)).length, 0);
+    await form.getByLabel('Normality 模型包').selectOption('vision_normality_model_test'); await form.getByLabel('冻结输入资产').selectOption('vision_inference_asset_test');
+    await form.getByLabel('TTT 用途 replay_1').selectOption('replay'); await form.getByLabel('TTT 用途 guard_normal').selectOption('guard_normal'); await form.getByLabel('TTT 用途 guard_anomaly').selectOption('guard_anomaly');
+    await form.getByLabel('TTT 步数').fill('2'); await form.getByLabel('TTT 最长秒数').fill('30'); await review(form);
+    for (const label of ['我授权本次本地 CPU 推理', '我信任沙箱运行环境', '我信任绑定的权重', '我仅授权 weights-only', '我单独授权本次有界 TTT', '我确认 replay 图像', '我已具名复核 guard']) await checked(form, label);
+    await submit.click(); await page.getByText('ACCEPTED_EPISODIC', { exact: true }).waitFor(); assert.equal((await writes(page)).length, 1);
+    assert.match(await page.locator('.vision-models__ttt-result').innerText(), /不等于工业效果提升/);
+    const out = path.join(root, 'output/playwright/vision-models'); mkdirSync(out, { recursive: true }); await page.screenshot({ path: path.join(out, 'ttt-desktop.png'), fullPage: true });
+  } finally { await page.close(); }
+});
+
+test('TTT unknown worker failure only GET reconciles an unmeasured receipt and never fabricates a score (synthetic API)', async () => {
+  const page = await openPage({ importedRuntime: true }); try {
+    const base = await inferenceAsset(), extra = await Promise.all([['replay_1', '1'], ['guard_normal', '2'], ['guard_anomaly', '3']].map(async ([id, digit]) => seal({ ...base, asset_id: id, resource_id: id, display_name: id, image_sha256: sha(digit) })));
+    await page.evaluate(extra => { window.__db.models.push(window.__db.approvedNormalityTemplate); window.__db.inferenceAssets = [window.__db.inferenceAssetTemplate, ...extra]; window.__db.capabilities.ttt_status = 'NORMALITY_EPISODIC_AVAILABLE'; window.__db.capabilities.ttt_scope = 'NORMALITY_ONLY_EPISODIC_NO_PERSISTENCE'; window.__tttFail = true; window.__unknownPost = true; }, extra);
+    await page.getByRole('button', { name: '刷新状态（仅 GET）' }).click(); await tab(page, 'Normality 推理'); await page.getByRole('button', { name: '读取 TTT 能力（仅 GET）' }).click();
+    const form = page.locator('.vision-models__normality-ttt'); await form.getByLabel('Normality 模型包').selectOption('vision_normality_model_test'); await form.getByLabel('冻结输入资产').selectOption('vision_inference_asset_test');
+    await form.getByLabel('TTT 用途 replay_1').selectOption('replay'); await form.getByLabel('TTT 用途 guard_normal').selectOption('guard_normal'); await form.getByLabel('TTT 用途 guard_anomaly').selectOption('guard_anomaly'); await review(form);
+    for (const label of ['我授权本次本地 CPU 推理', '我信任沙箱运行环境', '我信任绑定的权重', '我仅授权 weights-only', '我单独授权本次有界 TTT', '我确认 replay 图像', '我已具名复核 guard']) await checked(form, label);
+    await form.getByRole('button', { name: '按独立授权执行一次 TTT' }).click(); await page.getByText('写入结果待确认 · UNKNOWN', { exact: true }).waitFor(); assert.equal((await writes(page)).length, 1);
+    await page.getByRole('button', { name: '使用原 request_key 仅 GET 对账' }).click(); await page.getByRole('heading', { name: 'TTT 已失败关闭 · FAILED_CLOSED' }).waitFor();
+    const failure = page.locator('.vision-models__ttt-failure'); assert.match(await failure.innerText(), /NOT_MEASURED/); assert.equal(await failure.getByRole('img').count(), 0); assert.equal((await writes(page)).length, 1);
+    await page.getByRole('button', { name: '刷新状态（仅 GET）' }).click(); await failure.waitFor(); assert.equal((await writes(page)).length, 1);
+    assert.match(await page.getByRole('navigation', { name: '视觉模型流程' }).getByRole('button', { name: /Normality 推理/ }).innerText(), /6$/);
+  } finally { await page.close(); }
+});
+
+test('TTT rollback renders baseline-effective identity without claiming persistent learning (synthetic API)', async () => {
+  const page = await openPage(); try {
+    const inference = await tttInference('ROLLED_BACK'); await page.evaluate(inference => { window.__db.inferences = [inference]; }, inference);
+    await page.getByRole('button', { name: '刷新状态（仅 GET）' }).click(); await tab(page, 'Normality 推理'); await page.getByRole('button', { name: /异常信号/ }).click();
+    await page.getByText('ROLLED_BACK', { exact: true }).waitFor(); assert.match(await page.locator('.vision-models__ttt-result').innerText(), /当前分数与热图使用原模型/);
+    assert.equal((await writes(page)).length, 0);
+  } finally { await page.close(); }
+});
+
+test('account/project remount revokes private heatmap URLs before another scope renders (synthetic API)', async () => {
+  const page = await openInference(); try {
+    await page.getByRole('button', { name: '读取并校验热图（仅 GET）' }).click(); await page.getByRole('img', { name: '已校验的 Normality 热图' }).waitFor();
+    await page.evaluate(() => { window.__scope = { ...window.__scope, projectId: 'project_other', actorId: 'actor_other' };
+      window.__product = { ...window.__product, activeProject: { project_id: 'project_other', name: '另一个项目' } };
+      window.__identity.setIdentitySession({user_id:'actor_other',display_name:'Other synthetic operator',login_name:'other.test',email:null,created_at:'2026-09-13T00:00:00Z',platform_role:'USER',status:'ACTIVE'},'synthetic-token-only-000000000000000000000000'); window.__mount(); });
+    await page.waitForFunction(() => window.__revokedUrls.length === 1); assert.equal(await page.getByRole('img', { name: '已校验的 Normality 热图' }).count(), 0);
+  } finally { await page.close(); }
+});
+
+test('normality followup imports a real workbook asset then requires an existing manual box before a named OPEN order (synthetic API)', async () => {
+  const page = await openInference(); try {
+    await page.evaluate(() => { window.__db.inferenceAssets = [window.__db.inferenceAssetTemplate]; window.__db.normalityFeedback = [window.__db.normalityFeedbackTemplate]; });
+    await page.getByRole('button', { name: '读取人工反馈（仅 GET）' }).click();
+    const followup = page.locator('.vision-models__normality-followup'); await followup.getByRole('button', { name: '读取真实后续状态（仅 GET）' }).click();
+    const importForm = followup.locator('.vision-models__followup-import'); await review(importForm);
+    await checked(importForm, '我授权把这条推理的已验封原图导入'); await checked(importForm, '本次导入不创建标签');
+    await importForm.getByRole('button', { name: '具名导入到真实工作簿' }).click();
+    await followup.getByRole('button', { name: '读取真实后续状态（仅 GET）' }).click();
+    const link = followup.getByRole('link', { name: '打开真实待标注资产' }); await link.waitFor(); assert.equal(await link.getAttribute('href'), '/workspace?asset=img_followup_synthetic');
+    await followup.getByRole('button', { name: '读取已保存人工框（仅 GET）' }).click(); await followup.getByText(/尚无已保存人工框/).waitFor();
+    assert.equal((await writes(page)).length, 1);
+    await page.evaluate(() => { window.__db.manualAnnotations = [{ annotation_id: 'manual_box_1', label: '人工待核区域', x: .1, y: .1, width: .3, height: .2, source: 'MANUAL' }]; });
+    await followup.getByRole('button', { name: '读取已保存人工框（仅 GET）' }).click();
+    const form = followup.locator('.vision-models__followup-order'); await form.getByLabel('已保存人工框').selectOption('manual_box_1'); await form.getByLabel('复核工单负责人').fill('Human reviewer'); await review(form);
+    for (const label of ['我授权为上述已有人工框创建真实 OPEN 工单', '我已复核原图、人工框与当前标注版本', '本次发单不修改标签']) await checked(form, label);
+    await page.evaluate(() => { window.__unknownPost = true; }); await form.getByRole('button', { name: '具名创建真实复核工单' }).click();
+    await page.getByText('写入结果待确认 · UNKNOWN', { exact: true }).waitFor(); assert.equal((await writes(page)).length, 2);
+    await page.getByRole('button', { name: '使用原 request_key 仅 GET 对账' }).click();
+    await followup.getByRole('button', { name: '读取真实后续状态（仅 GET）' }).click(); await followup.getByText('真实工单已建立 · OPEN', { exact: true }).waitFor();
+    assert.match(await followup.innerText(), /已关联真实人工框和 OPEN 工单/);
+    assert.equal((await writes(page)).length, 2); assert.equal(await page.evaluate(() => window.__calls.some(call => call.method === 'PUT')), false);
+    const post = (await writes(page))[1].request; assert.equal('annotations' in post, false); assert.equal('bbox' in post, false);
+    const out = path.join(root, 'output/playwright/vision-models'); mkdirSync(out, { recursive: true }); await page.screenshot({ path: path.join(out, 'normality-real-followup-desktop.png'), fullPage: true });
+  } finally { await page.close(); }
+});
+
+test('legacy failed import probe displays NOT_MEASURED without blocking read-only workbench or enabling training (synthetic API)', async () => {
+  const page = await openPage(); try {
+    const failed = await seal({ ...await runtime(), status: 'UNAVAILABLE', probe: { status: 'failed', error_code: 'YOLO_CHILD_EXECUTION_FAILED', error_type: 'ModuleNotFoundError' } });
+    await page.evaluate(failed => { window.__db.runtimes[0] = failed; }, failed);
+    await page.getByRole('button', { name: '刷新状态（仅 GET）' }).click(); await page.getByRole('button', { name: /Python metadata fixture/ }).click();
+    const details = page.locator('.vision-models__details'); await details.getByText(/NOT_MEASURED/).waitFor(); assert.match(await details.innerText(), /ModuleNotFoundError/);
+    await details.getByRole('heading', { name: '显式复查此运行环境' }).waitFor(); assert.equal((await writes(page)).length, 0);
+    await tab(page, '训练'); const target = form(page); await target.getByLabel('运行环境', { exact: true }).selectOption('vision_runtime_test'); await target.getByLabel('冻结数据集', { exact: true }).selectOption('vision_dataset_test'); await review(target);
+    await checked(target, '我已核查 Ultralytics'); await checked(target, '我信任所选 Python'); await checked(target, '我授权按上述数据集');
+    assert.equal(await target.getByRole('button', { name: '按本次授权启动 CPU 训练' }).isEnabled(), false);
   } finally { await page.close(); }
 });

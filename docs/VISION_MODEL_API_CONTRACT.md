@@ -84,9 +84,23 @@ test 不输出错题，也不参与训练选择。每条反馈绑定 run、datas
 training_device=CPU_ONLY
 supervised_bbox_detector=BOUNDED_LOCAL_RUNTIME
 weight_download_allowed=false
-ttt_status=DISABLED_NOT_IMPLEMENTED
+normality_ttt_status=NORMALITY_EPISODIC_AVAILABLE
+detect_training_adaptation=OFF
 industrial_effectiveness_status=NOT_EVALUATED
 production_release_allowed=false
 ```
 
 Ultralytics 的 AGPL／Enterprise 许可义务需要独立评估；分进程运行不自动豁免。
+
+## Normality 图像推理与单次适应
+
+模型中心现提供 `vision-ttt-capabilities`、`vision-models/{id}/ttt-inferences`、
+`vision-ttt-failures`，以及 `vision-inferences/{id}/heatmap` 和 `feedback`。
+普通推理与 TTT 的原模型、输入图像、实现身份均由服务端重新验证；TTT 还绑定
+适应、正常回放、独立复验三组的字节与解码像素身份。授权需单独给出，不由
+一次普通推理批准隐式继承。
+
+TTT 仅适用于 Normality student，候选只用于当前会话。真实 PNG 响应绑定字节
+SHA 和强 ETag；反馈保存后只读回读，不自动确立标签真值。硬超时／worker
+错误生成独立失败回执，没有测量就不填虚构步数。未知写结果使用原请求键
+对账，禁止自动重新运行。[完整合同与预算](NORMALITY_TTT.md)

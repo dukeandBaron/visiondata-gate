@@ -286,7 +286,9 @@ Windows 也可使用 `./run_demo.ps1 -Check` 检查环境，再运行 `./run_dem
 
 YOLO 训练预算为 **10–600 秒**；输入冻结拒绝**同一分区的字节重复或解码像素重复**，失败、取消与超时保留证据。[模型 API 合同](docs/VISION_MODEL_API_CONTRACT.md) · [任务保留与恢复](docs/MODEL_JOB_RETENTION.md)
 
-参考 NumPy 学习闭环与 YOLO/Normality 分支分别验收。Normality 热图目前只展示工件摘要，人工复核仅为未提交的页面草稿；TTT、RL 与自动语义标注不列为已执行功能。[能力、接口与未完成连接](docs/CAPABILITY_STATUS.md)
+参考 NumPy 学习闭环与 YOLO/Normality 分支分别验收。Normality 支持真实 PNG 热图、具名反馈保存与回读，以及**单次自监督适应（TTT）**：冻结主干和阈值，只更新当前会话的重建模块，独立参考组检查后采用或回滚，不覆盖父模型。
+
+在已有 VisA 模型包上，真实 CPU 执行完成 3 步更新；16 张开发参考的 TP/TN/FP/FN 更新前后均为 `5/6/2/3`。这证明更新与复验链路已执行，**尚未证明检测质量提升**。参考组基线全漏检的另一轮在更新前被拒绝。永久在线学习、RL 与自动语义标注不因单次 TTT 而获得实现声明。[执行方法与复现](docs/NORMALITY_TTT.md) · [能力、接口与未完成连接](docs/CAPABILITY_STATUS.md)
 
 ### Windows 候选
 

@@ -775,6 +775,87 @@ def test_stability_rejects_outcome_policy_source_drift(tmp_path: Path):
         build_model_stability_summary(run_dirs)
 
 
+HISTORICAL_POLICY_SHA = "c2d9b28ed86724d1fdee8e47629fa5282c06e29528e0ec5d1f5796401b9bb30c"
+DOCUMENTED_POLICY_SHA = "ff1f2385b1e070a352f9242dd821adf36858d505d6b91e3e1d01229123db3fd6"
+
+
+def _historical_policy_runs(tmp_path, *, last_policy=None):
+    return [
+        _make_run(tmp_path, name=f"historical-run-{index}", seed=800 + index,
+                  image_auroc=0.8, pixel_auroc=0.8, image_f1=0.7, pixel_f1=0.2,
+                  policy_sha256=last_policy if index == 2 and last_policy else HISTORICAL_POLICY_SHA)
+        for index in range(3)
+    ]
+
+
+def test_reviewed_docstring_migration_has_sealed_receipts_and_preserves_training_identity(tmp_path):
+    runs = _historical_policy_runs(tmp_path)
+    before = {str(path): sha256_file(path) for root in runs for path in root.rglob("*") if path.is_file()}
+    summary = build_model_stability_summary(runs)
+    assert summary["promotion_gate"]["status"] == "PUBLIC_PROXY_STABLE"
+    assert summary["verification_implementation"]["outcome_policy_module_sha256"] == DOCUMENTED_POLICY_SHA
+    receipts = summary["outcome_policy_compatibility_receipts"]
+    assert len(receipts) == 3
+    for receipt in receipts:
+        assert receipt["schema_version"] == "visiondata-gate.outcome-policy-source-compatibility.v1"
+        assert receipt["historical_policy_module_sha256"] == HISTORICAL_POLICY_SHA
+        assert receipt["current_policy_module_sha256"] == DOCUMENTED_POLICY_SHA
+        assert receipt["reconstructed_historical_source_sha256"] == HISTORICAL_POLICY_SHA
+        assert receipt["verification_implementation"] == summary["verification_implementation"]
+        assert receipt["training_identity_rewritten"] is False
+        assert receipt["production_release_allowed"] is False
+        assert receipt["receipt_sha256"] == _jcs_digest({key: value for key, value in receipt.items() if key != "receipt_sha256"})
+    assert {str(path): sha256_file(path) for root in runs for path in root.rglob("*") if path.is_file()} == before
+    for root in runs:
+        original = json.loads((root / "RUN_RECEIPT.json").read_text("utf-8"))
+        assert original["implementation_identity"]["policy_module_sha256"] == HISTORICAL_POLICY_SHA
+    rendered = model_stability_module.render_model_stability_markdown(summary)
+    assert HISTORICAL_POLICY_SHA in rendered and DOCUMENTED_POLICY_SHA in rendered
+    assert "training_identity_rewritten: false" in rendered
+
+
+def test_exact_current_policy_does_not_add_migration_fields(tmp_path):
+    runs = [_make_run(tmp_path, name=f"same-source-{index}", seed=810 + index,
+                      image_auroc=0.8, pixel_auroc=0.8, image_f1=0.7, pixel_f1=0.2)
+            for index in range(3)]
+    assert "outcome_policy_compatibility_receipts" not in build_model_stability_summary(runs)
+
+
+def test_mixed_historical_and_current_training_identity_stays_incomparable(tmp_path):
+    summary = build_model_stability_summary(_historical_policy_runs(tmp_path, last_policy=DOCUMENTED_POLICY_SHA))
+    assert summary["promotion_gate"]["eligible"] is False
+    assert "implementation_identity_match" in summary["comparability"]["failed_check_ids"]
+
+
+@pytest.mark.parametrize("change", ["code", "docstring", "duplicate_patch"])
+def test_unknown_current_source_cannot_use_docstring_compatibility(tmp_path, monkeypatch, change):
+    runs = _historical_policy_runs(tmp_path / "runs")
+    source = Path(model_experiment_agent_module.__file__).read_bytes()
+    if change == "code":
+        changed = source + b"\nunknown_runtime_constant = 1\n"
+    elif change == "docstring":
+        changed = source.replace(b"adjudicated masks", b"arbitrary masks")
+    else:
+        changed = source.replace(b"The resulting experiment", b"The resulting experiment\nThe resulting experiment")
+    fixture = tmp_path / "changed_policy.py"
+    fixture.write_bytes(changed)
+    monkeypatch.setattr(model_experiment_agent_module, "__file__", str(fixture))
+    with pytest.raises(ModelStabilityContractError, match="OUTCOME_POLICY_SOURCE_DRIFT"):
+        build_model_stability_summary(runs)
+
+
+def test_current_hash_claim_cannot_bypass_actual_reverse_patch(tmp_path, monkeypatch):
+    runs = _historical_policy_runs(tmp_path / "runs")
+    fixture = tmp_path / "not-the-reviewed-source.py"
+    fixture.write_bytes(b"def classify_experiment_outcome(): return {}\n")
+    monkeypatch.setattr(model_experiment_agent_module, "__file__", str(fixture))
+    verifier = model_stability_module._verification_implementation()
+    verifier["outcome_policy_module_sha256"] = DOCUMENTED_POLICY_SHA
+    monkeypatch.setattr(model_stability_module, "_verification_implementation", lambda: verifier)
+    with pytest.raises(ModelStabilityContractError, match="OUTCOME_POLICY_SOURCE_DRIFT"):
+        build_model_stability_summary(runs)
+
+
 def test_non_seed_plan_drift_is_not_averaged_as_a_stability_result(tmp_path: Path):
     common = {
         "image_auroc": 0.8,

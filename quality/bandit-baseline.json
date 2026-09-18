@@ -2,19 +2,19 @@
   "bandit_version": "1.9.4",
   "baseline_schema_version": "visiondata-gate.bandit-baseline.v1",
   "errors": [],
-  "findings_sha256": "21004f57ed7723fbf1077e6d90ad6b8e3e1350ce854dbb489c5e723e018a89a9",
-  "generated_at": "2026-09-18T14:42:07Z",
+  "findings_sha256": "8faca919601cfc7a5c37cc05ffc2416dd33a743d53f2404c6d3bf789fc1b6db6",
+  "generated_at": "2026-09-18T19:12:01Z",
   "metrics": {
     "_totals": {
-      "CONFIDENCE.HIGH": 204,
+      "CONFIDENCE.HIGH": 206,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 24,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 228,
+      "SEVERITY.LOW": 230,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 117189,
+      "loc": 117370,
       "nosec": 0,
       "skipped_tests": 1
     },
@@ -2303,6 +2303,19 @@
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
       "loc": 344,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "tools\\run_normality_ttt_synthetic.py": {
+      "CONFIDENCE.HIGH": 2,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 2,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 181,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -4639,6 +4652,34 @@
       "test_name": "assert_used"
     },
     {
+      "code": "147         request_path.write_text(\"{}\", encoding=\"utf-8\")\n148         completed = subprocess.run(\n149             normality_inference._worker_command(\n150                 Path(sys.executable), \"ttt\", request_path, result_path\n151             ),\n152             cwd=work,\n153             env=normality_inference._child_environment(work / \"environment\"),\n154             capture_output=True,\n155             timeout=30,\n156         )\n157         bootstrap = json.loads(result_path.read_text(encoding=\"utf-8\"))\n",
+      "col_offset": 20,
+      "end_col_offset": 9,
+      "filename": "tools/run_normality_ttt_synthetic.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "subprocess call - check for execution of untrusted input.",
+      "line_number": 148,
+      "line_range": [
+        148,
+        149,
+        150,
+        151,
+        152,
+        153,
+        154,
+        155,
+        156
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html",
+      "test_id": "B603",
+      "test_name": "subprocess_without_shell_equals_true"
+    },
+    {
       "code": "186     assert trace_status == 200\n187     assert evidence_status == 200\n188     assert trace_sha256 == task[\"trace_sha256\"]\n",
       "col_offset": 4,
       "end_col_offset": 33,
@@ -5755,6 +5796,26 @@
       "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html",
       "test_id": "B603",
       "test_name": "subprocess_without_shell_equals_true"
+    },
+    {
+      "code": "14 import sys\n15 import subprocess\n16 import tempfile\n",
+      "col_offset": 0,
+      "end_col_offset": 17,
+      "filename": "tools/run_normality_ttt_synthetic.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Consider possible security implications associated with the subprocess module.",
+      "line_number": 15,
+      "line_range": [
+        15
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess",
+      "test_id": "B404",
+      "test_name": "blacklist"
     },
     {
       "code": "463             _require(asset is not None, \"manifest visual asset is unavailable\")\n464             assert asset is not None\n465             _require(\n",

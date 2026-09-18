@@ -1,0 +1,274 @@
+{
+  "schema_version": "visiondata-gate.normality-ttt-api-schemas.v1",
+  "requests": {
+    "RunNormalityTtt": {
+      "$defs": {
+        "NormalityTttAsset": {
+          "additionalProperties": false,
+          "properties": {
+            "asset_id": {
+              "pattern": "^[A-Za-z0-9_-]{1,120}$",
+              "title": "Asset Id",
+              "type": "string"
+            },
+            "expected_asset_receipt_sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Expected Asset Receipt Sha256",
+              "type": "string"
+            },
+            "expected_image_sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Expected Image Sha256",
+              "type": "string"
+            }
+          },
+          "required": [
+            "asset_id",
+            "expected_asset_receipt_sha256",
+            "expected_image_sha256"
+          ],
+          "title": "NormalityTttAsset",
+          "type": "object"
+        },
+        "NormalityTttBudget": {
+          "additionalProperties": false,
+          "properties": {
+            "steps": {
+              "default": 3,
+              "maximum": 8,
+              "minimum": 1,
+              "title": "Steps",
+              "type": "integer"
+            },
+            "learning_rate": {
+              "default": 0.001,
+              "maximum": 0.01,
+              "minimum": 0.00001,
+              "title": "Learning Rate",
+              "type": "number"
+            },
+            "max_seconds": {
+              "default": 60,
+              "maximum": 120,
+              "minimum": 5,
+              "title": "Max Seconds",
+              "type": "integer"
+            },
+            "seed": {
+              "default": 0,
+              "maximum": 2147483647,
+              "minimum": 0,
+              "title": "Seed",
+              "type": "integer"
+            }
+          },
+          "title": "NormalityTttBudget",
+          "type": "object"
+        },
+        "NormalityTttGuardAsset": {
+          "additionalProperties": false,
+          "properties": {
+            "asset_id": {
+              "pattern": "^[A-Za-z0-9_-]{1,120}$",
+              "title": "Asset Id",
+              "type": "string"
+            },
+            "expected_asset_receipt_sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Expected Asset Receipt Sha256",
+              "type": "string"
+            },
+            "expected_image_sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Expected Image Sha256",
+              "type": "string"
+            },
+            "reference_label": {
+              "enum": [
+                "normal",
+                "anomaly"
+              ],
+              "title": "Reference Label",
+              "type": "string"
+            }
+          },
+          "required": [
+            "asset_id",
+            "expected_asset_receipt_sha256",
+            "expected_image_sha256",
+            "reference_label"
+          ],
+          "title": "NormalityTttGuardAsset",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "request_key": {
+          "pattern": "^[A-Za-z0-9_-]{12,100}$",
+          "title": "Request Key",
+          "type": "string"
+        },
+        "reviewer_identity": {
+          "maxLength": 160,
+          "minLength": 2,
+          "title": "Reviewer Identity",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 1000,
+          "minLength": 8,
+          "title": "Note",
+          "type": "string"
+        },
+        "expected_model_receipt_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Model Receipt Sha256",
+          "type": "string"
+        },
+        "expected_model_pack_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Model Pack Sha256",
+          "type": "string"
+        },
+        "expected_backbone_weights_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Backbone Weights Sha256",
+          "type": "string"
+        },
+        "expected_source_binding_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Source Binding Sha256",
+          "type": "string"
+        },
+        "expected_source_index_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Source Index Sha256",
+          "type": "string"
+        },
+        "expected_runtime_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Runtime Sha256",
+          "type": "string"
+        },
+        "asset_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,120}$",
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "expected_asset_receipt_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Asset Receipt Sha256",
+          "type": "string"
+        },
+        "expected_image_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Image Sha256",
+          "type": "string"
+        },
+        "max_seconds": {
+          "default": 120,
+          "maximum": 300,
+          "minimum": 5,
+          "title": "Max Seconds",
+          "type": "integer"
+        },
+        "operator_attests_execution_authorized": {
+          "const": true,
+          "title": "Operator Attests Execution Authorized",
+          "type": "boolean"
+        },
+        "operator_attests_trusted_runtime": {
+          "const": true,
+          "title": "Operator Attests Trusted Runtime",
+          "type": "boolean"
+        },
+        "operator_attests_trusted_weights": {
+          "const": true,
+          "title": "Operator Attests Trusted Weights",
+          "type": "boolean"
+        },
+        "operator_attests_weights_only_load_authorized": {
+          "const": true,
+          "title": "Operator Attests Weights Only Load Authorized",
+          "type": "boolean"
+        },
+        "expected_ttt_implementation_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Ttt Implementation Sha256",
+          "type": "string"
+        },
+        "adaptation_assets": {
+          "items": {
+            "$ref": "#/$defs/NormalityTttAsset"
+          },
+          "maxItems": 7,
+          "title": "Adaptation Assets",
+          "type": "array"
+        },
+        "replay_assets": {
+          "items": {
+            "$ref": "#/$defs/NormalityTttAsset"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Replay Assets",
+          "type": "array"
+        },
+        "guard_assets": {
+          "items": {
+            "$ref": "#/$defs/NormalityTttGuardAsset"
+          },
+          "maxItems": 16,
+          "minItems": 2,
+          "title": "Guard Assets",
+          "type": "array"
+        },
+        "budget": {
+          "$ref": "#/$defs/NormalityTttBudget"
+        },
+        "operator_attests_ttt_authorized": {
+          "const": true,
+          "title": "Operator Attests Ttt Authorized",
+          "type": "boolean"
+        },
+        "operator_attests_replay_normal": {
+          "const": true,
+          "title": "Operator Attests Replay Normal",
+          "type": "boolean"
+        },
+        "operator_attests_guard_labels_reviewed": {
+          "const": true,
+          "title": "Operator Attests Guard Labels Reviewed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "request_key",
+        "reviewer_identity",
+        "note",
+        "expected_model_receipt_sha256",
+        "expected_model_pack_sha256",
+        "expected_backbone_weights_sha256",
+        "expected_source_binding_sha256",
+        "expected_source_index_sha256",
+        "expected_runtime_sha256",
+        "asset_id",
+        "expected_asset_receipt_sha256",
+        "expected_image_sha256",
+        "operator_attests_execution_authorized",
+        "operator_attests_trusted_runtime",
+        "operator_attests_trusted_weights",
+        "operator_attests_weights_only_load_authorized",
+        "expected_ttt_implementation_sha256",
+        "replay_assets",
+        "guard_assets",
+        "operator_attests_ttt_authorized",
+        "operator_attests_replay_normal",
+        "operator_attests_guard_labels_reviewed"
+      ],
+      "title": "RunNormalityTtt",
+      "type": "object"
+    }
+  }
+}
