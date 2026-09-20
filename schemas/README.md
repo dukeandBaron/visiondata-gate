@@ -11,6 +11,8 @@ Schema 描述数据形状，不替代身份鉴权、来源授权、摘要复核�
 | [operator_acceptance_requirements.v1.json](operator_acceptance_requirements.v1.json) | 导出的请求模型 Schema | [contracts.py](../src/visiondata_gate/contracts.py) 中的 `OperatorAcceptanceRequirements` |
 | [compute_handoff_request.v1.json](compute_handoff_request.v1.json) | 导出的请求模型 Schema | [compute_handoff.py](../src/visiondata_gate/compute_handoff.py) 中的 `ComputeHandoffRequest` |
 | [vision_model_requests.v1.json](vision_model_requests.v1.json) | **Schema 集合，不是单个请求 Schema** | `requests` 中的具名请求和 `detection_manifest`；对应 [local_model_registry.py](../src/visiondata_gate/local_model_registry.py) |
+| [normality_ttt_requests.v1.json](normality_ttt_requests.v1.json) | **具名请求 Schema 集合** | `requests.RunNormalityTtt`；单次适应、回放、复验角色、摘要、预算与独立授权；不替代服务端数据/权限验证 |
+| [normality_followup_requests.v1.json](normality_followup_requests.v1.json) | **具名请求 Schema 集合** | 反馈导入工作簿与人工框选后建立工单的两个独立请求；不自动生成标注或授权训练 |
 
 独立 Schema 按其 `$schema` 声明使用。生成的 Pydantic 模型 Schema 可能没有 `$schema`；消费方需固定模型和验证器版本。
 

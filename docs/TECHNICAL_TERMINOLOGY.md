@@ -170,7 +170,7 @@ supervision。
 |---|---|---|
 | Active Learning | 明确 query strategy、未标注池、预算、人工 oracle、独立评估 | 当前没有 query engine，不使用该完成时表述 |
 | Continual Learning | 时间/任务序列、保留/回放策略、遗忘指标和独立门禁 | 已有 retention evaluation 合同；不等于在线部署 |
-| Test-Time Training / TTT | 推理时真实参数更新、回滚、污染隔离与运行证据 | 当前运行时未实现 |
+| Test-Time Training / TTT | 推理时真实参数更新、回滚、污染隔离与运行证据 | 已有独立 Normality 单次 student 适应路径；不持久更新父模型，不等于 detect TTT、RL 或工厂验收 |
 | Multi-task Detection | 共享 backbone 与两个以上经训练/评估的任务 head | 当前未以该架构形成验证回执 |
 | Position + Scale | 明确 ROI 定位与多尺度细粒度检测协议 | 当前只可作为后续模型设计，不冒充既有结果 |
 | Segmentation / Mask Generation | 像素级输出、标注协议、独立指标和回执 | 当前不宣称自动 Mask 真值生成 |

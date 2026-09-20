@@ -26,6 +26,7 @@ from .local_model_registry import (
     RegisterVisionModel,
     RegisterVisionRuntime,
     ReviewVisionFeedback,
+    ReviewNormalityInference,
     RunNormalityInference,
     SelectVisionModel,
     VisionModelError,
@@ -305,6 +306,63 @@ def install_vision_model_routes(
             response,
         )
 
+    @router.get("/vision-inferences/{inference_id}/heatmap")
+    def get_inference_heatmap(
+        project_id: str,
+        inference_id: str,
+        actor: str = Depends(actor_dependency),
+        product=Depends(product_dependency),
+    ) -> Response:
+        content, digest = LocalVisionModelService(product).get_inference_heatmap(
+            actor, project_id, inference_id
+        )
+        if not hmac.compare_digest(hashlib.sha256(content).hexdigest(), digest):
+            raise VisionModelError("VISION_HEATMAP_RESPONSE_IDENTITY_INVALID")
+        return Response(
+            content=content,
+            media_type="image/png",
+            headers=_PRIVATE_HEADERS | {
+                "ETag": f'"{digest}"',
+                "X-Content-SHA256": digest,
+                "X-Content-Type-Options": "nosniff",
+            },
+        )
+
+    @router.get("/vision-inferences/{inference_id}/feedback")
+    def list_normality_feedback(
+        project_id: str,
+        inference_id: str,
+        response: Response,
+        actor: str = Depends(actor_dependency),
+        product=Depends(product_dependency),
+    ) -> dict:
+        return _bind_receipt(
+            LocalVisionModelService(product).list_normality_feedback(
+                actor, project_id, inference_id
+            ),
+            response,
+        )
+
+    @router.post(
+        "/vision-inferences/{inference_id}/feedback",
+        status_code=201,
+        dependencies=local_only,
+    )
+    def review_normality_inference(
+        project_id: str,
+        inference_id: str,
+        request: ReviewNormalityInference,
+        response: Response,
+        actor: str = Depends(actor_dependency),
+        product=Depends(product_dependency),
+    ) -> dict:
+        return _bind_receipt(
+            LocalVisionModelService(product).review_normality_inference(
+                actor, project_id, inference_id, request
+            ),
+            response,
+        )
+
     @router.get("/vision-runtimes")
     def list_runtimes(
         project_id: str,
@@ -527,3 +585,6 @@ def install_vision_model_routes(
         )
 
     app.include_router(router)
+    from .normality_adaptation_api import install_normality_ttt_routes
+
+    install_normality_ttt_routes(app, actor_dependency, product_dependency)

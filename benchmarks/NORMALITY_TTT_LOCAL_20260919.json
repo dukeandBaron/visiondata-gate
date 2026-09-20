@@ -1,0 +1,164 @@
+{
+  "schema_version": "visiondata-gate.normality-ttt-local-validation.v1",
+  "date": "2026-09-19",
+  "scope": "EXISTING_VISA_CAPSULES_DEVELOPMENT_PROXY_NOT_INDEPENDENT_TEST_OR_FACTORY",
+  "protocol": {
+    "query": "first development_normal by image_relative_path",
+    "replay": "first weight_update_train_normal by image_relative_path",
+    "positive_guard": "8 lowest image_sha256 per development class, query excluded, fixed before scoring",
+    "negative_guard": "first nonquery development normal and first development anomaly by image_relative_path",
+    "negative_retained": true,
+    "reference_labels": "dataset labels with simulated operator confirmation"
+  },
+  "runtime": {
+    "python": "3.10.20",
+    "torch": "2.11.0+cpu",
+    "torchvision": "0.26.0",
+    "ultralytics": "8.4.27",
+    "device": "cpu"
+  },
+  "model_pack_sha256": "40fb408cb6389001153b04e90bc5b626ec1aaa78d6096d6788bf5c336f76ca83",
+  "positive": {
+    "status": "ACCEPTED_EPISODIC",
+    "strategy": "EPISODIC_MASKED_STUDENT",
+    "implementation_sha256": "97b713c224412c6b2ec44a3b85644d1f6c8f48f070b425a9c1b2243dca58e62e",
+    "steps_completed": 3,
+    "budget": {
+      "learning_rate": 0.001,
+      "max_seconds": 90,
+      "seed": 20260919,
+      "steps": 3
+    },
+    "objective_before": 0.0023049714509397745,
+    "objective_after": 0.002304960275068879,
+    "guard_before": {
+      "fn": 3,
+      "fp": 2,
+      "tn": 6,
+      "tp": 5
+    },
+    "guard_after": {
+      "fn": 3,
+      "fp": 2,
+      "tn": 6,
+      "tp": 5
+    },
+    "effective_guard": {
+      "fn": 3,
+      "fp": 2,
+      "tn": 6,
+      "tp": 5
+    },
+    "rollback_reason": null,
+    "parameter_sha256_before": "13915def56f5b7b33ea18c05da334e8c6f5af046371d7e6100da9abfbb30faf1",
+    "parameter_sha256_after": "25b5b77884b674e8d0df32bd498fdf4c8da30ef95038790685f178b9b2f9c615",
+    "effective_parameter_sha256": "25b5b77884b674e8d0df32bd498fdf4c8da30ef95038790685f178b9b2f9c615",
+    "backbone_sha256_before": "e26c5ea87ad4eb22d502cde6710c4df2eeb595d5d7988d739777eb5e5582497b",
+    "backbone_sha256_after": "e26c5ea87ad4eb22d502cde6710c4df2eeb595d5d7988d739777eb5e5582497b",
+    "parent_pack_unchanged": true,
+    "thresholds_unchanged": true,
+    "persistent_learning": false,
+    "reset_after_episode": true,
+    "loss_curve": [
+      {
+        "anchor_loss": 0.0,
+        "gradient_norm": 0.0019620403181761503,
+        "loss": 0.0023049714509397745,
+        "reconstruction_loss": 0.0023049714509397745,
+        "replay_loss": 0.0,
+        "step": 1
+      },
+      {
+        "anchor_loss": 3.3958851898031883e-14,
+        "gradient_norm": 0.0019619588274508715,
+        "loss": 0.002304967725649476,
+        "reconstruction_loss": 0.002304967725649476,
+        "replay_loss": 4.431637077705747e-14,
+        "step": 2
+      },
+      {
+        "anchor_loss": 1.3583521785674735e-13,
+        "gradient_norm": 0.0019618775695562363,
+        "loss": 0.0023049642331898212,
+        "reconstruction_loss": 0.0023049642331898212,
+        "replay_loss": 1.7578211835341667e-13,
+        "step": 3
+      }
+    ],
+    "input_group_counts": {
+      "adaptation": 1,
+      "guard": 16,
+      "replay": 1
+    }
+  },
+  "negative": {
+    "status": "ROLLED_BACK",
+    "strategy": "EPISODIC_MASKED_STUDENT",
+    "implementation_sha256": "97b713c224412c6b2ec44a3b85644d1f6c8f48f070b425a9c1b2243dca58e62e",
+    "steps_completed": 0,
+    "budget": {
+      "learning_rate": 0.001,
+      "max_seconds": 90,
+      "seed": 20260919,
+      "steps": 3
+    },
+    "objective_before": null,
+    "objective_after": null,
+    "guard_before": {
+      "fn": 1,
+      "fp": 0,
+      "tn": 1,
+      "tp": 0
+    },
+    "guard_after": null,
+    "effective_guard": {
+      "fn": 1,
+      "fp": 0,
+      "tn": 1,
+      "tp": 0
+    },
+    "rollback_reason": "TTT_GUARD_BASELINE_UNQUALIFIED",
+    "parameter_sha256_before": "13915def56f5b7b33ea18c05da334e8c6f5af046371d7e6100da9abfbb30faf1",
+    "parameter_sha256_after": "13915def56f5b7b33ea18c05da334e8c6f5af046371d7e6100da9abfbb30faf1",
+    "effective_parameter_sha256": "13915def56f5b7b33ea18c05da334e8c6f5af046371d7e6100da9abfbb30faf1",
+    "backbone_sha256_before": "e26c5ea87ad4eb22d502cde6710c4df2eeb595d5d7988d739777eb5e5582497b",
+    "backbone_sha256_after": "e26c5ea87ad4eb22d502cde6710c4df2eeb595d5d7988d739777eb5e5582497b",
+    "parent_pack_unchanged": true,
+    "thresholds_unchanged": true,
+    "persistent_learning": false,
+    "reset_after_episode": true,
+    "loss_curve": [],
+    "input_group_counts": {
+      "adaptation": 1,
+      "guard": 2,
+      "replay": 1
+    }
+  },
+  "real_service": {
+    "scope": "IN_PROCESS_ASGI_REAL_DB_CAS_AND_EXTERNAL_MODEL_NOT_BROWSER",
+    "actual_heatmap_sha256_checked": true,
+    "same_key_did_not_create_new_inference": true,
+    "feedback_saved_and_read_back": true
+  },
+  "followup": {
+    "scope": "IN_PROCESS_HTTP_REAL_STORES_SIMULATED_OPERATOR_AND_TEST_AUTHORED_REGION_NOT_BROWSER",
+    "work_order_status": "OPEN",
+    "original_feedback_unchanged": true,
+    "same_key_did_not_duplicate": true,
+    "annotation_provenance": "explicit integration-test region NOT defect truth or independent human review"
+  },
+  "source_receipt_file_sha256": {
+    "real_service": "a2a50307d260b88db71b255a71572816684818aaa01fa27f0bb0954255f56989",
+    "negative": "a356e93109f5d2991e0584610c620c938468b22f6910115b66af0f685e04696f",
+    "followup": "d88162a1169ae881059051e926f2af9b5c6895f5c2e7c29e0f3341e7cfbecdbb"
+  },
+  "limits": {
+    "quality_improvement_observed": false,
+    "industrial_benefit_validated": false,
+    "real_human_acceptance": false,
+    "independent_heldout_test": false,
+    "persistent_learning": false,
+    "production_release_allowed": false,
+    "private_images_or_weights_included": false
+  }
+}

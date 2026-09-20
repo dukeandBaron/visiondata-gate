@@ -32,6 +32,7 @@ datas = [
     # process never imports Torch or deserializes a model pack.  An explicitly
     # registered external runtime executes this exact reviewed source file.
     (str(source_root / "visiondata_gate/normality_inference.py"), "visiondata_gate"),
+    (str(source_root / "visiondata_gate/normality_ttt.py"), "visiondata_gate"),
     # The v4 stability contract hashes these exact reviewed source files while
     # rebuilding the three-run evidence inside the packaged backend.  PYZ
     # bytecode alone does not create an on-disk __file__ for that hash step.

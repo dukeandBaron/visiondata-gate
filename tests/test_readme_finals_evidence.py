@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 import tomllib
 
@@ -22,7 +23,12 @@ def test_readme_maps_all_finals_dimensions_to_evidence() -> None:
         assert dimension in text
         assert score in text
     assert "docs/FINALS_EVIDENCE_MAP.md" in text
-    assert "当前 **Public** 主仓" in text
+    assert "Public 主仓" in text.replace("**", "")
+    score_table = text.split("## 决赛评分证据索引", 1)[1].split("## 当前声明边界", 1)[0]
+    scores = [int(row.split("|")[3].strip()) for row in score_table.splitlines()
+              if re.match(r"^\|.*\|\s*\d+\s*\|", row)]
+    assert scores == [8, 7, 5, 10, 10, 5, 10, 8, 7, 8, 7, 7, 8]
+    assert sum(scores) == 100
 
 
 def test_readme_exposes_benchmark_denominators_and_boundaries() -> None:
@@ -36,12 +42,13 @@ def test_readme_exposes_benchmark_denominators_and_boundaries() -> None:
         "24",
         "12 / 12",
         "6 / 6",
-        "2094 项收集",
+        "2094 collected",
         "2070 passed",
         "24 skipped",
         "不证明工业模型达标",
     ):
-        assert token in text
+        # Product copy may use compact ratios; spacing is not a factual contract.
+        assert re.sub(r"\s+", "", token) in re.sub(r"\s+", "", text)
     assert "2066 passed / 27 skipped" not in text
 
 

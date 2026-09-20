@@ -55,6 +55,19 @@ def test_public_main_freeze_does_not_require_internal_reports(builder):
     )
 
 
+def test_normality_followup_runtime_and_reproduction_are_frozen(builder):
+    assert {
+        "visiondata_gate.normality_followup_service",
+        "visiondata_gate.normality_followup_api",
+    }.issubset(set(builder.RUNTIME_MODULES))
+    assert "schemas/normality_followup_requests.v1.json" in builder.EXPLICIT_ADDITIONS
+    assert {
+        "docs/NORMALITY_TTT.md",
+        "tools/run_normality_ttt_synthetic.py",
+        "benchmarks/NORMALITY_TTT_LOCAL_20260919.json",
+    }.issubset(set(builder.REQUIRED_INPUTS))
+
+
 @pytest.fixture
 def builder():
     spec = importlib.util.spec_from_file_location("learning_installer_builder", TOOL)
@@ -289,6 +302,14 @@ def test_new_platform_schema_is_explicitly_freezable(builder, authority, tmp_pat
     }
 
 
+def test_ttt_schema_is_explicitly_freezable(builder, authority, tmp_path):
+    write(authority, "schemas/normality_ttt_requests.v1.json", b'{"type":"object"}')
+    result = builder.freeze_sources(authority, tmp_path / "stage")
+    assert "schemas/normality_ttt_requests.v1.json" in {
+        row["path"] for row in result["files"]
+    }
+
+
 def test_archive_gate_requires_identity_pool_and_model_feedback_modules(builder):
     assert hasattr(builder, "RUNTIME_MODULES"), (
         "Archive only checks old reference-learning modules"
@@ -302,6 +323,9 @@ def test_archive_gate_requires_identity_pool_and_model_feedback_modules(builder)
         "visiondata_gate.vision_feedback",
         "visiondata_gate.learning_yolo_backend",
         "visiondata_gate.normality_inference",
+        "visiondata_gate.normality_ttt",
+        "visiondata_gate.normality_adaptation_service",
+        "visiondata_gate.normality_adaptation_api",
         "visiondata_gate.model_stability",
         "visiondata_gate.model_experiment_agent",
         "visiondata_gate.vision_model_api",
@@ -354,6 +378,7 @@ def test_spec_carries_standalone_external_runner_and_excludes_install_origin(
     for worker in (
         "learning_yolo_backend.py",
         "normality_inference.py",
+        "normality_ttt.py",
         "model_stability.py",
         "model_experiment_agent.py",
     ):
@@ -381,6 +406,7 @@ def _write_external_runtime_bundle_fixture(root):
     resources = {
         "src/visiondata_gate/learning_yolo_backend.py": b"training worker\n",
         "src/visiondata_gate/normality_inference.py": b"inference worker\n",
+        "src/visiondata_gate/normality_ttt.py": b"episodic adaptation worker\n",
         "src/visiondata_gate/model_stability.py": b"stability verifier\n",
         "src/visiondata_gate/model_experiment_agent.py": b"outcome policy\n",
         "docs/THIRD_PARTY_NOTICES.md": b"third-party notices\n",
@@ -409,7 +435,7 @@ def test_external_runtime_bundle_binds_workers_and_notice_materials(builder, tmp
     assert receipt["torchvision_bundled"] is False
     assert receipt["ultralytics_bundled"] is False
     assert receipt["yolo_weights_bundled"] is False
-    assert len(receipt["resources"]) == 6
+    assert len(receipt["resources"]) == 7
     assert all(row["source_matches_packaged"] for row in receipt["resources"])
 
 

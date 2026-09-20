@@ -10,6 +10,7 @@ from contextlib import contextmanager
 from datetime import UTC, datetime
 import hashlib
 import hmac
+import io
 import json
 from pathlib import Path, PurePosixPath
 import re
@@ -258,6 +259,17 @@ class ReviewVisionFeedback(VisionRunAction):
     expected_feedback_sha256: str = Field(pattern=SHA)
     classification: Literal[
         "MODEL_ERROR", "LABEL_REVIEW_REQUIRED", "HARD_SAMPLE", "UNKNOWN"
+    ]
+
+
+class ReviewNormalityInference(VisionRequest):
+    expected_inference_sha256: str = Field(pattern=SHA)
+    operator_attests_reviewed: Literal[True]
+    classification: Literal[
+        "MODEL_SIGNAL_CONFIRMED",
+        "LIKELY_FALSE_POSITIVE",
+        "NEEDS_LABEL_REVIEW",
+        "INSUFFICIENT_EVIDENCE",
     ]
 
 
@@ -1139,6 +1151,150 @@ class LocalVisionModelService:
     def get_inference(self, actor, project, identifier):
         return self._get(actor, project, identifier, "inference")
 
+    def _normality_inference_record(self, conn, project, identifier):
+        try:
+            value, private = self._read(conn, project, identifier, "inference")
+        except (ValueError, TypeError, AttributeError):
+            raise VisionModelError("REGISTRY_RECEIPT_INVALID") from None
+        if not isinstance(value, dict) or not isinstance(private, dict):
+            raise VisionModelError("REGISTRY_RECEIPT_INVALID")
+        if (
+            re.fullmatch(r"vision_inference_[0-9a-f]{24}", identifier) is None
+            or value.get("schema_version") != "visiondata-gate.vision_inference.v1"
+            or value.get("resource_id") != identifier
+            or value.get("inference_id") != identifier
+            or value.get("project_id") != project
+            or value.get("status") != "COMPLETED_LOCAL_SANDBOX_INFERENCE"
+            or value.get("production_release_allowed") is not False
+            or value.get("machine_write_permitted") is not False
+        ):
+            raise VisionModelError("NORMALITY_INFERENCE_NOT_REVIEWABLE")
+        return value, private
+
+    def _normality_heatmap_bytes(self, inference, private):
+        """Read bounded, hash-verified PNG bytes from the exact registry location.
+
+        Never reopen a path in the HTTP response: the digest is over the exact
+        bytes returned, not an earlier file check. Private stored paths are also
+        untrusted and cannot redirect an inference to another artifact.
+        """
+        from PIL import Image
+
+        try:
+            output = _assert_registry_path(
+                self.root, self.root / "inferences" / inference["inference_id"]
+            )
+            expected = _assert_registry_path(
+                self.root, output / "artifacts" / "heatmap.png"
+            )
+            if (
+                _assert_registry_path(self.root, Path(private["output_root"])) != output
+                or _assert_registry_path(self.root, Path(private["heatmap_path"]))
+                != expected
+            ):
+                raise VisionModelError("INFERENCE_HEATMAP_PATH_MISMATCH")
+            meta = inference["heatmap"]
+            digest = meta["sha256"]
+            if (
+                not isinstance(digest, str)
+                or re.fullmatch(SHA, digest) is None
+                or meta.get("format") != "png"
+                or type(meta.get("bytes")) is not int
+                or not 0 < meta["bytes"] <= 16 * 1024 * 1024
+            ):
+                raise VisionModelError("INFERENCE_HEATMAP_METADATA_INVALID")
+            verified = _file(expected, digest, "INFERENCE_HEATMAP_CHANGED")
+            with verified.open("rb") as stream:
+                raw = stream.read(16 * 1024 * 1024 + 1)
+            _assert_registry_path(self.root, expected)
+            if (
+                len(raw) != meta["bytes"]
+                or not hmac.compare_digest(hashlib.sha256(raw).hexdigest(), digest)
+                or raw[:16] != b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
+                or raw[16:24] != b"\x00\x00\x00\x40\x00\x00\x00\x40"
+            ):
+                raise VisionModelError("INFERENCE_HEATMAP_CHANGED")
+            with Image.open(io.BytesIO(raw)) as image:
+                if (
+                    image.format != "PNG"
+                    or image.size != (meta.get("width"), meta.get("height"))
+                    or image.size != (64, 64)
+                ):
+                    raise VisionModelError("INFERENCE_HEATMAP_PNG_INVALID")
+                image.verify()
+            return raw, digest
+        except (OSError, ValueError, TypeError, KeyError, SyntaxError):
+            raise VisionModelError("INFERENCE_HEATMAP_UNAVAILABLE") from None
+
+    def get_inference_heatmap(self, actor, project, identifier):
+        self._authorize(actor, project)
+        with self.product.store._connection() as conn:
+            inference, private = self._normality_inference_record(
+                conn, project, identifier
+            )
+        return self._normality_heatmap_bytes(inference, private)
+
+    def list_normality_feedback(self, actor, project, identifier):
+        self._authorize(actor, project)
+        with self.product.store._connection() as conn:
+            self._normality_inference_record(conn, project, identifier)
+        result = self._list(actor, project, "normality_feedback")
+        return _seal(
+            result | {
+                "inference_id": identifier,
+                "items": [item for item in result["items"]
+                          if item["inference_id"] == identifier],
+            }
+        )
+
+    def review_normality_inference(
+        self, actor, project, identifier, request: ReviewNormalityInference
+    ):
+        request = ReviewNormalityInference.model_validate(request.model_dump(mode="json"))
+        operation = "review_normality_inference:" + identifier
+        with self._operation(actor, project, operation, request) as existing:
+            if existing:
+                return existing
+            with self.product.store._connection(immediate=True) as conn:
+                self._membership(conn, actor, project)
+                inference, private = self._normality_inference_record(
+                    conn, project, identifier
+                )
+                if not hmac.compare_digest(
+                    inference["receipt_sha256"], request.expected_inference_sha256
+                ):
+                    raise VisionModelError("STALE_NORMALITY_INFERENCE")
+                _raw, heatmap_sha256 = self._normality_heatmap_bytes(inference, private)
+                value = self._base(project, "normality_feedback", actor, request)
+                value.update(
+                    schema_version="visiondata-gate.normality-feedback.v1",
+                    feedback_id=value["resource_id"],
+                    inference_id=identifier,
+                    model_id=inference["model_id"],
+                    asset_id=inference["asset_id"],
+                    inference_sha256=inference["receipt_sha256"],
+                    image_sha256=inference["image_sha256"],
+                    model_pack_sha256=inference["model_pack_sha256"],
+                    heatmap_sha256=heatmap_sha256,
+                    heatmap_artifact_id=inference["heatmap_artifact_id"],
+                    classification=request.classification,
+                    note=request.note,
+                    status="RECORDED_FOR_HUMAN_FOLLOWUP",
+                    followup_work_item_type={
+                        "MODEL_SIGNAL_CONFIRMED": "MODEL_SIGNAL_REVIEW",
+                        "LIKELY_FALSE_POSITIVE": "FALSE_POSITIVE_INVESTIGATION",
+                        "NEEDS_LABEL_REVIEW": "LABEL_REVIEW",
+                        "INSUFFICIENT_EVIDENCE": "EVIDENCE_COLLECTION",
+                    }[request.classification],
+                    followup_work_item_created=False,
+                    issue_closed=False,
+                    label_truth_authority=False,
+                    training_ingestion_allowed=False,
+                )
+                result = self._put(conn, value, "normality_feedback")
+                self._remember(conn, actor, project, operation, request, result)
+            return result
+
     def capabilities(self, actor, project):
         models = self.list_models(actor, project)["items"]
         runtimes = self.list_runtimes(actor, project)["items"]
@@ -1169,7 +1325,8 @@ class LocalVisionModelService:
                 "training_device": "CPU_ONLY",
                 "normality_runtime": "EXTERNAL_RUNTIME_REQUIRED",
                 "initializations": ["ARCHITECTURE_RANDOM", "REGISTERED_WEIGHTS"],
-                "ttt_status": "DISABLED_NOT_IMPLEMENTED",
+                "ttt_status": "NORMALITY_EPISODIC_AVAILABLE",
+                "ttt_scope": "NORMALITY_ONLY_EPISODIC_NO_PERSISTENCE",
                 "weight_download_allowed": False,
                 "registered_model_count": len(models),
                 "registered_runtime_count": len(runtimes),
@@ -1411,7 +1568,10 @@ class LocalVisionModelService:
                 != "visiondata-gate.yolo26-normality-model-pack.v2"
                 or model.get("stability_schema_version")
                 != "visiondata-gate.model-stability.v4"
-                or model.get("status") != "MODEL_PACK_EVIDENCE_VERIFIED"
+                or (model.get("status"), model.get("usage_scope")) not in {
+                    ("MODEL_PACK_EVIDENCE_VERIFIED", "SANDBOX_CANDIDATE"),
+                    ("APPROVE_SANDBOX", "LOCAL_SANDBOX_ONLY"),
+                }
                 or model.get("sandbox_eligible") is not True
                 or model.get("stability_status") != "PUBLIC_PROXY_STABLE"
                 or model.get("stability_eligible") is not True
@@ -1467,6 +1627,10 @@ class LocalVisionModelService:
             if any(validation.get(key) != value for key, value in required_validation.items()):
                 raise VisionModelError("MODEL_PACK_RUNTIME_VALIDATION_FAILED")
             with self.product.store._connection(immediate=True) as conn:
+                self._membership(conn, actor, project)
+                current, _ = self._read(conn, project, identifier, "model")
+                if current["receipt_sha256"] != model["receipt_sha256"]:
+                    raise VisionModelError("MODEL_PACK_CHANGED_DURING_APPROVAL")
                 result = self._put(
                     conn,
                     model
@@ -1488,6 +1652,98 @@ class LocalVisionModelService:
                 self._remember(conn, actor, project, operation, request, result)
             return result
 
+    def _bound_normality_inputs(self, project, identifier, request):
+        """Revalidate exact sandbox, CAS, input and runtime bindings.
+
+        Callers must hold the authorized project-scoped operation context.
+        Both ordinary inference and optional Normality TTT use this same gate.
+        """
+        with self.product.store._connection() as conn:
+            model, model_private = self._read(conn, project, identifier, "model")
+            asset, asset_private = self._read(
+                conn, project, request.asset_id, "inference_asset"
+            )
+            runtime_id = model.get("sandbox_runtime_id")
+            if not isinstance(runtime_id, str):
+                raise VisionModelError("MODEL_PACK_NOT_SANDBOX_APPROVED")
+            runtime, runtime_private = self._read(
+                conn, project, runtime_id, "runtime"
+            )
+        sandbox_validation = model.get("sandbox_validation")
+        inference_backend_sha256 = _normality_backend_sha256()
+        if (
+            not isinstance(sandbox_validation, dict)
+            or sandbox_validation.get("inference_backend_sha256")
+            != inference_backend_sha256
+        ):
+            raise VisionModelError(
+                "INFERENCE_BACKEND_CHANGED_SINCE_SANDBOX_APPROVAL"
+            )
+        identity = {
+            "model_pack_sha256": request.expected_model_pack_sha256,
+            "backbone_weights_sha256": request.expected_backbone_weights_sha256,
+            "source_binding_sha256": request.expected_source_binding_sha256,
+            "source_index_sha256": request.expected_source_index_sha256,
+            "sandbox_runtime_sha256": request.expected_runtime_sha256,
+        }
+        if (
+            model.get("receipt_sha256")
+            != request.expected_model_receipt_sha256
+            or any(model.get(key) != value for key, value in identity.items())
+            or model.get("status") != "APPROVE_SANDBOX"
+            or model.get("usage_scope") != "LOCAL_SANDBOX_ONLY"
+            or model.get("model_pack_schema_version")
+            != "visiondata-gate.yolo26-normality-model-pack.v2"
+            or model.get("stability_schema_version")
+            != "visiondata-gate.model-stability.v4"
+            or model.get("production_release_allowed") is not False
+        ):
+            raise VisionModelError("MODEL_PACK_NOT_SANDBOX_APPROVED")
+        if (
+            asset.get("receipt_sha256")
+            != request.expected_asset_receipt_sha256
+            or asset.get("image_sha256") != request.expected_image_sha256
+            or asset.get("status") != "FROZEN_LOCAL_INFERENCE_ASSET"
+            or asset.get("production_release_allowed") is not False
+        ):
+            raise VisionModelError("INFERENCE_ASSET_CHANGED")
+        model_cas = _verify_normality_pack_cas(
+            self.root, model, model_private
+        )
+        image = _file(
+            asset_private["cas_path"],
+            asset["image_sha256"],
+            "INFERENCE_ASSET_CAS_CHANGED",
+        )
+        cas_root = (self.root / "cas" / "sha256").resolve(strict=True)
+        try:
+            image.relative_to(cas_root)
+        except ValueError:
+            raise VisionModelError("INFERENCE_ASSET_CAS_PATH_ESCAPE") from None
+        if image.name != asset["image_sha256"]:
+            raise VisionModelError("INFERENCE_ASSET_CAS_ADDRESS_MISMATCH")
+        if (
+            runtime.get("runtime_sha256") != request.expected_runtime_sha256
+            or runtime.get("status") != "PROBED"
+            or runtime.get("probe", {}).get("status") != "ready"
+            or runtime.get("probe", {}).get("import_status") != "PASSED"
+        ):
+            raise VisionModelError("RUNTIME_NOT_IMPORT_PROBED")
+        runtime_path = _file(
+            runtime_private["executable_path"],
+            runtime["executable_sha256"],
+            "RUNTIME_CHANGED",
+        )
+        return {
+            "model": model,
+            "asset": asset,
+            "runtime": runtime,
+            "model_cas": model_cas,
+            "image": image,
+            "runtime_path": runtime_path,
+            "inference_backend_sha256": inference_backend_sha256,
+        }
+
     def run_normality_inference(
         self,
         actor,
@@ -1500,82 +1756,14 @@ class LocalVisionModelService:
         with self._operation(actor, project, operation, request) as existing:
             if existing:
                 return existing
-            with self.product.store._connection() as conn:
-                model, model_private = self._read(conn, project, identifier, "model")
-                asset, asset_private = self._read(
-                    conn, project, request.asset_id, "inference_asset"
-                )
-                runtime_id = model.get("sandbox_runtime_id")
-                if not isinstance(runtime_id, str):
-                    raise VisionModelError("MODEL_PACK_NOT_SANDBOX_APPROVED")
-                runtime, runtime_private = self._read(
-                    conn, project, runtime_id, "runtime"
-                )
-            sandbox_validation = model.get("sandbox_validation")
-            inference_backend_sha256 = _normality_backend_sha256()
-            if (
-                not isinstance(sandbox_validation, dict)
-                or sandbox_validation.get("inference_backend_sha256")
-                != inference_backend_sha256
-            ):
-                raise VisionModelError(
-                    "INFERENCE_BACKEND_CHANGED_SINCE_SANDBOX_APPROVAL"
-                )
-            identity = {
-                "model_pack_sha256": request.expected_model_pack_sha256,
-                "backbone_weights_sha256": request.expected_backbone_weights_sha256,
-                "source_binding_sha256": request.expected_source_binding_sha256,
-                "source_index_sha256": request.expected_source_index_sha256,
-                "sandbox_runtime_sha256": request.expected_runtime_sha256,
-            }
-            if (
-                model.get("receipt_sha256")
-                != request.expected_model_receipt_sha256
-                or any(model.get(key) != value for key, value in identity.items())
-                or model.get("status") != "APPROVE_SANDBOX"
-                or model.get("usage_scope") != "LOCAL_SANDBOX_ONLY"
-                or model.get("model_pack_schema_version")
-                != "visiondata-gate.yolo26-normality-model-pack.v2"
-                or model.get("stability_schema_version")
-                != "visiondata-gate.model-stability.v4"
-                or model.get("production_release_allowed") is not False
-            ):
-                raise VisionModelError("MODEL_PACK_NOT_SANDBOX_APPROVED")
-            if (
-                asset.get("receipt_sha256")
-                != request.expected_asset_receipt_sha256
-                or asset.get("image_sha256") != request.expected_image_sha256
-                or asset.get("status") != "FROZEN_LOCAL_INFERENCE_ASSET"
-                or asset.get("production_release_allowed") is not False
-            ):
-                raise VisionModelError("INFERENCE_ASSET_CHANGED")
-            model_cas = _verify_normality_pack_cas(
-                self.root, model, model_private
-            )
-            image = _file(
-                asset_private["cas_path"],
-                asset["image_sha256"],
-                "INFERENCE_ASSET_CAS_CHANGED",
-            )
-            cas_root = (self.root / "cas" / "sha256").resolve(strict=True)
-            try:
-                image.relative_to(cas_root)
-            except ValueError:
-                raise VisionModelError("INFERENCE_ASSET_CAS_PATH_ESCAPE") from None
-            if image.name != asset["image_sha256"]:
-                raise VisionModelError("INFERENCE_ASSET_CAS_ADDRESS_MISMATCH")
-            if (
-                runtime.get("runtime_sha256") != request.expected_runtime_sha256
-                or runtime.get("status") != "PROBED"
-                or runtime.get("probe", {}).get("status") != "ready"
-                or runtime.get("probe", {}).get("import_status") != "PASSED"
-            ):
-                raise VisionModelError("RUNTIME_NOT_IMPORT_PROBED")
-            runtime_path = _file(
-                runtime_private["executable_path"],
-                runtime["executable_sha256"],
-                "RUNTIME_CHANGED",
-            )
+            bound = self._bound_normality_inputs(project, identifier, request)
+            model = bound["model"]
+            asset = bound["asset"]
+            runtime = bound["runtime"]
+            model_cas = bound["model_cas"]
+            image = bound["image"]
+            runtime_path = bound["runtime_path"]
+            inference_backend_sha256 = bound["inference_backend_sha256"]
             value = self._base(project, "vision_inference", actor, request)
             output = _ensure_registry_directory(
                 self.root,

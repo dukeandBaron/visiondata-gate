@@ -1,30 +1,32 @@
-# GOAI Competition Evaluation Guide
+# 决赛工程核验指南
 
-本文件将赛事评审问题映射到可抽查的本地证明物。它不是自评分，也不预测比赛结果。
+依据 GOAI 2026 赛道二决赛规则，当前采用 **20 / 25 / 25 / 15 / 15** 五维度、13 个二级考核点，合计 100 分。旧复赛 25 / 25 / 20 / 15 / 10 / 5 不作为本次验收依据。
 
-| 官方维度 | 评委需要验证 | VisionData Gate 证明物 | 当前边界 |
-|---|---|---|---|
-| 行业场景价值 25% | 用户、任务、痛点与收益是否明确 | 授权数据源 → Gate → CAPA → 私有派生版本 → Child Run → 责任队列 | 本地场景成立；客户采用、现场 KPI 与 ROI 仍待外部证据 |
-| Agent 能力与任务闭环 25% | 理解、规划、调用、交付、验证与异常处理 | Task Plan、五类工具、证据触发 Worker、人工中断/恢复、Frozen Judge、Decision Packet | 本地合同与运行证据；不宣称所有任务都需要多 Agent |
-| 产品体验与 Demo 20% | 是否能从零运行并快速看懂闭环 | 工业 Web 工作台、Reviewer Mode、固定 Demo、REST API 与失败分支 | 本地 served UI 已通过 3 轮 × 7 视口、Goal3 Authority 3/3、console 0/0；89.9 秒 Synthetic Fixture Replay 视频及 QA 已冻结；公开 Pages 只投影 SHA 绑定的合成只读事实 |
-| 技术实现深度 15% | 架构、状态、测试和复现是否可信 | Typed contracts、ToolTrace、Control Plane、DynamicBench、lineage、Audit Envelope | `PASS_LOCAL_RC3_RELEASE_CANDIDATE`；精确 Full、双构包、clean-extract、Attestation、匹配 clean checkout 与 toolchain 以完整本地验证集为准，第三方复现仍待外部证据 |
-| 安全、合规与可追溯 10% | 授权、隐私、幻觉、人工确认和依据 | 只读默认、allowlist、Grounding Guard、人工批准、脱敏 evidence、失败关闭 | 独立法律审查、生产 IAM 与现场验收仍属于外部范围 |
-| 开放 / 复用贡献 5% | 是否有接口、示例、文档和许可证 | Apache-2.0、Site Pack、Tool/Rule Contract、Evidence Schema、Adapter SDK、API、SBOM | 唯一 GitHub 主仓已提供经隐私审查的源码、锁文件、示例和文档；第三方 clean-clone 复现仍需独立回执 |
+本页是工程核验入口，不是自评分。判定顺序是实际运行与可核验事实、工程代码、封版材料，最后才是陈述。
 
-## 工业方向补充检查
+## 核验顺序
 
-- **多源融合**：图像、标注、metadata、方案、工单、工艺与只读回执进入同一个版本化案件。
-- **解释性**：每条 finding 绑定确定性工具结果、evidence span 与规则检查。
-- **可操作性**：输出责任队列、整改方案、人工节点和复验条件，而不是只给文本建议。
-- **安全红线**：`human_only`、`no_device_control`、`production_release_allowed=false` 是硬边界。
+1. 用 [能力状态表](CAPABILITY_STATUS.md) 确认入口：上传基础 Gate、Incident 动态调查、参考学习和真实模型分别核验。
+2. 用 [现场复现指南](LIVE_REPRODUCTION.md) 在新目录生成不同输入，核对同一任务的输入、计划、执行、回执、人工决定与后续复验。
+3. 用 [13 项证据地图](FINALS_EVIDENCE_MAP.md) 对应价值、创新、技术、安全、完成度与复用；未测量的收益不能由合成运行代替。
+4. 用 [技术包指南](TECHNICAL_SUBMISSION_BUNDLE.md) 冻结源码与公开回执，单独核验安装器和公开站点对应的提交，不混用版本。
 
-评审时先用三阶段业务链回答“项目到底做什么”：**人机协同数据集冷启动 →
-Agent 编排的数据质量治理 → 受控模型开发与反馈回流**；再用五个受控功能回答
-“Agent 为什么不是普通 Workflow”：Data Quality Diagnoser、Remediation Planner、
-Authorized Remediation Executor、Independent Verification Gate 和
-Evidence-gap-driven Bounded Replanner。底层仍映射到现有 Incident v6 六阶段，
-不虚构新的自治 Agent。
+## 什么是“同一任务闭环”
 
-## 使用方法
+输入身份 → 当次计划与 ToolTrace → 原 Case → 具名决定 → 派生版本 → Child Run → 逐项关闭/持续/回归。
 
-评审材料应从产品流程自然展示这些证明物。首页只保留产品定位、任务闭环与运行入口；完整分母见 [EVIDENCE_AND_BENCHMARKS.md](EVIDENCE_AND_BENCHMARKS.md)，当前状态见 [PROJECT_STATUS.md](PROJECT_STATUS.md)，可声明边界见 [CLAIM_SCOPE.md](CLAIM_SCOPE.md)。
+可以通过父子关系连接多轮运行，但不能把不同来源的截图、测试摘要和生产断言拼在一起。Worker 的选择理由与实际执行回执分别核验；前端替身测试不等于真实模型推理，构包成功不等于安装成功。
+
+## 工业场景的额外边界
+
+- 数据合格不等于产品没有缺陷；真实缺陷图可以是有价值的训练样本。
+- 自动操作仅限批准的确定性派生处理；重拍、返标和补采需要人带回新证据。
+- 图像分数、Gate 结果、任务完成、责任关闭、模型选择与生产权限是不同状态。
+- 数据来源、第三方模型许可、AI 辅助开发与外部 API 调用需披露；JCS/SHA 是完整性检查，不是法律认证或数字签名。
+- 外部真值、客户节省工时、投入产出比和工厂效果没有记录时保留未测量，不凭规模或测试数量推算。
+
+## 封版与提交
+
+官方规则给出的提交截止是 **2026 年 9 月 20 日 12:00（北京时间）**；现场展示含 Demo 共 8 分钟，提问评分 5 分钟。现场可要求改变输入重跑，预录视频只是备份。
+
+本轮技术整理不依赖尚未定稿的 PPT。后续材料定稿应使用同一技术身份与边界，但不将未审批的草稿、个人讲稿、录音或私域图片自动放入源码包。官网实际上传与回执另行确认。

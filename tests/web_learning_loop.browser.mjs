@@ -14,8 +14,7 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const webRoot = path.join(root, 'web');
 const require = createRequire(path.join(webRoot, 'package.json'));
 const { build, transformWithOxc } = await import(pathToFileURL(require.resolve('vite')).href);
-const existingPlaywright = 'D:/Users/living/.npm-cache/_npx/31e32ef8478fbf80/node_modules/playwright-core/index.mjs';
-const playwrightModule = process.env.VDG_PLAYWRIGHT_MODULE || (existsSync(existingPlaywright) ? existingPlaywright : require.resolve('playwright'));
+const playwrightModule = process.env.VDG_PLAYWRIGHT_MODULE || require.resolve('playwright');
 const { chromium } = await import(pathToFileURL(playwrightModule).href);
 let browser, bundle;
 

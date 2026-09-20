@@ -12,6 +12,7 @@
 | 文本 Skill 规范 | [`skills/README.md`](../skills/README.md) | 5 份版本化工作流说明；不是一键安装插件 |
 | Schema 目录 | [`schemas/README.md`](../schemas/README.md) | 区分独立 JSON Schema、生成模型 Schema 和 Schema 集合 |
 | 可执行 SDK 示例 | [`examples/reuse/`](../examples/reuse/README.md) | 无模型、无网络的真实 Skill 注册/调用/回执验证 |
+| 自定义 Skill 完整示例 | [`custom_range_skill.py`](../examples/reuse/custom_range_skill.py) | 继承 ABC、声明 Manifest/冻结参数、显式注册精确版本并验证回执；不是动态插件发现 |
 | Industrial Rule Pack v1 | `rulepacks/industrial-v1.json` | 冻结五类规则、三类动态触发和默认失败关闭边界 |
 | Rule Pack Schema | `schemas/rulepack.schema.json` | 校验规则 ID、版本、优先级、动作和发布边界 |
 | Evidence Finding Schema | `schemas/evidence-finding.schema.json` | 统一 finding、evidence span、reason trace 和 source refs |
@@ -48,13 +49,25 @@ Industrial Skill example：
 - 缺输入、manifest 漂移、异常或输出证据越界均失败关闭为 `DEFER`；
 - 当前为受信 host 的 in-process 合同，不是非受信 Python 代码安全沙箱；首个内置
   Metadata Skill 已由 Dynamic Leader 的固定 Worker 证据触发调度。
+- `ExposureMeanRangeSkill` 展示外部实现如何不修改核心 SDK 而声明输入、参数、依赖和
+  许可，再由 Registry 显式注册；合成曝光边界不是工厂校准。
 
 ## 3. 复验命令
+
+统一的无模型、无网络开放复用入口：
+
+```text
+uv run --no-sync python -c "from pathlib import Path; Path('output/open-reuse').mkdir(parents=True, exist_ok=True)"
+uv run --no-sync python tools/run_open_reuse_smoke.py --output-root output/open-reuse/run-01
+```
+
+该工具顺序调用下面三类真实公共 API，并生成 `OPEN_REUSE_RECEIPT.json`。它是维护者或使用者本地合成复验，不自动成为独立第三方采用记录。[采用路径](ADOPTION_GUIDE.md) · [复现记录要求](THIRD_PARTY_REPRODUCTION.md)
 
 先运行一个真实 SDK 示例：
 
 ```text
 uv run --no-sync python examples/reuse/metadata_skill.py --metadata-count 12 --observed-count 14
+uv run --no-sync python examples/reuse/custom_range_skill.py --mean 230 --lower 64 --upper 192
 ```
 
 它使用合成计数，实际调用 `visiondata-gate.metadata-count-drift@1.0.0` 并验证回执；不读取图像、模型或工厂数据。

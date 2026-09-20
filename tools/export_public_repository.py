@@ -73,6 +73,7 @@ PUBLIC_EXACT_FILES = {
     "uv.lock",
     "docs/00_OVERVIEW.md",
     "docs/AGENT_RUNTIME.md",
+    "docs/ADOPTION_GUIDE.md",
     "docs/ANOMALY_OPERATING_POINT.md",
     "docs/AGENT_PLATFORM.md",
     "docs/AGENT_PLATFORM_COMPARISON.md",
@@ -83,6 +84,8 @@ PUBLIC_EXACT_FILES = {
     "docs/CROSS_PLATFORM_QUICKSTART.md",
     "docs/INTERFACE_SUPPORT.md",
     "docs/MODEL_JOB_RETENTION.md",
+    "docs/NORMALITY_TTT.md",
+    "docs/OPEN_SOURCE_READINESS.md",
     "docs/RELEASE_PREPARATION.md",
     "docs/EXTERNAL_REVIEW_RESPONSE.md",
     "docs/FULL_REGRESSION_9417F01_20260916.md",
@@ -136,6 +139,7 @@ PUBLIC_EXACT_FILES = {
     "docs/SEMIFINAL_DEFENSE_RUNBOOK_20260902.md",
     "docs/THIRD_PARTY_LICENSE_INVENTORY.generated.md",
     "docs/THIRD_PARTY_NOTICES.md",
+    "docs/THIRD_PARTY_REPRODUCTION.md",
     "docs/TOOLS_AND_MCP_CONTRACT.md",
     "docs/TOOL_REPLAY_AND_MIGRATION.md",
     "docs/PUBLIC_BINARY_REVIEW.json",
@@ -143,6 +147,7 @@ PUBLIC_EXACT_FILES = {
     "docs/assets/workbook-local-synthetic.png",
     "docs/assets/finals-task-responsibility-p0.png",
     "gateway/pom.xml",
+    "quality/BANDIT_TTT_TOOL_REVIEW.md",
 }
 
 PUBLIC_PREFIXES = (

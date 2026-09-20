@@ -12,8 +12,106 @@ function base(kind) { return { schema_version: `visiondata-gate.vision_${kind}.v
   project_id: scope.projectId, created_by: scope.actorId, reviewer_identity: 'Synthetic reviewer', created_at: '2026-09-13T00:00:00Z', production_release_allowed: false, machine_write_permitted: false }; }
 export async function model() { return seal({ ...base('model'), display_name: 'Local YOLO26n test', task_type: 'detect', weights_sha256: sha(), file_bytes: 1234,
   format: 'pt', license_id: 'AGPL-3.0', license_status: 'OPERATOR_DECLARED_NOT_LEGAL_VERIFICATION', source_description: 'Synthetic owned fixture', status: 'REGISTERED_NOT_LOADED', loaded: false }); }
-export async function runtime() { return seal({ ...base('runtime'), display_name: 'Python metadata fixture', executable_sha256: sha('b'), runtime_sha256: sha('c'), status: 'METADATA_PROBED_IMPORT_NOT_TESTED',
-  probe: { status: 'ready', import_status: 'NOT_RUN', runtime_sha256: sha('c'), executable_sha256: sha('b'), python_version: [3, 12, 0], packages: { torch: '2.6.0', torchvision: '0.21.0', ultralytics: '8.4.33', numpy: '2.2.6' } } }); }
+export async function normalityModel(status = 'MODEL_PACK_EVIDENCE_VERIFIED') {
+  const approved = status === 'APPROVE_SANDBOX';
+  return seal({ ...base('model'), resource_id: 'vision_normality_model_test', model_id: 'vision_normality_model_test', display_name: 'Bound normality pack', model_kind: 'YOLO26_NORMALITY_MODEL_PACK', task_type: 'normality', format: 'pt',
+    model_pack_schema_version: 'visiondata-gate.yolo26-normality-model-pack.v2', model_pack_sha256: sha('a'), weights_sha256: sha('a'), backbone_weights_sha256: sha('b'),
+    source_binding_sha256: sha('c'), source_index_sha256: sha('d'), architecture: 'yolo26n', feature_layers: [4, 6, 9], split_seed: 20260913, model_seed: 20260913,
+    stability_schema_version: 'visiondata-gate.model-stability.v4', verification_implementation: { stability_module_sha256: sha('e'), outcome_policy_module_sha256: sha('f'), outcome_policy_function: 'classify_experiment_outcome' },
+    stability_run_artifact_sha256: { seed_20260911: { 'RUN_RECEIPT.json': sha('1') }, seed_20260912: { 'RUN_RECEIPT.json': sha('2') }, seed_20260913: { 'RUN_RECEIPT.json': sha('3') } },
+    stability_status: 'PUBLIC_PROXY_STABLE', stability_eligible: true, stability_blockers: [], evidence_file_sha256: { model_pack: sha('a'), stability_summary: sha('4'), source_binding_file: sha('5'), source_index_file: sha('6'), backbone_weights: sha('b') },
+    license_id: 'AGPL-3.0_OR_ENTERPRISE_REVIEW_REQUIRED', license_status: 'OPERATOR_ACKNOWLEDGED_NOT_LEGAL_VERIFICATION', status,
+    usage_scope: approved ? 'LOCAL_SANDBOX_ONLY' : 'SANDBOX_CANDIDATE', sandbox_eligible: true,
+    sandbox_runtime_id: approved ? 'vision_runtime_test' : null, sandbox_runtime_sha256: approved ? sha('c') : null,
+    ...(approved ? { sandbox_validation: { status: 'VALIDATED_FOR_LOCAL_SANDBOX', model_pack_sha256: sha('a'), backbone_weights_sha256: sha('b'), source_binding_sha256: sha('c'), source_index_sha256: sha('d'), runtime_sha256: sha('c'), inference_backend_sha256: sha('7'), model_pack_schema_version: 'visiondata-gate.yolo26-normality-model-pack.v2', production_release_allowed: false } } : {}),
+    loaded: false, storage_scope: 'REGISTRY_OWNED_CONTENT_ADDRESSED' });
+}
+function inferenceBase(kind, identifier) { return { schema_version: `visiondata-gate.${kind}.v1`, resource_id: identifier, project_id: scope.projectId, created_by: scope.actorId,
+  reviewer_identity: 'Synthetic reviewer', created_at: '2026-09-13T00:00:00Z', production_release_allowed: false, machine_write_permitted: false }; }
+export async function inferenceAsset() { const identifier = 'vision_inference_asset_test'; return seal({ ...inferenceBase('vision_inference_asset', identifier), asset_id: identifier,
+  display_name: 'Frozen local image', image_sha256: sha('8'), image_bytes: 2048, image_width: 256, image_height: 192, format: 'png', storage_scope: 'REGISTRY_OWNED_CONTENT_ADDRESSED', status: 'FROZEN_LOCAL_INFERENCE_ASSET' }); }
+export async function normalityInference() { const identifier = 'vision_inference_test'; return seal({ ...inferenceBase('vision_inference', identifier), inference_id: identifier,
+  model_id: 'vision_normality_model_test', asset_id: 'vision_inference_asset_test', runtime_id: 'vision_runtime_test', model_pack_sha256: sha('a'), backbone_weights_sha256: sha('b'),
+  source_binding_sha256: sha('c'), source_index_sha256: sha('d'), runtime_sha256: sha('c'), inference_backend_sha256: sha('7'), image_sha256: sha('8'),
+  status: 'COMPLETED_LOCAL_SANDBOX_INFERENCE', image_score: 0.75, image_threshold: 0.5, pixel_threshold: 1.5, predicted_anomaly: true, positive_pixel_fraction: 0.125,
+  heatmap_artifact_id: 'normality_heatmap_0123456789abcdef01234567', heatmap: { sha256: sha('9'), bytes: 4096, width: 64, height: 64, format: 'png' }, device: 'cpu',
+  decision_scope: 'MODEL_SIGNAL_ONLY_NOT_GATE_OR_PRODUCTION_DECISION', review_required: true, gate_decision: 'NOT_ISSUED' }); }
+// A real, tiny PNG for transport-integrity and browser decoding tests; no user pixels.
+export const normalityPngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Zl1sAAAAASUVORK5CYII=';
+export async function previewInference() {
+  const bytes = Uint8Array.from(Buffer.from(normalityPngBase64, 'base64'));
+  const hash = Buffer.from(await crypto.subtle.digest('SHA-256', bytes)).toString('hex');
+  return seal({ ...await normalityInference(), heatmap: { sha256: hash, bytes: bytes.length, width: 1, height: 1, format: 'png' } });
+}
+export async function normalityFeedback(inference = undefined, classification = 'NEEDS_LABEL_REVIEW') {
+  const value = inference ?? await normalityInference(); const id = 'nfeedback_0123456789abcdef01234567';
+  return seal({ schema_version: 'visiondata-gate.normality-feedback.v1', resource_id: id, feedback_id: id, project_id: scope.projectId,
+    inference_id: value.inference_id, model_id: value.model_id, asset_id: value.asset_id, inference_sha256: value.receipt_sha256,
+    image_sha256: value.image_sha256, model_pack_sha256: value.model_pack_sha256, heatmap_sha256: value.heatmap.sha256, heatmap_artifact_id: value.heatmap_artifact_id,
+    created_by: scope.actorId, reviewer_identity: approval.reviewer_identity, note: approval.note, created_at: '2026-09-19T00:00:00Z', classification,
+    status: 'RECORDED_FOR_HUMAN_FOLLOWUP', followup_work_item_type: { MODEL_SIGNAL_CONFIRMED: 'MODEL_SIGNAL_REVIEW', LIKELY_FALSE_POSITIVE: 'FALSE_POSITIVE_INVESTIGATION', NEEDS_LABEL_REVIEW: 'LABEL_REVIEW', INSUFFICIENT_EVIDENCE: 'EVIDENCE_COLLECTION' }[classification],
+    followup_work_item_created: false, issue_closed: false, label_truth_authority: false, training_ingestion_allowed: false, production_release_allowed: false, machine_write_permitted: false });
+}
+export const guardPolicy = { min_true_positive: 1, min_true_negative: 1, max_fp_increase: 0, max_fn_increase: 0 };
+export async function tttCapabilities() { return seal({ schema_version: 'visiondata-gate.normality-ttt-capabilities.v1', project_id: scope.projectId, strategy: 'EPISODIC_MASKED_STUDENT', implementation_sha256: sha('e'), max_steps: 8, max_learning_rate: .01, min_learning_rate: .00001, max_seconds: 120, max_adaptation_assets: 7, max_replay_assets: 8, max_guard_assets: 16, production_release_allowed: false, machine_write_permitted: false, persistent_learning: false, industrial_benefit_validated: false, guard_policy: guardPolicy }); }
+export async function tttRequest() { const ref = (name, digit) => ({ asset_id: name, expected_asset_receipt_sha256: sha(digit), expected_image_sha256: sha(digit) });
+  return { ...await runNormalityInferenceRequest(), expected_ttt_implementation_sha256: sha('e'), adaptation_assets: [], replay_assets: [ref('replay_1', '1')],
+    guard_assets: [{ ...ref('guard_normal', '2'), reference_label: 'normal' }, { ...ref('guard_anomaly', '3'), reference_label: 'anomaly' }],
+    budget: { steps: 2, learning_rate: .001, max_seconds: 30, seed: 0 }, operator_attests_ttt_authorized: true, operator_attests_replay_normal: true, operator_attests_guard_labels_reviewed: true }; }
+export async function tttInference(status = 'ACCEPTED_EPISODIC') {
+  const matrix = { tp: 1, tn: 1, fp: 0, fn: 0 }, request = await tttRequest();
+  return seal({ ...await previewInference(), ttt_backend_sha256: sha('e'), ttt: {
+    schema_version: 'visiondata-gate.normality-ttt.v1', strategy: 'EPISODIC_MASKED_STUDENT', status,
+    rollback_reason: status === 'ROLLED_BACK' ? 'TTT_GUARD_REGRESSION' : null, steps_completed: 2, objective_before: 2, objective_after: .9,
+    parameter_sha256_before: sha('4'), parameter_sha256_after: sha('5'), attempted_parameter_sha256: sha('5'), effective_parameter_sha256: sha(status === 'ROLLED_BACK' ? '4' : '5'),
+    backbone_sha256_before: sha('6'), backbone_sha256_after: sha('6'), guard_before: matrix, guard_after: status === 'ROLLED_BACK' ? { tp: 0, tn: 1, fp: 0, fn: 1 } : matrix, effective_guard: matrix,
+    reset_after_episode: true, persistent_learning: false, parent_pack_unchanged: true, thresholds_unchanged: true, industrial_benefit_validated: false, guard_policy: guardPolicy,
+    budget: request.budget, loss_curve: [2, 1].map((loss, index) => ({ step: index + 1, loss, reconstruction_loss: loss, replay_loss: 0, anchor_loss: 0, gradient_norm: 1 })),
+    loss_weights: { masked_reconstruction: 1, teacher_replay: 1, parameter_anchor: .1 }, mask_fraction: .25, elapsed_seconds: .2,
+    implementation_sha256: sha('e'), input_groups: { adaptation: { count: 1, sha256: [sha('8')] }, replay: { count: 1, sha256: [sha('1')] }, guard: { count: 2, sha256: [sha('2'), sha('3')] } },
+  } });
+}
+export async function tttFailure() { const request = await tttRequest(), id = 'vision_ttt_failure_0123456789abcdef01234567'; return seal({ ...inferenceBase('vision_ttt_failure', id), failure_id: id,
+  model_id: 'vision_normality_model_test', asset_id: request.asset_id, model_pack_sha256: request.expected_model_pack_sha256, image_sha256: request.expected_image_sha256,
+  authorization_sha256: await digest(request), ttt_backend_sha256: request.expected_ttt_implementation_sha256, status: 'FAILED_CLOSED', failure_code: 'TTT_WORKER_TIMEOUT', measurements_available: false, retry_policy: 'NEW_EXPLICIT_AUTHORIZATION_REQUIRED' }); }
+export async function normalityFollowupImport() {
+  const inference = await previewInference(), asset = await inferenceAsset(), feedback = await normalityFeedback(inference), id = 'normality_import_0123456789abcdef01234567';
+  return seal({ ...inferenceBase('normality-followup-import', id), import_id: id, workspace_id: scope.workspaceId, note: approval.note,
+    feedback_id: feedback.feedback_id, feedback_sha256: feedback.receipt_sha256, inference_id: inference.inference_id, inference_sha256: inference.receipt_sha256,
+    vision_asset_id: asset.asset_id, vision_asset_sha256: asset.receipt_sha256, image_sha256: asset.image_sha256, operator_asset_id: 'img_followup_synthetic', operator_source_sha256: asset.image_sha256,
+    image_width: asset.image_width, image_height: asset.image_height, coordinate_frame: 'DECODED_PIXELS_EXIF_IDENTITY', status: 'ASSET_IMPORTED_AWAITING_HUMAN_ANNOTATION', annotation_created: false, work_order_created: false,
+    issue_closed: false, label_truth_authority: false, training_ingestion_allowed: false });
+}
+export async function normalityFollowupWorkOrder(imported = undefined) {
+  const value = imported ?? await normalityFollowupImport(), id = 'normality_binding_0123456789abcdef01234567'; const { import_id, ...common } = value;
+  return seal({ ...common, schema_version: 'visiondata-gate.normality-followup-work-order.v1', resource_id: id, binding_id: id, import_id,
+    import_sha256: value.receipt_sha256, annotation_id: 'manual_box_1', annotation_revision: 1, annotation_document_sha256: sha('1'), work_order_id: 'wo_followup_synthetic', work_order_document_sha256: sha('2'), crop_sha256: sha('3'), assignee: 'Human reviewer', status: 'OPEN', work_order_created: true });
+}
+export async function followupRequest(order = false) {
+  const imported = await normalityFollowupImport(); return { ...approval, expected_feedback_sha256: imported.feedback_sha256, expected_inference_sha256: imported.inference_sha256,
+    expected_asset_sha256: imported.vision_asset_sha256, expected_image_sha256: imported.image_sha256, operator_attests_no_label_or_training_authority: true,
+    ...(order ? { import_id: imported.import_id, expected_import_sha256: imported.receipt_sha256, annotation_id: 'manual_box_1', expected_annotation_revision: 1, expected_annotation_document_sha256: sha('1'), assignee: 'Human reviewer', operator_attests_create_work_order: true, operator_attests_reviewed_evidence: true } : { operator_attests_import_authorized: true }) };
+}
+export function registerNormalityPackRequest() { return { ...approval, display_name: 'Bound normality pack', model_pack_path: 'C:/synthetic/normality/model-pack.pt', expected_model_pack_sha256: sha('a'),
+  run_directory: 'C:/synthetic/normality/seed_20260913', stability_run_directories: ['C:/synthetic/normality/seed_20260911', 'C:/synthetic/normality/seed_20260912', 'C:/synthetic/normality/seed_20260913'],
+  target_model_seed: 20260913, stability_summary_path: 'C:/synthetic/normality/model_stability_summary.json', expected_stability_summary_sha256: sha('4'),
+  source_binding_path: 'C:/synthetic/normality/source_binding.json', expected_source_binding_file_sha256: sha('5'), expected_source_binding_sha256: sha('c'),
+  source_index_path: 'C:/synthetic/normality/source_index.json', expected_source_index_file_sha256: sha('6'), expected_source_index_sha256: sha('d'),
+  backbone_weights_path: 'C:/synthetic/normality/backbone.pt', expected_backbone_weights_sha256: sha('b'), operator_attests_read_authorized: true,
+  operator_attests_weights_only_load_authorized: true, ultralytics_license_acknowledged: true }; }
+export async function approveNormalityPackRequest() { const value = await normalityModel(); return { ...approval, action: 'APPROVE_SANDBOX', expected_model_receipt_sha256: value.receipt_sha256,
+  expected_model_pack_sha256: value.model_pack_sha256, expected_backbone_weights_sha256: value.backbone_weights_sha256, expected_source_binding_sha256: value.source_binding_sha256,
+  expected_source_index_sha256: value.source_index_sha256, runtime_id: 'vision_runtime_test', expected_runtime_sha256: sha('c'), operator_attests_reviewed: true,
+  operator_attests_trusted_runtime: true, operator_attests_execution_authorized: true, operator_attests_trusted_weights: true,
+  operator_attests_weights_only_load_authorized: true, ultralytics_license_acknowledged: true }; }
+export function registerInferenceAssetRequest() { return { ...approval, display_name: 'Frozen local image', image_path: 'C:/synthetic/images/part.png', expected_image_sha256: sha('8'), operator_attests_read_authorized: true }; }
+export async function runNormalityInferenceRequest() { const value = await normalityModel('APPROVE_SANDBOX'), asset = await inferenceAsset(); return { ...approval,
+  expected_model_receipt_sha256: value.receipt_sha256, expected_model_pack_sha256: value.model_pack_sha256, expected_backbone_weights_sha256: value.backbone_weights_sha256,
+  expected_source_binding_sha256: value.source_binding_sha256, expected_source_index_sha256: value.source_index_sha256, expected_runtime_sha256: value.sandbox_runtime_sha256,
+  asset_id: asset.asset_id, expected_asset_receipt_sha256: asset.receipt_sha256, expected_image_sha256: asset.image_sha256, max_seconds: 120,
+  operator_attests_execution_authorized: true, operator_attests_trusted_runtime: true, operator_attests_trusted_weights: true, operator_attests_weights_only_load_authorized: true }; }
+export async function runtime(importStatus = 'NOT_RUN') { return seal({ ...base('runtime'), display_name: 'Python metadata fixture', executable_sha256: sha('b'), runtime_sha256: sha('c'), status: importStatus === 'PASSED' ? 'PROBED' : 'METADATA_PROBED_IMPORT_NOT_TESTED',
+  probe: { status: 'ready', import_status: importStatus, runtime_sha256: sha('c'), executable_sha256: sha('b'), python_version: [3, 12, 0], packages: { torch: '2.6.0', torchvision: '0.21.0', ultralytics: '8.4.33', numpy: '2.2.6' } } }); }
 export async function dataset() {
   const input = manifest(); const receipt = await seal({ schema_version: 'visiondata-gate.detection-dataset-receipt.v1', source_version: input.source_version, class_names: input.class_names,
     manifest_sha256: await digest(input), samples: input.samples.map((sample, index) => ({ ...sample, image_path: `images/${sample.split}/${sample.sample_id}.png`,
@@ -36,8 +134,9 @@ export async function run(status = 'SUCCEEDED_CANDIDATE') {
       actual_epochs: 1, training_samples: 1, validation_samples: 1, checkpoint: { relative_path: 'train/weights/last.pt', sha256: sha('f'), bytes: 1000, round_trip: 'VERIFIED', selection: 'last_epoch' } } : null });
 }
 export async function capabilities() { return seal({ schema_version: 'visiondata-gate.vision-capabilities.v1', project_id: scope.projectId, model_domain: 'LOCAL_VISUAL_MODELS', llm_provider_managed: false,
-  supported_registration_tasks: ['detect', 'segment'], executable_training_tasks: ['detect'], training_device: 'CPU_ONLY', initializations: ['ARCHITECTURE_RANDOM', 'REGISTERED_WEIGHTS'], ttt_status: 'DISABLED_NOT_IMPLEMENTED',
+  supported_registration_tasks: ['detect', 'segment', 'normality'], executable_training_tasks: ['detect'], executable_inference_tasks: ['normality'], training_device: 'CPU_ONLY', normality_runtime: 'EXTERNAL_RUNTIME_REQUIRED', initializations: ['ARCHITECTURE_RANDOM', 'REGISTERED_WEIGHTS'], ttt_status: 'DISABLED_NOT_IMPLEMENTED',
   weight_download_allowed: false, registered_model_count: 1, registered_runtime_count: 1, registered_dataset_count: 1, training_ready: true, training_authorization_required: true,
+  sandbox_approved_normality_model_count: 0, registered_inference_asset_count: 0, completed_normality_inference_count: 0,
   license_boundary: 'ULTRALYTICS_AGPL_3_0_OR_ENTERPRISE_REVIEW_REQUIRED', production_release_allowed: false, industrial_effectiveness_status: 'NOT_EVALUATED' }); }
 export async function list(items) { return seal({ schema_version: 'visiondata-gate.vision-list.v1', project_id: scope.projectId, items }); }
 export async function operation(pending, resource) { return seal({ schema_version: 'visiondata-gate.vision-operation.v1', project_id: scope.projectId, operation: pending.operation,

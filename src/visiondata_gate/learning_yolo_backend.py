@@ -101,6 +101,9 @@ def _child_environment(work_root: Path, threads: int = 2) -> dict[str, str]:
            if key in os.environ}
     env.update({
         "HOME": str(isolated), "USERPROFILE": str(isolated),
+        # Torch/Torchvision cache setup calls getpass on Windows. Supply a
+        # non-identifying value instead of inheriting the caller's username.
+        "USERNAME": "visiondata-worker",
         "APPDATA": str(isolated), "LOCALAPPDATA": str(isolated),
         "TEMP": str(isolated), "TMP": str(isolated),
         "YOLO_CONFIG_DIR": str(isolated / "yolo"),

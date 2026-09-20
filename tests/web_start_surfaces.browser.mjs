@@ -11,8 +11,7 @@ const root = fileURLToPath(new URL("..", import.meta.url));
 const webRoot = path.join(root, "web");
 const requireWeb = createRequire(path.join(webRoot, "package.json"));
 const { build, transformWithOxc } = await import(pathToFileURL(requireWeb.resolve("vite")).href);
-const cached = "D:/Users/living/.npm-cache/_npx/31e32ef8478fbf80/node_modules/playwright-core/index.mjs";
-const { chromium } = await import(pathToFileURL(process.env.VDG_PLAYWRIGHT_MODULE || (existsSync(cached) ? cached : requireWeb.resolve("playwright"))).href);
+const { chromium } = await import(pathToFileURL(process.env.VDG_PLAYWRIGHT_MODULE || requireWeb.resolve("playwright")).href);
 const workspace = { workspace_id: "wsp_start_test", name: "隔离交互测试工作空间" };
 const projects = [
   { project_id: "prj_gears", workspace_id: workspace.workspace_id, name: "齿轮返修 · 测试项目", description: "验证标注修订与复核", source_kind: "local_authorized_directory" },

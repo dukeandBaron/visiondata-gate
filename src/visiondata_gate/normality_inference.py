@@ -225,6 +225,10 @@ def _child_environment(work_root: Path) -> dict[str, str]:
         {
             "HOME": str(root),
             "USERPROFILE": str(root),
+            # Windows getpass otherwise imports the unavailable Unix pwd module
+            # during Torch optimizer/Dynamo cache initialization. Never inherit
+            # the caller's identifying USER/LOGNAME/USERNAME values.
+            "USERNAME": "visiondata-worker",
             "APPDATA": str(root),
             "LOCALAPPDATA": str(root),
             "TEMP": str(root),
@@ -280,7 +284,7 @@ def _run_worker_process(
     output_root: Path,
     max_seconds: int,
 ) -> dict:
-    if mode not in {"validate", "infer"}:
+    if mode not in {"validate", "infer", "ttt"}:
         raise ValueError("NORMALITY_WORKER_MODE_INVALID")
     if type(max_seconds) is not int or not 5 <= max_seconds <= 300:
         raise ValueError("NORMALITY_WORKER_BUDGET_INVALID")
@@ -648,7 +652,7 @@ def _score_normality_image(
     rendered = np.rint(rendered * 255.0).astype(np.uint8)
     heatmap_path = Path(heatmap_path).resolve()
     heatmap_path.parent.mkdir(parents=True, exist_ok=False)
-    Image.fromarray(rendered, mode="L").save(heatmap_path, format="PNG")
+    Image.fromarray(rendered).save(heatmap_path, format="PNG")
     if _sha(image_path) != expected_image_sha256:
         raise ValueError("NORMALITY_INPUT_IMAGE_SHA_MISMATCH")
     return {
@@ -742,7 +746,7 @@ def _child_infer(request: dict) -> dict:
 
 
 def _worker_main(argv: list[str]) -> int:
-    if len(argv) != 4 or argv[0] != "worker" or argv[1] not in {"validate", "infer"}:
+    if len(argv) != 4 or argv[0] != "worker" or argv[1] not in {"validate", "infer", "ttt"}:
         return 2
     _package_paths()
     _deny_network_and_children()
@@ -750,11 +754,18 @@ def _worker_main(argv: list[str]) -> int:
     result_path = Path(argv[3]).resolve()
     try:
         request = json.loads(request_path.read_text(encoding="utf-8"))
-        result = (
-            _child_validate(request)
-            if argv[1] == "validate"
-            else _child_infer(request)
-        )
+        if argv[1] == "ttt":
+            if __package__:
+                from . import normality_ttt
+            else:
+                spec = importlib.util.spec_from_file_location(
+                    "_normality_ttt_worker", Path(__file__).with_name("normality_ttt.py")
+                )
+                normality_ttt = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(normality_ttt)
+            result = normality_ttt.child_ttt(request)
+        else:
+            result = _child_validate(request) if argv[1] == "validate" else _child_infer(request)
         _write_json(result_path, result)
         return 0
     except Exception as error:

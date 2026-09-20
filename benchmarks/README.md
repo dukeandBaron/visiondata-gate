@@ -12,6 +12,7 @@ VisionData Gate 用一组目标不同的实验解释架构取舍：先判断固�
 | DynamicBench-v4 | 基准是否进入真实产品内核 | 四类合成场景经过 ProductService、Incident、Control Plane 和 DecisionPacket | [协议](../docs/DYNAMICBENCH_V4.md) · [冻结 JSON](DYNAMICBENCH_V4_PRODUCT_RUNTIME_20260829.json) |
 | IndustrialIncidentBench | 人工闸门、故障、预算与撤销如何处理 | 12 类本地 fixture 检验异常处置和权限停止路径 | [实现](../src/visiondata_gate/industrial_incident_benchmark.py) |
 | Omni 授权离线试跑 | 数据整改与责任复验如何交接 | 49→33 findings；6 项关闭、43 项仍开放，转人工调查 | [历史记录](../docs/EVIDENCE_AND_BENCHMARKS.md) |
+| Normality TTT 本地开发代理 | 单次真实参数更新能否在父模型不变时通过独立复验 | 3 步更新，16 图 TP/TN/FP/FN 保持 5/6/2/3；另一个全漏检基线在 0 步拒绝，**未观察到质量提升** | [脱敏摘要](NORMALITY_TTT_LOCAL_20260919.json) · [协议](../docs/NORMALITY_TTT.md) |
 
 前三类 288 是各自协议的记录数，不是同一批独立工业样本。作者定义的合成基准用于工程/编排比较；Omni 记录与工厂独立真值评测是不同证据来源。原始私域图像和个人信息不在此分发。
 
@@ -25,11 +26,14 @@ uv run --no-sync visiondata-gate architecture-benchmark --output output/archbenc
 uv run --no-sync visiondata-gate dynamic-benchmark --output output/dynamicbench-v1-fresh.json
 uv run --no-sync python tools/run_dynamic_benchmark_v3.py output/dynamicbench-v3-fresh.json
 uv run --no-sync python tools/run_dynamic_benchmark_v4.py --output output/dynamicbench-v4-fresh.json --v3-report benchmarks/DYNAMICBENCH_V3_REPLANNING_20260829.json --scratch-root output/dynamicbench-v4-fresh-runtime
+uv run --no-sync python tools/run_normality_ttt_synthetic.py
 ```
 
 v3 的固定规则基线也保持不安全误放行为零；差异来自补证完整性、恢复和调用效率，不能写成固定基线误放行 4/4。单独的复杂冲突子集不并入这组分母。
 
 v4 的“产品运行时”指真实软件调用链，不是工厂生产环境。重复运行会产生不同案件身份或计时，应核对协议、结果及完整性，不要求所有新 Run 的文件哈希与历史文件完全相同。
+
+Normality TTT 的公开 JSON 是现有 VisA 开发代理的脱敏本地运行摘要，不含权重、原图或私人路径。合成 tensor 工具验证更新/回滚机制；真实 pack 摘要验证既有模型执行。二者都不是第三方复现、独立测试集或工厂效果证据。
 
 ## 结果应如何呈现
 

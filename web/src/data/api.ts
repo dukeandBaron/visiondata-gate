@@ -1488,7 +1488,7 @@ export async function operatorFetch(
       headers,
       credentials: "omit",
       cache: "no-store",
-      signal: controller.signal,
+      signal: init.signal ? AbortSignal.any([controller.signal, init.signal]) : controller.signal,
     });
     if (!response.ok) {
       const payload = (await response.json().catch(() => ({}))) as ApiErrorEnvelope;

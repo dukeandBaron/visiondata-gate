@@ -56,6 +56,7 @@ deliverables/_qa/*
 !adapters/examples/*.json
 !agentteams/runtime_receipt.template.json
 !schemas/*.json
+!benchmarks/NORMALITY_TTT_LOCAL_20260919.json
 !rulepacks/*.json
 !10_reports/*.json
 !docs/CARGO_LICENSES.locked.json

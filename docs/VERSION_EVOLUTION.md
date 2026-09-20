@@ -38,6 +38,22 @@ commit、构建产物、验证分母和对应摘要。
 
 ## 当前架构变化如何理解
 
+### 2026-09-19：Normality 单次适应与反馈执行链
+
+本轮源码新增实际 PNG 读取与验封、具名反馈持久化、模型重新批准、受控 CPU
+单次 TTT，以及反馈导入工作簿、人工框选后生成 OPEN 工单的两阶段桥接。
+TTT 冻结父包、主干与阈值，仅更新当前会话 student，独立参考组不合格或退化
+则拒绝/回滚。真实模型包完成 3 步更新，16 张开发参考的 FP/FN 前后均为 2/3；
+这是运行证据，不是模型精度提升或工厂验收。
+
+同步补齐独立 worker 资源和 API/Schema 的安装构建检查，以及 Windows
+隔离运行环境导入 Torchvision 的匿名用户兼容修复。历史 pack 的策略源码
+兼容只允许已经证明是文档文字差异的精确摘要对；任何函数体变化不能借此
+继承旧训练证据。[执行合同与实跑摘要](NORMALITY_TTT.md)
+
+旧安装器与旧 main 不自动包含这次新增能力。新二进制必须按新源码清单单独
+构建与验收；PR、源码、安装运行、原生 GUI、干净机与工厂效果仍分别记录。
+
 最新源码将业务说明收敛为三段：
 
 1. `HUMAN_AI_COLLABORATIVE_DATASET_BOOTSTRAP`：人机协同数据集冷启动；
@@ -49,10 +65,11 @@ commit、构建产物、验证分母和对应摘要。
 执行，以保证“建议权”和“执行权”不混在一个组件里。完整定义见
 [TECHNICAL_TERMINOLOGY](TECHNICAL_TERMINOLOGY.md)。
 
-模型侧当前只把有界监督 BBox detector 与 Normality development proxy 作为已
-存在的本地开发路径。VLM 辅助预标注、样本级 Top-K 挖掘、Active Learning、
-TTT 和自动 Mask 生成仍分别保持 `PLANNED_NOT_CONNECTED` 或
-`NOT_IMPLEMENTED`，不能从架构图反推为已上线。
+模型侧当前把有界监督 BBox detector、Normality development proxy 和单次
+Normality TTT 作为已存在的本地开发路径。后者只更新当前 episode 的克隆
+student，并不持久替换父模型。VLM 辅助预标注、样本级 Top-K 挖掘、Active
+Learning、detect-TTT、永久在线适应和自动 Mask 生成仍分别保持
+`PLANNED_NOT_CONNECTED` 或 `NOT_IMPLEMENTED`，不能从架构图反推为已上线。
 
 ## 如何确认手中的版本
 

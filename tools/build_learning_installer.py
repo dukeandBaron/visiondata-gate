@@ -50,6 +50,11 @@ RUNTIME_MODULES = LEARNING_MODULES + tuple(
         "learning_detection_dataset",
         "learning_yolo_backend",
         "normality_inference",
+        "normality_ttt",
+        "normality_adaptation_service",
+        "normality_adaptation_api",
+        "normality_followup_service",
+        "normality_followup_api",
         "model_stability",
         "model_experiment_agent",
         "vision_model_api",
@@ -64,6 +69,7 @@ REQUIRED_INPUTS = (
     "docs/WINDOWS_INSTALLER.md",
     "docs/VISION_MODEL_API_CONTRACT.md",
     "docs/MODEL_JOB_RETENTION.md",
+    "docs/NORMALITY_TTT.md",
     "docs/THIRD_PARTY_NOTICES.md",
     "docs/SBOM.cdx.json",
     "pyproject.toml",
@@ -86,6 +92,7 @@ REQUIRED_INPUTS = (
     "web/src-tauri/tauri.conf.json",
     "benchmarks/DYNAMICBENCH_V3_REPLANNING_20260829.json",
     "benchmarks/DYNAMICBENCH_V4_PRODUCT_RUNTIME_20260829.json",
+    "benchmarks/NORMALITY_TTT_LOCAL_20260919.json",
     "tools/build_learning_installer.py",
     "tools/smoke_packaged_learning.py",
     "tools/smoke_desktop_identity.mjs",
@@ -94,6 +101,7 @@ REQUIRED_INPUTS = (
     "tools/run_visa_yolo26_normality.py",
     "tools/summarize_visa_yolo26_stability.py",
     "tools/run_normality_registry_smoke.py",
+    "tools/run_normality_ttt_synthetic.py",
 )
 SOURCE_TREES = (
     "src",
@@ -123,6 +131,8 @@ EXPLICIT_ADDITIONS = {
     "schemas/compute_handoff_request.v1.json",
     "schemas/operator_acceptance_requirements.v1.json",
     "schemas/vision_model_requests.v1.json",
+    "schemas/normality_ttt_requests.v1.json",
+    "schemas/normality_followup_requests.v1.json",
 }
 EXCLUDED_SOURCE_SUBTREES = {
     "examples/reproducibility/": "Explicitly excluded parallel public benchmark fixtures; not required by this learning or installed runtime."
@@ -145,6 +155,10 @@ EXTERNAL_RUNTIME_RESOURCES = (
     (
         "src/visiondata_gate/normality_inference.py",
         "_internal/visiondata_gate/normality_inference.py",
+    ),
+    (
+        "src/visiondata_gate/normality_ttt.py",
+        "_internal/visiondata_gate/normality_ttt.py",
     ),
     (
         "src/visiondata_gate/model_stability.py",

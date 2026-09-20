@@ -32,7 +32,7 @@ import rfc8785
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_INFERENCE_BACKEND_SHA256 = (
-    "516b31e2dd7a8e8fac8a25d7aaa234e1ef70c4624d907d7f75b6793300eef549"
+    "c57e9fd6a1698e2e0dc994451ef6e43b2d4b61ae25cbc00d971a9a40aaca63a8"
 )
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _WINDOWS_ABSOLUTE = re.compile(r"(?i)^(?:[a-z]:[\\/]|\\\\)")

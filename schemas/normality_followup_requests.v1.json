@@ -1,0 +1,179 @@
+{
+  "schema_version": "visiondata-gate.normality-followup-api-schemas.v1",
+  "requests": {
+    "ImportNormalityFollowup": {
+      "additionalProperties": false,
+      "properties": {
+        "request_key": {
+          "pattern": "^[A-Za-z0-9_-]{12,100}$",
+          "title": "Request Key",
+          "type": "string"
+        },
+        "reviewer_identity": {
+          "maxLength": 160,
+          "minLength": 2,
+          "title": "Reviewer Identity",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 1000,
+          "minLength": 8,
+          "title": "Note",
+          "type": "string"
+        },
+        "expected_feedback_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Feedback Sha256",
+          "type": "string"
+        },
+        "expected_inference_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Inference Sha256",
+          "type": "string"
+        },
+        "expected_asset_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Asset Sha256",
+          "type": "string"
+        },
+        "expected_image_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Image Sha256",
+          "type": "string"
+        },
+        "operator_attests_no_label_or_training_authority": {
+          "const": true,
+          "title": "Operator Attests No Label Or Training Authority",
+          "type": "boolean"
+        },
+        "operator_attests_import_authorized": {
+          "const": true,
+          "title": "Operator Attests Import Authorized",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "request_key",
+        "reviewer_identity",
+        "note",
+        "expected_feedback_sha256",
+        "expected_inference_sha256",
+        "expected_asset_sha256",
+        "expected_image_sha256",
+        "operator_attests_no_label_or_training_authority",
+        "operator_attests_import_authorized"
+      ],
+      "title": "ImportNormalityFollowup",
+      "type": "object"
+    },
+    "CreateNormalityFollowupWorkOrder": {
+      "additionalProperties": false,
+      "properties": {
+        "request_key": {
+          "pattern": "^[A-Za-z0-9_-]{12,100}$",
+          "title": "Request Key",
+          "type": "string"
+        },
+        "reviewer_identity": {
+          "maxLength": 160,
+          "minLength": 2,
+          "title": "Reviewer Identity",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 1000,
+          "minLength": 8,
+          "title": "Note",
+          "type": "string"
+        },
+        "expected_feedback_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Feedback Sha256",
+          "type": "string"
+        },
+        "expected_inference_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Inference Sha256",
+          "type": "string"
+        },
+        "expected_asset_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Asset Sha256",
+          "type": "string"
+        },
+        "expected_image_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Image Sha256",
+          "type": "string"
+        },
+        "operator_attests_no_label_or_training_authority": {
+          "const": true,
+          "title": "Operator Attests No Label Or Training Authority",
+          "type": "boolean"
+        },
+        "import_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,120}$",
+          "title": "Import Id",
+          "type": "string"
+        },
+        "expected_import_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Import Sha256",
+          "type": "string"
+        },
+        "annotation_id": {
+          "maxLength": 96,
+          "minLength": 1,
+          "title": "Annotation Id",
+          "type": "string"
+        },
+        "expected_annotation_revision": {
+          "minimum": 1,
+          "title": "Expected Annotation Revision",
+          "type": "integer"
+        },
+        "expected_annotation_document_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Annotation Document Sha256",
+          "type": "string"
+        },
+        "assignee": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Assignee",
+          "type": "string"
+        },
+        "operator_attests_create_work_order": {
+          "const": true,
+          "title": "Operator Attests Create Work Order",
+          "type": "boolean"
+        },
+        "operator_attests_reviewed_evidence": {
+          "const": true,
+          "title": "Operator Attests Reviewed Evidence",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "request_key",
+        "reviewer_identity",
+        "note",
+        "expected_feedback_sha256",
+        "expected_inference_sha256",
+        "expected_asset_sha256",
+        "expected_image_sha256",
+        "operator_attests_no_label_or_training_authority",
+        "import_id",
+        "expected_import_sha256",
+        "annotation_id",
+        "expected_annotation_revision",
+        "expected_annotation_document_sha256",
+        "assignee",
+        "operator_attests_create_work_order",
+        "operator_attests_reviewed_evidence"
+      ],
+      "title": "CreateNormalityFollowupWorkOrder",
+      "type": "object"
+    }
+  }
+}

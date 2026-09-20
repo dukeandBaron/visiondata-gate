@@ -31,6 +31,15 @@ EXPECTED_MODEL_PACK_SCHEMA_VERSION = (
     "visiondata-gate.yolo26-normality-model-pack.v2"
 )
 EXPECTED_FEATURE_LAYERS = (4, 6, 9)
+# One reviewed, directed compatibility edge only. This is not a general
+# comment/docstring normalization rule and must not be extended implicitly.
+_HISTORICAL_POLICY_SHA256 = "c2d9b28ed86724d1fdee8e47629fa5282c06e29528e0ec5d1f5796401b9bb30c"
+_DOCUMENTED_POLICY_SHA256 = "ff1f2385b1e070a352f9242dd821adf36858d505d6b91e3e1d01229123db3fd6"
+_REVIEWED_POLICY_DOCSTRING_ADDITION = (
+    b"\nThe resulting experiment is a normality proxy over multiscale classification\n"
+    b"features.  It is not the supervised bounding-box detector implemented by the\n"
+    b"separate YOLO training backend, and it does not generate adjudicated masks.\n"
+)
 EXPECTED_AGENT_STAGES = (
     "intake",
     "planner",
@@ -178,6 +187,62 @@ def _verification_implementation() -> dict[str, str]:
         "outcome_policy_module_sha256": sha256_file(outcome_policy_path),
         "outcome_policy_function": "classify_experiment_outcome",
     }
+
+
+def _outcome_policy_source_compatibility(
+    historical_sha: Any,
+    verification: Mapping[str, str],
+    *,
+    run_label: str,
+    model_seed: int,
+) -> dict[str, Any] | None:
+    """Admit only the reviewed byte-for-byte docstring migration, with a receipt.
+
+    The historical policy remains the training identity. The current source is
+    used only for verification and outcome re-derivation; no old artifact is
+    rewritten and no new training execution is implied.
+    """
+    current_sha = verification["outcome_policy_module_sha256"]
+    if historical_sha == current_sha:
+        return None
+    valid_pair = (
+        historical_sha == _HISTORICAL_POLICY_SHA256
+        and current_sha == _DOCUMENTED_POLICY_SHA256
+    )
+    if not valid_pair:
+        raise _contract_error("OUTCOME_POLICY_SOURCE_DRIFT", "model_experiment_agent.py")
+    try:
+        current_bytes = Path(_outcome_policy.__file__).read_bytes()
+    except OSError:
+        raise _contract_error("OUTCOME_POLICY_SOURCE_DRIFT", "model_experiment_agent.py") from None
+    reconstructed = current_bytes.replace(_REVIEWED_POLICY_DOCSTRING_ADDITION, b"", 1)
+    reconstructed_sha = hashlib.sha256(reconstructed).hexdigest()
+    if (
+        hashlib.sha256(current_bytes).hexdigest() != _DOCUMENTED_POLICY_SHA256
+        or current_bytes.count(_REVIEWED_POLICY_DOCSTRING_ADDITION) != 1
+        or reconstructed_sha != _HISTORICAL_POLICY_SHA256
+    ):
+        raise _contract_error("OUTCOME_POLICY_SOURCE_DRIFT", "model_experiment_agent.py")
+    receipt = {
+        "schema_version": "visiondata-gate.outcome-policy-source-compatibility.v1",
+        "migration_id": "normality-scope-module-docstring-20260918",
+        "status": "EXACT_REVIEWED_DOCSTRING_MIGRATION",
+        "historical_policy_module_sha256": historical_sha,
+        "current_policy_module_sha256": current_sha,
+        "reconstructed_historical_source_sha256": reconstructed_sha,
+        "verification_method": "EXACT_REVERSE_PATCH_AND_FULL_BYTE_SHA256",
+        "verification_implementation": dict(verification),
+        "run_label": run_label,
+        "model_seed": model_seed,
+        "training_identity_rewritten": False,
+        "production_release_allowed": False,
+        "claim_boundary": (
+            "Compatibility applies only to this exact reviewed policy-module "
+            "docstring change. Training used the historical implementation identity; "
+            "current source only re-verifies the preserved evidence."
+        ),
+    }
+    return receipt | {"receipt_sha256": _canonical_jcs_digest(receipt)}
 
 
 def _safe_run_member(root: Path, relative: Any, *, artifact: str) -> Path:
@@ -973,14 +1038,16 @@ def _load_run(
         field="implementation_identity", artifact_values=identity_values
     )
     run_identity = identity_values["run_receipt"]
-    if (
-        not isinstance(run_identity, Mapping)
-        or run_identity.get("policy_module_sha256")
-        != verification_implementation["outcome_policy_module_sha256"]
-    ):
+    if not isinstance(run_identity, Mapping):
         raise _contract_error(
             "OUTCOME_POLICY_SOURCE_DRIFT", "model_experiment_agent.py"
         )
+    policy_compatibility = _outcome_policy_source_compatibility(
+        run_identity.get("policy_module_sha256"),
+        verification_implementation,
+        run_label=root.name,
+        model_seed=seed_contract["model_seed"],
+    )
     backbone_values = {
         "run_receipt": _required(
             receipt, ("backbone_weights_sha256",), artifact="RUN_RECEIPT.json"
@@ -1132,6 +1199,7 @@ def _load_run(
         "optimization_status": derived_outcome["optimization_status"],
         "effectiveness_status": derived_outcome["effectiveness_status"],
         "implementation_identity": identity_values["run_receipt"],
+        "outcome_policy_compatibility": policy_compatibility,
         "source_binding_sha256": _required(
             plan, ("source_binding_sha256",), artifact="model_experiment_plan.json"
         ),
@@ -1334,7 +1402,7 @@ def build_model_stability_summary(
         }
         for run in runs
     ]
-    return {
+    summary = {
         "schema_version": STABILITY_SCHEMA_VERSION,
         "verification_implementation": verification_implementation,
         "evidence_contract": {
@@ -1392,6 +1460,13 @@ def build_model_stability_summary(
         ),
         "production_release_allowed": False,
     }
+    compatibility_receipts = [
+        run["outcome_policy_compatibility"]
+        for run in runs if run["outcome_policy_compatibility"] is not None
+    ]
+    if compatibility_receipts:
+        summary["outcome_policy_compatibility_receipts"] = compatibility_receipts
+    return summary
 
 
 def _format_metric(value: Any) -> str:
@@ -1457,6 +1532,32 @@ def render_model_stability_markdown(summary: Mapping[str, Any]) -> str:
         "| Seed | Run | Optimization | Effectiveness |",
         "|---:|---|---|---|",
     ]
+    compatibility = summary.get("outcome_policy_compatibility_receipts", [])
+    if compatibility:
+        section = [
+            "## Exact reviewed source compatibility", "",
+            "Training used the preserved historical policy, not the current verifier source.",
+            "Only the reviewed module-docstring reverse patch was admitted.",
+            "- training_identity_rewritten: false", "",
+        ]
+        for receipt in compatibility:
+            unsigned = {key: value for key, value in receipt.items() if key != "receipt_sha256"}
+            if (
+                receipt.get("receipt_sha256") != _canonical_jcs_digest(unsigned)
+                or receipt.get("verification_implementation") != verification
+                or receipt.get("historical_policy_module_sha256") != _HISTORICAL_POLICY_SHA256
+                or receipt.get("current_policy_module_sha256") != _DOCUMENTED_POLICY_SHA256
+                or receipt.get("training_identity_rewritten") is not False
+            ):
+                raise _contract_error("OUTCOME_POLICY_COMPATIBILITY_RECEIPT_INVALID", "stability summary")
+            section.extend([
+                f"- Run `{receipt['run_label']}`, model seed `{receipt['model_seed']}`:",
+                f"  - Historical training policy: `{receipt['historical_policy_module_sha256']}`",
+                f"  - Current verification policy: `{receipt['current_policy_module_sha256']}`",
+                f"  - Exact compatibility receipt: `{receipt['receipt_sha256']}`", "",
+            ])
+        insertion = lines.index("## Run outcomes")
+        lines[insertion:insertion] = section
     for run in runs:
         if not isinstance(run, Mapping):
             raise _contract_error("STABILITY_MAPPING_REQUIRED", "run summary")

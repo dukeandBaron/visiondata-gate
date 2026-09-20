@@ -91,7 +91,7 @@ PRIVATE_IDENTITY_PATTERNS: tuple[tuple[str, re.Pattern[bytes]], ...] = (
     ),
     (
         "private-windows-path",
-        re.compile(rb"(?i)\bC:[\\/]Users[\\/][^\\/\s]+(?:[\\/]|\b)"),
+        re.compile(rb"(?i)\b[A-Za-z]:[\\/]+Users[\\/]+[^\\/\s`'\"<>]+"),
     ),
     (
         "private-posix-home",

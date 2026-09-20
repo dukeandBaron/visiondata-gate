@@ -90,7 +90,8 @@ pwsh -NoProfile -File tools/smoke_desktop_identity_uia.ps1 `
 ## 可选视觉模型：环境、许可与权重
 
 - 安装包提供运行环境登记、审核数据池、数据冻结、训练请求、验证反馈和人审选模接口；没有配置外部 Python/Torch/Ultralytics 时，接口存在不等于可以训练。
-- 外部环境须显式登记解释器与摘要，重新配置后重新验证。当前实现为有界 CPU detect；GPU、NPU/CANN、segmentation 训练和 TTT 没有因此获得支持或执行证明。
+- 外部环境须显式登记解释器与摘要，重新配置后重新验证。监督训练当前为有界 CPU detect；Normality 单次 TTT 使用另一个受控 CPU 执行合同。GPU、NPU/CANN、segmentation 训练和永久在线更新没有因此获得支持或执行证明。
+- 安装器必须包含独立 `normality_ttt.py` 资源、适应/反馈桥接模块及请求 Schema；旧二进制不因源码更新而自动获得这些功能。真实模型执行仍需操作者登记合法环境、模型包和参考图像，详见 [Normality TTT](NORMALITY_TTT.md)。
 - Ultralytics 采用 AGPL-3.0 或适用的 Enterprise 许可。商业使用/分发需核对实际许可义务；独立进程不是许可豁免，本项目 Apache-2.0 声明不替代第三方条款。
 - `.pt` 登记只记录字节与摘要，不执行文件。加载需可信来源、精确 SHA 和具名风险确认；SHA 只能确认文件身份，不能证明 pickle 或原生代码安全。不得加载未知权重。
 - 不自动下载模型。缺陷检测的业务效果、数据质量或生产放行不能由一次训练成功或流程测试推断；最终批准仍由人完成。

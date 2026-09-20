@@ -680,6 +680,8 @@ class OperatorImageStore:
         project_id: str | None = None,
         filename: str | None,
         data: bytes,
+        _idempotency_token: str | None = None,
+        _created_at: str | None = None,
     ) -> OperatorImageAsset:
         (
             image_format,
@@ -706,13 +708,28 @@ class OperatorImageStore:
             ),
             None,
         )
-        asset_id = f"img_{uuid.uuid4().hex[:20]}"
+        asset_id = (
+            self._followup_id("img", _idempotency_token)
+            if _idempotency_token is not None else f"img_{uuid.uuid4().hex[:20]}"
+        )
         asset_root = workspace_root / asset_id
-        asset_root.mkdir(parents=False, exist_ok=False)
+        if _idempotency_token is not None:
+            self._followup_path(asset_root)
+            if (asset_root / "asset.json").exists():
+                existing, _ = self._asset(actor_user_id, workspace_id, asset_id)
+                self.file_variant(actor_user_id, workspace_id, asset_id, "source")
+                self.file_variant(actor_user_id, workspace_id, asset_id, "preview")
+                if (existing.project_id != project_id
+                        or existing.source_sha256 != source_sha256
+                        or existing.created_at != _created_at
+                        or existing.original_name != _clean_filename(filename)):
+                    raise OperatorWorkspaceError("followup_import_conflict", "internal import identity changed", status_code=409)
+                return existing
+        asset_root.mkdir(parents=False, exist_ok=_idempotency_token is not None)
         source_path = asset_root / f"source{extension}"
         preview_path = asset_root / "preview.jpg"
-        _atomic_write(source_path, data, replace=False)
-        _atomic_write(preview_path, preview_bytes, replace=False)
+        self._followup_write(source_path, data, _idempotency_token)
+        self._followup_write(preview_path, preview_bytes, _idempotency_token)
 
         base_url = f"/v1/operator-workspaces/{workspace_id}/assets/{asset_id}"
         record = OperatorImageAsset(
@@ -732,7 +749,7 @@ class OperatorImageStore:
             preview_url=f"{base_url}/preview",
             duplicate_of_asset_id=duplicate,
             inspection=metrics,
-            created_at=_now(),
+            created_at=_created_at if _idempotency_token is not None else _now(),
         )
         _atomic_write(
             asset_root / "asset.json",
@@ -740,6 +757,27 @@ class OperatorImageStore:
             replace=False,
         )
         return record
+
+    @staticmethod
+    def _followup_id(prefix: str, token: str) -> str:
+        """Private storage seam; no public upload/order DTO accepts an object ID."""
+        if not isinstance(token, str) or re.fullmatch(r"[0-9a-f]{64}", token) is None:
+            raise OperatorWorkspaceError("followup_token_invalid", "internal token invalid", status_code=409)
+        return f"{prefix}_followup_{token}"
+
+    def _followup_path(self, path: Path) -> None:
+        from .local_model_registry import _assert_registry_path
+
+        _assert_registry_path(self.root, path)
+
+    def _followup_write(self, path: Path, data: bytes, token: str | None) -> None:
+        if token is not None:
+            self._followup_path(path)
+            if path.exists():
+                if path.read_bytes() != data:
+                    raise OperatorWorkspaceError("followup_partial_write_conflict", "internal stored bytes changed", status_code=409)
+                return
+        _atomic_write(path, data, replace=False)
 
     def validate_image_upload(self, data: bytes) -> None:
         """Validate and decode one upload without creating filesystem state."""
@@ -1047,9 +1085,16 @@ class OperatorImageStore:
         workspace_id: str,
         asset_id: str,
         request: CreateOperatorWorkOrderRequest,
+        *,
+        _idempotency_token: str | None = None,
+        _created_at: str | None = None,
+        _expected_annotation_sha256: str | None = None,
     ) -> OperatorWorkOrderState:
         asset, _asset_root = self._asset(actor_user_id, workspace_id, asset_id)
         annotation_state = self.get_annotations(actor_user_id, workspace_id, asset_id)
+        if (_expected_annotation_sha256 is not None
+                and annotation_state.document_sha256 != _expected_annotation_sha256):
+            raise OperatorWorkspaceError("followup_annotation_changed", "saved annotation document changed", status_code=409)
         if request.expected_annotation_revision != annotation_state.revision:
             raise OperatorWorkspaceError(
                 "work_order_annotation_revision_conflict",
@@ -1111,13 +1156,30 @@ class OperatorImageStore:
                 status_code=409,
             ) from exc
 
-        work_order_id = f"wo_{uuid.uuid4().hex[:20]}"
+        work_order_id = (
+            self._followup_id("wo", _idempotency_token)
+            if _idempotency_token is not None else f"wo_{uuid.uuid4().hex[:20]}"
+        )
         work_order_root = self._work_order_root(
             actor_user_id, workspace_id, work_order_id
         )
-        work_order_root.mkdir(parents=True, exist_ok=False)
-        _atomic_write(work_order_root / "crop.jpg", crop_bytes, replace=False)
-        timestamp = _now()
+        if _idempotency_token is not None:
+            self._followup_path(work_order_root)
+            if (work_order_root / "revisions" / "rev_000001.json").exists():
+                existing = self.get_work_order(actor_user_id, workspace_id, work_order_id)
+                if (existing.asset_id != asset_id or existing.asset_sha256 != asset.source_sha256
+                        or existing.annotation != annotation
+                        or existing.annotation_revision != annotation_state.revision
+                        or existing.assignee != request.assignee or existing.note != request.note
+                        or existing.created_by != actor_user_id or existing.created_at != _created_at
+                        or existing.status != "OPEN" or existing.revision != 1
+                        or existing.crop_sha256 != hashlib.sha256(crop_bytes).hexdigest()):
+                    raise OperatorWorkspaceError("followup_order_conflict", "internal order identity changed", status_code=409)
+                self._followup_write(work_order_root / "crop.jpg", crop_bytes, _idempotency_token)
+                return existing
+        work_order_root.mkdir(parents=True, exist_ok=_idempotency_token is not None)
+        self._followup_write(work_order_root / "crop.jpg", crop_bytes, _idempotency_token)
+        timestamp = _created_at if _idempotency_token is not None else _now()
         revision = StoredOperatorWorkOrderRevision(
             work_order_id=work_order_id,
             workspace_id=workspace_id,

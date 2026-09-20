@@ -36,7 +36,9 @@ depend on artifacts excluded from the public repository.
 Security scans remain fail-closed. Bandit `1.9.4` scans all Python under `src`,
 `desktop`, and `tools`, writes the complete JSON report, and does not use
 `--exit-zero`, a global rule skip, or `continue-on-error`. The reviewed baseline
-at `quality/bandit-baseline.json` contains only the 226 existing Low findings;
+at `quality/bandit-baseline.json` contains only 230 individually reviewed Low findings
+(including the bounded [technical bundle](BANDIT_TECHNICAL_BUNDLE_REVIEW.md) and
+[TTT reproduction tool](BANDIT_TTT_TOOL_REVIEW.md) subprocesses);
 its normalized findings list is SHA-256 bound. The comparison gate normalizes
 Windows and POSIX path separators, permits resolved findings to disappear, and
 rejects every new Low finding plus every current Medium or High finding.
